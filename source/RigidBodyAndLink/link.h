@@ -29,8 +29,8 @@ public:
 
     virtual void update(double dt) = 0;
 
-    virtual void addConnection(Node &linkEnd, Node &node);
-    virtual void deleteConnection(Node &linkEnd, Node &node);
+    virtual void addConnection(Node& linkEnd, Node& node);
+    virtual void deleteConnection(Node& linkEnd, Node& node);
 
     [[nodiscard]] virtual Node& startPointNode() const;
     [[nodiscard]] virtual Node& endPointNode() const;

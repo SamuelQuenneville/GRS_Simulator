@@ -16,7 +16,7 @@
 class Tether : public Link {
 
 public:
-    Tether(worldPhysics &physics, tetherProperties &properties);
+    Tether(worldPhysics& physics, tetherProperties& properties);
 
     [[nodiscard]] int getId() const;
     [[nodiscard]] linkType getType() const;

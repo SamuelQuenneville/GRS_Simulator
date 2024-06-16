@@ -16,32 +16,29 @@
  *   VARIOUS SIMULATION STRUCTURES
  */
 
-struct SimulationParameters {
-    std::string logFileDirectory;
-    std::string uavPropertiesFileDirectory;
-    bool nullRoll;
-    bool tetherAero;
-    float time;
+struct simulationParameters {
+    std::string logFilesDirectory;
+    std::string aircraftPropertiesFileDirectory;
+    std::string tetherPropertiesFileDirectory;
+    std::string systemConfiguration;
+    bool fixedDuration;
+    float duration;
     int hlcRate;
     int llcRate;
-    std::vector<double> windEarth;
+    bool windOn;
+    bool tetherAeroOn;
 };
 
-struct States {
+struct initialStates {
     std::vector<double> position;      // [x y z]
     std::vector<double> speed;         // [vx vy vz]
     std::vector<double> orientation;   // [roll pitch yaw]
 };
 
-struct InitialStates {
-    States uav1States;
-    States uav2States;
-    States payloadStates;
-};
-
-struct Target {
+struct target {
     std::vector<double> positionPayload;    // [x y z]
     float groundspeed;                      // m/s
+    float aircraftRoll;                     // degrees
 };
 
 

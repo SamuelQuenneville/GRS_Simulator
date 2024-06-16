@@ -9,6 +9,8 @@
 #ifndef GRS_SIMULATOR_TETHERDEFINITIONS_H
 #define GRS_SIMULATOR_TETHERDEFINITIONS_H
 
+#include "Mathematics/vector3.h"
+
 /*
  *   TETHERS STRUCTURES
  */
@@ -17,10 +19,9 @@ struct tetherProperties {
     float linearMass;  // kg/m
     float length;      // m
     float diameter;    // m
-    int   numSegments; // number of segments use to compute aerodynamic forces
     float rigidity;    // spring model k value
     float damping;     // spring model b value
-    bool  fixed;
+    int   numSegments; // number of segments use to compute aerodynamic forces
 };
 
 struct tetherLogInfos {

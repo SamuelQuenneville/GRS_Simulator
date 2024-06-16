@@ -21,11 +21,11 @@ Node& Link::endPointNode() const {
     return *endPoint;
 }
 
-void Link::addConnection(Node &linkEnd, Node &node) {
+void Link::addConnection(Node& linkEnd, Node& node) {
     connections[&linkEnd].push_back(&node);
 }
 
-void Link::deleteConnection(Node &linkEnd, Node &node) {
+void Link::deleteConnection(Node& linkEnd, Node& node) {
     std::vector<Node*> &linkEndConnections = connections[&linkEnd];
     linkEndConnections.erase(std::remove_if(linkEndConnections.begin(), linkEndConnections.end(), [node](Node *n){return node.getId() == n->getId();}), linkEndConnections.end());
 }

@@ -35,11 +35,10 @@ public:
     virtual void addConnection(Node& node);
     virtual void deleteConnection(Node& node);
 
-    [[nodiscard]] virtual const Node &node() const;
+    [[nodiscard]] virtual const Node& node() const;
 
     std::unique_ptr<Node> centerOfMass;
     std::vector<Node*> connectedNode;
-
 };
 
 

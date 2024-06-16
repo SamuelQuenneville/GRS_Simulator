@@ -8,171 +8,156 @@
 
 #include "pid.h"
 
-
-PID::PID(float initial_p, float initial_i, float initial_d, float initial_ff, float initial_imax, float initial_filter_target_hz,
-         float initial_filter_derivative_hz, float initial_filter_error_hz, float dt, float initial_srmax, float initial_srtau)
-        : _dt(dt)
+PID::PID(float proportionalGain, float integralGain, float derivativeGain, float feedForwardGain, float integralMaxValue, float inputFilterTargetHz,
+         float inputFilterDerivativeHz, float inputFilterErrorHz, float dt, float initialSrmax, float initialSrtau)
+        : m_dt(dt)
 {
-    _kp = initial_p;
-    _ki = initial_i;
-    _kd = initial_d;
-    _kff = initial_ff;
-    _kimax = fabsf(initial_imax);
-    _kimin = -_kimax;
-    filter_target_hz(initial_filter_target_hz);
-    filter_error_hz(initial_filter_error_hz);
-    filter_derivative_hz(initial_filter_derivative_hz);
+    m_kp = proportionalGain;
+    m_ki = integralGain;
+    m_kd = derivativeGain;
+    m_kff = feedForwardGain;
+    m_kimax = fabsf(integralMaxValue);
+    m_kimin = -m_kimax;
+    filterTargetHz(inputFilterTargetHz);
+    filterErrorHz(inputFilterErrorHz);
+    filterDerivativeHz(inputFilterDerivativeHz);
 
-    _slew_rate_max = initial_srmax;
-    _slew_limit_scale = 1;
+    m_slewRateMax = initialSrmax;
+    m_slewLimitScale = 1;
 
-    _flags._reset_filter = true;
+    flags.resetFilter = true;
 
-    std::memset(&_pid_info, 0, sizeof(_pid_info));
+    std::memset(&m_pidInfo, 0, sizeof(m_pidInfo));
 }
 
 // Overload the function call operator to permit easy initialisation
-void PID::operator()(float p_val, float i_val, float d_val, float ff_val, float imin_val, float imax_val, float input_filt_T_hz, float input_filt_E_hz, float input_filt_D_hz, float dt)
-{
-    _kp = p_val;
-    _ki = i_val;
-    _kd = d_val;
-    _kff = ff_val;
-    _kimin = imin_val;
-    _kimax = fabsf(imax_val);
-    _filter_target_hz = input_filt_T_hz;
-    _filter_error_hz = input_filt_E_hz;
-    _filter_derivative_hz = input_filt_D_hz;
-    _dt = dt;
+void PID::operator()(float proportionalGain, float integralGain, float derivativeGain, float feedForwardGain, float integralMinValue, float integralMaxValue,
+                     float inputFilterTargetHz, float inputFilterErrorHz, float inputFilterDerivativeHz, float dt) {
+    m_kp = proportionalGain;
+    m_ki = integralGain;
+    m_kd = derivativeGain;
+    m_kff = feedForwardGain;
+    m_kimin = integralMinValue;
+    m_kimax = fabsf(integralMaxValue);
+    m_filterTargetHz = inputFilterTargetHz;
+    m_filterErrorHz = inputFilterErrorHz;
+    m_filterDerivativeHz = inputFilterDerivativeHz;
+    m_dt = dt;
 }
 
-float PID::update_all(float target, float measurement, bool limit)
-{
+float PID::updateAll(float target, float measurement, bool limit) {
     if (!std::isfinite(target) || !std::isfinite(measurement)){
         return 0.0f;
     }
 
     // reset input filter to value
-    if (_flags._reset_filter){
-        _flags._reset_filter = false;
-        _target = target;
-        _error = _target - measurement;
-        _derivative = 0.0f;
+    if (flags.resetFilter){
+        flags.resetFilter = false;
+        m_target = target;
+        m_error = m_target - measurement;
+        m_derivative = 0.0f;
     } else {
-        float error_last = _error;
-        _target += get_filter_target_alpha() * (target - _target);
-        _error += get_filter_error_alpha() * ((_target - measurement) - _error);
+        float errorLast = m_error;
+        m_target += getFilterTargetAlpha() * (target - m_target);
+        m_error += getFilterErrorAlpha() * ((m_target - measurement) - m_error);
 
         // calculate derivative than filter it
-        if (_dt > 0.0f) {
-            float derivative = (_error - error_last) / _dt;
-            _derivative += get_filter_derivative_alpha() * (derivative - _derivative);
+        if (m_dt > 0.0f) {
+            float derivative = (m_error - errorLast) / m_dt;
+            m_derivative += getFilterDerivativeAlpha() * (derivative - m_derivative);
         }
     }
 
     // update integral term
-    update_integral(limit);
+    updateIntegral(limit);
 
-    float proportional_out = _error * _kp;
-    float derivative_out = _derivative * _kd;
+    float proportionalOut = m_error * m_kp;
+    float derivativeOut = m_derivative * m_kd;
 
     // calculate slew limit modifier and applied them to PD
-    _pid_info.Dmod = _slew_limiter.modifier((_pid_info.P + _pid_info.D) * _slew_limit_scale, _dt);
-    _pid_info.slew_rate = _slew_limiter.get_slew_rate();
+    m_pidInfo.Dmod = m_slewLimiter.modifier((m_pidInfo.P + m_pidInfo.D) * m_slewLimitScale, m_dt);
+    m_pidInfo.slew_rate = m_slewLimiter.getSlewRate();
 
-    proportional_out *= _pid_info.Dmod;
-    derivative_out *= _pid_info.Dmod;
+    proportionalOut *= m_pidInfo.Dmod;
+    derivativeOut *= m_pidInfo.Dmod;
 
-    _pid_info.target = _target;
-    _pid_info.actual = measurement;
-    _pid_info.error = _error;
-    _pid_info.P = proportional_out;
-    _pid_info.D = derivative_out;
+    m_pidInfo.target = m_target;
+    m_pidInfo.actual = measurement;
+    m_pidInfo.error = m_error;
+    m_pidInfo.P = proportionalOut;
+    m_pidInfo.D = derivativeOut;
 
-    return proportional_out + _integrator + derivative_out;
+    return proportionalOut + m_integrator + derivativeOut;
 }
 
-void PID::update_integral(bool limit)
-{
-    if (!is_zero(_ki) && is_positive(_dt)) {
+void PID::updateIntegral(bool limit) {
+    if (!isZero(m_ki) && isPositive(m_dt)) {
         // ensure that integrator can only be reduced if the output is saturated
-        if (!limit || ((is_positive(_integrator) && is_negative(_error)) || (is_negative(_integrator) && is_positive(_error)))) {
-            _integrator += ((float)_error * _ki) * _dt;
-            _integrator = constrain_float(_integrator, _kimin, _kimax);
+        if (!limit || ((isPositive(m_integrator) && isNegative(m_error)) || (isNegative(m_integrator) && isPositive(m_error)))) {
+            m_integrator += ((float)m_error * m_ki) * m_dt;
+            m_integrator = constrainFloat(m_integrator, m_kimin, m_kimax);
         }
     } else {
-        _integrator = 0.0f;
+        m_integrator = 0.0f;
     }
-    _pid_info.I = _integrator;
-    _pid_info.limit = limit;
+    m_pidInfo.I = m_integrator;
+    m_pidInfo.limit = limit;
 }
 
-void PID::reset_I()
-{
-    _integrator = 0;
+void PID::resetI() {
+    m_integrator = 0;
 }
 
 // set time step in seconds
-void PID::set_dt(float dt)
-{
-    _dt = dt;
+void PID::setDt(float dt) {
+    m_dt = dt;
 }
 
 // set target filter hz
-void PID::filter_target_hz(float hz)
-{
-    _filter_target_hz = hz;
+void PID::filterTargetHz(float hz) {
+    m_filterTargetHz = hz;
 }
 
 // set error filter hz
-void PID::filter_error_hz(float hz)
-{
-    _filter_error_hz = hz;
+void PID::filterErrorHz(const float hz) {
+    m_filterErrorHz = hz;
 }
 
 // set derivative filter hz
-void PID::filter_derivative_hz(float hz)
-{
-    _filter_derivative_hz = hz;
+void PID::filterDerivativeHz(const float hz) {
+    m_filterDerivativeHz = hz;
 }
 
 // get the target filter alpha
-float PID::get_filter_target_alpha() const
-{
-    return get_filter_alpha(_filter_target_hz);
+float PID::getFilterTargetAlpha() const {
+    return getFilterAlpha(m_filterTargetHz);
 }
 
 // get the error filter alpha
-float PID::get_filter_error_alpha() const
-{
-    return get_filter_alpha(_filter_error_hz);
+float PID::getFilterErrorAlpha() const {
+    return getFilterAlpha(m_filterErrorHz);
 }
 
 // get the derivative filter alpha
-float PID::get_filter_derivative_alpha() const
-{
-    return get_filter_alpha(_filter_derivative_hz);
+float PID::getFilterDerivativeAlpha() const {
+    return getFilterAlpha(m_filterDerivativeHz);
 }
 
 // calculate a filter alpha
-float PID::get_filter_alpha(float filter_hz) const
-{
-    return calc_lowpass_alpha_dt(_dt, filter_hz);
+float PID::getFilterAlpha(float filterHz) const {
+    return calcLowpassAlphaDt(m_dt, filterHz);
 }
 
-float PID::get_i() const
-{
-    return _integrator;
+float PID::getI() const {
+    return m_integrator;
 }
 
-float PID::get_ff()
-{
-    _pid_info.FF = _target * _kff;
-    return _target * _kff;
+float PID::getFF() {
+    m_pidInfo.FF = m_target * m_kff;
+    return m_target * m_kff;
 }
 
-void PID::set_integrator(float i)
-{
-    _integrator = constrain_float(i, _kimin, _kimax);
-    _pid_info.I = _integrator;
+void PID::setIntegrator(float i) {
+    m_integrator = constrainFloat(i, m_kimin, m_kimax);
+    m_pidInfo.I = m_integrator;
 }

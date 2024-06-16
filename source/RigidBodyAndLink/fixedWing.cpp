@@ -10,7 +10,7 @@
 
 int FixedWing::m_idCounter = 0;
 
-FixedWing::FixedWing(worldPhysics &physics, fixedWingProperties &properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller)
+FixedWing::FixedWing(worldPhysics& physics, fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller)
         : m_id(++m_idCounter)
         , m_type(RigidBody::AIRCRAFT)
         , m_physics(physics)
@@ -47,7 +47,7 @@ void FixedWing::update(double dt) {
     centerOfMass->update({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, forcesAeroBody, momentsAeroBody);
 }
 
-Vector3<double> FixedWing::m_calcForceAeroBodyFrame(const fixedWingControlInputs &inputs) const {
+Vector3<double> FixedWing::m_calcForceAeroBodyFrame(const fixedWingControlInputs& inputs) const {
 
     // airspeed (Va)
     double Va = airspeed();
@@ -85,7 +85,7 @@ Vector3<double> FixedWing::m_calcForceAeroBodyFrame(const fixedWingControlInputs
     return forcesBody;
 }
 
-Vector3<double> FixedWing::m_calcMomentAeroBodyFrame(const fixedWingControlInputs &inputs) const {
+Vector3<double> FixedWing::m_calcMomentAeroBodyFrame(const fixedWingControlInputs& inputs) const {
 
     // airspeed (Va)
     double Va = airspeed();
@@ -156,7 +156,7 @@ fixedWingStates FixedWing::m_calcStatesDerivatives(Vector3<double> forceAeroBody
     return derivatives;
 }
 
-fixedWingStates FixedWing::m_eulerIntegration(fixedWingStates &derivatives, double dt) const {
+fixedWingStates FixedWing::m_eulerIntegration(fixedWingStates& derivatives, double dt) const {
 
     fixedWingStates updatedStates{};
 
@@ -203,7 +203,7 @@ Vector3<double> FixedWing::m_earthToBody(const Vector3<double>& earthVector) con
     return bodyVector;
 }
 
-Vector3<double> FixedWing::m_bodyToEarth(const Vector3<double> &bodyVector) const {
+Vector3<double> FixedWing::m_bodyToEarth(const Vector3<double>& bodyVector) const {
 
     Matrix3 C_EarthBody = rotationMatrixCBodyEarth().transpose();
 

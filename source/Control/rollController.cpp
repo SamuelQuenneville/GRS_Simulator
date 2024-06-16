@@ -8,36 +8,36 @@
 
 #include "rollController.h"
 
-RollController::RollController(worldPhysics &physics, float rate)
+RollController::RollController(worldPhysics& physics, float rate)
     : m_physics(physics)
-    , _dt(1.0f/rate)
+    , m_dt(1.0f/rate)
 {
 
 }
 
 int32_t RollController::getServoOut(float navRoll, float scaler, bool disableIntegrator) {
     // Calculate the desired roll rate (deg/sec) from the angle error
-    _angleErrorDeg = navRoll - degrees(_aircraftStates.phi);
-    float desiredRate = _angleErrorDeg / _tau;
+    m_angleErrorDeg = navRoll - degrees(m_aircraftStates.phi);
+    float desiredRate = m_angleErrorDeg / m_tau;
 
     // limit the demanded roll rate
-    if (desiredRate < -_rmax) {
-        desiredRate = - _rmax;
-    } else if (desiredRate > _rmax) {
-        desiredRate = _rmax;
+    if (desiredRate < -m_rmax) {
+        desiredRate = - m_rmax;
+    } else if (desiredRate > m_rmax) {
+        desiredRate = m_rmax;
     }
 
     return getRateOut(desiredRate, scaler, disableIntegrator);
 }
 
 int32_t RollController::getRateOut(float desiredRate, float scaler, bool disableIntegrator) {
-    bool limitIntegrator = fabsf(_lastOut) >= 45;
-    float oldIntegrator = ratePID.get_i();
-    ratePID.set_dt(_dt);
+    bool limitIntegrator = fabsf(m_lastOut) >= 45;
+    float oldIntegrator = m_ratePID.getI();
+    m_ratePID.setDt(m_dt);
 
-    float airspeed = sqrt(_aircraftStates.u * _aircraftStates.u + _aircraftStates.v * _aircraftStates.v + _aircraftStates.w * _aircraftStates.w);
+    float airspeed = std::sqrt(m_aircraftStates.u * m_aircraftStates.u + m_aircraftStates.v * m_aircraftStates.v + m_aircraftStates.w * m_aircraftStates.w);
     bool underspeed = airspeed <= 11.0;
-    if(underspeed){
+    if(underspeed) {
         limitIntegrator = true;
     }
 
@@ -46,47 +46,47 @@ int32_t RollController::getRateOut(float desiredRate, float scaler, bool disable
     //
     // note that we run AC_PID in radians so that the normal scaling
     // range for IMAX in AC_PID applies (usually an IMAX value less than 1.0)
-    ratePID.update_all(radians(desiredRate) * scaler * scaler, _aircraftStates.p * scaler * scaler, limitIntegrator);
+    m_ratePID.updateAll(radians(desiredRate) * scaler * scaler, m_aircraftStates.p * scaler * scaler, limitIntegrator);
 
     if (underspeed) {
         // when underspeed we lock the integrator
-        ratePID.set_integrator(oldIntegrator);
+        m_ratePID.setIntegrator(oldIntegrator);
     }
 
     // FF should be scaled by scaler/eas2tas, but since we have scaled
     // the AC_PID target above by scaler*scaler we need to instead
     // divide by scaler*eas2tas to get the right scaling
-    const float ff = degrees(ratePID.get_ff() / scaler);
+    const float ff = degrees(m_ratePID.getFF() / scaler);
 
     if (disableIntegrator) {
-        ratePID.reset_I();
+        m_ratePID.resetI();
     }
 
     // convert AC_PID info object to same scale as old controller
-    _pidInfo = ratePID.getPID_info();
-    auto &pinfo = _pidInfo;
+    m_pidInfo = m_ratePID.getPidInfo();
+    auto& pinfo = m_pidInfo;
 
-    const float deg_scale = degrees(1);
+    const float degScale = degrees(1);
     pinfo.FF = ff;
-    pinfo.P *= deg_scale;
-    pinfo.I *= deg_scale;
-    pinfo.D *= deg_scale;
+    pinfo.P *= degScale;
+    pinfo.I *= degScale;
+    pinfo.D *= degScale;
 
     // fix the logged target and actual values to not have the scalers applied
     pinfo.target = desiredRate;
-    pinfo.actual = degrees(_aircraftStates.p);
+    pinfo.actual = degrees(m_aircraftStates.p);
 
     // sum components
     float out = pinfo.FF + pinfo.P + pinfo.I + pinfo.D;
 
     // remember the last output to trigger the I limit
-    _lastOut = out;
+    m_lastOut = out;
 
     // output is scaled to notional centidegrees of deflection
-    return constrain_int32(out * 100, -1500, 1500);
+    return constrainInt32(out * 100, -1500, 1500);
 }
 
 void RollController::resetIntegrator() {
-    _pidInfo.I = 0;
-    ratePID.reset_I();
+    m_pidInfo.I = 0;
+    m_ratePID.resetI();
 }

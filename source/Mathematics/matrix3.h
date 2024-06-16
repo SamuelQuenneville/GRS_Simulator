@@ -21,24 +21,24 @@
 template<typename T>
 class Matrix2 {
 private:
-    Vector2<Vector2<T>> data;
+    Vector2<Vector2<T>> m_data;
 
 public:
-    Matrix2() : data(Vector2<T>(), Vector2<T>()) {}
+    Matrix2() : m_data(Vector2<T>(), Vector2<T>()) {}
 
-    Matrix2(std::initializer_list<std::initializer_list<T>> row_list) : data(Vector2<T>(), Vector2<T>()) {
-        if (row_list.size() != 2) {
+    Matrix2(std::initializer_list<std::initializer_list<T>> rowList) : m_data(Vector2<T>(), Vector2<T>()) {
+        if (rowList.size() != 2) {
             throw std::invalid_argument("Matrix2 initializer_list should have 2 rows");
         }
 
         int i = 0;
-        for (auto& row : row_list) {
+        for (auto& row : rowList) {
             if (row.size() != 2) {
                 throw std::invalid_argument("Each row in Matrix2 initializer_list should have 2 elements");
             }
             int j = 0;
             for (auto& val : row) {
-                data[i][j] = val;
+                m_data[i][j] = val;
                 ++j;
             }
             ++i;
@@ -48,7 +48,7 @@ public:
     // Access by index
     Vector2<T>& operator[](int index) {
         if (index >= 0 && index < 2) {
-            return data[index];
+            return m_data[index];
         } else {
             throw std::out_of_range("Matrix2 index out of range");
         }
@@ -57,7 +57,7 @@ public:
     // Const access by index
     const Vector2<T>& operator[](int index) const {
         if (index >= 0 && index < 2) {
-            return data[index];
+            return m_data[index];
         } else {
             throw std::out_of_range("Matrix2 index out of range");
         }
@@ -65,16 +65,16 @@ public:
 
     // Access the individual elements
     T& operator()(const unsigned& row, const unsigned& col) {
-        return this->data[row][col];
+        return this->m_data[row][col];
     }
 
     // Access the individual elements (const)
     const T& operator()(const unsigned& row, const unsigned& col) const {
-        return this->data[row][col];
+        return this->m_data[row][col];
     }
 
     T determinant() {
-        T det = (this->data[0][0] * this->data[1][1]) - (this->data[0][1] * this->data[1][0]);
+        T det = (this->m_data[0][0] * this->m_data[1][1]) - (this->m_data[0][1] * this->m_data[1][0]);
 
         return det;
     }
@@ -82,28 +82,27 @@ public:
 };
 
 
-
 template<typename T>
 class Matrix3 {
 private:
-    Vector3<Vector3<T>> data;
+    Vector3<Vector3<T>> m_data;
 
 public:
-    Matrix3() : data(Vector3<T>(), Vector3<T>(), Vector3<T>()) {}
+    Matrix3() : m_data(Vector3<T>(), Vector3<T>(), Vector3<T>()) {}
 
-    Matrix3(std::initializer_list<std::initializer_list<T>> row_list) : data(Vector3<T>(), Vector3<T>(), Vector3<T>()) {
-        if (row_list.size() != 3) {
+    Matrix3(std::initializer_list<std::initializer_list<T>> rowList) : m_data(Vector3<T>(), Vector3<T>(), Vector3<T>()) {
+        if (rowList.size() != 3) {
             throw std::invalid_argument("Matrix3 initializer_list should have 3 rows");
         }
 
         int i = 0;
-        for (auto& row : row_list) {
+        for (auto& row : rowList) {
             if (row.size() != 3) {
                 throw std::invalid_argument("Each row in Matrix3 initializer_list should have 3 elements");
             }
             int j = 0;
             for (auto& val : row) {
-                data[i][j] = val;
+                m_data[i][j] = val;
                 ++j;
             }
             ++i;
@@ -113,7 +112,7 @@ public:
     // Access by index
     Vector3<T>& operator[](int index) {
         if (index >= 0 && index < 3) {
-            return data[index];
+            return m_data[index];
         } else {
             throw std::out_of_range("Matrix3 index out of range");
         }
@@ -122,7 +121,7 @@ public:
     // Const access by index
     const Vector3<T>& operator[](int index) const {
         if (index >= 0 && index < 3) {
-            return data[index];
+            return m_data[index];
         } else {
             throw std::out_of_range("Matrix3 index out of range");
         }
@@ -135,7 +134,7 @@ public:
     // R_AB = | 0    cos(theta)    sin(theta) |
     //        | 0   -sin(theta)    cos(theta) |
     //
-    static Matrix3<T> makeXRotation(const T &angle) {
+    static Matrix3<T> makeXRotation(const T& angle) {
         const T cosAngle = std::cos(angle);
         const T sinAngle = std::sin(angle);
 
@@ -155,7 +154,7 @@ public:
     // R_AB = |          0    1            0  |
     //        |  sin(theta)   0    cos(theta) |
     //
-    static Matrix3<T> makeYRotation(const T &angle) {
+    static Matrix3<T> makeYRotation(const T& angle) {
 
         const T cosAngle = std::cos(angle);
         const T sinAngle = std::sin(angle);
@@ -176,7 +175,7 @@ public:
     // R_AB = | -sin(theta)   cos(theta)   0 |
     //        |          0            0    1 |
     //
-    static Matrix3<T> makeZRotation(const T &angle) {
+    static Matrix3<T> makeZRotation(const T& angle) {
 
         const T cosAngle = std::cos(angle);
         const T sinAngle = std::sin(angle);
@@ -219,12 +218,12 @@ public:
 
     // Access the individual elements
     T& operator()(const unsigned& row, const unsigned& col) {
-        return this->data[row][col];
+        return this->m_data[row][col];
     }
 
     // Access the individual elements (const)
     const T& operator()(const unsigned& row, const unsigned& col) const {
-        return this->data[row][col];
+        return this->m_data[row][col];
     }
 
     // Addition of two matrices
@@ -233,7 +232,7 @@ public:
 
         for (unsigned i=0; i<3; i++) {
             for (unsigned j=0; j<3; j++) {
-                result(i,j) = this->data[i][j] + rhs(i,j);
+                result(i,j) = this->m_data[i][j] + rhs(i,j);
             }
         }
 
@@ -244,7 +243,7 @@ public:
     Matrix3<T>& operator+=(const Matrix3<T>& rhs) {
         for (unsigned i=0; i<3; i++) {
             for (unsigned j=0; j<3; j++) {
-                this->data[i][j] += rhs(i,j);
+                this->m_data[i][j] += rhs(i,j);
             }
         }
 
@@ -257,7 +256,7 @@ public:
 
         for (unsigned i=0; i<3; i++) {
             for (unsigned j=0; j<3; j++) {
-                result(i,j) = this->data[i][j] - rhs(i,j);
+                result(i,j) = this->m_data[i][j] - rhs(i,j);
             }
         }
 
@@ -268,7 +267,7 @@ public:
     Matrix3<T>& operator-=(const Matrix3<T>& rhs) {
         for (unsigned i=0; i<3; i++) {
             for (unsigned j=0; j<3; j++) {
-                this->data[i][j] -= rhs(i,j);
+                this->m_data[i][j] -= rhs(i,j);
             }
         }
 
@@ -282,7 +281,7 @@ public:
         for (unsigned i=0; i<3; i++) {
             for (unsigned j=0; j<3; j++) {
                 for (unsigned k=0; k<3; k++) {
-                    result(i,j) += this->data[i][k] * rhs(k,j);
+                    result(i,j) += this->m_data[i][k] * rhs(k,j);
                 }
             }
         }
@@ -303,7 +302,7 @@ public:
 
         for (unsigned i=0; i<3; i++) {
             for (unsigned j=0; j<3; j++) {
-                result(i,j) = this->data[j][i];
+                result(i,j) = this->m_data[j][i];
             }
         }
 
@@ -311,15 +310,15 @@ public:
     }
 
     T determinant() {
-        Matrix2<double> minor1{{data[1][1], data[1][2]}, {data[2][1], data[2][2]}};
-        Matrix2<double> minor2{{data[1][0], data[1][2]}, {data[2][0], data[2][2]}};
-        Matrix2<double> minor3{{data[1][0], data[1][1]}, {data[2][0], data[2][1]}};
+        Matrix2<double> minor1{{m_data[1][1], m_data[1][2]}, {m_data[2][1], m_data[2][2]}};
+        Matrix2<double> minor2{{m_data[1][0], m_data[1][2]}, {m_data[2][0], m_data[2][2]}};
+        Matrix2<double> minor3{{m_data[1][0], m_data[1][1]}, {m_data[2][0], m_data[2][1]}};
 
         T det1 = minor1.determinant();
         T det2 = minor2.determinant();
         T det3 = minor3.determinant();
 
-        return data[0][0] * det1 - data[0][1] * det2 + data[0][2] * det3;
+        return m_data[0][0] * det1 - m_data[0][1] * det2 + m_data[0][2] * det3;
     }
 
     // Matrix/scalar addition
@@ -328,7 +327,7 @@ public:
 
         for (unsigned i=0; i<3; i++) {
             for (unsigned j=0; j<3; j++) {
-                result(i,j) = this->data[i][j] + rhs;
+                result(i,j) = this->m_data[i][j] + rhs;
             }
         }
 
@@ -341,7 +340,7 @@ public:
 
         for (unsigned i=0; i<3; i++) {
             for (unsigned j=0; j<3; j++) {
-                result(i,j) = this->data[i][j] - rhs;
+                result(i,j) = this->m_data[i][j] - rhs;
             }
         }
 
@@ -354,7 +353,7 @@ public:
 
         for (unsigned i=0; i<3; i++) {
             for (unsigned j=0; j<3; j++) {
-                result(i,j) = this->data[i][j] * rhs;
+                result(i,j) = this->m_data[i][j] * rhs;
             }
         }
 
@@ -367,7 +366,7 @@ public:
 
         for (unsigned i=0; i<3; i++) {
             for (unsigned j=0; j<3; j++) {
-                result(i,j) = this->data[i][j] / rhs;
+                result(i,j) = this->m_data[i][j] / rhs;
             }
         }
 
@@ -380,7 +379,7 @@ public:
 
         for (unsigned i=0; i<3; i++) {
             for (unsigned j=0; j<3; j++) {
-                result[i] += this->data[i][j] * rhs[j];
+                result[i] += this->m_data[i][j] * rhs[j];
             }
         }
 
@@ -391,7 +390,7 @@ public:
     void print() const {
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 3; ++j) {
-                std::cout << data[i][j] << " ";
+                std::cout << m_data[i][j] << " ";
             }
             std::cout << std::endl;
         }

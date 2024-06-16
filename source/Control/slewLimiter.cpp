@@ -1,4 +1,12 @@
 /*
+ * GRS Simulation Environment
+ * Samuel Quenneville (samuel.quenneville@usherbrooke.ca)
+ *
+ * Université de Sherbrooke
+ * Createk Innovation Lab
+ */
+
+/*
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
@@ -27,105 +35,104 @@
 
 #include "slewLimiter.h"
 
-SlewLimiter::SlewLimiter(const float &_slew_rate_max, const float &_slew_rate_tau) :
-        slew_rate_max(_slew_rate_max),
-        slew_rate_tau(_slew_rate_tau)
+SlewLimiter::SlewLimiter(const float& slewRateMax, const float& slewRateTau) :
+        m_slewRateMax(slewRateMax),
+        m_slewRateTau(slewRateTau)
 {
-    slew_filter.set_cutoff_frequency(DERIVATIVE_CUTOFF_FREQ);
-    slew_filter.reset(0.0);
+    m_slewFilter.setCutOffFrequency(DERIVATIVE_CUTOFF_FREQ);
+    m_slewFilter.reset(0.0);
 }
 
 /*
   apply filter to sample, returning multiplier between 0 and 1 to keep
   output within slew rate
  */
-float SlewLimiter::modifier(float sample, float dt)
-{
-    if (slew_rate_max <= 0) {
+float SlewLimiter::modifier(float sample, float dt) {
+    if (m_slewRateMax <= 0) {
         return 1.0;
     }
 
     // Calculate a low pass filtered slew rate
-    const float slew_rate = slew_filter.apply((sample - last_sample) / dt, dt);
-    last_sample = sample;
+    const float slewRate = m_slewFilter.apply((sample - m_lastSample) / dt, dt);
+    m_lastSample = sample;
 
-    uint32_t now_ms  = std::chrono::duration_cast< std::chrono::milliseconds >(std::chrono::system_clock::now().time_since_epoch()).count();
-    const float decay_alpha = fminf(dt, slew_rate_tau) / slew_rate_tau;
+    uint32_t nowMilliseconds  = std::chrono::duration_cast< std::chrono::milliseconds >(std::chrono::system_clock::now().time_since_epoch()).count();
+    const float decayAlpha = fminf(dt, m_slewRateTau) / m_slewRateTau;
 
     // Store a series of positive slew rate exceedance events
-    if (!_pos_event_stored && slew_rate > slew_rate_max) {
-        if (_pos_event_index >= N_EVENTS) {
-            _pos_event_index = 0;
+    if (!m_posEventStored && slewRate > m_slewRateMax) {
+        if (m_posEventIndex >= N_EVENTS) {
+            m_posEventIndex = 0;
         }
-        _pos_event_ms[_pos_event_index] = now_ms;
-        _pos_event_index++;
-        _pos_event_stored = true;
-        _neg_event_stored = false;
+        m_posEventMs[m_posEventIndex] = nowMilliseconds;
+        m_posEventIndex++;
+        m_posEventStored = true;
+        m_negEventStored = false;
     }
 
     // Store a series of negative slew rate exceedance events
-    if (!_neg_event_stored && slew_rate < - slew_rate_max) {
-        if (_neg_event_index >= N_EVENTS) {
-            _neg_event_index = 0;
+    if (!m_negEventStored && slewRate < - m_slewRateMax) {
+        if (m_negEventIndex >= N_EVENTS) {
+            m_negEventIndex = 0;
         }
-        _neg_event_ms[_neg_event_index] = now_ms;
-        _neg_event_index++;
-        _neg_event_stored = true;
-        _pos_event_stored = false;
+        m_posEventMs[m_negEventIndex] = nowMilliseconds;
+        m_negEventIndex++;
+        m_negEventStored = true;
+        m_posEventStored = false;
     }
 
     // Find the oldest event time
-    uint32_t oldest_ms = now_ms;
+    uint32_t oldestMilliseconds = nowMilliseconds;
     for (uint8_t index = 0; index < N_EVENTS; index++) {
-        if (_pos_event_ms[index] < oldest_ms) {
-            oldest_ms = _pos_event_ms[index];
+        if (m_posEventMs[index] < oldestMilliseconds) {
+            oldestMilliseconds = m_posEventMs[index];
         }
-        if (_neg_event_ms[index] < oldest_ms) {
-            oldest_ms = _neg_event_ms[index];
+        if (m_negEventMs[index] < oldestMilliseconds) {
+            oldestMilliseconds = m_negEventMs[index];
         }
     }
 
     // Decay the peak positive and negative slew rate if they are outside the window
     // Never drop PID gains below 10% of configured value
-    if (slew_rate > _max_pos_slew_rate) {
-        _max_pos_slew_rate = fminf(slew_rate, 10.0f * slew_rate_max);
-        _max_pos_slew_event_ms = now_ms;
-    } else if (now_ms - _max_pos_slew_event_ms > WINDOW_MS) {
-        _max_pos_slew_rate *= (1.0f - decay_alpha);
+    if (slewRate > m_maxPosSlewRate) {
+        m_maxPosSlewRate = fminf(slewRate, 10.0f * m_slewRateMax);
+        m_maxPosSlewEventMs = nowMilliseconds;
+    } else if (nowMilliseconds - m_maxPosSlewEventMs > WINDOW_MS) {
+        m_maxPosSlewRate *= (1.0f - decayAlpha);
     }
 
-    if (slew_rate < -_max_neg_slew_rate) {
-        _max_neg_slew_rate = fminf(-slew_rate, 10.0f * slew_rate_max);
-        _max_neg_slew_event_ms = now_ms;
-    } else if (now_ms - _max_neg_slew_event_ms > WINDOW_MS) {
-        _max_neg_slew_rate *= (1.0f - decay_alpha);
+    if (slewRate < -m_maxNegSlewRate) {
+        m_maxNegSlewRate = fminf(-slewRate, 10.0f * m_slewRateMax);
+        m_maxNegSlewEventMs = nowMilliseconds;
+    } else if (nowMilliseconds - m_maxNegSlewEventMs > WINDOW_MS) {
+        m_maxNegSlewRate *= (1.0f - decayAlpha);
     }
 
-    const float raw_slew_rate = 0.5f*(_max_pos_slew_rate + _max_neg_slew_rate);
+    const float rawSlewRate = 0.5f * (m_maxPosSlewRate + m_maxNegSlewRate);
 
-    // Apply a further reduction when the oldest exceedance event falls outside the window rewuired for the
+    // Apply a further reduction when the oldest exceedance event falls outside the window required for the
     // specified number of exceedance events. This prevents spikes due to control mode changed, etc causing
     // unwanted gain reduction and is only applied to the slew rate used for gain reduction
-    float modifier_input = raw_slew_rate;
-    if (now_ms - oldest_ms > (N_EVENTS + 1) * WINDOW_MS) {
-        const float oldest_time_from_window = 0.001f*(float)(now_ms - oldest_ms - (N_EVENTS + 1) * WINDOW_MS);
-        modifier_input *= expf(-oldest_time_from_window / slew_rate_tau);
+    float modifierInput = rawSlewRate;
+    if (nowMilliseconds - oldestMilliseconds > (N_EVENTS + 1) * WINDOW_MS) {
+        const float oldestTimeFromWindow = 0.001f*(float)(nowMilliseconds - oldestMilliseconds - (N_EVENTS + 1) * WINDOW_MS);
+        modifierInput *= expf(-oldestTimeFromWindow / m_slewRateTau);
     }
 
     // Apply a filter to increases in slew rate only to reduce the effect of gusts and large controller
-    // setpoint changeschanges
-    const float attack_alpha = fminf(2.0f * decay_alpha, 1.0f);
+    // set point changes
+    const float attackAlpha = fminf(2.0f * decayAlpha, 1.0f);
 
-    _modifier_slew_rate = (1.0f - attack_alpha) * _modifier_slew_rate + attack_alpha * modifier_input;
-    _modifier_slew_rate = fminf(_modifier_slew_rate, modifier_input);
+    m_modifierSlewRate = (1.0f - attackAlpha) * m_modifierSlewRate + attackAlpha * modifierInput;
+    m_modifierSlewRate = fminf(m_modifierSlewRate, modifierInput);
 
-    _output_slew_rate = (1.0f - attack_alpha) * _output_slew_rate + attack_alpha * raw_slew_rate;
-    _output_slew_rate = fminf(_output_slew_rate, raw_slew_rate);
+    m_outputSlewRate = (1.0f - attackAlpha) * m_outputSlewRate + attackAlpha * rawSlewRate;
+    m_outputSlewRate = fminf(m_outputSlewRate, rawSlewRate);
 
     // Calculate the gain adjustment
     float mod;
-    if (_modifier_slew_rate > slew_rate_max) {
-        mod = slew_rate_max / (slew_rate_max + MODIFIER_GAIN * (_modifier_slew_rate - slew_rate_max));
+    if (m_modifierSlewRate > m_slewRateMax) {
+        mod = m_slewRateMax / (m_slewRateMax + MODIFIER_GAIN * (m_modifierSlewRate - m_slewRateMax));
     } else {
         mod = 1.0f;
     }

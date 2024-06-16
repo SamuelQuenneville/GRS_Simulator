@@ -16,56 +16,54 @@
 class PID
 {
 public:
-    PID(float initial_p, float initial_i, float initial_d, float initial_ff, float initial_imax, float initial_filter_target_hz,
-        float initial_filter_derivative_hz, float initial_filter_error_hz, float dt, float initial_srmax=0.0, float initial_srtau=1.0);
+    PID(float proportionalGain, float integralGain, float derivativeGain, float feedForwardGain, float IntegratorMaxValue, float inputFilterTargetHz,
+        float inputFilterDerivativeHz, float inputFilterErrorHz, float dt, float initialSrmax=0.0, float initialSrtau=1.0);
 
     // set time step in seconds
-    void set_dt(float dt);
+    void setDt(float dt);
 
     /* set target and measured inputs to PID controller and calculate outputs
      * target and error are filtered
      * the derivative is then calculated and filtered
      * the integral is then updated based on the setting of the limit flag
      */
-    float update_all(float target, float measurement, bool limit = false);
+    float updateAll(float target, float measurement, bool limit = false);
 
     // update the integral
     // if the limit flag is set the integral is only allowed to shrink
-    void update_integral(bool limit);
+    void updateIntegral(bool limit);
 
     // get results from pid controller
-    float get_i() const;
-    float get_ff();
+    float getI() const;
+    float getFF();
 
     // reset the integrator
-    void reset_I();
+    void resetI();
 
     // get accessor
-    float get_filter_alpha(float filter_hz) const;
-    float get_filter_target_alpha() const;
-    float get_filter_error_alpha() const;
-    float get_filter_derivative_alpha() const;
+    float getFilterAlpha(float filterHz) const;
+    float getFilterTargetAlpha() const;
+    float getFilterErrorAlpha() const;
+    float getFilterDerivativeAlpha() const;
 
     // set accessor
-    void filter_target_hz(const float v);
-    void filter_error_hz(const float v);
-    void filter_derivative_hz(const float v);
+    void filterTargetHz(const float hz);
+    void filterErrorHz(const float hz);
+    void filterDerivativeHz(const float hz);
 
     // operator function call for easy initialisation
-    void operator()(float p_val, float i_val, float d_val, float ff_val, float imin_val, float imax_val,
-                    float input_filt_T_hz, float input_filt_E_hz, float input_filt_D_hz, float dt);
+    void operator()(float proportionalGain, float integralGain, float derivativeGain, float feedForwardGain, float integralMinValue, float integralMaxValue,
+                    float inputFilterTargetHz, float inputFilterErrorHz, float inputFilterDerivativeHz, float dt);
 
     // integrator setting function
-    void set_integrator(float i);
+    void setIntegrator(float i);
 
     // flags
-    struct pid_flags {
-        bool _reset_filter :1; // true when input filter should be reset during next call to set_input
-    } _flags;
+    struct pidFlags {
+        bool resetFilter :1; // true when input filter should be reset during next call to set_input
+    } flags;
 
-    void set_reset_flag();
-
-    struct PID_Info {
+    struct PidInfo {
         float target;
         float actual;
         float error;
@@ -78,32 +76,31 @@ public:
         bool  limit;
     };
 
-    const PID_Info& getPID_info(void) const { return _pid_info; };
+    const PidInfo& getPidInfo(void) const { return m_pidInfo;};
 
 protected:
-    float _kp;
-    float _ki;
-    float _kd;
-    float _kff;
-    float _kimin;
-    float _kimax;
-    float _filter_target_hz;
-    float _filter_error_hz;
-    float _filter_derivative_hz;
-    float _slew_rate_max;
-    float _slew_rate_tau;
+    float m_kp;
+    float m_ki;
+    float m_kd;
+    float m_kff;
+    float m_kimin;
+    float m_kimax;
+    float m_filterTargetHz;
+    float m_filterErrorHz;
+    float m_filterDerivativeHz;
+    float m_slewRateMax;
+    float m_slewRateTau;
 
-    float _dt;
-    float _integrator;
-    float _derivative;
-    float _target;
-    float _error;
-    int8_t _slew_limit_scale;
-    uint16_t _reset_counter;
+    float m_dt;
+    float m_integrator;
+    float m_derivative;
+    float m_target;
+    float m_error;
+    int8_t m_slewLimitScale;
+    uint16_t m_resetCounter;
 
-    PID_Info _pid_info;
-    SlewLimiter _slew_limiter{_slew_rate_max, _slew_rate_tau};
-
+    PidInfo m_pidInfo;
+    SlewLimiter m_slewLimiter{m_slewRateMax, m_slewRateTau};
 };
 
 #endif //GRS_SIMULATOR_PID_H

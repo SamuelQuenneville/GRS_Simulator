@@ -9,6 +9,8 @@
 #ifndef GRS_SIMULATOR_WORLD_H
 #define GRS_SIMULATOR_WORLD_H
 
+#include <map>
+
 #include "Mathematics/vector3.h"
 #include "Definitions/worldPhysics.h"
 #include "system.h"
@@ -36,6 +38,9 @@ public:
     void log();
 
     void createSystem(systemType type);
+
+    std::map<std::string,systemType> systemTypeStringToEnum;
+    static int getNumberOfAircraftInSystem(systemType type);
 
 private:
     bool m_isRunning = false;

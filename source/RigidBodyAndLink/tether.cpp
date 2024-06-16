@@ -10,7 +10,7 @@
 
 int Tether::m_idCounter = 0;
 
-Tether::Tether(worldPhysics &physics, tetherProperties &properties)
+Tether::Tether(worldPhysics& physics, tetherProperties& properties)
     : m_id(++m_idCounter)
     , m_type(Link::RIGID)
     , m_physics(physics)

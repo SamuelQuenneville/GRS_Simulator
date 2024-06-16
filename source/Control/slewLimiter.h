@@ -1,3 +1,11 @@
+/*
+ * GRS Simulation Environment
+ * Samuel Quenneville (samuel.quenneville@usherbrooke.ca)
+ *
+ * Université de Sherbrooke
+ * Createk Innovation Lab
+ */
+
 /* slew rate limiting filter. This is used to prevent oscillation of a
  * controller by modifying the controllers output based on a maximum
  * slew rate
@@ -19,7 +27,7 @@
 
 class SlewLimiter {
 public:
-    SlewLimiter(const float &slew_rate_max, const float &slew_rate_tau);
+    SlewLimiter(const float& slewRateMax, const float& slewRateTau);
 
     /*
       apply filter to sample, returning multiplier between 0 and 1 to keep
@@ -30,27 +38,27 @@ public:
     /*
       get last oscillation slew rate
      */
-    float get_slew_rate(void) const {
-        return _output_slew_rate;
+    float getSlewRate(void) const {
+        return m_outputSlewRate;
     }
 
 private:
-    const float &slew_rate_max;
-    const float &slew_rate_tau;
-    LowPassFilterFloat slew_filter;
-    float _output_slew_rate;
-    float _modifier_slew_rate;
-    float last_sample;
-    float _max_pos_slew_rate;
-    float _max_neg_slew_rate;
-    uint32_t _max_pos_slew_event_ms;
-    uint32_t _max_neg_slew_event_ms;
-    uint8_t _pos_event_index;
-    uint8_t _neg_event_index;
-    uint32_t _pos_event_ms[N_EVENTS];
-    uint32_t _neg_event_ms[N_EVENTS];
-    bool _pos_event_stored;
-    bool _neg_event_stored;
+    const float& m_slewRateMax;
+    const float& m_slewRateTau;
+    LowPassFilterFloat m_slewFilter;
+    float m_outputSlewRate;
+    float m_modifierSlewRate;
+    float m_lastSample;
+    float m_maxPosSlewRate;
+    float m_maxNegSlewRate;
+    uint32_t m_maxPosSlewEventMs;
+    uint32_t m_maxNegSlewEventMs;
+    uint8_t m_posEventIndex;
+    uint8_t m_negEventIndex;
+    uint32_t m_posEventMs[N_EVENTS];
+    uint32_t m_negEventMs[N_EVENTS];
+    bool m_posEventStored;
+    bool m_negEventStored;
 };
 
 #endif //GRS_SIMULATOR_SLEWLIMITER_H

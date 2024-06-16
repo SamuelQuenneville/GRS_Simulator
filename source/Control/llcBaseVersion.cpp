@@ -8,7 +8,7 @@
 
 #include "llcBaseVersion.h"
 
-LlcBaseVersion::LlcBaseVersion(worldPhysics &physics, float rate)
+LlcBaseVersion::LlcBaseVersion(worldPhysics& physics, float rate)
     : m_physics(physics)
     , m_rate(rate)
 {
@@ -17,7 +17,7 @@ LlcBaseVersion::LlcBaseVersion(worldPhysics &physics, float rate)
     m_altController = std::make_unique<AltitudeController>(m_physics, m_rate);
 }
 
-fixedWingControlInputs LlcBaseVersion::calculateAircraftControlInputs(const fixedWingStates &currentStates, const fixedWingCommands &commands, double desiredThrust) {
+fixedWingControlInputs LlcBaseVersion::calculateAircraftControlInputs(const fixedWingStates& currentStates, const fixedWingCommands& commands, double desiredThrust) {
 
     m_rollController->setAircraftStates(currentStates);
     m_pitchController->setAircraftStates(currentStates);

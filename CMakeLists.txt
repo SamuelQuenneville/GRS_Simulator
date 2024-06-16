@@ -45,6 +45,8 @@ add_executable(GRS_Simulator source/main.cpp
         source/RigidBodyAndLink/link.h
         source/RigidBodyAndLink/tether.cpp
         source/RigidBodyAndLink/tether.h
+        source/configurationParser.cpp
+        source/configurationParser.h
 )
 
 target_include_directories (GRS_Simulator PUBLIC source)

@@ -22,27 +22,29 @@
 namespace YAML {
 
     template<>
-    struct convert<SimulationParameters> {
-        static bool decode(const Node& node, SimulationParameters& rhs) {
+    struct convert<simulationParameters> {
+        static bool decode(const Node& node, simulationParameters& rhs) {
             if(!node.IsMap()) {
                 return false;
             }
 
-            rhs.logFileDirectory            = node["LOG_FILE_DIRECTORY"].as<std::string>();
-            rhs.uavPropertiesFileDirectory  = node["UAV_PROPERTIES_FILE_NAME"].as<std::string>();
-            rhs.nullRoll                    = node["NULL_ROLL"].as<bool>();
-            rhs.tetherAero                  = node["TETHER_AERO"].as<bool>();
-            rhs.time                        = node["TIME"].as<float>();
-            rhs.hlcRate                     = node["HLC_RATE"].as<int>();
-            rhs.llcRate                     = node["LLC_RATE"].as<int>();
-            rhs.windEarth                   = node["WIND_EARTH"].as<std::vector<double>>();
+            rhs.logFilesDirectory               = node["LOG_FILE_DIRECTORY"].as<std::string>();
+            rhs.aircraftPropertiesFileDirectory = node["AIRCRAFT_PROPERTIES_FILE_NAME"].as<std::string>();
+            rhs.tetherPropertiesFileDirectory   = node["TETHER_PROPERTIES_FILE_NAME"].as<std::string>();
+            rhs.systemConfiguration             = node["SYSTEM_CONFIGURATION"].as<std::string>();
+            rhs.fixedDuration                   = node["FIXED_DURATION"].as<bool>();
+            rhs.duration                        = node["DURATION"].as<float>();
+            rhs.hlcRate                         = node["HLC_RATE"].as<int>();
+            rhs.llcRate                         = node["LLC_RATE"].as<int>();
+            rhs.windOn                          = node["WIND_ON"].as<bool>();
+            rhs.tetherAeroOn                    = node["TETHER_AERO_ON"].as<bool>();
             return true;
         }
     };
 
     template<>
-    struct convert<States> {
-        static bool decode(const Node& node, States& rhs) {
+    struct convert<initialStates> {
+        static bool decode(const Node& node, initialStates& rhs) {
             if(!node.IsMap()) {
                 return false;
             }
@@ -55,35 +57,22 @@ namespace YAML {
     };
 
     template<>
-    struct convert<InitialStates> {
-        static bool decode(const Node& node, InitialStates& rhs) {
-            if(!node.IsMap()) {
-                return false;
-            }
-
-            rhs.uav1States      = node["UAV1"].as<States>();
-            rhs.uav2States      = node["UAV2"].as<States>();
-            rhs.payloadStates   = node["PAYLOAD"].as<States>();
-            return true;
-        }
-    };
-
-    template<>
-    struct convert<Target> {
-        static bool decode(const Node& node, Target& rhs) {
+    struct convert<target> {
+        static bool decode(const Node& node, target& rhs) {
             if(!node.IsMap()) {
                 return false;
             }
 
             rhs.positionPayload = node["POS_PAYLOAD"].as<std::vector<double>>();
             rhs.groundspeed     = node["GROUNDSPEED"].as<float>();
+            rhs.aircraftRoll    = node["AIRCRAFT_ROLL"].as<float>();
             return true;
         }
     };
 
     template<>
-    struct convert<TetherProperties> {
-        static bool decode(const Node& node, TetherProperties& rhs) {
+    struct convert<tetherProperties> {
+        static bool decode(const Node& node, tetherProperties& rhs) {
             if(!node.IsMap()) {
                 return false;
             }
@@ -91,10 +80,9 @@ namespace YAML {
             rhs.linearMass   = node["LINEAR_MASS"].as<float>();
             rhs.length       = node["LENGTH"].as<float>();
             rhs.diameter     = node["DIAMETER"].as<float>();
-            rhs.numSegments  = node["N_SEGMENTS"].as<int>();
             rhs.rigidity     = node["RIGIDITY"].as<float>();
             rhs.damping      = node["DAMPING"].as<float>();
-            rhs.fixed        = node["FIXED"].as<bool>();
+            rhs.numSegments  = node["NUM_SEGMENTS"].as<int>();
             return true;
         }
     };
@@ -106,12 +94,12 @@ namespace YAML {
                 return false;
             }
 
-            rhs.mass         = node["MASS"].as<double>();
-            rhs.wingSurface  = node["WING_SURFACE"].as<double>();
-            rhs.wingChord    = node["WING_CHORD"].as<double>();
-            rhs.wingSpan     = node["WING_SPAN"].as<double>();
-            rhs.aspectRatio  = node["ASPECT_RATIO"].as<double>();
-            rhs.oswaldEfficiency   = node["OSWALD_EFF"].as<double>();
+            rhs.mass                = node["MASS"].as<double>();
+            rhs.wingSurface         = node["WING_SURFACE"].as<double>();
+            rhs.wingChord           = node["WING_CHORD"].as<double>();
+            rhs.wingSpan            = node["WING_SPAN"].as<double>();
+            rhs.aspectRatio         = node["ASPECT_RATIO"].as<double>();
+            rhs.oswaldEfficiency    = node["OSWALD_EFF"].as<double>();
 
             // INERTIA MATRIX
             rhs.inertiaX  = node["INERTIA_X"].as<double>();

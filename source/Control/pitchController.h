@@ -24,7 +24,7 @@ public:
     int32_t getRateOut(float desiredRate, float scaler, bool disableIntegrator, float airspeed);
     float getCoordinationRateOffset(float airspeed) const;
 
-    void setAircraftStates(const fixedWingStates &aircraftStates) {_aircraftStates = aircraftStates;};
+    void setAircraftStates(const fixedWingStates &aircraftStates) {m_aircraftStates = aircraftStates;};
 
     void resetIntegrator();
 
@@ -32,25 +32,25 @@ private:
     worldPhysics m_physics;
 
     // pitch time constant
-    static constexpr float _tau = 0.5;
+    static constexpr float m_tau = 0.5;
 
     // maximum & minimum pitch rate
-    static constexpr float _rmax = 20.0;
-    static constexpr float _rmin = 20.0; // declare positive
+    static constexpr float m_rmax = 20.0;
+    static constexpr float m_rmin = 20.0; // declare positive
 
     // roll compensation
-    static constexpr float _rollCompensation = 1.0;
+    static constexpr float m_rollCompensation = 1.0;
 
     // controller frequency
-    float _dt;
+    float m_dt;
 
-    float _lastOut = 0.0;
-    float _angleErrorDeg = 0.0;
+    float m_lastOut = 0.0;
+    float m_angleErrorDeg = 0.0;
 
-    PID ratePID{0.04, 0.15, 0, 0.345, 0.666, 1.5, 7, 4, 0.02, 150, 1};
-    PID::PID_Info _pidInfo{};
+    PID m_ratePID{0.04, 0.15, 0, 0.345, 0.666, 1.5, 7, 4, 0.02, 150, 1};
+    PID::PidInfo m_pidInfo{};
 
-    fixedWingStates _aircraftStates{};
+    fixedWingStates m_aircraftStates{};
 };
 
 #endif //GRS_SIMULATOR_PITCHCONTROLLER_H

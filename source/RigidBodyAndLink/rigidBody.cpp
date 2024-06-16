@@ -12,7 +12,7 @@ RigidBody::RigidBody() {
     centerOfMass = std::make_unique<Node>();
 }
 
-const Node &RigidBody::node() const {
+const Node& RigidBody::node() const {
     return *centerOfMass;
 }
 
@@ -26,11 +26,11 @@ Vector3<double> RigidBody::calcExternalForce() {
     return sumExternalForce;
 }
 
-void RigidBody::addConnection(Node &node) {
+void RigidBody::addConnection(Node& node) {
     connectedNode.push_back(&node);
 }
 
-void RigidBody::deleteConnection(Node &node) {
-    connectedNode.erase(std::remove_if(connectedNode.begin(), connectedNode.end(), [node](Node *n){return node.getId() == n->getId();}), connectedNode.end());
+void RigidBody::deleteConnection(Node& node) {
+    connectedNode.erase(std::remove_if(connectedNode.begin(), connectedNode.end(), [node](Node* n){return node.getId() == n->getId();}), connectedNode.end());
 }
 

@@ -20,17 +20,17 @@ public:
 
     void update(Vector3<double> newPosition, Vector3<double> newVelocity, Vector3<double> newForce, Vector3<double> newMoment);
 
-    [[nodiscard]] const Vector3<double> &position() const;
-    void setPosition(const Vector3<double> &newPosition);
+    [[nodiscard]] const Vector3<double>& position() const;
+    void setPosition(const Vector3<double>& newPosition);
 
-    [[nodiscard]] const Vector3<double> &velocity() const;
-    void setVelocity(const Vector3<double> &newVelocity);
+    [[nodiscard]] const Vector3<double>& velocity() const;
+    void setVelocity(const Vector3<double>& newVelocity);
 
-    [[nodiscard]] const Vector3<double> &force() const;
-    void setForce(const Vector3<double> &newForce);
+    [[nodiscard]] const Vector3<double>& force() const;
+    void setForce(const Vector3<double>& newForce);
 
-    [[nodiscard]] const Vector3<double> &moment() const;
-    void setMoment(const Vector3<double> &newMoment);
+    [[nodiscard]] const Vector3<double>& moment() const;
+    void setMoment(const Vector3<double>& newMoment);
 
 private:
     int m_id;

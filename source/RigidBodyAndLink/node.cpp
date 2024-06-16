@@ -27,34 +27,34 @@ void Node::update(Vector3<double> newPosition, Vector3<double> newVelocity, Vect
     setMoment(newMoment);
 }
 
-const Vector3<double> &Node::position() const {
+const Vector3<double>& Node::position() const {
     return m_position;
 }
 
-void Node::setPosition(const Vector3<double> &newPosition) {
+void Node::setPosition(const Vector3<double>& newPosition) {
     m_position = newPosition;
 }
 
-const Vector3<double> &Node::velocity() const {
+const Vector3<double>& Node::velocity() const {
     return m_velocity;
 }
 
-void Node::setVelocity(const Vector3<double> &newVelocity) {
+void Node::setVelocity(const Vector3<double>& newVelocity) {
     m_velocity = newVelocity;
 }
 
-const Vector3<double> &Node::force() const {
+const Vector3<double>& Node::force() const {
     return m_force;
 }
 
-void Node::setForce(const Vector3<double> &newForce) {
+void Node::setForce(const Vector3<double>& newForce) {
     m_force = newForce;
 }
 
-const Vector3<double> &Node::moment() const {
+const Vector3<double>& Node::moment() const {
     return m_moment;
 }
 
-void Node::setMoment(const Vector3<double> &newMoment) {
+void Node::setMoment(const Vector3<double>& newMoment) {
     m_moment = newMoment;
 }

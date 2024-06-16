@@ -8,7 +8,17 @@
 
 #include "world.h"
 
-World::World() = default;
+World::World() {
+
+    systemTypeStringToEnum = {
+            {"ONE_AIRCRAFT", ONE_AIRCRAFT},
+            {"ONE_AIRCRAFT_GROUNDED", ONE_AIRCRAFT_GROUNDED},
+            {"TWO_AIRCRAFT_GROUNDED_V", TWO_AIRCRAFT_GROUNDED_V},
+            {"TWO_AIRCRAFT_FREE_V", TWO_AIRCRAFT_FREE_V},
+            {"TWO_AIRCRAFT_GROUNDED_Y", TWO_AIRCRAFT_GROUNDED_Y},
+            {"TWO_AIRCRAFT_FREE_Y", TWO_AIRCRAFT_FREE_Y}
+    };
+}
 
 void World::update() {
 
@@ -41,5 +51,14 @@ void World::createSystem(systemType type) {
         case TWO_AIRCRAFT_FREE_Y:
             m_system->createSystemTwoAircraftFreeY();
             break;
+    }
+}
+
+int World::getNumberOfAircraftInSystem(World::systemType type) {
+
+    if (type == ONE_AIRCRAFT || type == ONE_AIRCRAFT_GROUNDED) {
+        return 1;
+    } else {
+        return 2;
     }
 }
