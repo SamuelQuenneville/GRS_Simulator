@@ -28,7 +28,8 @@ public:
     static simulationParameters parseSimulationParameters(YAML::Node& node);
     static fixedWingProperties parseFixedWingProperties(const std::string& filePath);
     static tetherProperties parseTetherProperties(const std::string& filePath);
-    initialStates parseInitialStates(YAML::Node& node, std::string nodeName);
+    static initialStates parseInitialStates(YAML::Node& node, const std::string& nodeName);
+    static target parseSystemTarget(YAML::Node& node);
 
 };
 

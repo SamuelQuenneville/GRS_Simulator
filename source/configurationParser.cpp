@@ -22,6 +22,10 @@ tetherProperties ConfigurationParser::parseTetherProperties(const std::string& f
     return node["TetherProperties"].as<tetherProperties>();
 }
 
-initialStates ConfigurationParser::parseInitialStates(YAML::Node& node, std::string nodeName) {
+initialStates ConfigurationParser::parseInitialStates(YAML::Node& node, const std::string& nodeName) {
     return node[nodeName].as<initialStates>();
+}
+
+target ConfigurationParser::parseSystemTarget(YAML::Node &node) {
+    return node["Target"].as<target>();;
 }

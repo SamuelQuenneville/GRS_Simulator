@@ -24,12 +24,35 @@ void World::update() {
 
 }
 
+void World::readConfigurationFile(const std::string& fileName) {
+    YAML::Node nodeConfiguration = YAML::LoadFile(fileName);
+    simulationParameters simParams = ConfigurationParser::parseSimulationParameters(nodeConfiguration);
+
+    m_simulationConfiguration = {simParams.fixedDuration, simParams.duration};
+    m_systemConfiguration = {systemTypeStringToEnum.at(simParams.systemConfiguration), simParams.hlcRate, simParams.llcRate, simParams.windOn, simParams.tetherAeroOn};
+
+    m_aircraftProperties = ConfigurationParser::parseFixedWingProperties(simParams.aircraftPropertiesFileDirectory);
+    m_tetherProperties = ConfigurationParser::parseTetherProperties(simParams.tetherPropertiesFileDirectory);
+
+    int numberAircraftInSystem = getNumberOfAircraftInSystem(m_systemConfiguration.type);
+
+    for (int i = 1; i <= numberAircraftInSystem; i++) {
+        std::string nodeName = "InitialStatesAircraft_" + std::to_string(i);
+        initialStates states = ConfigurationParser::parseInitialStates(nodeConfiguration, nodeName);
+        m_initialAircraftStatesVector.push_back(&states);
+    }
+
+    m_initialPayloadStates = ConfigurationParser::parseInitialStates(nodeConfiguration, "InitialStatesPayload");
+    m_systemTarget = ConfigurationParser::parseSystemTarget(nodeConfiguration);
+}
+
 void World::log() {
 
 }
 
-void World::createSystem(systemType type) {
+void World::createSystem() {
 
+    systemType type = m_systemConfiguration.type;
     m_system = std::make_unique<System>(worldPhysics);
 
     switch(type) {

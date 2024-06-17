@@ -7,29 +7,17 @@
  */
 
 #include "world.h"
-#include "configurationParser.h"
-#include "RigidBodyAndLink/link.h"
 
-#include "yaml-cpp/yaml.h"
-#include "Definitions/configurationDefinitions.h"
 
 int main() {
 
-    std::cout << "It runs!" << "\n";
     World myWorld;
-    myWorld.createSystem(World::ONE_AIRCRAFT);
 
-    YAML::Node nodeConfiguration = YAML::LoadFile("C:/Users/ques2902/Desktop/simulationV1.yaml");
-    simulationParameters simParams = ConfigurationParser::parseSimulationParameters(nodeConfiguration);
+    // TODO get from user input maybe opengl window in future
+    std::string fileName = "C:/Users/ques2902/Desktop/simulationV1.yaml";
 
-    World::systemType type = myWorld.systemTypeStringToEnum.at(simParams.systemConfiguration);
-    int n = World::getNumberOfAircraftInSystem(type);
-    std::cout << n << "\n";
-
-    fixedWingProperties aircraftProperties = ConfigurationParser::parseFixedWingProperties(simParams.aircraftPropertiesFileDirectory);
-    tetherProperties tetherProperties = ConfigurationParser::parseTetherProperties(simParams.tetherPropertiesFileDirectory);
-    std::cout << aircraftProperties.mass << "\n";
-    std::cout << tetherProperties.length << "\n";
+    myWorld.readConfigurationFile(fileName);
+    myWorld.createSystem();
 
     myWorld.start();
     while (myWorld.isRunning())

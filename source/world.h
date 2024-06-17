@@ -11,6 +11,7 @@
 
 #include <map>
 
+#include "configurationParser.h"
 #include "Mathematics/vector3.h"
 #include "Definitions/worldPhysics.h"
 #include "system.h"
@@ -34,16 +35,38 @@ public:
         TWO_AIRCRAFT_FREE_Y,
     };
 
+    struct simulationConfiguration {
+        bool fixedDuration;
+        float duration;
+    };
+
+    struct systemConfiguration {
+        systemType type;
+        int hlcRate;
+        int llcRate;
+        bool windOn;
+        bool tetherAerodynamicOn;
+    };
+
     void update();
+    void readConfigurationFile(const std::string& fileName);
     void log();
 
-    void createSystem(systemType type);
+    void createSystem();
 
     std::map<std::string,systemType> systemTypeStringToEnum;
     static int getNumberOfAircraftInSystem(systemType type);
 
 private:
     bool m_isRunning = false;
+    simulationConfiguration m_simulationConfiguration{};
+    systemConfiguration m_systemConfiguration{};
+    fixedWingProperties m_aircraftProperties{};
+    tetherProperties m_tetherProperties{};
+
+    std::vector<initialStates*> m_initialAircraftStatesVector;
+    initialStates m_initialPayloadStates;
+    target m_systemTarget;
 
     std::unique_ptr<System> m_system;
 
