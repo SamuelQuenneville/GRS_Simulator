@@ -63,8 +63,11 @@ public:
         return Vector3(m_elements[0] + other.m_elements[0], m_elements[1] + other.m_elements[1], m_elements[2] + other.m_elements[2]);
     }
 
-    Vector3 operator+=(const Vector3& other) const {
-        return Vector3(m_elements[0] + other.m_elements[0], m_elements[1] + other.m_elements[1], m_elements[2] + other.m_elements[2]);
+    Vector3& operator+=(const Vector3& other) {
+        m_elements[0] += other.m_elements[0];
+        m_elements[1] += other.m_elements[1];
+        m_elements[2] += other.m_elements[2];
+        return *this;
     }
 
     Vector3 operator-(const Vector3& other) const {

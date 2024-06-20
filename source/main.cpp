@@ -26,8 +26,14 @@ int main() {
         // Call at HLC rate < LLC rate (simulation rate)
 
         // ------------------------------------------------------------------------
+        std::cout << "Simulation start" << std::endl;
+        int num_steps = 20000;
 
-
+        for (int step = 0; step < num_steps+1; ++step){
+            myWorld.update();
+        }
+        myWorld.stop();
+        std::cout << "Simulation ended" << std::endl;
         // ----------------------------- Tether Update ----------------------------
         // Calculate forces applied by tethers on UAVs and payload
 

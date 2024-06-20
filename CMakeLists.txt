@@ -18,7 +18,6 @@ add_executable(GRS_Simulator source/main.cpp
         source/Control/lowLevelController.cpp
         source/Control/lowLevelController.h
         source/Definitions/worldPhysics.h
-        source/Mathematics/grsMath.cpp
         source/Mathematics/grsMath.h
         source/Mathematics/matrix3.h
         source/Control/lowPassFilter.cpp
@@ -47,12 +46,14 @@ add_executable(GRS_Simulator source/main.cpp
         source/RigidBodyAndLink/tether.h
         source/configurationParser.cpp
         source/configurationParser.h
+        source/Definitions/systemDefinitions.h
 )
 
 target_include_directories (GRS_Simulator PUBLIC source)
 
 include(FetchContent)
 
+# YAML
 FetchContent_Declare(
         yaml-cpp
         GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
@@ -65,5 +66,33 @@ if(NOT yaml-cpp_POPULATED)
     FetchContent_Populate(yaml-cpp)
     add_subdirectory(${yaml-cpp_SOURCE_DIR} ${yaml-cpp_BINARY_DIR})
 endif()
-
 target_link_libraries(GRS_Simulator PUBLIC yaml-cpp::yaml-cpp)
+
+
+# GOOGLE TESTS
+FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+enable_testing()
+
+add_executable(GRS_Simulator_tests
+        tests/tests-vector2.cpp
+        tests/tests-vector3.cpp
+        tests/tests-mathematics.cpp
+)
+
+target_include_directories (GRS_Simulator_tests PUBLIC source)
+target_include_directories (GRS_Simulator_tests PUBLIC tests)
+
+target_link_libraries(
+        GRS_Simulator_tests
+        GTest::gtest_main
+)
+
+include(GoogleTest)
+gtest_discover_tests(GRS_Simulator_tests)

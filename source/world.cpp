@@ -21,7 +21,7 @@ World::World() {
 }
 
 void World::update() {
-
+    m_system->update(1.0 / m_systemConfiguration.llcRate);
 }
 
 void World::readConfigurationFile(const std::string& fileName) {
@@ -39,7 +39,7 @@ void World::readConfigurationFile(const std::string& fileName) {
     for (int i = 1; i <= numberAircraftInSystem; i++) {
         std::string nodeName = "InitialStatesAircraft_" + std::to_string(i);
         initialStates states = ConfigurationParser::parseInitialStates(nodeConfiguration, nodeName);
-        m_initialAircraftStatesVector.push_back(&states);
+        m_initialAircraftStatesVector.push_back(states);
     }
 
     m_initialPayloadStates = ConfigurationParser::parseInitialStates(nodeConfiguration, "InitialStatesPayload");
@@ -52,12 +52,12 @@ void World::log() {
 
 void World::createSystem() {
 
-    systemType type = m_systemConfiguration.type;
-    m_system = std::make_unique<System>(worldPhysics);
+    m_system = std::make_unique<System>(worldPhysics, m_systemConfiguration);
 
+    systemType type = m_systemConfiguration.type;
     switch(type) {
         case ONE_AIRCRAFT:
-            m_system->createSystemOneAircraft();
+            m_system->createSystemOneAircraft(m_aircraftProperties, m_initialAircraftStatesVector.front());
             break;
         case ONE_AIRCRAFT_GROUNDED:
             m_system->createSystemOneAircraftGrounded();
@@ -77,7 +77,7 @@ void World::createSystem() {
     }
 }
 
-int World::getNumberOfAircraftInSystem(World::systemType type) {
+int World::getNumberOfAircraftInSystem(systemType type) {
 
     if (type == ONE_AIRCRAFT || type == ONE_AIRCRAFT_GROUNDED) {
         return 1;

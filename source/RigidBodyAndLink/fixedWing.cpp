@@ -212,4 +212,18 @@ Vector3<double> FixedWing::m_bodyToEarth(const Vector3<double>& bodyVector) cons
     return earthVector;
 }
 
+void FixedWing::setInitialStates(initialStates &states) {
+    m_states.x = states.position.at(0);
+    m_states.y = states.position.at(1);
+    m_states.z = states.position.at(2);
+
+    m_states.u = states.speed.at(0);
+    m_states.v = states.speed.at(1);
+    m_states.w = states.speed.at(2);
+
+    m_states.theta = states.orientation.at(0);
+    m_states.phi = states.orientation.at(1);
+    m_states.psi = states.orientation.at(2);
+}
+
 

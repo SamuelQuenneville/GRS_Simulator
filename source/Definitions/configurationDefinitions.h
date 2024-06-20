@@ -9,6 +9,8 @@
 #ifndef GRS_SIMULATOR_CONFIGURATIONDEFINITIONS_H
 #define GRS_SIMULATOR_CONFIGURATIONDEFINITIONS_H
 
+#pragma once
+
 #include <string>
 #include <vector>
 

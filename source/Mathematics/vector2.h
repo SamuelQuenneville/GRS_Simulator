@@ -64,8 +64,10 @@ public:
         return Vector2(m_elements[0] - other.m_elements[0], m_elements[1] - other.m_elements[1]);
     }
 
-    Vector2 operator+=(const Vector2& other) const {
-        return Vector2(m_elements[0] + other.m_elements[0], m_elements[1] + other.m_elements[1]);
+    Vector2& operator+=(const Vector2& other) {
+        m_elements[0] += other.m_elements[0];
+        m_elements[1] += other.m_elements[1];
+        return *this;
     }
 
     constexpr friend inline Vector2 operator*(const T& scalar, Vector2 vector) {

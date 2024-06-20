@@ -9,6 +9,8 @@
 #ifndef GRS_SIMULATOR_WORLDPHYSICS_H
 #define GRS_SIMULATOR_WORLDPHYSICS_H
 
+#pragma once
+
 #include "Mathematics/vector3.h"
 
 struct worldPhysics {

@@ -11,16 +11,21 @@
 
 #include "Definitions/worldPhysics.h"
 #include "RigidBodyAndLink//fixedWing.h"
+#include "RigidBodyAndLink/tether.h"
+
+#include "Definitions/configurationDefinitions.h"
+#include "Definitions/systemDefinitions.h"
+#include "Control/llcBaseVersion.h"
 
 class System {
 
 public:
-    explicit System(worldPhysics& worldPhysics);
+    explicit System(worldPhysics& worldPhysics, systemConfiguration& configuration);
 
     void update(double dt);
 
     // Create the different configuration of system
-    void createSystemOneAircraft();
+    void createSystemOneAircraft(fixedWingProperties& aircraftProperties, initialStates& aircraftStates);
     void createSystemOneAircraftGrounded();
     void createSystemTwoAircraftGroundedV();
     void createSystemTwoAircraftFreeV();
@@ -29,8 +34,10 @@ public:
 
 private:
     worldPhysics& m_physics;
+    systemConfiguration& m_systemConfiguration;
 
-    std::vector<RigidBody*> m_rigidBodies;
+    std::vector<std::unique_ptr<RigidBody>> m_rigidBodies;
+    std::vector<Link*> m_links;
 
 
 };

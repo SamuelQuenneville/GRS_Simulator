@@ -38,16 +38,28 @@ static inline auto MAX(const A& one, const B& two) -> decltype(one > two ? one :
 }
 
 /*
-  wrap an angle in radians to -PI ~ PI (equivalent to +- 180 degrees)
- */
-template <typename T>
-float wrapPI(T radian);
-
-/*
  * wrap an angle in radians to 0..2PI
  */
 template <typename T>
-float wrap2PI(T radian);
+inline T wrap2PI(const T radian) {
+    T res = fmod(static_cast<double>(radian), M_2PI);
+    if (res < 0) {
+        res += M_2PI;
+    }
+    return res;
+}
+
+/*
+  wrap an angle in radians to -PI ~ PI (equivalent to +- 180 degrees)
+ */
+template <typename T>
+inline T wrapPI(const T radian) {
+    auto res = wrap2PI(radian);
+    if (res > M_PI) {
+        res -= M_2PI;
+    }
+    return res;
+}
 
 // degrees -> radians
 template <typename T>
@@ -65,10 +77,30 @@ static inline constexpr float degrees(T rad) {
  * Constrain a value to be within the range: low and high
  */
 template <typename T>
-T constrainValue(T amt, T low, T high);
+T constrainValue(T amt, T low, T high) {
+    if (amt < low) {
+        return low;
+    }
+
+    if (amt > high) {
+        return high;
+    }
+
+    return amt;
+}
 
 template <typename T>
-T constrainValueLine(T amt, T low, T high, uint32_t line);
+T constrainValueLine(T amt, T low, T high, uint32_t line) {
+    if (amt < low) {
+        return low;
+    }
+
+    if (amt > high) {
+        return high;
+    }
+
+    return amt;
+}
 
 #define constrainFloat(amt, low, high) constrainValueLine(float(amt), float(low), float(high), uint32_t(__LINE__))
 
@@ -79,20 +111,35 @@ inline int32_t constrainInt32(const int32_t amt, const int32_t low, const int32_
 /*
  * calculate a low pass filter alpha value
  */
-float calcLowpassAlphaDt(float dt, float cutOffFrequency);
+float calcLowpassAlphaDt(float dt, float cutOffFrequency) {
+    if (dt <= 0.0f || cutOffFrequency <= 0.0f) {
+        return 1.0;
+    }
+    float rc = 1.0f/(M_2PI * cutOffFrequency);
+    return constrainFloat(dt/(dt+rc), 0.0f, 1.0f);
+}
 
 /*
  *  use for unwrap
  */
 template <typename T>
-T angleNorm(T res);
+T angleNorm(T res) {
+    if (fabs(res) == M_PI){
+        return res;
+    }
+
+    res = wrap2PI(res + M_PI);
+    return res - M_PI;
+}
 
 /*
  * Whenever the jump between consecutive angles is greater than or equal to π radians,
  * unwrap shifts the angles by adding multiples of ±2π until the jump is less than π
  */
 template <typename T>
-T unwrap(T prev, T now);
+T unwrap(T prev, T now) {
+    return prev + angleNorm(now - prev);
+}
 
 
 /*

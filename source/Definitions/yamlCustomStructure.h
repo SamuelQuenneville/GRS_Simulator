@@ -9,6 +9,8 @@
 #ifndef GRS_SIMULATOR_YAMLCUSTOMSTRUCTURE_H
 #define GRS_SIMULATOR_YAMLCUSTOMSTRUCTURE_H
 
+#pragma once
+
 #include "yaml-cpp/node/node.h"
 
 #include "tetherDefinitions.h"
