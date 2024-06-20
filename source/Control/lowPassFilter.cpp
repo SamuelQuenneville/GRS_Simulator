@@ -58,7 +58,7 @@ void DigitalLPF<T>::computeAlpha(float sampleFrequency, float cutOffFrequency) {
     if (sampleFrequency <= 0) {
         m_alpha = 1;
     } else {
-        m_alpha = calcLowpassAlphaDt(1.0/sampleFrequency, cutOffFrequency);
+        m_alpha = calcLowpassAlphaDt(1.0f/sampleFrequency, cutOffFrequency);
     }
 }
 

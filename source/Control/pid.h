@@ -63,7 +63,7 @@ public:
         bool resetFilter :1; // true when input filter should be reset during next call to set_input
     } flags;
 
-    struct PidInfo {
+    struct pidInfo {
         float target;
         float actual;
         float error;
@@ -76,7 +76,7 @@ public:
         bool  limit;
     };
 
-    const PidInfo& getPidInfo(void) const { return m_pidInfo;};
+    const pidInfo& getPidInfo() const { return m_pidInfo;};
 
 protected:
     float m_kp;
@@ -99,7 +99,7 @@ protected:
     int8_t m_slewLimitScale;
     uint16_t m_resetCounter;
 
-    PidInfo m_pidInfo;
+    pidInfo m_pidInfo;
     SlewLimiter m_slewLimiter{m_slewRateMax, m_slewRateTau};
 };
 

@@ -43,7 +43,7 @@ private:
     float m_angleErrorDeg = 0.0;
 
     PID m_ratePID{0.08, 0.15, 0, 0.345, 0.666, 3, 7, 4, 0.02, 150, 1};
-    PID::PidInfo m_pidInfo{};
+    PID::pidInfo m_pidInfo{};
 
     fixedWingStates m_aircraftStates{};
 

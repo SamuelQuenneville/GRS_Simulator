@@ -111,11 +111,12 @@ inline int32_t constrainInt32(const int32_t amt, const int32_t low, const int32_
 /*
  * calculate a low pass filter alpha value
  */
-float calcLowpassAlphaDt(float dt, float cutOffFrequency) {
+template <typename T>
+T calcLowpassAlphaDt(T dt, T cutOffFrequency) {
     if (dt <= 0.0f || cutOffFrequency <= 0.0f) {
         return 1.0;
     }
-    float rc = 1.0f/(M_2PI * cutOffFrequency);
+    T rc = 1.0f/(M_2PI * cutOffFrequency);
     return constrainFloat(dt/(dt+rc), 0.0f, 1.0f);
 }
 
