@@ -17,7 +17,7 @@ FixedWing::FixedWing(worldPhysics& physics, fixedWingProperties& properties, std
         , m_properties(properties)
         , m_controller(std::move(controller))
 {
-
+    std::cout << "Fixed Wing created --> ID = " << m_id << "\n";
 }
 
 int FixedWing::getId() const {
@@ -43,8 +43,7 @@ void FixedWing::update(double dt) {
     setStates(updatedStates);
 
     // Set new states to the node of this body
-    // TODO change forces and moments to total in Earth reference frame
-    centerOfMass->update({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, forcesAeroBody, momentsAeroBody);
+    centerOfMass->update({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, m_bodyToEarth(forcesAeroBody) + externalForcesEarth,m_bodyToEarth(momentsAeroBody));
 }
 
 Vector3<double> FixedWing::m_calcForceAeroBodyFrame(const fixedWingControlInputs& inputs) const {
@@ -224,6 +223,9 @@ void FixedWing::setInitialStates(initialStates &states) {
     m_states.theta = states.orientation.at(0);
     m_states.phi = states.orientation.at(1);
     m_states.psi = states.orientation.at(2);
+
+    centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
+    centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
 }
 
 

@@ -16,7 +16,7 @@ Tether::Tether(worldPhysics& physics, tetherProperties& properties)
     , m_physics(physics)
     , m_properties(properties)
 {
-
+    std::cout << "Tether created --> ID = " << m_id << "\n";
 }
 
 int Tether::getId() const {
@@ -48,7 +48,6 @@ void Tether::update(double dt) {
     Vector3<double> tensionForce = m_calcTensionForce();
     startPoint->setForce(-tensionForce);    // TODO confirm negative sign here
     endPoint->setForce(tensionForce);
-
 }
 
 void Tether::m_updateRelativePosition() {
@@ -60,6 +59,9 @@ void Tether::m_updateRelativeSpeed() {
 }
 
 Vector3<double> Tether::m_calcTensionForce() {
+    // Update
+    m_updateRelativePosition();
+    m_updateRelativeSpeed();
 
     // Find tether position relative to startPoint
     double tetherMagnitude = m_relativePosition.magnitude();
@@ -123,4 +125,9 @@ std::tuple<double, double> Tether::m_calcLiftDragCoeff(double Cf, double Cn, dou
 // TODO implement tether aerodynamic and discretization
 Vector3<double> Tether::m_calcTetherAeroForces(Vector3<double> windSpeed) {
     return {0,0,0};
+}
+
+void Tether::grounded() {
+    startPoint->setPosition({0,0,0});
+    startPoint->setVelocity({0,0,0});
 }

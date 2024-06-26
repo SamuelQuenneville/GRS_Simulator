@@ -18,9 +18,6 @@ public:
     virtual INPUTS calculateAircraftControlInputs(const STATES& currentStates, const COMMANDS& commands, double desiredThrust) = 0;
     virtual ~LowLevelController() = default;
 
-private:
-
-
 };
 
 

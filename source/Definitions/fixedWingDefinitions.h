@@ -16,7 +16,7 @@
  */
 
 struct fixedWingCommands {
-    double groundspeed;
+    double altitude;
     double phi;
     double theta;
     double thrust;

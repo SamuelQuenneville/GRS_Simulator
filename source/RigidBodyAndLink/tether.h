@@ -22,6 +22,7 @@ public:
     [[nodiscard]] linkType getType() const;
 
     void update(double dt) override;
+    void grounded();
 
 private:
     int m_id;

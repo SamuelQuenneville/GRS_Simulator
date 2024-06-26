@@ -28,7 +28,7 @@ void World::readConfigurationFile(const std::string& fileName) {
     YAML::Node nodeConfiguration = YAML::LoadFile(fileName);
     simulationParameters simParams = ConfigurationParser::parseSimulationParameters(nodeConfiguration);
 
-    m_simulationConfiguration = {simParams.fixedDuration, simParams.duration};
+    simulationConfiguration = {simParams.fixedDuration, simParams.duration, 1.0/simParams.llcRate};
     m_systemConfiguration = {systemTypeStringToEnum.at(simParams.systemConfiguration), simParams.hlcRate, simParams.llcRate, simParams.windOn, simParams.tetherAeroOn};
 
     m_aircraftProperties = ConfigurationParser::parseFixedWingProperties(simParams.aircraftPropertiesFileDirectory);
@@ -53,6 +53,7 @@ void World::log() {
 void World::createSystem() {
 
     m_system = std::make_unique<System>(worldPhysics, m_systemConfiguration);
+    m_system->setTarget(m_systemTarget);
 
     systemType type = m_systemConfiguration.type;
     switch(type) {
@@ -60,7 +61,7 @@ void World::createSystem() {
             m_system->createSystemOneAircraft(m_aircraftProperties, m_initialAircraftStatesVector.front());
             break;
         case ONE_AIRCRAFT_GROUNDED:
-            m_system->createSystemOneAircraftGrounded();
+            m_system->createSystemOneAircraftGrounded(m_aircraftProperties, m_tetherProperties, m_initialAircraftStatesVector.front(), m_initialPayloadStates);
             break;
         case TWO_AIRCRAFT_GROUNDED_V:
             m_system->createSystemTwoAircraftGroundedV();

@@ -47,6 +47,12 @@ add_executable(GRS_Simulator source/main.cpp
         source/configurationParser.cpp
         source/configurationParser.h
         source/Definitions/systemDefinitions.h
+        source/Control/highLevelController.cpp
+        source/Control/highLevelController.h
+        source/Control/groundspeedController.cpp
+        source/Control/groundspeedController.h
+        source/Control/hlcSingleAircraft.cpp
+        source/Control/hlcSingleAircraft.h
 )
 
 target_include_directories (GRS_Simulator PUBLIC source)

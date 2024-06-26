@@ -40,6 +40,7 @@ struct initialStates {
 struct target {
     std::vector<double> positionPayload;    // [x y z]
     float groundspeed;                      // m/s
+    float aircraftPitch;                    // degrees
     float aircraftRoll;                     // degrees
 };
 

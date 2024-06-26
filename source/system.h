@@ -9,6 +9,8 @@
 #ifndef GRS_SIMULATOR_SYSTEM_H
 #define GRS_SIMULATOR_SYSTEM_H
 
+#include <memory>
+
 #include "Definitions/worldPhysics.h"
 #include "RigidBodyAndLink//fixedWing.h"
 #include "RigidBodyAndLink/tether.h"
@@ -16,6 +18,8 @@
 #include "Definitions/configurationDefinitions.h"
 #include "Definitions/systemDefinitions.h"
 #include "Control/llcBaseVersion.h"
+#include "Control/hlcSingleAircraft.h"
+
 
 class System {
 
@@ -23,10 +27,11 @@ public:
     explicit System(worldPhysics& worldPhysics, systemConfiguration& configuration);
 
     void update(double dt);
+    void setTarget(const target& newTarget) {m_target = newTarget;};
 
     // Create the different configuration of system
     void createSystemOneAircraft(fixedWingProperties& aircraftProperties, initialStates& aircraftStates);
-    void createSystemOneAircraftGrounded();
+    void createSystemOneAircraftGrounded(fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, initialStates& aircraftStates, initialStates& payloadStates);
     void createSystemTwoAircraftGroundedV();
     void createSystemTwoAircraftFreeV();
     void createSystemTwoAircraftGroundedY();
@@ -36,10 +41,19 @@ private:
     worldPhysics& m_physics;
     systemConfiguration& m_systemConfiguration;
 
-    std::vector<std::unique_ptr<RigidBody>> m_rigidBodies;
-    std::vector<Link*> m_links;
+    double m_timeSinceHlcCall;
+    bool m_shouldCallHlc();
 
+    void m_initHlcCommands();
 
+    target m_target{};
+    fixedWingCommands m_commands{};
+    std::unique_ptr<HlcSingleAircraft> m_controller;
+
+    std::vector<fixedWingStates> m_getAircraftStates();
+
+    std::vector<std::unique_ptr<FixedWing>> m_aircraft;
+    std::vector<std::unique_ptr<Tether>> m_links;
 };
 
 

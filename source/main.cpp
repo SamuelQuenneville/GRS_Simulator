@@ -6,6 +6,7 @@
  * Createk Innovation Lab
  */
 
+#include <Windows.h>
 #include "world.h"
 
 
@@ -15,40 +16,39 @@ int main() {
 
     // TODO get from user input maybe opengl window in future
     std::string fileName = "C:/Users/ques2902/Desktop/simulationV1.yaml";
-
     myWorld.readConfigurationFile(fileName);
+
     myWorld.createSystem();
 
-    myWorld.start();
     while (myWorld.isRunning())
     {
-        // ------------------------------- HLC Call -------------------------------
-        // Call at HLC rate < LLC rate (simulation rate)
 
-        // ------------------------------------------------------------------------
-        std::cout << "Simulation start" << std::endl;
-        int num_steps = 20000;
+        if (myWorld.simulationConfiguration.fixedDuration) {
+            int numSteps = myWorld.simulationConfiguration.duration / myWorld.simulationConfiguration.dt;
 
-        for (int step = 0; step < num_steps+1; ++step){
-            myWorld.update();
+            std::cout << "Simulation start" << std::endl;
+            for (int step = 0; step < numSteps+1; ++step){
+                myWorld.update();
+            }
+
+            myWorld.stop();
+            std::cout << "Simulation ended" << std::endl;
+
+        } else {
+
+            std::cout << "Simulation start --> Press 'S' to stop!" << std::endl;
+            bool running = true;
+
+            while (running) {
+                myWorld.update();
+
+                if (GetKeyState('S') & 0x8000) {
+                    myWorld.stop();
+                    running = false;
+                    std::cout << "Simulation ended" << std::endl;
+                }
+            }
         }
-        myWorld.stop();
-        std::cout << "Simulation ended" << std::endl;
-        // ----------------------------- Tether Update ----------------------------
-        // Calculate forces applied by tethers on UAVs and payload
-
-        // ------------------------------------------------------------------------
-
-
-        // ---------------------------- Dynamic Update ----------------------------
-        // Update payload and UAVs states
-
-        // ------------------------------------------------------------------------
-
-
-        // --------------------------------- Log ----------------------------------
-
-        // ------------------------------------------------------------------------
     }
 
     return 0;

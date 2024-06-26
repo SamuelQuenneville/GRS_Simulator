@@ -67,6 +67,7 @@ namespace YAML {
 
             rhs.positionPayload = node["POS_PAYLOAD"].as<std::vector<double>>();
             rhs.groundspeed     = node["GROUNDSPEED"].as<float>();
+            rhs.aircraftPitch   = node["AIRCRAFT_PITCH"].as<float>();
             rhs.aircraftRoll    = node["AIRCRAFT_ROLL"].as<float>();
             return true;
         }

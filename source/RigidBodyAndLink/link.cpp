@@ -23,6 +23,8 @@ Node& Link::endPointNode() const {
 
 void Link::addConnection(Node& linkEnd, Node& node) {
     connections[&linkEnd].push_back(&node);
+    linkEnd.setPosition(node.position());
+    linkEnd.setVelocity(node.velocity());
 }
 
 void Link::deleteConnection(Node& linkEnd, Node& node) {

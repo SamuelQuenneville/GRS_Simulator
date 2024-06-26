@@ -29,7 +29,10 @@ public:
     struct simulationConfiguration {
         bool fixedDuration;
         float duration;
+        double dt;
     };
+
+    simulationConfiguration simulationConfiguration{};
 
     void update();
     void readConfigurationFile(const std::string& fileName);
@@ -41,8 +44,7 @@ public:
     static int getNumberOfAircraftInSystem(systemType type);
 
 private:
-    bool m_isRunning = false;
-    simulationConfiguration m_simulationConfiguration{};
+    bool m_isRunning = true;
     systemConfiguration m_systemConfiguration{};
     fixedWingProperties m_aircraftProperties{};
     tetherProperties m_tetherProperties{};

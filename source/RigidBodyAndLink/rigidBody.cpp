@@ -12,7 +12,7 @@ RigidBody::RigidBody() {
     centerOfMass = std::make_unique<Node>();
 }
 
-const Node& RigidBody::node() const {
+Node& RigidBody::node() {
     return *centerOfMass;
 }
 

@@ -23,13 +23,13 @@ fixedWingControlInputs LlcBaseVersion::calculateAircraftControlInputs(const fixe
     m_pitchController->setAircraftStates(currentStates);
     m_altController->setAircraftStates(currentStates);
 
-    double altPitch = m_altController->getPitchOut(10, false)/100.0;
+    double altPitch = m_altController->getPitchOut(commands.altitude, false)/100.0;
 
     fixedWingControlInputs controlInputs{};
-    controlInputs.deltaAileron = m_stabilizeRoll(0) / 100.0;
-    controlInputs.deltaElevator = -1.0 * m_stabilizePitch(altPitch) / 100.0; // PixHawk define positive del_e up, we use Cm_de negative so del_e must be positive down
+    controlInputs.deltaAileron = m_stabilizeRoll(commands.phi) / 100.0;
+    controlInputs.deltaElevator = -1.0 * m_stabilizePitch(altPitch + commands.theta) / 100.0; // PixHawk define positive del_e up, we use Cm_de negative so del_e must be positive down
     controlInputs.deltaRudder = 0.0;//_stabilizeYaw(0.0); // Always 0
-    controlInputs.deltaThrust = desiredThrust;
+    controlInputs.deltaThrust = commands.thrust;
 
     return controlInputs;
 }
