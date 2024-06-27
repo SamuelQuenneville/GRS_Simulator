@@ -9,7 +9,7 @@
 #include "pitchController.h"
 
 
-PitchController::PitchController(worldPhysics &physics, float rate)
+PitchController::PitchController(worldPhysics& physics, float rate)
     : m_physics(physics)
     , m_dt(1.0f/rate)
 {

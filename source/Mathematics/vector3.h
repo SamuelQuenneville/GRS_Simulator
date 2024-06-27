@@ -102,7 +102,7 @@ public:
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Vector3& vec) {
-        os << "[" << vec.m_elements[0] << ", " << vec.m_elements[1] << ", " << vec.m_elements[2] << "]";
+        os << vec.m_elements[0] << "," << vec.m_elements[1] << "," << vec.m_elements[2];
         return os;
     }
 };

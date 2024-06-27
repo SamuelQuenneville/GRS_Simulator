@@ -23,7 +23,7 @@ class LlcBaseVersion : public LowLevelController<fixedWingControlInputs,fixedWin
 public:
     LlcBaseVersion(worldPhysics& physics, float rate);
 
-    fixedWingControlInputs calculateAircraftControlInputs(const fixedWingStates& currentStates, const fixedWingCommands& commands, double desiredThrust) override;
+    fixedWingControlInputs calculateAircraftControlInputs(const fixedWingStates& currentStates, const fixedWingCommands& commands) override;
 
 private:
     worldPhysics m_physics;

@@ -18,15 +18,20 @@ World::World() {
             {"TWO_AIRCRAFT_GROUNDED_Y", TWO_AIRCRAFT_GROUNDED_Y},
             {"TWO_AIRCRAFT_FREE_Y", TWO_AIRCRAFT_FREE_Y}
     };
+
 }
 
 void World::update() {
     m_system->update(1.0 / m_systemConfiguration.llcRate);
+    logger().loggerClockTick(1.0 / m_systemConfiguration.llcRate);
 }
 
 void World::readConfigurationFile(const std::string& fileName) {
     YAML::Node nodeConfiguration = YAML::LoadFile(fileName);
     simulationParameters simParams = ConfigurationParser::parseSimulationParameters(nodeConfiguration);
+
+    m_logDirectory = simParams.logFilesDirectory;
+    m_logger = std::make_unique<Logger>(m_logDirectory);
 
     simulationConfiguration = {simParams.fixedDuration, simParams.duration, 1.0/simParams.llcRate};
     m_systemConfiguration = {systemTypeStringToEnum.at(simParams.systemConfiguration), simParams.hlcRate, simParams.llcRate, simParams.windOn, simParams.tetherAeroOn};
@@ -46,13 +51,13 @@ void World::readConfigurationFile(const std::string& fileName) {
     m_systemTarget = ConfigurationParser::parseSystemTarget(nodeConfiguration);
 }
 
-void World::log() {
-
+Logger& World::logger() {
+    return *m_logger;
 }
 
 void World::createSystem() {
 
-    m_system = std::make_unique<System>(worldPhysics, m_systemConfiguration);
+    m_system = std::make_unique<System>(worldPhysics, logger(), m_systemConfiguration);
     m_system->setTarget(m_systemTarget);
 
     systemType type = m_systemConfiguration.type;
@@ -61,7 +66,7 @@ void World::createSystem() {
             m_system->createSystemOneAircraft(m_aircraftProperties, m_initialAircraftStatesVector.front());
             break;
         case ONE_AIRCRAFT_GROUNDED:
-            m_system->createSystemOneAircraftGrounded(m_aircraftProperties, m_tetherProperties, m_initialAircraftStatesVector.front(), m_initialPayloadStates);
+            m_system->createSystemOneAircraftGrounded(m_aircraftProperties, m_tetherProperties, m_initialAircraftStatesVector.front());
             break;
         case TWO_AIRCRAFT_GROUNDED_V:
             m_system->createSystemTwoAircraftGroundedV();

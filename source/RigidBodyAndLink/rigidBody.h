@@ -20,6 +20,8 @@
 #include "Mathematics/matrix3.h"
 #include "node.h"
 
+#include "Log/logger.h"
+
 class RigidBody {
 
 public:

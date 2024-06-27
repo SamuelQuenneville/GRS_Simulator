@@ -8,8 +8,9 @@
 
 #include "hlcSingleAircraft.h"
 
-HlcSingleAircraft::HlcSingleAircraft(worldPhysics &physics, float rate)
+HlcSingleAircraft::HlcSingleAircraft(worldPhysics &physics, Logger& logger, float rate)
         : m_physics(physics)
+        , m_logger(logger)
         , m_rate(rate)
 {
     m_groundspeedController = std::make_unique<GroundspeedController>(m_physics, m_rate);
@@ -25,7 +26,7 @@ fixedWingCommands HlcSingleAircraft::calculateInputs(const std::vector<fixedWing
     commandsInputs.thrust = requiredThrust;
     commandsInputs.theta = target.aircraftPitch;
     commandsInputs.phi = target.aircraftRoll;
-    commandsInputs.altitude = target.positionPayload[2]; // TODO down or up altitude??
+    commandsInputs.altitude = target.positionPayload[2];
 
     return commandsInputs;
 }

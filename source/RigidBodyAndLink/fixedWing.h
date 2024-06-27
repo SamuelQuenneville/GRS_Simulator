@@ -17,7 +17,7 @@
 class FixedWing : public RigidBody {
 
 public:
-    FixedWing(worldPhysics& physics, fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller);
+    FixedWing(worldPhysics& physics, Logger& logger, fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller);
 
     [[nodiscard]] int getId() const;
     [[nodiscard]] rigidBodyType getType() const;
@@ -32,6 +32,9 @@ public:
     [[nodiscard]] fixedWingCommands getCommands() const {return m_commands;};
     void setCommands(const fixedWingCommands& newCommands) {m_commands = newCommands;};
 
+    [[nodiscard]] fixedWingControlInputs getInputs() const {return m_inputs;};
+    void setInputs(const fixedWingControlInputs& newInputs) {m_inputs = newInputs;};
+
     [[nodiscard]] double airspeed() const;
 
     [[nodiscard]] Matrix3<double> rotationMatrixCBodyEarth() const;
@@ -42,9 +45,11 @@ private:
     rigidBodyType m_type;
 
     worldPhysics m_physics;
+    Logger& m_logger;
 
     fixedWingStates m_states{};
     fixedWingProperties m_properties;
+    fixedWingControlInputs m_inputs{};
     fixedWingCommands m_commands{};
 
     std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> m_controller;
@@ -57,6 +62,8 @@ private:
 
     fixedWingStates m_calcStatesDerivatives(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> externalForceEarth);
     fixedWingStates m_eulerIntegration(fixedWingStates& derivatives, double dt) const;
+
+    void m_writeLog(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> tetherForceBody);
 
 };
 

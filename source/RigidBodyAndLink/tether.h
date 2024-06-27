@@ -16,7 +16,7 @@
 class Tether : public Link {
 
 public:
-    Tether(worldPhysics& physics, tetherProperties& properties);
+    Tether(worldPhysics& physics, Logger& logger, tetherProperties& properties);
 
     [[nodiscard]] int getId() const;
     [[nodiscard]] linkType getType() const;
@@ -30,6 +30,7 @@ private:
     linkType m_type;
 
     worldPhysics m_physics;
+    Logger& m_logger;
     tetherProperties m_properties;
 
     tetherLogInfos m_tetherLogInfos{};
@@ -49,6 +50,8 @@ private:
     [[nodiscard]] double m_calcCrossflowDrag(double normalVelocity) const;
     static std::tuple<double, double> m_calcLiftDragCoeff(double Cf, double Cn, double theta);
     Vector3<double> m_calcTetherAeroForces(Vector3<double> windSpeed);
+
+    void m_writeLog();
 };
 
 

@@ -14,6 +14,7 @@
 #include "configurationParser.h"
 #include "Mathematics/vector3.h"
 #include "system.h"
+#include "Log/logger.h"
 
 class World {
 
@@ -36,7 +37,7 @@ public:
 
     void update();
     void readConfigurationFile(const std::string& fileName);
-    void log();
+    Logger& logger();
 
     void createSystem();
 
@@ -44,7 +45,11 @@ public:
     static int getNumberOfAircraftInSystem(systemType type);
 
 private:
+    std::unique_ptr<Logger> m_logger;
+
     bool m_isRunning = true;
+    std::string m_logDirectory;
+
     systemConfiguration m_systemConfiguration{};
     fixedWingProperties m_aircraftProperties{};
     tetherProperties m_tetherProperties{};

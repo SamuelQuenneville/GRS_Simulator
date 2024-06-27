@@ -16,6 +16,7 @@
 #include <algorithm>
 
 #include "node.h"
+#include "Log/logger.h"
 
 class Link {
 

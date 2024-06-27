@@ -11,10 +11,10 @@
 
 #include <memory>
 
-#include "Definitions/worldPhysics.h"
 #include "RigidBodyAndLink//fixedWing.h"
 #include "RigidBodyAndLink/tether.h"
 
+#include "Definitions/worldPhysics.h"
 #include "Definitions/configurationDefinitions.h"
 #include "Definitions/systemDefinitions.h"
 #include "Control/llcBaseVersion.h"
@@ -24,14 +24,14 @@
 class System {
 
 public:
-    explicit System(worldPhysics& worldPhysics, systemConfiguration& configuration);
+    explicit System(worldPhysics& worldPhysics, Logger& logger, systemConfiguration& configuration);
 
     void update(double dt);
     void setTarget(const target& newTarget) {m_target = newTarget;};
 
     // Create the different configuration of system
     void createSystemOneAircraft(fixedWingProperties& aircraftProperties, initialStates& aircraftStates);
-    void createSystemOneAircraftGrounded(fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, initialStates& aircraftStates, initialStates& payloadStates);
+    void createSystemOneAircraftGrounded(fixedWingProperties &aircraftProperties, tetherProperties &tetherProperties, initialStates &aircraftStates);
     void createSystemTwoAircraftGroundedV();
     void createSystemTwoAircraftFreeV();
     void createSystemTwoAircraftGroundedY();
@@ -39,6 +39,7 @@ public:
 
 private:
     worldPhysics& m_physics;
+    Logger& m_logger;
     systemConfiguration& m_systemConfiguration;
 
     double m_timeSinceHlcCall;

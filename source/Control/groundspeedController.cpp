@@ -8,7 +8,7 @@
 
 #include "groundspeedController.h"
 
-GroundspeedController::GroundspeedController(worldPhysics &physics, float rate)
+GroundspeedController::GroundspeedController(worldPhysics& physics, float rate)
     : m_physics(physics)
     , m_dt(1.0f/rate)
 {
@@ -36,6 +36,6 @@ float GroundspeedController::getThrustOut(float desiredSpeed, bool disableIntegr
     return constrainFloat(thrustDem, 0.0, 60.0);
 }
 
-void GroundspeedController::setAircraftStates(const fixedWingStates &aircraftStates) {
+void GroundspeedController::setAircraftStates(const fixedWingStates& aircraftStates) {
     m_aircraftStates = aircraftStates;
 }

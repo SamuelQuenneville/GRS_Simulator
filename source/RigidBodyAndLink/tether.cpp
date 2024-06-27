@@ -10,10 +10,11 @@
 
 int Tether::m_idCounter = 0;
 
-Tether::Tether(worldPhysics& physics, tetherProperties& properties)
+Tether::Tether(worldPhysics& physics, Logger& logger, tetherProperties& properties)
     : m_id(++m_idCounter)
     , m_type(Link::RIGID)
     , m_physics(physics)
+    , m_logger(logger)
     , m_properties(properties)
 {
     std::cout << "Tether created --> ID = " << m_id << "\n";
@@ -48,6 +49,9 @@ void Tether::update(double dt) {
     Vector3<double> tensionForce = m_calcTensionForce();
     startPoint->setForce(-tensionForce);    // TODO confirm negative sign here
     endPoint->setForce(tensionForce);
+
+    // Log
+    m_writeLog();
 }
 
 void Tether::m_updateRelativePosition() {
@@ -124,10 +128,30 @@ std::tuple<double, double> Tether::m_calcLiftDragCoeff(double Cf, double Cn, dou
 
 // TODO implement tether aerodynamic and discretization
 Vector3<double> Tether::m_calcTetherAeroForces(Vector3<double> windSpeed) {
-    return {0,0,0};
+    Vector3<double> forceAero = {0,0,0};
+    m_tetherLogInfos.forceAero = forceAero;
+
+    return forceAero;
 }
 
 void Tether::grounded() {
     startPoint->setPosition({0,0,0});
     startPoint->setVelocity({0,0,0});
+}
+
+void Tether::m_writeLog() {
+    tetherLogMessage logMessage;
+
+    logMessage = {
+            m_id,
+            m_tetherLogInfos.deformation,
+            startPoint->position(),
+            startPoint->velocity(),
+            endPoint->position(),
+            endPoint->velocity(),
+            m_tetherLogInfos.forceSpring,
+            m_tetherLogInfos.forceAero
+    };
+
+    m_logger.writeTetherMessage(logMessage);
 }

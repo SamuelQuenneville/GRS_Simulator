@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "Definitions/configurationDefinitions.h"
+#include "Log/logger.h"
 
 template <typename COMMANDS, typename STATES>
 class HighLevelController {

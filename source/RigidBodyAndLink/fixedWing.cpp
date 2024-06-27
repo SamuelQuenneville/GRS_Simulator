@@ -10,10 +10,11 @@
 
 int FixedWing::m_idCounter = 0;
 
-FixedWing::FixedWing(worldPhysics& physics, fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller)
+FixedWing::FixedWing(worldPhysics& physics, Logger& logger, fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller)
         : m_id(++m_idCounter)
         , m_type(RigidBody::AIRCRAFT)
         , m_physics(physics)
+        , m_logger(logger)
         , m_properties(properties)
         , m_controller(std::move(controller))
 {
@@ -30,7 +31,8 @@ RigidBody::rigidBodyType FixedWing::getType() const {
 
 void FixedWing::update(double dt) {
 
-    fixedWingControlInputs inputs(m_controller->calculateAircraftControlInputs(getStates(), getCommands(), 4.5));
+    fixedWingControlInputs inputs(m_controller->calculateAircraftControlInputs(getStates(), getCommands()));
+    setInputs(inputs);
 
     Vector3<double> externalForcesEarth = calcExternalForce();
     Vector3<double> forcesAeroBody   = m_calcForceAeroBodyFrame(inputs);
@@ -44,6 +46,9 @@ void FixedWing::update(double dt) {
 
     // Set new states to the node of this body
     centerOfMass->update({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, m_bodyToEarth(forcesAeroBody) + externalForcesEarth,m_bodyToEarth(momentsAeroBody));
+
+    // Log
+    m_writeLog(forcesAeroBody, momentsAeroBody, m_earthToBody(externalForcesEarth));
 }
 
 Vector3<double> FixedWing::m_calcForceAeroBodyFrame(const fixedWingControlInputs& inputs) const {
@@ -66,8 +71,8 @@ Vector3<double> FixedWing::m_calcForceAeroBodyFrame(const fixedWingControlInputs
     double CD = m_properties.CD_0 + (CL*CL) / (M_PI * m_properties.oswaldEfficiency * m_properties.aspectRatio);
 
     // stability vs body frame
-    double CX = -CD * cos(alpha) + CL * sin(alpha);
-    double CZ = -CD * sin(alpha) - CL * cos(alpha);
+    double CX = -CD * std::cos(alpha) + CL * std::sin(alpha);
+    double CZ = -CD * std::sin(alpha) - CL * std::cos(alpha);
 
     // q_bar
     double qBarSurface = 0.5 * m_physics.airDensity * Va * Va * m_properties.wingSurface;
@@ -228,4 +233,24 @@ void FixedWing::setInitialStates(initialStates &states) {
     centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
 }
 
+void FixedWing::m_writeLog(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> tetherForceBody) {
+    fixedWingLogMessage logMessage;
 
+    logMessage = {
+            m_id,
+            getInputs().deltaAileron,
+            getInputs().deltaElevator,
+            getInputs().deltaRudder,
+            getInputs().deltaThrust,
+            node().position(),
+            node().velocity(),
+            {m_states.u, m_states.v, m_states.w},
+            {m_states.phi, m_states.theta, m_states.psi},
+            {m_states.p, m_states.q, m_states.r},
+            forceAeroBody,
+            momentAeroBody,
+            tetherForceBody
+    };
+
+    m_logger.writeAircraftMessage(logMessage);
+}
