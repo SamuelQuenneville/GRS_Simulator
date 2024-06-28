@@ -24,6 +24,8 @@ public:
     void resetIntegrator();
     void resetIntegratorTakeoff();
 
+    const PID::pidInfo& getPidInfo() const { return m_pidInfo;};
+
 private:
     worldPhysics m_physics;
 

@@ -21,6 +21,8 @@ public:
     int32_t getServoOut(float navRoll, float scaler, bool disableIntegrator);
     int32_t getRateOut(float desiredRate, float scaler, bool disableIntegrator);
 
+    const PID::pidInfo& getPidInfo() const { return m_pidInfo;};
+
     void setAircraftStates(const fixedWingStates& aircraftStates) {m_aircraftStates = aircraftStates;};
 
     void resetIntegrator();

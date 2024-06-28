@@ -12,6 +12,8 @@
 #pragma once
 
 #include "Mathematics/vector3.h"
+#include "Definitions/fixedWingDefinitions.h"
+#include "Control/pid.h"
 
 struct fixedWingLogMessage {
     int uavId;
@@ -47,11 +49,15 @@ struct tetherLogMessage {
 };
 
 struct hlcLogMessage {
-
+    fixedWingCommands commands;
+    PID::pidInfo groundspeedPid;
 };
 
 struct llcLogMessage {
-
+    fixedWingControlInputs inputs;
+    PID::pidInfo pitchPid;
+    PID::pidInfo rollPid;
+    PID::pidInfo altitudePid;
 };
 
 #endif //GRS_SIMULATOR_LOGDEFINITIONS_H

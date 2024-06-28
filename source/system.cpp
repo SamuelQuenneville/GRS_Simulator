@@ -45,7 +45,7 @@ void System::createSystemOneAircraft(fixedWingProperties& aircraftProperties, in
     m_controller = std::make_unique<HlcSingleAircraft>(m_physics, m_logger, m_systemConfiguration.hlcRate);
 
     // Create LLC
-    std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController = std::make_unique<LlcBaseVersion>(m_physics, m_systemConfiguration.llcRate);
+    std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_systemConfiguration.llcRate);
 
     // Create aircraft and set initial conditions
     std::unique_ptr<FixedWing> aircraft = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController));
@@ -64,7 +64,7 @@ System::createSystemOneAircraftGrounded(fixedWingProperties &aircraftProperties,
     m_controller = std::make_unique<HlcSingleAircraft>(m_physics, m_logger, m_systemConfiguration.hlcRate);
 
     // Create LLC
-    std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController = std::make_unique<LlcBaseVersion>(m_physics, m_systemConfiguration.llcRate);
+    std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_systemConfiguration.llcRate);
 
     // Create aircraft and set initial conditions
     std::unique_ptr<FixedWing> aircraft = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController));

@@ -234,7 +234,7 @@ void FixedWing::setInitialStates(initialStates &states) {
 }
 
 void FixedWing::m_writeLog(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> tetherForceBody) {
-    fixedWingLogMessage logMessage;
+    fixedWingLogMessage logMessage{};
 
     logMessage = {
             m_id,

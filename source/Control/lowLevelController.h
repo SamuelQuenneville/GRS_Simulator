@@ -11,6 +11,8 @@
 
 #include <cmath>
 
+#include "Log/logger.h"
+
 template <typename INPUTS, typename STATES, typename COMMANDS>
 class LowLevelController {
 

@@ -142,7 +142,7 @@ void Tether::grounded() {
 }
 
 void Tether::m_writeLog() {
-    tetherLogMessage logMessage;
+    tetherLogMessage logMessage{};
 
     logMessage = {
             m_id,

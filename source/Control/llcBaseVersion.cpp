@@ -8,8 +8,9 @@
 
 #include "llcBaseVersion.h"
 
-LlcBaseVersion::LlcBaseVersion(worldPhysics& physics, float rate)
+LlcBaseVersion::LlcBaseVersion(worldPhysics& physics, Logger& logger, float rate)
     : m_physics(physics)
+    , m_logger(logger)
     , m_rate(rate)
 {
     m_rollController = std::make_unique<RollController>(m_physics, m_rate);
@@ -31,6 +32,7 @@ fixedWingControlInputs LlcBaseVersion::calculateAircraftControlInputs(const fixe
     controlInputs.deltaRudder = 0.0;//_stabilizeYaw(0.0); // Always 0
     controlInputs.deltaThrust = commands.thrust;
 
+    m_writeLog(controlInputs);
     return controlInputs;
 }
 
@@ -71,3 +73,15 @@ int32_t LlcBaseVersion::m_stabilizeRpm(double commandedRpm) {
     return true;
 }
 
+void LlcBaseVersion::m_writeLog(fixedWingControlInputs &inputs) {
+    llcLogMessage logMessage;
+
+    logMessage = {
+            inputs,
+            m_pitchController->getPidInfo(),
+            m_rollController->getPidInfo(),
+            m_altController->getPidInfo()
+    };
+
+    m_logger.writeLlcMessage(logMessage);
+}

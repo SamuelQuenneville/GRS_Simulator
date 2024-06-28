@@ -28,5 +28,17 @@ fixedWingCommands HlcSingleAircraft::calculateInputs(const std::vector<fixedWing
     commandsInputs.phi = target.aircraftRoll;
     commandsInputs.altitude = target.positionPayload[2];
 
+    m_writeLog(commandsInputs);
     return commandsInputs;
+}
+
+void HlcSingleAircraft::m_writeLog(const fixedWingCommands &commands) {
+    hlcLogMessage logMessage{};
+
+    logMessage = {
+            commands,
+            m_groundspeedController->getPidInfo()
+    };
+
+    m_logger.writeHlcMessage(logMessage);
 }

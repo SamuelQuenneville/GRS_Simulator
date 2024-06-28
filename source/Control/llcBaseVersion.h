@@ -19,12 +19,13 @@
 class LlcBaseVersion : public LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands> {
 
 public:
-    LlcBaseVersion(worldPhysics& physics, float rate);
+    LlcBaseVersion(worldPhysics& physics, Logger& logger, float rate);
 
     fixedWingControlInputs calculateAircraftControlInputs(const fixedWingStates& currentStates, const fixedWingCommands& commands) override;
 
 private:
     worldPhysics m_physics;
+    Logger& m_logger;
 
     // Controller rate Hz
     float m_rate;
@@ -49,6 +50,8 @@ private:
     std::unique_ptr<RollController> m_rollController;
     std::unique_ptr<PitchController>  m_pitchController;
     std::unique_ptr<AltitudeController> m_altController;
+
+    void m_writeLog(fixedWingControlInputs& inputs);
 };
 
 

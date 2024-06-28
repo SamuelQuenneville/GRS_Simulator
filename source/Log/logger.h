@@ -30,6 +30,8 @@ public:
 
     void writeAircraftMessage(fixedWingLogMessage& message);
     void writeTetherMessage(tetherLogMessage& message);
+    void writeHlcMessage(hlcLogMessage& message);
+    void writeLlcMessage(llcLogMessage& message);
 
 private:
     void m_initDirectory(std::string logDirectory);
@@ -39,6 +41,8 @@ private:
 
     std::ofstream m_aircraftLog;
     std::ofstream m_tethersLog;
+    std::ofstream m_hlcLog;
+    std::ofstream m_llcLog;
 };
 
 

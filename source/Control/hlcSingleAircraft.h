@@ -24,6 +24,8 @@ private:
     float m_rate;
 
     std::unique_ptr<GroundspeedController> m_groundspeedController;
+
+    void m_writeLog(const fixedWingCommands& commands);
 };
 
 
