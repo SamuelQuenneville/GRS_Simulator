@@ -12,9 +12,7 @@
 #include <map>
 
 #include "configurationParser.h"
-#include "Mathematics/vector3.h"
 #include "system.h"
-#include "Log/logger.h"
 
 class World {
 

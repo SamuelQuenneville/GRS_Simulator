@@ -15,8 +15,6 @@
 #include "Control/pitchController.h"
 #include "Control/rollController.h"
 #include "Control/altitudeController.h"
-#include "Definitions/fixedWingDefinitions.h"
-#include "Definitions/worldPhysics.h"
 
 class LlcBaseVersion : public LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands> {
 

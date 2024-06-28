@@ -12,7 +12,8 @@
 #ifndef Matrix3_H
 #define Matrix3_H
 
-#include <cmath>
+#pragma once
+
 #include <stdexcept>
 
 #include "Mathematics/vector2.h"

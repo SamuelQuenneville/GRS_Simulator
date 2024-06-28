@@ -37,7 +37,7 @@ private:
 
     // endPoint - startPoint
     Vector3<double> m_relativePosition{};
-    Vector3<double> m_relativeSpeed;
+    Vector3<double> m_relativeSpeed{};
 
     void m_updateRelativePosition();
     void m_updateRelativeSpeed();

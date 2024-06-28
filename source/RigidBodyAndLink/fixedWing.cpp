@@ -18,7 +18,7 @@ FixedWing::FixedWing(worldPhysics& physics, Logger& logger, fixedWingProperties&
         , m_properties(properties)
         , m_controller(std::move(controller))
 {
-    std::cout << "Fixed Wing created --> ID = " << m_id << "\n";
+
 }
 
 int FixedWing::getId() const {

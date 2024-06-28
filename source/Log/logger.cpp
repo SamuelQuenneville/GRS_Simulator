@@ -24,7 +24,7 @@ void Logger::loggerClockTick(double dt) {
     m_simulationTime += dt;
 }
 
-double Logger::getLoggerTime() {
+double Logger::getLoggerTime() const {
     return m_simulationTime;
 }
 

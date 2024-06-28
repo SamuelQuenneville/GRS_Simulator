@@ -10,11 +10,12 @@
 #define GRS_SIMULATOR_PID_H
 
 #include <cstring>
+
 #include "Control/slewLimiter.h"
 #include "Mathematics//grsMath.h"
 
-class PID
-{
+class PID {
+
 public:
     PID(float proportionalGain, float integralGain, float derivativeGain, float feedForwardGain, float IntegratorMaxValue, float inputFilterTargetHz,
         float inputFilterDerivativeHz, float inputFilterErrorHz, float dt, float initialSrmax=0.0, float initialSrtau=1.0);
@@ -47,9 +48,9 @@ public:
     float getFilterDerivativeAlpha() const;
 
     // set accessor
-    void filterTargetHz(const float hz);
-    void filterErrorHz(const float hz);
-    void filterDerivativeHz(const float hz);
+    void filterTargetHz(float hz);
+    void filterErrorHz(float hz);
+    void filterDerivativeHz(float hz);
 
     // operator function call for easy initialisation
     void operator()(float proportionalGain, float integralGain, float derivativeGain, float feedForwardGain, float integralMinValue, float integralMaxValue,

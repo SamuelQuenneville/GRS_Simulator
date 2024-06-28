@@ -9,6 +9,8 @@
 #ifndef GRS_SIMULATOR_VECTOR3_H
 #define GRS_SIMULATOR_VECTOR3_H
 
+#pragma once
+
 #include <iostream>
 #include <cmath>
 

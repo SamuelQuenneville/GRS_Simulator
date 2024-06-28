@@ -9,13 +9,9 @@
 #ifndef GRS_SIMULATOR_FILTER_H
 #define GRS_SIMULATOR_FILTER_H
 
-//
-/// @file	FilterClass.h
-/// @brief	A pure virtual interface class
-///
 #pragma once
 
-#include <inttypes.h>
+#include <cinttypes>
 
 template <class T>
 class Filter

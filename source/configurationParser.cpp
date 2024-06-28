@@ -26,6 +26,6 @@ initialStates ConfigurationParser::parseInitialStates(YAML::Node& node, const st
     return node[nodeName].as<initialStates>();
 }
 
-target ConfigurationParser::parseSystemTarget(YAML::Node &node) {
+target ConfigurationParser::parseSystemTarget(YAML::Node& node) {
     return node["Target"].as<target>();;
 }

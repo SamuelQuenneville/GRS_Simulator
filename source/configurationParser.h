@@ -9,7 +9,6 @@
 #ifndef GRS_SIMULATOR_CONFIGURATIONPARSER_H
 #define GRS_SIMULATOR_CONFIGURATIONPARSER_H
 
-
 #include <string>
 
 #include "yaml-cpp/yaml.h"
@@ -30,7 +29,6 @@ public:
     static tetherProperties parseTetherProperties(const std::string& filePath);
     static initialStates parseInitialStates(YAML::Node& node, const std::string& nodeName);
     static target parseSystemTarget(YAML::Node& node);
-
 };
 
 

@@ -11,9 +11,6 @@
 
 #include "Control/highLevelController.h"
 #include "Control/groundspeedController.h"
-#include "Definitions/configurationDefinitions.h"
-#include "Definitions/fixedWingDefinitions.h"
-#include "Definitions/worldPhysics.h"
 
 class HlcSingleAircraft : public HighLevelController<fixedWingCommands, fixedWingStates> {
 

@@ -13,8 +13,6 @@
 #include "Definitions/fixedWingDefinitions.h"
 #include "Definitions/worldPhysics.h"
 
-#include "Mathematics/grsMath.h"
-
 class RollController {
 
 public:
@@ -46,7 +44,6 @@ private:
     PID::pidInfo m_pidInfo{};
 
     fixedWingStates m_aircraftStates{};
-
 };
 
 

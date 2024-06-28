@@ -26,7 +26,7 @@ public:
     static void stopLog(std::ofstream& logHandle);
 
     void loggerClockTick(double dt);
-    double getLoggerTime();
+    double getLoggerTime() const;
 
     void writeAircraftMessage(fixedWingLogMessage& message);
     void writeTetherMessage(tetherLogMessage& message);

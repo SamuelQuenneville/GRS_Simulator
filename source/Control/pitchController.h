@@ -13,8 +13,6 @@
 #include "Definitions/fixedWingDefinitions.h"
 #include "Definitions/worldPhysics.h"
 
-#include "Mathematics/grsMath.h"
-
 class PitchController {
 
 public:

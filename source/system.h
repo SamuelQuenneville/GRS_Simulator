@@ -14,7 +14,6 @@
 #include "RigidBodyAndLink//fixedWing.h"
 #include "RigidBodyAndLink/tether.h"
 
-#include "Definitions/worldPhysics.h"
 #include "Definitions/configurationDefinitions.h"
 #include "Definitions/systemDefinitions.h"
 #include "Control/llcBaseVersion.h"

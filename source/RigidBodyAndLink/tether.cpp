@@ -37,12 +37,14 @@ void Tether::update(double dt) {
     // TODO what happen if Y tether config
     if (startPointConnections.size() == 1) {
         startPoint->setPosition(startPointConnections.at(0)->position());
+        startPoint->setVelocity(startPointConnections.at(0)->velocity());
     }
 
     // Should be an aircraft position or a Y tether node
     // TODO change if Y tether config
     if (endPointConnections.size() == 1) {
         endPoint->setPosition(endPointConnections.at(0)->position());
+        endPoint->setVelocity(endPointConnections.at(0)->velocity());
     }
 
     // Calculate the tension force and distribute to the nodes

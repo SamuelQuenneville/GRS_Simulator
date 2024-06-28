@@ -16,8 +16,9 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <chrono>
+
 #include "Control/lowPassFilter.h"
 
 #define N_EVENTS 2 // number of positive and negative consecutive slew rate exceedance events recorded where a value of 2 corresponds to a complete cycle

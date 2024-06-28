@@ -13,8 +13,6 @@
 #include "Definitions/fixedWingDefinitions.h"
 #include "Definitions/worldPhysics.h"
 
-#include "Mathematics/grsMath.h"
-
 class AltitudeController {
 
 public:
@@ -30,12 +28,12 @@ private:
     worldPhysics m_physics;
 
     float m_dt;
-    float m_lastOutRad;
+    float m_lastOutRad = 0;
 
     PID m_altPID{radians(4.0),radians(2.0),radians(0.5),0.0,radians(20.0),3.0,10.0,3.0,0.0025,radians(360.0),1.0};
-    PID::pidInfo m_pidInfo;
+    PID::pidInfo m_pidInfo{};
 
-    fixedWingStates m_aircraftStates;
+    fixedWingStates m_aircraftStates{};
 };
 
 
