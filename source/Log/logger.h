@@ -13,16 +13,17 @@
 #include <filesystem>
 #include <fstream>
 #include <ctime>
+#include <vector>
 
 #include "Definitions/logDefinitions.h"
 
 class Logger {
 
 public:
-    explicit Logger(std::string logDirectory);
+    explicit Logger(const std::string& logDirectory);
     ~Logger();
 
-    static std::ofstream startLog(std::string fileName);
+    static std::ofstream startLog(const std::string& fileName);
     static void stopLog(std::ofstream& logHandle);
 
     void loggerClockTick(double dt);
@@ -34,7 +35,7 @@ public:
     void writeLlcMessage(llcLogMessage& message);
 
 private:
-    void m_initDirectory(std::string logDirectory);
+    void m_initDirectory(const std::string& logDirectory);
     std::string m_logDirectory;
 
     double m_simulationTime;

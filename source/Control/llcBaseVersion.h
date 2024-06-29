@@ -9,8 +9,6 @@
 #ifndef GRS_SIMULATOR_LLCBASEVERSION_H
 #define GRS_SIMULATOR_LLCBASEVERSION_H
 
-#include <memory>
-
 #include "Control/lowLevelController.h"
 #include "Control/pitchController.h"
 #include "Control/rollController.h"

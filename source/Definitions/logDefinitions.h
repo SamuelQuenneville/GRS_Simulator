@@ -16,11 +16,11 @@
 #include "Control/pid.h"
 
 struct fixedWingLogMessage {
-    int uavId;
-    double aileronCommand;
-    double elevatorCommand;
-    double rudderCommand;
-    double thrustCommand;
+    int uavId{};
+    double aileronCommand{};
+    double elevatorCommand{};
+    double rudderCommand{};
+    double thrustCommand{};
     Vector3<double> nedPosition;
     Vector3<double> earthSpeed;
     Vector3<double> bodySpeed;
@@ -38,8 +38,8 @@ struct payloadLogMessage {
 };
 
 struct tetherLogMessage {
-    int tetherId;
-    double elongation;
+    int tetherId{};
+    double elongation{};
     Vector3<double> startPointPosition;
     Vector3<double> startPointSpeed;
     Vector3<double> endPointPosition;

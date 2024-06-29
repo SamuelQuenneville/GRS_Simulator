@@ -9,8 +9,6 @@
 #ifndef GRS_SIMULATOR_WORLD_H
 #define GRS_SIMULATOR_WORLD_H
 
-#include <map>
-
 #include "configurationParser.h"
 #include "system.h"
 
@@ -58,6 +56,5 @@ private:
 
     std::unique_ptr<System> m_system;
 };
-
 
 #endif //GRS_SIMULATOR_WORLD_H

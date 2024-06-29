@@ -25,7 +25,7 @@ public:
     void update(double dt) override;
 
     [[nodiscard]] fixedWingStates getStates() const {return m_states;};
-    virtual void setStates(const fixedWingStates& newStates) {m_states = newStates;};
+    virtual void setStates(const fixedWingStates& newStates);
 
     void setInitialStates(initialStates& states) override;
 

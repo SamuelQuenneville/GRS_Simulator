@@ -8,7 +8,7 @@
 
 #include "logger.h"
 
-Logger::Logger(std::string logDirectory)
+Logger::Logger(const std::string& logDirectory)
     : m_logDirectory(logDirectory)
 {
     m_initDirectory(logDirectory);
@@ -30,7 +30,7 @@ double Logger::getLoggerTime() const {
     return m_simulationTime;
 }
 
-void Logger::m_initDirectory(std::string logDirectory) {
+void Logger::m_initDirectory(const std::string& logDirectory) {
     std::filesystem::create_directories(logDirectory);
 
     time_t rawTime;
@@ -49,14 +49,14 @@ void Logger::m_initDirectory(std::string logDirectory) {
     m_llcLog = startLog(logDirectory + date + "_llc.csv");
 }
 
-std::ofstream Logger::startLog(std::string fileName) {
+std::ofstream Logger::startLog(const std::string& fileName) {
     std::ofstream logFile;
     logFile.open(fileName);
 
     return logFile;
 }
 
-void Logger::stopLog(std::ofstream &logHandle) {
+void Logger::stopLog(std::ofstream& logHandle) {
     logHandle.close();
 }
 

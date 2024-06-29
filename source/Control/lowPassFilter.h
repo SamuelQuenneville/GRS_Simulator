@@ -84,7 +84,7 @@ template <class T>
 class LowPassFilter {
 public:
     LowPassFilter();
-    LowPassFilter(float cutOffFrequency);
+    explicit LowPassFilter(float cutOffFrequency);
     LowPassFilter(float sampleFrequency, float cutOffFrequency);
 
     // change parameters
@@ -92,12 +92,12 @@ public:
     void setCutOffFrequency(float sampleFrequency, float cutOffFrequency);
 
     // return the cutoff frequency
-    float get_cutoff_freq(void) const;
+    float getCutOffFreq() const;
     T apply(T sample, float dt);
     T apply(T sample);
     const T& get() const;
     void reset(T value);
-    void reset(void) { m_filter.reset(); }
+    void reset() { m_filter.reset(); }
 
 protected:
     float m_cutOffFrequency;

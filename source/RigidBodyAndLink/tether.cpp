@@ -17,7 +17,7 @@ Tether::Tether(worldPhysics& physics, Logger& logger, tetherProperties& properti
     , m_logger(logger)
     , m_properties(properties)
 {
-    std::cout << "Tether created --> ID = " << m_id << "\n";
+
 }
 
 int Tether::getId() const {
@@ -47,6 +47,10 @@ void Tether::update(double dt) {
         endPoint->setVelocity(endPointConnections.at(0)->velocity());
     }
 
+    // Update
+    m_updateRelativePosition();
+    m_updateRelativeSpeed();
+
     // Calculate the tension force and distribute to the nodes
     Vector3<double> tensionForce = m_calcTensionForce();
     startPoint->setForce(-tensionForce);    // TODO confirm negative sign here
@@ -65,10 +69,6 @@ void Tether::m_updateRelativeSpeed() {
 }
 
 Vector3<double> Tether::m_calcTensionForce() {
-    // Update
-    m_updateRelativePosition();
-    m_updateRelativeSpeed();
-
     // Find tether position relative to startPoint
     double tetherMagnitude = m_relativePosition.magnitude();
     Vector3<double> tetherNormalize = m_relativePosition.normalize();

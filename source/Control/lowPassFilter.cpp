@@ -100,7 +100,7 @@ void LowPassFilter<T>::setCutOffFrequency(float sampleFrequency, float cutOffFre
 
 // return the cutoff frequency
 template <class T>
-float LowPassFilter<T>::get_cutoff_freq(void) const {
+float LowPassFilter<T>::getCutOffFreq() const {
     return m_cutOffFrequency;
 }
 

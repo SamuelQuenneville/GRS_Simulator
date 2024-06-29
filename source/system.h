@@ -9,12 +9,9 @@
 #ifndef GRS_SIMULATOR_SYSTEM_H
 #define GRS_SIMULATOR_SYSTEM_H
 
-#include <memory>
-
 #include "RigidBodyAndLink//fixedWing.h"
 #include "RigidBodyAndLink/tether.h"
 
-#include "Definitions/configurationDefinitions.h"
 #include "Definitions/systemDefinitions.h"
 #include "Control/llcBaseVersion.h"
 #include "Control/hlcSingleAircraft.h"

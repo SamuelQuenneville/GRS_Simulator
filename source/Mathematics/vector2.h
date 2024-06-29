@@ -44,7 +44,7 @@ public:
     void setY(T newY) { m_elements[1] = newY; }
 
     T magnitude() const {
-        return sqrt(m_elements[0] * m_elements[0] + m_elements[1] * m_elements[1]);
+        return std::sqrt(m_elements[0] * m_elements[0] + m_elements[1] * m_elements[1]);
     }
 
     Vector2<T> normalize() const {

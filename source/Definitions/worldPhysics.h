@@ -22,7 +22,7 @@ struct worldPhysics {
 
     void setGravity(const double newGravity) {gravity = newGravity;};
     void setAirDensity(const double newDensity) {airDensity = newDensity;};
-    void updateWind(const Vector3<double> &newWind) {wind = newWind;};
+    void updateWind(const Vector3<double>& newWind) {wind = newWind;};
 };
 
 #endif //GRS_SIMULATOR_WORLDPHYSICS_H

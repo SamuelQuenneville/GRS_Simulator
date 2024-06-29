@@ -399,13 +399,13 @@ public:
 
 protected:
 
-    void _check_square(const unsigned Matrix3Cols, const unsigned Matrix3Lines){
+    void m_check_square(const unsigned Matrix3Cols, const unsigned Matrix3Lines){
         if(Matrix3Cols != Matrix3Lines) {
             throw std::invalid_argument("Matrix3 not squared ->"+std::string(__FILE__)+" line: "+std::to_string(__LINE__));
         };
     }
 
-    void _check_dimensions(const unsigned Matrix3Cols, const unsigned Matrix3Lines){
+    void m_check_dimensions(const unsigned Matrix3Cols, const unsigned Matrix3Lines){
         if(Matrix3Cols != Matrix3Lines) {
             throw std::invalid_argument("Dimensions mismatch ->"+std::string(__FILE__)+" line: "+std::to_string(__LINE__));
         }

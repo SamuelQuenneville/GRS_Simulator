@@ -21,6 +21,13 @@ FixedWing::FixedWing(worldPhysics& physics, Logger& logger, fixedWingProperties&
 
 }
 
+void FixedWing::setStates(const fixedWingStates &newStates) {
+    m_states = newStates;
+
+    centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
+    centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
+}
+
 int FixedWing::getId() const {
     return m_id;
 }
@@ -44,8 +51,9 @@ void FixedWing::update(double dt) {
     // Set new states to this body
     setStates(updatedStates);
 
-    // Set new states to the node of this body
-    centerOfMass->update({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, m_bodyToEarth(forcesAeroBody) + externalForcesEarth,m_bodyToEarth(momentsAeroBody));
+    // Set new forces/moments to the node of this body
+    centerOfMass->setForce(m_bodyToEarth(forcesAeroBody) + externalForcesEarth);
+    centerOfMass->setMoment(m_bodyToEarth(momentsAeroBody));
 
     // Log
     m_writeLog(forcesAeroBody, momentsAeroBody, m_earthToBody(externalForcesEarth));
@@ -242,8 +250,8 @@ void FixedWing::m_writeLog(Vector3<double> forceAeroBody, Vector3<double> moment
             getInputs().deltaElevator,
             getInputs().deltaRudder,
             getInputs().deltaThrust,
-            node().position(),
-            node().velocity(),
+            centerOfMass->position(),
+            centerOfMass->velocity(),
             {m_states.u, m_states.v, m_states.w},
             {m_states.phi, m_states.theta, m_states.psi},
             {m_states.p, m_states.q, m_states.r},

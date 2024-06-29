@@ -142,7 +142,6 @@ T unwrap(T prev, T now) {
     return prev + angleNorm(now - prev);
 }
 
-
 /*
  * @brief: Check whether a float is zero
  */

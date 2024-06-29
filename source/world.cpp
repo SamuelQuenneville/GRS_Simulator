@@ -22,8 +22,8 @@ World::World() {
 }
 
 void World::update() {
-    m_system->update(1.0 / m_systemConfiguration.llcRate);
-    logger().loggerClockTick(1.0 / m_systemConfiguration.llcRate);
+    m_system->update(simulationConfiguration.dt);
+    logger().loggerClockTick(simulationConfiguration.dt);
 }
 
 void World::readConfigurationFile(const std::string& fileName) {

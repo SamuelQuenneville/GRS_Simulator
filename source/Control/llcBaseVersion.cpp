@@ -74,7 +74,7 @@ int32_t LlcBaseVersion::m_stabilizeRpm(double commandedRpm) {
 }
 
 void LlcBaseVersion::m_writeLog(fixedWingControlInputs &inputs) {
-    llcLogMessage logMessage;
+    llcLogMessage logMessage{};
 
     logMessage = {
             inputs,
