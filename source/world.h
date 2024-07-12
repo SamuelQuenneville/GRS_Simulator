@@ -9,7 +9,7 @@
 #ifndef GRS_SIMULATOR_WORLD_H
 #define GRS_SIMULATOR_WORLD_H
 
-#include "configurationParser.h"
+#include "Configuration/configurationParser.h"
 #include "system.h"
 
 class World {

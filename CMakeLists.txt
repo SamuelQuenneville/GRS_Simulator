@@ -3,23 +3,18 @@ project(GRS_Simulator)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(GRS_Simulator source/main.cpp
-        source/Definitions/yamlCustomStructure.h
-        source/Mathematics/vector2.h
-        source/Mathematics/vector3.h
-        source/RigidBodyAndLink/node.cpp
-        source/RigidBodyAndLink/node.h
-        source/RigidBodyAndLink/rigidBody.cpp
-        source/RigidBodyAndLink/rigidBody.h
-        source/world.cpp
-        source/world.h
-        source/RigidBodyAndLink/fixedWing.cpp
-        source/RigidBodyAndLink/fixedWing.h
+enable_testing()
+include(FetchContent)
+
+# Project files
+set(GRS_CONFIGURATION
+        source/Configuration/configurationParser.cpp
+        source/Configuration/configurationParser.h
+)
+
+set(GRS_CONTROL
         source/Control/lowLevelController.cpp
         source/Control/lowLevelController.h
-        source/Definitions/worldPhysics.h
-        source/Mathematics/grsMath.h
-        source/Mathematics/matrix3.h
         source/Control/lowPassFilter.cpp
         source/Control/lowPassFilter.h
         source/Control/filter.h
@@ -29,39 +24,80 @@ add_executable(GRS_Simulator source/main.cpp
         source/Control/pid.h
         source/Control/pitchController.cpp
         source/Control/pitchController.h
-        source/system.cpp
-        source/system.h
-        source/Definitions/tetherDefinitions.h
-        source/Definitions/fixedWingDefinitions.h
-        source/Definitions/configurationDefinitions.h
         source/Control/llcBaseVersion.cpp
         source/Control/llcBaseVersion.h
         source/Control/rollController.cpp
         source/Control/rollController.h
         source/Control/altitudeController.cpp
         source/Control/altitudeController.h
-        source/RigidBodyAndLink/link.cpp
-        source/RigidBodyAndLink/link.h
-        source/RigidBodyAndLink/tether.cpp
-        source/RigidBodyAndLink/tether.h
-        source/configurationParser.cpp
-        source/configurationParser.h
-        source/Definitions/systemDefinitions.h
         source/Control/highLevelController.cpp
         source/Control/highLevelController.h
         source/Control/groundspeedController.cpp
         source/Control/groundspeedController.h
         source/Control/hlcSingleAircraft.cpp
         source/Control/hlcSingleAircraft.h
-        source/Log/logger.cpp
-        source/Log/logger.h
-        source/Definitions/logDefinitions.h
 )
 
-target_include_directories (GRS_Simulator PUBLIC source)
+set(GRS_DEFINITIONS
+        source/Definitions/worldPhysics.h
+        source/Definitions/tetherDefinitions.h
+        source/Definitions/fixedWingDefinitions.h
+        source/Definitions/configurationDefinitions.h
+        source/Definitions/systemDefinitions.h
+        source/Definitions/logDefinitions.h
+        source/Definitions/yamlCustomStructure.h
+)
 
-include(FetchContent)
+set(GRS_LOG
+        source/Log/logger.cpp
+        source/Log/logger.h
+)
 
+set(GRS_MATHEMATICS
+        source/Mathematics/grsMath.h
+        source/Mathematics/matrix3.h
+        source/Mathematics/vector2.h
+        source/Mathematics/vector3.h
+)
+
+set(GRS_RIGID_BODIES_AND_LINK
+        source/RigidBodyAndLink/node.cpp
+        source/RigidBodyAndLink/node.h
+        source/RigidBodyAndLink/rigidBody.cpp
+        source/RigidBodyAndLink/rigidBody.h
+        source/RigidBodyAndLink/fixedWing.cpp
+        source/RigidBodyAndLink/fixedWing.h
+        source/RigidBodyAndLink/link.cpp
+        source/RigidBodyAndLink/link.h
+        source/RigidBodyAndLink/tether.cpp
+        source/RigidBodyAndLink/tether.h
+)
+
+set(GRS_SOURCE
+        source/main.cpp
+        source/world.cpp
+        source/world.h
+        source/system.cpp
+        source/system.h
+)
+
+# Copy the Shaders used for the demo into the build directory
+file(COPY "source/Shaders/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/source/Shaders/")
+
+# Copy the Meshes used for the demo into the build directory
+file(COPY "source/Meshes/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/source/Meshes/")
+
+add_executable(GRS_Simulator
+        ${GRS_CONFIGURATION}
+        ${GRS_CONTROL}
+        ${GRS_DEFINITIONS}
+        ${GRS_LOG}
+        ${GRS_MATHEMATICS}
+        ${GRS_RIGID_BODIES_AND_LINK}
+        ${GRS_SOURCE}
+)
+
+# Include libraries
 # YAML
 FetchContent_Declare(
         yaml-cpp
@@ -75,8 +111,39 @@ if(NOT yaml-cpp_POPULATED)
     FetchContent_Populate(yaml-cpp)
     add_subdirectory(${yaml-cpp_SOURCE_DIR} ${yaml-cpp_BINARY_DIR})
 endif()
-target_link_libraries(GRS_Simulator PUBLIC yaml-cpp::yaml-cpp)
 
+# OpenGL
+set(NANOGUI_BUILD_EXAMPLE OFF CACHE BOOL " " FORCE)
+set(NANOGUI_BUILD_PYTHON  OFF CACHE BOOL " " FORCE)
+set(NANOGUI_INSTALL       OFF CACHE BOOL " " FORCE)
+set(NANOGUI_BACKEND       OpenGL CACHE BOOL " " FORCE)
+
+SET(NANOGUI_BUILD_SHARED OFF CACHE BOOL "Build Nanogui with static libraries" FORCE)
+
+
+add_subdirectory(source/Extern/nanogui)
+
+set_property(TARGET glfw glfw_objects nanogui PROPERTY FOLDER "dependencies")
+
+add_definitions(${NANOGUI_EXTRA_DEFS})
+include_directories(${NANOGUI_EXTRA_INCS})
+
+# Project
+target_include_directories(GRS_Simulator PUBLIC source)
+
+foreach(p ${NANOGUI_EXTRA_INCS})
+    target_include_directories(GRS_Simulator PRIVATE $<1:${p}>)
+endforeach()
+
+
+# Compile definitions
+target_compile_definitions(GRS_Simulator PRIVATE ${NANOGUI_EXTRA_DEFS})
+
+# C++17 compiler features
+target_compile_features(GRS_Simulator PUBLIC cxx_std_17)
+set_target_properties(GRS_Simulator PROPERTIES CXX_EXTENSIONS OFF)
+
+target_link_libraries(GRS_Simulator yaml-cpp::yaml-cpp nanogui ${NANOGUI_EXTRA_LIBS})
 
 # GOOGLE TESTS
 FetchContent_Declare(
@@ -87,7 +154,6 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-enable_testing()
 
 add_executable(GRS_Simulator_tests
         tests/tests-vector2.cpp
