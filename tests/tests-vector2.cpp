@@ -37,7 +37,7 @@ TEST(testsVector2, setElementsValues) {
 TEST(testsVector2, calculateMagnitude) {
     Vector2<double> vec = {2,3};
 
-    EXPECT_DOUBLE_EQ(vec.magnitude(), std::sqrt(13));
+    EXPECT_DOUBLE_EQ(vec.length(), std::sqrt(13));
 }
 
 TEST(testsVector2, normalizePositiveVector) {

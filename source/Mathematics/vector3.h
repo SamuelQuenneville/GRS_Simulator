@@ -48,17 +48,27 @@ public:
     void setY(T newY) { m_elements[1] = newY; }
     void setZ(T newZ) { m_elements[2] = newZ; }
 
-    T magnitude() const {
+    void setAllValues(T newX, T newY, T newZ) { m_elements[0] = newX; m_elements[1] = newY; m_elements[2] = newZ;}
+
+    T length() const {
         return std::sqrt(m_elements[0] * m_elements[0] + m_elements[1] * m_elements[1] + m_elements[2] * m_elements[2]);
     }
 
     Vector3<T> normalize() const {
-        T mag = magnitude();
-        if (mag != 0) {
-            return Vector3<T>(m_elements[0] / mag, m_elements[1] / mag, m_elements[2] / mag);
+        T len = length();
+        if (len != 0) {
+            return Vector3<T>(m_elements[0] / len, m_elements[1] / len, m_elements[2] / len);
         } else {
             throw std::invalid_argument("Can't normalize zero vector"+std::string(__FILE__)+" line: "+std::to_string(__LINE__));
         }
+    }
+
+    [[nodiscard]] bool isFinite() const {
+        return std::isfinite(m_elements[0]) && std::isfinite(m_elements[1]) && std::isfinite(m_elements[2]);
+    }
+
+    [[nodiscard]] std::string toString() const {
+        return "Vector3(" + std::to_string(m_elements[0]) + "," + std::to_string(m_elements[1]) + "," + std::to_string(m_elements[2]) + ")";
     }
 
     Vector3 operator+(const Vector3& other) const {

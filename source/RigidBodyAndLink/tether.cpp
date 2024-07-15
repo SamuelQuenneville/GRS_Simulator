@@ -70,7 +70,7 @@ void Tether::m_updateRelativeSpeed() {
 
 Vector3<double> Tether::m_calcTensionForce() {
     // Find tether position relative to startPoint
-    double tetherMagnitude = m_relativePosition.magnitude();
+    double tetherMagnitude = m_relativePosition.length();
     Vector3<double> tetherNormalize = m_relativePosition.normalize();
 
     // Calculate tether elongation

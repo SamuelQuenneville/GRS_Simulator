@@ -43,14 +43,14 @@ public:
     void setX(T newX) { m_elements[0] = newX; }
     void setY(T newY) { m_elements[1] = newY; }
 
-    T magnitude() const {
+    T length() const {
         return std::sqrt(m_elements[0] * m_elements[0] + m_elements[1] * m_elements[1]);
     }
 
     Vector2<T> normalize() const {
-        T mag = magnitude();
-        if (mag != 0) {
-            return Vector2<T>(m_elements[0] / mag, m_elements[1] / mag);
+        T len = length();
+        if (len != 0) {
+            return Vector2<T>(m_elements[0] / len, m_elements[1] / len);
         } else {
             throw std::invalid_argument("Can't normalize zero vector"+std::string(__FILE__)+" line: "+std::to_string(__LINE__));
         }

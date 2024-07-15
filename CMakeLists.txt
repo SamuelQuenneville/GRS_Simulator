@@ -58,6 +58,13 @@ set(GRS_MATHEMATICS
         source/Mathematics/matrix3.h
         source/Mathematics/vector2.h
         source/Mathematics/vector3.h
+        source/Mathematics/vector4.h
+        source/Mathematics/matrix4.h
+        source/Mathematics/color.h
+        source/Mathematics/quaternion.h
+        source/Mathematics/quaternion.cpp
+        source/Mathematics/transform.cpp
+        source/Mathematics/transform.h
 )
 
 set(GRS_RIGID_BODIES_AND_LINK

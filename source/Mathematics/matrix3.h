@@ -16,8 +16,8 @@
 
 #include <stdexcept>
 
-#include "Mathematics/vector2.h"
-#include "Mathematics/vector3.h"
+#include "vector2.h"
+#include "vector3.h"
 
 template<typename T>
 class Matrix2 {
@@ -128,6 +128,11 @@ public:
         }
     }
 
+    T getTrace() const {
+        // Compute and return the trace
+        return (m_data[0][0] + m_data[1][1] + m_data[2][2]);
+    }
+
     // Rotation Matrix3
     // Create rotation matrix around the X-axis
     //
@@ -204,7 +209,7 @@ public:
         return result;
     }
 
-    // Create identity matrix
+    // Create zeros matrix
     static Matrix3<T> zeros() {
 
         Matrix3<T> result
