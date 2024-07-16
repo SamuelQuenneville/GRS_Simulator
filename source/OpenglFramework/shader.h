@@ -35,10 +35,10 @@ public:
     void unbind() const;
 
     // Return the location of a uniform variable inside a shader program
-    GLint getUniformLocation(const std::string& variableName, bool errorIfMissing = true) const;
+    [[nodiscard]] GLint getUniformLocation(const std::string& variableName, bool errorIfMissing = true) const;
 
     // Return the location of an attribute variable inside a shader program
-    GLint getAttribLocation(const std::string& variableName, bool errorIfMissing = true) const;
+    [[nodiscard]] GLint getAttribLocation(const std::string& variableName, bool errorIfMissing = true) const;
 
     // Set an int uniform value to this shader (be careful if the uniform is not
     // used in the shader, the compiler will remove it, then when you will try to set it, an assert will occur)

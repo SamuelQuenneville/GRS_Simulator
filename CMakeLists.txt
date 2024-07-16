@@ -82,6 +82,12 @@ set(GRS_OPENGL_FRAMEWORK
         source/OpenglFramework/meshReader.h
         source/OpenglFramework/shader.cpp
         source/OpenglFramework/shader.h
+        source/OpenglFramework/frameBufferObject.cpp
+        source/OpenglFramework/frameBufferObject.h
+        source/OpenglFramework/vertexArrayObject.cpp
+        source/OpenglFramework/vertexArrayObject.h
+        source/OpenglFramework/vertexBufferObject.cpp
+        source/OpenglFramework/vertexBufferObject.h
 )
 
 set(GRS_RIGID_BODIES_AND_LINK
