@@ -67,6 +67,23 @@ set(GRS_MATHEMATICS
         source/Mathematics/transform.h
 )
 
+set(GRS_OPENGL_FRAMEWORK
+        source/OpenglFramework/object3D.cpp
+        source/OpenglFramework/object3D.h
+        source/OpenglFramework/light.cpp
+        source/OpenglFramework/light.h
+        source/OpenglFramework/camera.cpp
+        source/OpenglFramework/camera.h
+        source/OpenglFramework/mesh.cpp
+        source/OpenglFramework/mesh.h
+        source/OpenglFramework/texture2D.cpp
+        source/OpenglFramework/texture2D.h
+        source/OpenglFramework/meshReader.cpp
+        source/OpenglFramework/meshReader.h
+        source/OpenglFramework/shader.cpp
+        source/OpenglFramework/shader.h
+)
+
 set(GRS_RIGID_BODIES_AND_LINK
         source/RigidBodyAndLink/node.cpp
         source/RigidBodyAndLink/node.h
@@ -100,6 +117,7 @@ add_executable(GRS_Simulator
         ${GRS_DEFINITIONS}
         ${GRS_LOG}
         ${GRS_MATHEMATICS}
+        ${GRS_OPENGL_FRAMEWORK}
         ${GRS_RIGID_BODIES_AND_LINK}
         ${GRS_SOURCE}
 )

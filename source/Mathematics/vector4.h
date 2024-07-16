@@ -50,6 +50,8 @@ public:
     void setZ(T newZ) { m_elements[2] = newZ; }
     void setW(T newW) { m_elements[3] = newW; }
 
+    void setAllValues(T newX, T newY, T newZ, T newW) { m_elements[0] = newX; m_elements[1] = newY; m_elements[2] = newZ, m_elements[3] = newW;}
+
     T length() const {
         return std::sqrt(m_elements[0] * m_elements[0] + m_elements[1] * m_elements[1] + m_elements[2] * m_elements[2] + m_elements[3] * m_elements[3]);
     }

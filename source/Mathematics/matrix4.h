@@ -43,48 +43,33 @@ public:
             ++i;
         }
     }
-    // Constructor
-    Matrix4(float m_00=0, float m_01=0, float m_02=0, float m_03=0,
-            float m_10=0, float m_11=0, float m_12=0, float m_13=0,
-            float m_20=0, float m_21=0, float m_22=0, float m_23=0,
-            float m_30=0, float m_31=0, float m_32=0, float m_33=0) {
-        m_data[0][0] = m_00; m_data[0][1] = m_01; m_data[0][2] = m_02;  m_data[0][3] = m_03;
-        m_data[1][0] = m_10; m_data[1][1] = m_11; m_data[1][2] = m_12;  m_data[1][3] = m_13;
-        m_data[2][0] = m_20; m_data[2][1] = m_21; m_data[2][2] = m_22;  m_data[2][3] = m_23;
-        m_data[3][0] = m_30; m_data[3][1] = m_31; m_data[3][2] = m_32;  m_data[3][3] = m_33;
+
+    // Access by index
+    Vector4<T>& operator[](int index) {
+        if (index >= 0 && index < 4) {
+            return m_data[index];
+        } else {
+            throw std::out_of_range("Matrix4 index out of range");
+        }
     }
 
-    // Constructor
-    Matrix4(float n[4][4]) {
-        m_data[0][0]=n[0][0]; m_data[0][1]=n[0][1]; m_data[0][2]=n[0][2]; m_data[0][3]=n[0][3];
-        m_data[1][0]=n[1][0]; m_data[1][1]=n[1][1]; m_data[1][2]=n[1][2]; m_data[1][3]=n[1][3];
-        m_data[2][0]=n[2][0]; m_data[2][1]=n[2][1]; m_data[2][2]=n[2][2]; m_data[2][3]=n[2][3];
-        m_data[3][0]=n[3][0]; m_data[3][1]=n[3][1]; m_data[3][2]=n[3][2]; m_data[3][3]=n[3][3];
+    // Const access by index
+    const Vector4<T>& operator[](int index) const {
+        if (index >= 0 && index < 4) {
+            return m_data[index];
+        } else {
+            throw std::out_of_range("Matrix4 index out of range");
+        }
     }
 
-    // Constructor
-    Matrix4(const Vector3<T>& a1, const Vector3<T>& a2, const Vector3<T>& a3) {
-        m_data[0][0] = a1.x; m_data[0][1] = a2.x; m_data[0][2] = a3.x;  m_data[0][3] = 0.f;
-        m_data[1][0] = a1.y; m_data[1][1] = a2.y; m_data[1][2] = a3.y;  m_data[1][3] = 0.f;
-        m_data[2][0] = a1.z; m_data[2][1] = a2.z; m_data[2][2] = a3.z;  m_data[2][3] = 0.f;
-        m_data[3][0] = 0.f;  m_data[3][1] = 0.f;  m_data[3][2] = 0.f;   m_data[3][3] = 1.f;
+    // Access the individual elements
+    T& operator()(const unsigned& row, const unsigned& col) {
+        return this->m_data[row][col];
     }
 
-    // Constructor
-    Matrix4(const Vector4<T>& a1, const Vector4<T>& a2, const Vector4<T>& a3) {
-        m_data[0][0] = a1.x; m_data[0][1] = a2.x; m_data[0][2] = a3.x;  m_data[0][3] = 0.f;
-        m_data[1][0] = a1.y; m_data[1][1] = a2.y; m_data[1][2] = a3.y;  m_data[1][3] = 0.f;
-        m_data[2][0] = a1.z; m_data[2][1] = a2.z; m_data[2][2] = a3.z;  m_data[2][3] = 0.f;
-        m_data[3][0] = a1.w; m_data[3][1] = a2.w; m_data[3][2] = a3.w;  m_data[3][3] = 1.f;
-    }
-
-    // Constructor
-    Matrix4(const Matrix4<T>& matrix) {
-
-        setAllValues(matrix.m_data[0][0], matrix.m_data[0][1], matrix.m_data[0][2], matrix.m_data[0][3],
-                     matrix.m_data[1][0], matrix.m_data[1][1], matrix.m_data[1][2], matrix.m_data[1][3],
-                     matrix.m_data[2][0], matrix.m_data[2][1], matrix.m_data[2][2], matrix.m_data[2][3],
-                     matrix.m_data[3][0], matrix.m_data[3][1], matrix.m_data[3][2], matrix.m_data[3][3]);
+    // Access the individual elements (const)
+    const T& operator()(const unsigned& row, const unsigned& col) const {
+        return this->m_data[row][col];
     }
 
     // Create zeros matrix
@@ -92,6 +77,7 @@ public:
 
         Matrix4<T> result
                 {
+                        {0, 0, 0, 0},
                         {0, 0, 0, 0},
                         {0, 0, 0, 0},
                         {0, 0, 0, 0}
@@ -114,7 +100,7 @@ public:
     }
 
     // += operator
-    Matrix4<T>& operator+=(const Matrix4<T>& rhs) {
+    Matrix4& operator+=(const Matrix4& rhs) {
         for (unsigned i=0; i<4; i++) {
             for (unsigned j=0; j<4; j++) {
                 this->m_data[i][j] += rhs(i,j);
@@ -149,18 +135,18 @@ public:
     }
 
     // = operator
-    Matrix4& operator=(const Matrix4& matrix) {
+    Matrix4<T>& operator=(const Matrix4<T>& matrix) {
         if (&matrix != this) {
-            setAllValues(matrix.m[0][0], matrix.m[0][1], matrix.m[0][2], matrix.m[0][3],
-                         matrix.m[1][0], matrix.m[1][1], matrix.m[1][2], matrix.m[1][3],
-                         matrix.m[2][0], matrix.m[2][1], matrix.m[2][2], matrix.m[2][3],
-                         matrix.m[3][0], matrix.m[3][1], matrix.m[3][2], matrix.m[3][3]);
+            setAllValues(matrix.m_data[0][0], matrix.m_data[0][1], matrix.m_data[0][2], matrix.m_data[0][3],
+                         matrix.m_data[1][0], matrix.m_data[1][1], matrix.m_data[1][2], matrix.m_data[1][3],
+                         matrix.m_data[2][0], matrix.m_data[2][1], matrix.m_data[2][2], matrix.m_data[2][3],
+                         matrix.m_data[3][0], matrix.m_data[3][1], matrix.m_data[3][2], matrix.m_data[3][3]);
         }
         return *this;
     }
 
     // == operator
-    bool operator==(const Matrix4& rhs) const {
+    bool operator==(const Matrix4<T>& rhs) const {
         return m_data[0][0]==rhs.m_data[0][0] && m_data[0][1]==rhs.m_data[0][1] && m_data[0][2]==rhs.m_data[0][2] && m_data[0][3]==rhs.m_data[0][3] &&
                m_data[1][0]==rhs.m_data[1][0] && m_data[1][1]==rhs.m_data[1][1] && m_data[1][2]==rhs.m_data[1][2] && m_data[1][3]==rhs.m_data[1][3] &&
                m_data[2][0]==rhs.m_data[2][0] && m_data[2][1]==rhs.m_data[2][1] && m_data[2][2]==rhs.m_data[2][2] && m_data[2][3]==rhs.m_data[2][3] &&
@@ -168,8 +154,8 @@ public:
     }
 
     // * operator
-    Matrix4 operator*(const Matrix4& rhs) const {
-        Matrix4 result = zeros();
+    Matrix4<T> operator*(const Matrix4<T>& rhs) const {
+        Matrix4<T> result = zeros();
 
         for (unsigned i=0; i<4; i++) {
             for (unsigned j=0; j<4; j++) {
@@ -184,19 +170,19 @@ public:
 
     // * operator
     Vector3<T> operator*(const Vector3<T>& rhs) const {
-        Vector3 u =Vector3(m_data[0][0]*rhs.x + m_data[0][1]*rhs.y + m_data[0][2]*rhs.z + m_data[0][3],
-                           m_data[1][0]*rhs.x + m_data[1][1]*rhs.y + m_data[1][2]*rhs.z + m_data[1][3],
-                           m_data[2][0]*rhs.x + m_data[2][1]*rhs.y + m_data[2][2]*rhs.z + m_data[2][3]);
-        float w = m_data[3][0]*rhs.x + m_data[3][1]*rhs.y + m_data[3][2]*rhs.z + m_data[3][3];
+        Vector3<T> u = {{m_data[0][0]*rhs.x() + m_data[0][1]*rhs.y() + m_data[0][2]*rhs.z() + m_data[0][3]},
+                        {m_data[1][0]*rhs.x() + m_data[1][1]*rhs.y() + m_data[1][2]*rhs.z() + m_data[1][3]},
+                        {m_data[2][0]*rhs.x() + m_data[2][1]*rhs.y() + m_data[2][2]*rhs.z() + m_data[2][3]}};
+        double w = m_data[3][0]*rhs.x() + m_data[3][1]*rhs.y() + m_data[3][2]*rhs.z() + m_data[3][3];
         return u/w;
     }
 
     // * operator
     Vector4<T> operator*(const Vector4<T>& rhs) const {
-        Vector4 u = Vector4(m_data[0][0]*rhs.x + m_data[0][1]*rhs.y + m_data[0][2]*rhs.z + rhs.w*m_data[0][3],
-                            m_data[1][0]*rhs.x + m_data[1][1]*rhs.y + m_data[1][2]*rhs.z + rhs.w*m_data[1][3],
-                            m_data[2][0]*rhs.x + m_data[2][1]*rhs.y + m_data[2][2]*rhs.z + rhs.w*m_data[2][3],
-                            m_data[3][0]*rhs.x + m_data[3][1]*rhs.y + m_data[3][2]*rhs.z + rhs.w*m_data[3][3]);
+        Vector4<T> u = {{m_data[0][0]*rhs.x() + m_data[0][1]*rhs.y() + m_data[0][2]*rhs.z() + rhs.w*m_data[0][3]},
+                        {m_data[1][0]*rhs.x() + m_data[1][1]*rhs.y() + m_data[1][2]*rhs.z() + rhs.w*m_data[1][3]},
+                        {m_data[2][0]*rhs.x() + m_data[2][1]*rhs.y() + m_data[2][2]*rhs.z() + rhs.w*m_data[2][3]},
+                        {m_data[3][0]*rhs.x() + m_data[3][1]*rhs.y() + m_data[3][2]*rhs.z() + rhs.w*m_data[3][3]}};
         if(u.w != 0)
             return u/u.w;
         else
@@ -205,7 +191,7 @@ public:
 
     // * operator
     Matrix4<T> operator*(T& rhs) const {
-        Matrix4 result = zeros();
+        Matrix4<T> result = zeros();
 
         for (unsigned i=0; i<4; i++) {
             for (unsigned j=0; j<4; j++) {
@@ -272,11 +258,11 @@ public:
     }
 
     // Return the inversed matrix
-    Matrix4 getInverse() const {
+    Matrix4<T> getInverse() const {
         int indxc[4], indxr[4];
         int ipiv[4] = { 0, 0, 0, 0 };
-        float minv[4][4];
-        float temp;
+        T minv[4][4];
+        T temp;
 
         for (int s=0; s<4; s++) {
             for (int t=0; t<4; t++) {
@@ -286,14 +272,14 @@ public:
 
         for (int i = 0; i < 4; i++) {
             int irow = -1, icol = -1;
-            float big = 0.;
+            T big = 0.;
             // Choose pivot
             for (int j = 0; j < 4; j++) {
                 if (ipiv[j] != 1) {
                     for (int k = 0; k < 4; k++) {
                         if (ipiv[k] == 0) {
                             if (std::fabs(minv[j][k]) >= big) {
-                                big = float(std::fabs(minv[j][k]));
+                                big = T(std::fabs(minv[j][k]));
                                 irow = j;
                                 icol = k;
                             }
@@ -319,7 +305,7 @@ public:
                 std::cout << "Singular matrix in MatrixInvert\n";
             }
             // Set $m[icol][icol]$ to one by scaling row _icol_ appropriately
-            float pivinv = 1.f / minv[icol][icol];
+            T pivinv = 1.f / minv[icol][icol];
             minv[icol][icol] = 1.f;
             for (int j = 0; j < 4; j++) {
                 minv[icol][j] *= pivinv;
@@ -328,7 +314,7 @@ public:
             // Subtract this row from others to zero out their columns
             for (int j = 0; j < 4; j++) {
                 if (j != icol) {
-                    float save = minv[j][icol];
+                    T save = minv[j][icol];
                     minv[j][icol] = 0;
                     for (int k = 0; k < 4; k++) {
                         minv[j][k] -= minv[icol][k]*save;
@@ -346,14 +332,22 @@ public:
                 }
             }
         }
-        return Matrix4(minv);
+
+        Matrix4<T> result = zeros();
+        for (unsigned i=0; i<4; i++) {
+            for (unsigned j=0; j<4; j++) {
+                result.m_data[i][j] = minv[i][j];
+            }
+        }
+
+        return result;
     }
 
     // Method to set all the values in the matrix
-    void setAllValues(float a1, float a2, float a3, float a4,
-                      float b1, float b2, float b3, float b4,
-                      float c1, float c2, float c3, float c4,
-                      float d1, float d2, float d3, float d4) {
+    void setAllValues(T a1, T a2, T a3, T a4,
+                      T b1, T b2, T b3, T b4,
+                      T c1, T c2, T c3, T c4,
+                      T d1, T d2, T d3, T d4) {
         m_data[0][0] = a1; m_data[0][1] = a2; m_data[0][2] = a3, m_data[0][3] = a4;
         m_data[1][0] = b1; m_data[1][1] = b2; m_data[1][2] = b3; m_data[1][3] = b4;
         m_data[2][0] = c1; m_data[2][1] = c2; m_data[2][2] = c3; m_data[2][3] = c4;
@@ -362,10 +356,10 @@ public:
 
     // Set the matrix to the identity matrix
     Matrix4<T> setToIdentity() {
-        m_data[0][0] = 1; m_data[0][1] = 0; m_data[0][2] = 0;  m_data[0][3] = 0;
-        m_data[1][0] = 0; m_data[1][1] = 1; m_data[1][2] = 0;  m_data[1][3] = 0;
-        m_data[2][0] = 0; m_data[2][1] = 0; m_data[2][2] = 1;  m_data[2][3] = 0;
-        m_data[3][0] = 0; m_data[3][1] = 0; m_data[3][2] = 0;  m_data[3][3] = 1;
+        m_data[0][0] = 1.0; m_data[0][1] = 0.0; m_data[0][2] = 0.0;  m_data[0][3] = 0.0;
+        m_data[1][0] = 0.0; m_data[1][1] = 1.0; m_data[1][2] = 0.0;  m_data[1][3] = 0.0;
+        m_data[2][0] = 0.0; m_data[2][1] = 0.0; m_data[2][2] = 1.0;  m_data[2][3] = 0.0;
+        m_data[3][0] = 0.0; m_data[3][1] = 0.0; m_data[3][2] = 0.0;  m_data[3][3] = 1.0;
         return *this;
     }
 
@@ -402,34 +396,33 @@ public:
     }
 
     // Return a 4x4 translation matrix
-    Matrix4<T> translationMatrix(const Vector3<T>& v) {
-        return Matrix4<T>(1, 0, 0, v.x,
-                          0, 1, 0, v.y,
-                          0, 0, 1, v.z,
-                          0, 0, 0, 1);
+    static Matrix4<T> translationMatrix(const Vector3<T>& v) {
+        return {{1, 0, 0, v.x()},
+                {0, 1, 0, v.y()},
+                {0, 0, 1, v.z()},
+                {0, 0, 0, 1}};
     }
 
     // Return a 4x4 rotation matrix
-    Matrix4<T> rotationMatrix(const Vector3<T>& axis, float angle) {
+    static Matrix4<T> rotationMatrix(const Vector3<T>& axis, float angle) {
 
         T cosA = std::cos(angle);
         T sinA = std::sin(angle);
-        Matrix4<T> rotationMatrix;
-        rotationMatrix.setToIdentity();
+        Matrix4<T> rotationMatrix = identity();
 
-        rotationMatrix.m_data[0][0] = cosA + (1-cosA) * axis.x * axis.x;
-        rotationMatrix.m_data[0][1] = (1-cosA) * axis.x * axis.y - axis.z * sinA;
-        rotationMatrix.m_data[0][2] = (1-cosA) * axis.x * axis.z + axis.y * sinA;
+        rotationMatrix.m_data[0][0] = cosA + (1-cosA) * axis.x() * axis.x();
+        rotationMatrix.m_data[0][1] = (1-cosA) * axis.x() * axis.y() - axis.z() * sinA;
+        rotationMatrix.m_data[0][2] = (1-cosA) * axis.x() * axis.z() + axis.y() * sinA;
         rotationMatrix.m_data[0][3] = 0.0;
 
-        rotationMatrix.m_data[1][0] = (1-cosA) * axis.x * axis.y + axis.z * sinA;
-        rotationMatrix.m_data[1][1] = cosA + (1-cosA) * axis.y * axis.y;
-        rotationMatrix.m_data[1][2] = (1-cosA) * axis.y * axis.z - axis.x * sinA;
+        rotationMatrix.m_data[1][0] = (1-cosA) * axis.x() * axis.y() + axis.z() * sinA;
+        rotationMatrix.m_data[1][1] = cosA + (1-cosA) * axis.y() * axis.y();
+        rotationMatrix.m_data[1][2] = (1-cosA) * axis.y() * axis.z() - axis.x() * sinA;
         rotationMatrix.m_data[1][3] = 0.0;
 
-        rotationMatrix.m_data[2][0] = (1-cosA) * axis.x * axis.z - axis.y * sinA;
-        rotationMatrix.m_data[2][1] = (1-cosA) * axis.y * axis.z + axis.x * sinA;
-        rotationMatrix.m_data[2][2] = cosA + (1-cosA) * axis.z * axis.z;
+        rotationMatrix.m_data[2][0] = (1-cosA) * axis.x() * axis.z() - axis.y() * sinA;
+        rotationMatrix.m_data[2][1] = (1-cosA) * axis.y() * axis.z() + axis.x() * sinA;
+        rotationMatrix.m_data[2][2] = cosA + (1-cosA) * axis.z() * axis.z();
         rotationMatrix.m_data[2][3] = 0.0;
 
         rotationMatrix.m_data[3][0] = 0.0;
@@ -456,11 +449,14 @@ public:
         T fw = -2.0f * farDistance * nearDistance / (farDistance - nearDistance);
 
         // Compute the projection matrix
-        return Matrix4<T>(fx, 0, 0, 0,
-                          0, fy, 0, 0,
-                          0, 0, fz, fw,
-                          0, 0, -1, 0);
-    }
+        return {
+                {fx, 0, 0, 0},
+                {0, fy, 0, 0},
+                {0, 0, fz, fw},
+                {0, 0, -1, 0}
+               };
+
+        }
 
     // Return a 4x4 orthographic projection matrix
     Matrix4<T> orthoProjectionMatrix(float nearDistance, float farDistance, int width, int height) {
@@ -478,18 +474,22 @@ public:
         T fw = -(farDistance + nearDistance) / (farDistance - nearDistance);
 
         // Compute the projection matrix
-        return Matrix4<T>(fx, 0, 0, 0,
-                           0, fy, 0, 0,
-                           0, 0, fz, fw,
-                           0, 0, 0, 1);
-    }
+        return {
+                {fx, 0,  0,  0},
+                {0,  fy, 0,  0},
+                {0,  0,  fz, fw},
+                {0,  0,  0,  1}
+               };
+        }
 
     // Return the identity matrix
-    Matrix4<T> identity() {
-        return Matrix4<T>(1, 0, 0, 0,
-                          0, 1, 0, 0,
-                          0, 0, 1, 0,
-                          0, 0, 0, 1);
+    static Matrix4<T> identity() {
+        return {
+                {1, 0, 0, 0},
+                {0, 1, 0, 0},
+                {0, 0, 1, 0},
+                {0, 0, 0, 1}
+               };
     }
 };
 
