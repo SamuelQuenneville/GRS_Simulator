@@ -8,10 +8,14 @@
 
 #include <Windows.h>
 #include "world.h"
+#include "simulationViewer.h"
 
 int main() {
 
     World myWorld;
+    SimulationViewer viewer;
+
+    viewer.start();
 
     // TODO get from user input maybe opengl window in future
     std::string fileName = "C:/Users/ques2902/Desktop/simulationV1.yaml";

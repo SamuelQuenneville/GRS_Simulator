@@ -115,6 +115,8 @@ set(GRS_SOURCE
         source/system.h
         source/simulationViewer.cpp
         source/simulationViewer.h
+        source/gui.cpp
+        source/gui.h
 )
 
 # Copy the Shaders used for the demo into the build directory
