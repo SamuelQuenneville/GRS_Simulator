@@ -15,14 +15,14 @@ Transform::Transform()
 
 }
 
-Transform::Transform(const Vector3<double> &position, const Matrix3<double> &orientation)
+Transform::Transform(const Vector3<double>& position, const Matrix3<double>& orientation)
     : m_position(position)
     , m_orientation(Quaternion(orientation))
 {
 
 }
 
-Transform::Transform(const Vector3<double> &position, const Quaternion &orientation)
+Transform::Transform(const Vector3<double>& position, const Quaternion& orientation)
     : m_position(position)
     , m_orientation(orientation)
 {
@@ -43,7 +43,7 @@ void Transform::setFromOpenGL(double *openglMatrix) {
     m_position.setAllValues(openglMatrix[12],openglMatrix[13],openglMatrix[14]);
 }
 
-void Transform::getOpenGLMatrix(double *openglMatrix) const {
+void Transform::getOpenGLMatrix(double* openglMatrix) const {
     const Matrix3<double>& matrix = m_orientation.getMatrix();
     openglMatrix[0] = matrix[0][0];
     openglMatrix[1] = matrix[1][0];
@@ -113,6 +113,12 @@ Transform Transform::operator*(const Transform& transform2) const {
                               - m_orientation.y * transform2.m_orientation.y - m_orientation.z * transform2.m_orientation.z};
 
     return {position, orientation};
+}
+
+Transform& Transform::operator=(const Transform& transform2) {
+    m_position = transform2.getPosition();
+    m_orientation = transform2.getOrientation();
+    return *this;
 }
 
 std::string Transform::toString() const {

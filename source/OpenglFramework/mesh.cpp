@@ -64,11 +64,11 @@ uint32_t Mesh::getNumbersParts() const {
     return m_indices.size();
 }
 
-const std::vector<Vector3<double>> &Mesh::getVertices() const {
+const std::vector<Vector3<double>>& Mesh::getVertices() const {
     return m_vertices;
 }
 
-void Mesh::setVertices(std::vector<Vector3<double>> &vertices) {
+void Mesh::setVertices(std::vector<Vector3<double>>& vertices) {
     m_vertices = vertices;
 }
 
@@ -76,7 +76,7 @@ const std::vector<Vector3<double>> &Mesh::getNormals() const {
     return m_normals;
 }
 
-void Mesh::setNormals(std::vector<Vector3<double>> &normals) {
+void Mesh::setNormals(std::vector<Vector3<double>>& normals) {
     m_normals = normals;
 }
 
@@ -84,19 +84,19 @@ const std::vector<Vector2<double>> &Mesh::getUVs() const {
     return m_uvs;
 }
 
-void Mesh::setUVs(std::vector<Vector2<double>> &uvs) {
+void Mesh::setUVs(std::vector<Vector2<double>>& uvs) {
     m_uvs = uvs;
 }
 
-const std::vector<uint32_t> &Mesh::getIndices(uint32_t part) const {
+const std::vector<uint32_t>& Mesh::getIndices(uint32_t part) const {
     return m_indices[part];
 }
 
-void Mesh::setIndices(std::vector<std::vector<uint32_t>> &indices) {
+void Mesh::setIndices(std::vector<std::vector<uint32_t>>& indices) {
     m_indices = indices;
 }
 
-const Vector3<double> &Mesh::getVertex(uint32_t i) const {
+const Vector3<double>& Mesh::getVertex(uint32_t i) const {
     assert(i < getNumbersVertices());
     return m_vertices[i];
 }
@@ -117,18 +117,18 @@ bool Mesh::hasTexture() const {
     return hasUVTextureCoordinates() && (!m_textures.empty());
 }
 
-void *Mesh::getVerticesPointer() {
+void* Mesh::getVerticesPointer() {
     return &(m_vertices[0]);
 }
 
-void *Mesh::getNormalsPointer() {
+void* Mesh::getNormalsPointer() {
     return &(m_normals[0]);
 }
 
-void *Mesh::getUVTextureCoordinatesPointer() {
+void* Mesh::getUVTextureCoordinatesPointer() {
     return &(m_uvs[0]);
 }
 
-void *Mesh::getIndicesPointer(uint32_t part) {
+void* Mesh::getIndicesPointer(uint32_t part) {
     return &(m_indices[part])[0];
 }

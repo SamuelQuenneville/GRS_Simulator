@@ -315,7 +315,7 @@ public:
         return result;
     }
 
-    T determinant() {
+    T determinant() const {
         Matrix2<double> minor1{{m_data[1][1], m_data[1][2]}, {m_data[2][1], m_data[2][2]}};
         Matrix2<double> minor2{{m_data[1][0], m_data[1][2]}, {m_data[2][0], m_data[2][2]}};
         Matrix2<double> minor3{{m_data[1][0], m_data[1][1]}, {m_data[2][0], m_data[2][1]}};
@@ -390,6 +390,22 @@ public:
         }
 
         return result;
+    }
+
+    Matrix3<T> getInverse() const {
+        // Compute the determinant of the matrix
+        T det = determinant();
+
+        // Check if the determinant is equal to zero
+        assert(det > std::numeric_limits<float>::epsilon());
+
+        float invDeterminant = 1.0f / det;
+        Matrix3 tempMatrix{{(m_data[1][1]*m_data[2][2]-m_data[2][1]*m_data[1][2]), -(m_data[0][1]*m_data[2][2]-m_data[2][1]*m_data[0][2]), (m_data[0][1]*m_data[1][2]-m_data[0][2]*m_data[1][1])},
+                           {-(m_data[1][0]*m_data[2][2]-m_data[2][0]*m_data[1][2]), (m_data[0][0]*m_data[2][2]-m_data[2][0]*m_data[0][2]), -(m_data[0][0]*m_data[1][2]-m_data[1][0]*m_data[0][2])},
+                           {(m_data[1][0]*m_data[2][1]-m_data[2][0]*m_data[1][1]), -(m_data[0][0]*m_data[2][1]-m_data[2][0]*m_data[0][1]), (m_data[0][0]*m_data[1][1]-m_data[0][1]*m_data[1][0])}};
+
+        // Return the inverse matrix
+        return (tempMatrix * invDeterminant);
     }
 
     // Print matrix values

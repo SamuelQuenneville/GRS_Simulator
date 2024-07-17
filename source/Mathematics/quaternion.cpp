@@ -51,13 +51,13 @@ Quaternion::Quaternion(double newX, double newY, double newZ, double newW)
 
 }
 
-Quaternion::Quaternion(const Vector3<double> &vector, double newW)
+Quaternion::Quaternion(const Vector3<double>& vector, double newW)
     : x(vector.x()), y(vector.y()), z(vector.z()), w(newW)
 {
 
 }
 
-Quaternion::Quaternion(const Matrix3<double> &matrix) {
+Quaternion::Quaternion(const Matrix3<double>& matrix) {
 
     // Get the trace of the matrix
     double trace = matrix.getTrace();
@@ -224,18 +224,18 @@ Quaternion Quaternion::fromEulerAngles(double angleX, double angleY, double angl
     return quaternion;
 }
 
-Quaternion Quaternion::fromEulerAngles(const Vector3<double> &eulerAngles) {
+Quaternion Quaternion::fromEulerAngles(const Vector3<double>& eulerAngles) {
     Quaternion quaternion;
     quaternion.m_initWithEulerAngles(eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
 
     return quaternion;
 }
 
-double Quaternion::dot(const Quaternion &quaternion) const {
+double Quaternion::dot(const Quaternion& quaternion) const {
     return (x*quaternion.x + y*quaternion.y + z*quaternion.z + w*quaternion.w);
 }
 
-void Quaternion::getRotationAngleAxis(double &angle, Vector3<double> &axis) const {
+void Quaternion::getRotationAngleAxis(double& angle, Vector3<double>& axis) const {
 
     // Compute the rotation angle
     angle = std::acos(w) * 2.0;
@@ -264,7 +264,7 @@ bool Quaternion::isValid() const {
     return isFinite() && isUnit();
 }
 
-Quaternion Quaternion::slerp(const Quaternion &quaternion1, const Quaternion &quaternion2, double t) {
+Quaternion Quaternion::slerp(const Quaternion &quaternion1, const Quaternion& quaternion2, double t) {
     assert(t >= 0.0 && t <= 1.0);
 
     double invert = 1.0;
@@ -300,15 +300,15 @@ Quaternion Quaternion::slerp(const Quaternion &quaternion1, const Quaternion &qu
     return quaternion1 * coeff1 + quaternion2 * coeff2;
 }
 
-Quaternion Quaternion::operator+(const Quaternion &quaternion) const {
+Quaternion Quaternion::operator+(const Quaternion& quaternion) const {
     return {x + quaternion.x, y + quaternion.y, z + quaternion.z, w + quaternion.w};
 }
 
-Quaternion Quaternion::operator-(const Quaternion &quaternion) const {
+Quaternion Quaternion::operator-(const Quaternion& quaternion) const {
     return {x - quaternion.x, y - quaternion.y, z - quaternion.z, w - quaternion.w};
 }
 
-Quaternion &Quaternion::operator+=(const Quaternion &quaternion) {
+Quaternion &Quaternion::operator+=(const Quaternion& quaternion) {
     x += quaternion.x;
     y += quaternion.y;
     z += quaternion.z;
@@ -316,7 +316,7 @@ Quaternion &Quaternion::operator+=(const Quaternion &quaternion) {
     return *this;
 }
 
-Quaternion &Quaternion::operator-=(const Quaternion &quaternion) {
+Quaternion &Quaternion::operator-=(const Quaternion& quaternion) {
     x -= quaternion.x;
     y -= quaternion.y;
     z -= quaternion.z;
@@ -328,7 +328,7 @@ Quaternion Quaternion::operator*(double rhs) const {
     return {rhs * x, rhs * y, rhs * z, rhs * w};
 }
 
-Quaternion Quaternion::operator*(const Quaternion &quaternion) const {
+Quaternion Quaternion::operator*(const Quaternion& quaternion) const {
     /* The following code is equivalent to this
      * return Quaternion(w * quaternion.w - getVectorV().dot(quaternion.getVectorV()),
      * w * quaternion.getVectorV() + quaternion.w * getVectorV() +
@@ -342,7 +342,7 @@ Quaternion Quaternion::operator*(const Quaternion &quaternion) const {
 
 }
 
-Vector3<double> Quaternion::operator*(const Vector3<double> &point) const {
+Vector3<double> Quaternion::operator*(const Vector3<double>& point) const {
     /* The following code is equivalent to this
      * Quaternion p(point.x, point.y, point.z, 0.0);
      * return (((*this) * p) * getConjugate()).getVectorV();
@@ -357,6 +357,6 @@ Vector3<double> Quaternion::operator*(const Vector3<double> &point) const {
             w * prodZ - prodX * y + prodY * x - prodW * z};
 }
 
-bool Quaternion::operator==(const Quaternion &quaternion) const {
+bool Quaternion::operator==(const Quaternion& quaternion) const {
     return (x == quaternion.x && y == quaternion.y && z == quaternion.z && w == quaternion.w);
 }

@@ -18,6 +18,7 @@
 #include "Definitions/configurationDefinitions.h"
 #include "Mathematics/grsMath.h"
 #include "Mathematics/matrix3.h"
+#include "Mathematics/transform.h"
 #include "node.h"
 
 #include "Log/logger.h"
@@ -43,8 +44,21 @@ public:
 
     [[nodiscard]] virtual Node& node();
 
+    void setTransform(const Transform& newTransform);
+    void setTransform(const Vector3<double>& newPosition, const Quaternion& newOrientation);
+    [[nodiscard]] const Transform& transform() const;
+
+    void setVelocity(const Vector3<double>& newVelocity) const;
+
+    void setAngularVelocity(const Vector3<double>& newAngularVelocity);
+    [[nodiscard]] const Vector3<double>& getAngularVelocity();
+
     std::unique_ptr<Node> centerOfMass;
     std::vector<Node*> connectedNode;
+
+private:
+    Transform m_transform;
+    Vector3<double> m_angularVelocity{0,0,0};   // Earth reference frame
 };
 
 

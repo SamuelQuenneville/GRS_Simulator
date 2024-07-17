@@ -53,7 +53,7 @@ public:
     void* getVerticesPointer();
     void* getNormalsPointer();
     void* getUVTextureCoordinatesPointer();
-    void* getIndicesPointer(uint32_t part);
+    void* getIndicesPointer(uint32_t part = 0);
 
 protected:
     // A triplet of vertex indices for each triangle

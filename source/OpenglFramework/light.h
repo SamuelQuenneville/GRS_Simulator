@@ -18,7 +18,7 @@ public:
     Light();
     ~Light() override = default;
 
-    Color getDiffuseColor() const;
+    [[nodiscard]] Color getDiffuseColor() const;
     void setDiffuseColor(const Color& color);
 
     void init();

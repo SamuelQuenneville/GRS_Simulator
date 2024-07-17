@@ -22,7 +22,7 @@ Camera::Camera()
     m_updateProjectionMatrix();
 }
 
-const Matrix4<double> &Camera::getProjectionMatrix() const {
+const Matrix4<double>& Camera::getProjectionMatrix() const {
     return m_projectionMatrix;
 }
 
@@ -53,7 +53,7 @@ void Camera::setZoom(float fraction) {
     translateLocal(zoomVector);
 }
 
-void Camera::translateCamera(float dx, float dy, const Vector3<double> &worldPoint) {
+void Camera::translateCamera(float dx, float dy, const Vector3<double>& worldPoint) {
     // Transform the world point into camera coordinates
     Vector3<double> pointCamera = m_transformMatrix.getInverse() * worldPoint;
 

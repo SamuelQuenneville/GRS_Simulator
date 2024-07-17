@@ -252,9 +252,9 @@ public:
 
     // Return the 3x3 upper-left matrix
     Matrix3<T> getUpperLeft3x3Matrix() const {
-        return Matrix3<T>(m_data[0][0], m_data[0][1], m_data[0][2],
-                          m_data[1][0], m_data[1][1], m_data[1][2],
-                          m_data[2][0], m_data[2][1], m_data[2][2]);
+        return Matrix3<T>{{m_data[0][0], m_data[0][1], m_data[0][2]},
+                          {m_data[1][0], m_data[1][1], m_data[1][2]},
+                          {m_data[2][0], m_data[2][1], m_data[2][2]}};
     }
 
     // Return the inversed matrix

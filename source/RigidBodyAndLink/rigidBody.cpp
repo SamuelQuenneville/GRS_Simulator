@@ -34,3 +34,27 @@ void RigidBody::deleteConnection(Node& node) {
     connectedNode.erase(std::remove_if(connectedNode.begin(), connectedNode.end(), [node](Node* n){return node.getId() == n->getId();}), connectedNode.end());
 }
 
+void RigidBody::setTransform(const Transform& newTransform) {
+    m_transform = newTransform;
+}
+
+void RigidBody::setTransform(const Vector3<double>& newPosition, const Quaternion& newOrientation) {
+    m_transform.setPosition(newPosition);
+    m_transform.setOrientation(newOrientation);
+}
+
+const Transform& RigidBody::transform() const {
+    return m_transform;
+}
+
+void RigidBody::setVelocity(const Vector3<double>& newVelocity) const {
+    centerOfMass->setVelocity(newVelocity);
+}
+
+void RigidBody::setAngularVelocity(const Vector3<double>& newAngularVelocity) {
+    m_angularVelocity = newAngularVelocity;
+}
+
+const Vector3<double> &RigidBody::getAngularVelocity() {
+    return m_angularVelocity;
+}

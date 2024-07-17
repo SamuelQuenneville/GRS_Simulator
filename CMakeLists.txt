@@ -101,6 +101,10 @@ set(GRS_RIGID_BODIES_AND_LINK
         source/RigidBodyAndLink/link.h
         source/RigidBodyAndLink/tether.cpp
         source/RigidBodyAndLink/tether.h
+        source/RigidBodyAndLink/SceneObjects/physicsObject.cpp
+        source/RigidBodyAndLink/SceneObjects/physicsObject.h
+        source/RigidBodyAndLink/SceneObjects/cube.cpp
+        source/RigidBodyAndLink/SceneObjects/cube.h
 )
 
 set(GRS_SOURCE
@@ -109,6 +113,8 @@ set(GRS_SOURCE
         source/world.h
         source/system.cpp
         source/system.h
+        source/simulationViewer.cpp
+        source/simulationViewer.h
 )
 
 # Copy the Shaders used for the demo into the build directory

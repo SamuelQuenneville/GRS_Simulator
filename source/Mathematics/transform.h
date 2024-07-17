@@ -49,6 +49,7 @@ public:
     // operator
     Vector3<double> operator*(const Vector3<double>& vector) const;
     Transform operator*(const Transform& transform2) const;
+    Transform& operator=(const Transform& transform2);
 
     [[nodiscard]] std::string toString() const;
 

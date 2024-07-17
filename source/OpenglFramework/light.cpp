@@ -23,7 +23,7 @@ Color Light::getDiffuseColor() const {
     return m_diffuseColor;
 }
 
-void Light::setDiffuseColor(const Color &color) {
+void Light::setDiffuseColor(const Color& color) {
     m_diffuseColor = color;
 }
 

@@ -8,7 +8,7 @@
 
 #include "meshReader.h"
 
-void MeshReader::loadMesh(const std::string &filename, Mesh &meshContainer) {
+void MeshReader::loadMesh(const std::string& filename, Mesh& meshContainer) {
     // Get the extension of the file
     uint32_t startPosExtension = filename.find_last_of('.');
     std::string extension = filename.substr(startPosExtension+1);
@@ -26,7 +26,7 @@ void MeshReader::loadMesh(const std::string &filename, Mesh &meshContainer) {
     }
 }
 
-void MeshReader::loadObjectFile(const std::string &filename, Mesh &meshContainer) {
+void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer) {
     // Open the file
     std::ifstream meshFile(filename.c_str());
 

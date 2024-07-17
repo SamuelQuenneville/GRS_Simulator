@@ -30,7 +30,7 @@ bool VertexBufferObject::create() {
     return true;
 }
 
-void VertexBufferObject::copyDataIntoVBO(GLsizei size, const void *data, GLenum usage) const {
+void VertexBufferObject::copyDataIntoVBO(GLsizei size, const void* data, GLenum usage) const {
     glBufferData(m_targetData, size, data, usage);
 }
 

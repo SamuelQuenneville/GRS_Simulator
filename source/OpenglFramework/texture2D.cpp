@@ -46,7 +46,7 @@ void Texture2D::create(uint32_t width, uint32_t height, uint32_t internalFormat,
 }
 
 void Texture2D::create(uint32_t width, uint32_t height, uint32_t internalFormat, uint32_t format, uint32_t type,
-                       uint32_t minFilter, uint32_t maxFilter, uint32_t wrapS, uint32_t wrapT, void *data) {
+                       uint32_t minFilter, uint32_t maxFilter, uint32_t wrapS, uint32_t wrapT, void* data) {
     destroy();
 
     m_width = width;

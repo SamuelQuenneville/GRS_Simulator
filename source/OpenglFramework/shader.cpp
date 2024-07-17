@@ -184,7 +184,7 @@ void Shader::unbind() const {
     glUseProgram(0);
 }
 
-GLint Shader::getUniformLocation(const std::string &variableName, bool errorIfMissing) const {
+GLint Shader::getUniformLocation(const std::string& variableName, bool errorIfMissing) const {
     assert(m_programObjectId != 0);
     GLint location = glGetUniformLocation(m_programObjectId, variableName.c_str());
     if (location == -1 && errorIfMissing) {
@@ -196,7 +196,7 @@ GLint Shader::getUniformLocation(const std::string &variableName, bool errorIfMi
     return location;
 }
 
-GLint Shader::getAttribLocation(const std::string &variableName, bool errorIfMissing) const {
+GLint Shader::getAttribLocation(const std::string& variableName, bool errorIfMissing) const {
     assert(m_programObjectId != 0);
     GLint location = glGetAttribLocation(m_programObjectId, variableName.c_str());
     if (location == -1 && errorIfMissing) {
@@ -209,7 +209,7 @@ GLint Shader::getAttribLocation(const std::string &variableName, bool errorIfMis
     return location;
 }
 
-void Shader::setIntUniform(const std::string &variableName, int value, bool errorIfMissing) const {
+void Shader::setIntUniform(const std::string& variableName, int value, bool errorIfMissing) const {
     assert(m_programObjectId != 0);
     GLint location = getUniformLocation(variableName, errorIfMissing);
     if (location != -1) {
@@ -217,7 +217,7 @@ void Shader::setIntUniform(const std::string &variableName, int value, bool erro
     }
 }
 
-void Shader::setVector2Uniform(const std::string &variableName, const Vector2<double> &v, bool errorIfMissing) const {
+void Shader::setVector2Uniform(const std::string& variableName, const Vector2<double>& v, bool errorIfMissing) const {
     assert(m_programObjectId != 0);
     GLint location = getUniformLocation(variableName, errorIfMissing);
     if (location != -1) {
@@ -225,7 +225,7 @@ void Shader::setVector2Uniform(const std::string &variableName, const Vector2<do
     }
 }
 
-void Shader::setVector3Uniform(const std::string &variableName, const Vector3<double> &v, bool errorIfMissing) const {
+void Shader::setVector3Uniform(const std::string& variableName, const Vector3<double>& v, bool errorIfMissing) const {
     assert(m_programObjectId != 0);
     GLint location = getUniformLocation(variableName, errorIfMissing);
     if (location != -1) {
@@ -233,7 +233,7 @@ void Shader::setVector3Uniform(const std::string &variableName, const Vector3<do
     }
 }
 
-void Shader::setVector4Uniform(const std::string &variableName, const Vector4<double> &v, bool errorIfMissing) const {
+void Shader::setVector4Uniform(const std::string& variableName, const Vector4<double>& v, bool errorIfMissing) const {
     assert(m_programObjectId != 0);
     GLint location = getUniformLocation(variableName, errorIfMissing);
     if (location != -1) {
@@ -241,7 +241,7 @@ void Shader::setVector4Uniform(const std::string &variableName, const Vector4<do
     }
 }
 
-void Shader::setMatrix3x3Uniform(const std::string &variableName, const float *matrix, bool transpose, bool errorIfMissing) const {
+void Shader::setMatrix3x3Uniform(const std::string& variableName, const float* matrix, bool transpose, bool errorIfMissing) const {
     assert(m_programObjectId != 0);
     GLint location = getUniformLocation(variableName, errorIfMissing);
     if (location != -1) {
@@ -250,7 +250,7 @@ void Shader::setMatrix3x3Uniform(const std::string &variableName, const float *m
 }
 
 void
-Shader::setMatrix3x3Uniform(const std::string &variableName, const Matrix3<double> &matrix, bool errorIfMissing) const {
+Shader::setMatrix3x3Uniform(const std::string& variableName, const Matrix3<double>& matrix, bool errorIfMissing) const {
     assert(m_programObjectId != 0);
     GLfloat mat[9];
     for (int i=0; i<3; i++) {
@@ -264,7 +264,7 @@ Shader::setMatrix3x3Uniform(const std::string &variableName, const Matrix3<doubl
     }
 }
 
-void Shader::setMatrix4x4Uniform(const std::string &variableName, const float *matrix, bool transpose, bool errorIfMissing) const {
+void Shader::setMatrix4x4Uniform(const std::string& variableName, const float* matrix, bool transpose, bool errorIfMissing) const {
     assert(m_programObjectId != 0);
     GLint location = getUniformLocation(variableName, errorIfMissing);
     if (location != -1) {
@@ -272,7 +272,7 @@ void Shader::setMatrix4x4Uniform(const std::string &variableName, const float *m
     }
 }
 
-void Shader::setMatrix4x4Uniform(const std::string &variableName, const Matrix4<double> &matrix, bool errorIfMissing) const {
+void Shader::setMatrix4x4Uniform(const std::string& variableName, const Matrix4<double>& matrix, bool errorIfMissing) const {
     assert(m_programObjectId != 0);
     GLfloat mat[16];
     for (int i=0; i<4; i++) {
