@@ -17,9 +17,9 @@ Cube::Cube(const Vector3<float> &size)
     , m_vertexBufferIndices(GL_ELEMENT_ARRAY_BUFFER)
 {
     // Initialize the size of the box
-    m_size[0] = size.x() * 0.5f;
-    m_size[1] = size.y() * 0.5f;
-    m_size[2] = size.z() * 0.5f;
+    m_size[0] = size.x();
+    m_size[1] = size.y();
+    m_size[2] = size.z();
 
     // Compute the scaling matrix
     m_scalingMatrix = Matrix4<double>{{m_size[0],         0,         0, 0},
@@ -42,7 +42,7 @@ Cube::~Cube() {
     m_vertexArrayObject.destroy();
 }
 
-void Cube::render(Shader &shader, const Matrix4<double>& worldToCameraMatrix) {
+void Cube::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
 
     shader.bind();
 

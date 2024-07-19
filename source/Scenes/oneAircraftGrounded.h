@@ -30,8 +30,8 @@ public:
 
 protected:
     // Floor
-    Cube* m_floor{};
-    Aircraft* m_aircraft1{};
+    Cube* m_ground{};
+    Aircraft* m_aircraft;
 
     World* m_world;
 

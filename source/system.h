@@ -33,6 +33,8 @@ public:
     void createSystemTwoAircraftGroundedY();
     void createSystemTwoAircraftFreeY();
 
+    std::vector<std::unique_ptr<FixedWing>>& aircraft() {return m_aircraft;};
+
 private:
     worldPhysics& m_physics;
     Logger& m_logger;

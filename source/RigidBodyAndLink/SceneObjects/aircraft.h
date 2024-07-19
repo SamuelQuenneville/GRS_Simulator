@@ -12,42 +12,36 @@
 #include "physicsObject.h"
 #include "OpenglFramework/vertexBufferObject.h"
 #include "OpenglFramework/vertexArrayObject.h"
+#include "RigidBodyAndLink/fixedWing.h"
 
 class Aircraft : public PhysicsObject {
 
-private :
-
-    /// Scaling matrix
-    Matrix4<double> mScalingMatrix;
-
-    /// Vertex Buffer Object for the vertices data
-    VertexBufferObject mVBOVertices;
-
-    /// Vertex Buffer Object for the normals data
-    VertexBufferObject mVBONormals;
-
-    /// Vertex Buffer Object for the texture coords
-    VertexBufferObject mVBOTextureCoords;
-
-    /// Vertex Buffer Object for the indices
-    VertexBufferObject mVBOIndices;
-
-    /// Vertex Array Object for the vertex data
-    VertexArrayObject mVAO;
-
-    // Create the Vertex Buffer Objects used to render with OpenGL.
-    void createVBOAndVAO();
-
 public :
-
-    Aircraft(const Vector3<double>& scaling = Vector3<double>(1, 1, 1));
+    Aircraft(FixedWing* aircraft, const Vector3<double>& scaling = Vector3<double>(1, 1, 1));
     ~Aircraft() override;
 
-    /// Render the mesh at the correct position and with the correct orientation
     void render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;
-
-    /// Update the transform matrix of the object
     void updateTransform(double interpolationFactor) override;
+
+private :
+    Matrix4<double> m_scalingMatrix;
+
+    // Vertex Buffer Object for the vertices data
+    VertexBufferObject m_vertexBufferVertices;
+
+    // Vertex Buffer Object for the normals data
+    VertexBufferObject m_vertexBufferNormals;
+
+    // Vertex Buffer Object for the texture coords
+    VertexBufferObject m_vertexBufferTextureCoords;
+
+    // Vertex Buffer Object for the indices
+    VertexBufferObject m_vertexBufferIndices;
+
+    // Vertex Array Object for the vertex data
+    VertexArrayObject m_vertexArrayObject;
+
+    void m_createVertexBufferAndArrayObject();
 };
 
 

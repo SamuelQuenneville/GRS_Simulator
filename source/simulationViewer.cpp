@@ -87,6 +87,8 @@ void SimulationViewer::start() {
             m_scene->reshape(m_windowWidth, m_windowHeight);
             m_scene->setWindowDimension(m_windowWidth, m_windowHeight);
             m_scene->reset();
+
+            //m_timer.start();
         }
 
         if (m_sceneCreated) {

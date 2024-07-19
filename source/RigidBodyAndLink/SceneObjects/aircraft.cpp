@@ -9,42 +9,38 @@
 #include "aircraft.h"
 
 // Constructor
-Aircraft::Aircraft(const Vector3<double>& scaling)
+Aircraft::Aircraft(FixedWing* aircraft, const Vector3<double>& scaling)
         : PhysicsObject("C:/Users/ques2902/Desktop/Meshes/aircraft.obj")
-        , mVBOVertices(GL_ARRAY_BUFFER)
-        , mVBONormals(GL_ARRAY_BUFFER)
-        , mVBOTextureCoords(GL_ARRAY_BUFFER)
-        , mVBOIndices(GL_ELEMENT_ARRAY_BUFFER)
+        , m_vertexBufferVertices(GL_ARRAY_BUFFER)
+        , m_vertexBufferNormals(GL_ARRAY_BUFFER)
+        , m_vertexBufferTextureCoords(GL_ARRAY_BUFFER)
+        , m_vertexBufferIndices(GL_ELEMENT_ARRAY_BUFFER)
 {
-
-
-    mScalingMatrix = Matrix4<double>{{scaling.x(),           0,           0, 0},
-                                     {          0, scaling.y(),           0, 0},
-                                     {          0,           0, scaling.z(), 0},
-                                     {          0,           0,           0, 1}};
+    m_scalingMatrix = Matrix4<double>{{scaling.x(),           0,           0, 0},
+                                     {           0, scaling.y(),           0, 0},
+                                     {           0,           0, scaling.z(), 0},
+                                     {           0,           0,           0, 1}};
 
     m_previousTransform = Transform::identity();
 
-    m_body = new RigidBody();
+    m_body = aircraft;
 
     // Create the VBOs and VAO
-    createVBOAndVAO();
+    m_createVertexBufferAndArrayObject();
 
-    m_transformMatrix = m_transformMatrix * mScalingMatrix;
+    m_transformMatrix = m_transformMatrix * m_scalingMatrix;
 }
 
 // Destructor
 Aircraft::~Aircraft() {
-
-    // Destroy the mesh
     destroy();
 
     // Destroy the VBOs and VAO
-    mVBOIndices.destroy();
-    mVBOVertices.destroy();
-    mVBONormals.destroy();
-    mVBOTextureCoords.destroy();
-    mVAO.destroy();
+    m_vertexBufferIndices.destroy();
+    m_vertexBufferVertices.destroy();
+    m_vertexBufferNormals.destroy();
+    m_vertexBufferTextureCoords.destroy();
+    m_vertexArrayObject.destroy();
 }
 
 // Render the sphere at the correct position and with the correct orientation
@@ -63,14 +59,13 @@ void Aircraft::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix
     shader.setMatrix3x3Uniform("normalMatrix", normalMatrix, false);
 
     // Set the vertex color
-    auto* rigidBody = dynamic_cast<RigidBody*>(m_body);
     Vector4<double> color(m_color.r, m_color.g, m_color.b, m_color.a);
     shader.setVector4Uniform("globalVertexColor", color, false);
 
     // Bind the VAO
-    mVAO.bind();
+    m_vertexArrayObject.bind();
 
-    mVBOVertices.bind();
+    m_vertexBufferVertices.bind();
 
     // Get the location of shader attribute variables
     GLint vertexPositionLoc = shader.getAttribLocation("vertexPosition");
@@ -79,24 +74,24 @@ void Aircraft::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix
     glEnableVertexAttribArray(vertexPositionLoc);
     glVertexAttribPointer(vertexPositionLoc, 3, GL_FLOAT, GL_FALSE, 0, (char*)nullptr);
 
-    mVBONormals.bind();
+    m_vertexBufferNormals.bind();
 
     if (vertexNormalLoc != -1) glVertexAttribPointer(vertexNormalLoc, 3, GL_FLOAT, GL_FALSE, 0, (char*)nullptr);
     if (vertexNormalLoc != -1) glEnableVertexAttribArray(vertexNormalLoc);
 
     // For each part of the mesh
     for (unsigned int i=0; i<getNumbersParts(); i++) {
-        glDrawElements(GL_TRIANGLES, getNumbersFaces(i) * 3, GL_UNSIGNED_INT, (char*)nullptr);
+        glDrawElements(GL_TRIANGLES, GLsizei(getNumbersFaces(i) * 3), GL_UNSIGNED_INT, (char*)nullptr);
     }
 
     glDisableVertexAttribArray(vertexPositionLoc);
     if (vertexNormalLoc != -1) glDisableVertexAttribArray(vertexNormalLoc);
 
-    mVBONormals.unbind();
-    mVBOVertices.unbind();
+    m_vertexBufferNormals.unbind();
+    m_vertexBufferVertices.unbind();
 
     // Unbind the VAO
-    mVAO.unbind();
+    m_vertexArrayObject.unbind();
 
     // Unbind the shader
     shader.unbind();
@@ -104,61 +99,55 @@ void Aircraft::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix
 
 // Create the Vertex Buffer Objects used to render with OpenGL.
 /// We create two VBOs (one for vertices and one for indices)
-void Aircraft::createVBOAndVAO() {
+void Aircraft::m_createVertexBufferAndArrayObject() {
 
     // Create the VBO for the vertices data
-    mVBOVertices.create();
-    mVBOVertices.bind();
-    size_t sizeVertices = m_vertices.size() * sizeof(Vector3<float>);
-    mVBOVertices.copyDataIntoVBO(sizeVertices, getVerticesPointer(), GL_STATIC_DRAW);
-    mVBOVertices.unbind();
+    m_vertexBufferVertices.create();
+    m_vertexBufferVertices.bind();
+    auto sizeVertices = GLsizei(m_vertices.size() * sizeof(Vector3<float>));
+    m_vertexBufferVertices.copyDataIntoVBO(sizeVertices, getVerticesPointer(), GL_STATIC_DRAW);
+    m_vertexBufferVertices.unbind();
 
     // Create the VBO for the normals data
-    mVBONormals.create();
-    mVBONormals.bind();
-    size_t sizeNormals = m_normals.size() * sizeof(Vector3<float>);
-    mVBONormals.copyDataIntoVBO(sizeNormals, getNormalsPointer(), GL_STATIC_DRAW);
-    mVBONormals.unbind();
+    m_vertexBufferNormals.create();
+    m_vertexBufferNormals.bind();
+    auto sizeNormals = GLsizei(m_normals.size() * sizeof(Vector3<float>));
+    m_vertexBufferNormals.copyDataIntoVBO(sizeNormals, getNormalsPointer(), GL_STATIC_DRAW);
+    m_vertexBufferNormals.unbind();
 
     if (hasTexture()) {
         // Create the VBO for the texture co data
-        mVBOTextureCoords.create();
-        mVBOTextureCoords.bind();
-        size_t sizeTextureCoords = m_uvs.size() * sizeof(Vector2<float>);
-        mVBOTextureCoords.copyDataIntoVBO(sizeTextureCoords, getUVTextureCoordinatesPointer(), GL_STATIC_DRAW);
-        mVBOTextureCoords.unbind();
+        m_vertexBufferTextureCoords.create();
+        m_vertexBufferTextureCoords.bind();
+        auto sizeTextureCoords = GLsizei(m_uvs.size() * sizeof(Vector2<float>));
+        m_vertexBufferTextureCoords.copyDataIntoVBO(sizeTextureCoords, getUVTextureCoordinatesPointer(), GL_STATIC_DRAW);
+        m_vertexBufferTextureCoords.unbind();
     }
 
     // Create th VBO for the indices data
-    mVBOIndices.create();
-    mVBOIndices.bind();
-    size_t sizeIndices = m_indices[0].size() * sizeof(unsigned int);
-    mVBOIndices.copyDataIntoVBO(sizeIndices, getIndicesPointer(), GL_STATIC_DRAW);
-    mVBOIndices.unbind();
+    m_vertexBufferIndices.create();
+    m_vertexBufferIndices.bind();
+    auto sizeIndices = GLsizei(m_indices[0].size() * sizeof(unsigned int));
+    m_vertexBufferIndices.copyDataIntoVBO(sizeIndices, getIndicesPointer(), GL_STATIC_DRAW);
+    m_vertexBufferIndices.unbind();
 
     // Create the VAO for both VBOs
-    mVAO.create();
-    mVAO.bind();
+    m_vertexArrayObject.create();
+    m_vertexArrayObject.bind();
 
     // Bind the VBO of vertices
-    mVBOVertices.bind();
-
-    // Bind the VBO of normals
-    mVBONormals.bind();
+    m_vertexBufferVertices.bind();
+    m_vertexBufferNormals.bind();
 
     if (hasTexture()) {
-        // Bind the VBO of texture coords
-        mVBOTextureCoords.bind();
+        m_vertexBufferTextureCoords.bind();
     }
 
-    // Bind the VBO of indices
-    mVBOIndices.bind();
-
-    // Unbind the VAO
-    mVAO.unbind();
+    m_vertexBufferIndices.bind();
+    m_vertexArrayObject.unbind();
 }
 
 // Update the transform matrix of the object
 void Aircraft::updateTransform(double interpolationFactor) {
-    m_transformMatrix = m_calculateTransform(interpolationFactor, mScalingMatrix);
+    m_transformMatrix = m_calculateTransform(interpolationFactor, m_scalingMatrix);
 }

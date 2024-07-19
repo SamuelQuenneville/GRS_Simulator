@@ -39,12 +39,14 @@ void PhysicsObject::setTransform(const Transform& transform) {
     // Reset the transform
     m_body->setTransform(transform);
 
+    /*
     // Reset the velocity of the rigid body
     auto* rigidBody = dynamic_cast<RigidBody*>(m_body);
     if (rigidBody != nullptr) {
         rigidBody->setVelocity({0,0,0});
         rigidBody->setAngularVelocity({0,0,0});
     }
+     */
     updateTransform(1.0f);
 }
 

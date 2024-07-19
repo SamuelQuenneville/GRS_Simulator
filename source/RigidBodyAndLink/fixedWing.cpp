@@ -55,6 +55,8 @@ void FixedWing::update(double dt) {
     centerOfMass->setForce(m_bodyToEarth(forcesAeroBody) + externalForcesEarth);
     centerOfMass->setMoment(m_bodyToEarth(momentsAeroBody));
 
+    setTransform(Transform({centerOfMass->position().x(), -centerOfMass->position().z(), centerOfMass->position().y()}, Quaternion::fromEulerAngles(-M_PI/2 + m_states.phi,M_PI - m_states.psi,m_states.theta)));
+
     // Log
     m_writeLog(forcesAeroBody, momentsAeroBody, m_earthToBody(externalForcesEarth));
 }

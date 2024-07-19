@@ -15,8 +15,9 @@ int main() {
     SimulationViewer applicationViewer;
     applicationViewer.start();
 
-    World myWorld;
+    //World myWorld;
 
+    /*
     // TODO get from user input maybe opengl window in future
     std::string fileName = "C:/Users/ques2902/Desktop/simulationV1.yaml";
     myWorld.readConfigurationFile(fileName);
@@ -53,6 +54,7 @@ int main() {
             }
         }
     }
+    */
 
     return 0;
 }
