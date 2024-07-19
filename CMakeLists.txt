@@ -105,6 +105,15 @@ set(GRS_RIGID_BODIES_AND_LINK
         source/RigidBodyAndLink/SceneObjects/physicsObject.h
         source/RigidBodyAndLink/SceneObjects/cube.cpp
         source/RigidBodyAndLink/SceneObjects/cube.h
+        source/RigidBodyAndLink/SceneObjects/aircraft.cpp
+        source/RigidBodyAndLink/SceneObjects/aircraft.h
+)
+
+set(GRS_SCENES
+        source/Scenes/scene.cpp
+        source/Scenes/scene.h
+        source/Scenes/oneAircraftGrounded.cpp
+        source/Scenes/oneAircraftGrounded.h
 )
 
 set(GRS_SOURCE
@@ -117,6 +126,8 @@ set(GRS_SOURCE
         source/simulationViewer.h
         source/gui.cpp
         source/gui.h
+        source/timer.cpp
+        source/timer.h
 )
 
 # Copy the Shaders used for the demo into the build directory
@@ -133,6 +144,7 @@ add_executable(GRS_Simulator
         ${GRS_MATHEMATICS}
         ${GRS_OPENGL_FRAMEWORK}
         ${GRS_RIGID_BODIES_AND_LINK}
+        ${GRS_SCENES}
         ${GRS_SOURCE}
 )
 

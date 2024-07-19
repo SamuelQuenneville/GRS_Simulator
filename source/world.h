@@ -26,7 +26,7 @@ public:
     struct simulationConfiguration {
         bool fixedDuration;
         float duration;
-        double dt;
+        std::chrono::duration<double> dt;
     };
 
     simulationConfiguration simulationConfiguration{};
@@ -39,6 +39,9 @@ public:
 
     std::map<std::string, systemType> systemTypeStringToEnum;
     static int getNumberOfAircraftInSystem(systemType type);
+
+    [[nodiscard]] systemType getSystemType() const;
+    System* system();
 
 private:
     std::unique_ptr<Logger> m_logger;

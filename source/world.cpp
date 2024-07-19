@@ -22,8 +22,8 @@ World::World() {
 }
 
 void World::update() {
-    m_system->update(simulationConfiguration.dt);
-    logger().loggerClockTick(simulationConfiguration.dt);
+    m_system->update(simulationConfiguration.dt.count());
+    logger().loggerClockTick(simulationConfiguration.dt.count());
 }
 
 void World::readConfigurationFile(const std::string& fileName) {
@@ -33,7 +33,8 @@ void World::readConfigurationFile(const std::string& fileName) {
     m_logDirectory = simParams.logFilesDirectory;
     m_logger = std::make_unique<Logger>(m_logDirectory);
 
-    simulationConfiguration = {simParams.fixedDuration, simParams.duration, 1.0/simParams.llcRate};
+    std::chrono::duration<double> timeStep(1.0 / simParams.llcRate);
+    simulationConfiguration = {simParams.fixedDuration, simParams.duration, timeStep};
     m_systemConfiguration = {systemTypeStringToEnum.at(simParams.systemConfiguration), simParams.hlcRate, simParams.llcRate, simParams.windOn, simParams.tetherAeroOn};
 
     m_aircraftProperties = ConfigurationParser::parseFixedWingProperties(simParams.aircraftPropertiesFileDirectory);
@@ -90,4 +91,12 @@ int World::getNumberOfAircraftInSystem(systemType type) {
     } else {
         return 2;
     }
+}
+
+systemType World::getSystemType() const {
+    return m_systemConfiguration.type;
+}
+
+System* World::system() {
+    return m_system.get();
 }

@@ -17,7 +17,7 @@ Texture2D::Texture2D()
 
 }
 
-Texture2D::Texture2D(uint32_t width, uint32_t height, uint32_t internalFormat, uint32_t format, uint32_t type)
+Texture2D::Texture2D(unsigned int width, unsigned int height, unsigned int internalFormat, unsigned int format, unsigned int type)
     : Texture2D()
 {
     create(width, height, internalFormat, format, type);
@@ -27,7 +27,7 @@ Texture2D::~Texture2D() {
     destroy();
 }
 
-void Texture2D::create(uint32_t width, uint32_t height, uint32_t internalFormat, uint32_t format, uint32_t type, void *data) {
+void Texture2D::create(unsigned int width, unsigned int height, unsigned int internalFormat, unsigned int format, unsigned int type, void *data) {
     destroy();
 
     m_width = width;
@@ -45,8 +45,8 @@ void Texture2D::create(uint32_t width, uint32_t height, uint32_t internalFormat,
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture2D::create(uint32_t width, uint32_t height, uint32_t internalFormat, uint32_t format, uint32_t type,
-                       uint32_t minFilter, uint32_t maxFilter, uint32_t wrapS, uint32_t wrapT, void* data) {
+void Texture2D::create(unsigned int width, unsigned int height, unsigned int internalFormat, unsigned int format, unsigned int type,
+                       unsigned int minFilter, unsigned int maxFilter, unsigned int wrapS, unsigned int wrapT, void* data) {
     destroy();
 
     m_width = width;
@@ -86,22 +86,14 @@ void Texture2D::unbind() const {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-uint32_t Texture2D::getID() const {
+unsigned int Texture2D::getID() const {
     return m_id;
 }
 
-uint32_t Texture2D::getUnit() const {
+unsigned int Texture2D::getUnit() const {
     return m_unit;
 }
 
-void Texture2D::setUnit(uint32_t unit) {
+void Texture2D::setUnit(unsigned int unit) {
     m_unit = unit;
-}
-
-uint32_t Texture2D::getWidth() const {
-    return m_width;
-}
-
-uint32_t Texture2D::getHeight() const {
-    return m_height;
 }

@@ -45,7 +45,6 @@ void PhysicsObject::setTransform(const Transform& transform) {
         rigidBody->setVelocity({0,0,0});
         rigidBody->setAngularVelocity({0,0,0});
     }
-
     updateTransform(1.0f);
 }
 

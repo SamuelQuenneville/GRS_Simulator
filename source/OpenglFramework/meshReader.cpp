@@ -10,7 +10,7 @@
 
 void MeshReader::loadMesh(const std::string& filename, Mesh& meshContainer) {
     // Get the extension of the file
-    uint32_t startPosExtension = filename.find_last_of('.');
+    unsigned int startPosExtension = filename.find_last_of('.');
     std::string extension = filename.substr(startPosExtension+1);
 
     // Load the file using the correct method
@@ -47,12 +47,12 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
     float v1, v2, v3;
     size_t found1, found2;
     std::vector<bool> isQuad;
-    std::vector<Vector3<double>> vertices;
-    std::vector<Vector3<double>> normals;
-    std::vector<Vector2<double>> uvs;
-    std::vector<uint32_t > verticesIndices;
-    std::vector<uint32_t> normalsIndices;
-    std::vector<uint32_t> uvsIndices;
+    std::vector<Vector3<float>> vertices;
+    std::vector<Vector3<float>> normals;
+    std::vector<Vector2<float>> uvs;
+    std::vector<unsigned int > verticesIndices;
+    std::vector<unsigned int> normalsIndices;
+    std::vector<unsigned int> uvsIndices;
 
 
     // ---------- Collect the data from the file ---------- //
@@ -169,16 +169,16 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
 
     // This is used to create duplicate vertices if a vertex with index "i" from a face does not
     // have same texture coordinates or normals as a previous vertex with index "i".
-    std::unordered_map<std::tuple<int, int, int>, uint32_t > mapVertNormTexToVertexIndex;
+    std::unordered_map<std::tuple<int, int, int>, unsigned int > mapVertNormTexToVertexIndex;
 
     // Mesh data
-    std::vector<std::vector<uint32_t>> meshIndices;
-    std::vector<Vector3<double>> meshVertices;
-    std::vector<Vector3<double>> meshNormals;
-    std::vector<Vector2<double>> meshUVs;
+    std::vector<std::vector<unsigned int>> meshIndices;
+    std::vector<Vector3<float>> meshVertices;
+    std::vector<Vector3<float>> meshNormals;
+    std::vector<Vector2<float>> meshUVs;
 
     // We cannot load mesh with several parts for the moment
-    uint32_t meshPart = 0;
+    unsigned int meshPart = 0;
 
     const bool hasNormals = !normalsIndices.empty() && !normals.empty();
     const bool hasUvs = !uvsIndices.empty() && !uvs.empty();
@@ -223,10 +223,10 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
         }
 
         // Get the current vertex IDs
-        uint32_t i1 = newVerticesIndices[0];
-        uint32_t i2 = newVerticesIndices[1];
-        uint32_t i3 = newVerticesIndices[2];
-        uint32_t i4 = newVerticesIndices[3];
+        unsigned int i1 = newVerticesIndices[0];
+        unsigned int i2 = newVerticesIndices[1];
+        unsigned int i3 = newVerticesIndices[2];
+        unsigned int i4 = newVerticesIndices[3];
 
         // If the current vertex not in a quad (it is part of a triangle)
         if (!isQuad[j]) {
@@ -240,14 +240,14 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
         }
         else {  // If the current vertex is in a quad
 
-            Vector3 v1 = meshVertices[i1];
-            Vector3 v2 = meshVertices[i2];
-            Vector3 v3 = meshVertices[i3];
-            Vector3 v4 = meshVertices[i4];
+            Vector3<float> v1 = meshVertices[i1];
+            Vector3<float> v2 = meshVertices[i2];
+            Vector3<float> v3 = meshVertices[i3];
+            Vector3<float> v4 = meshVertices[i4];
 
-            Vector3 v13 = v3-v1;
-            Vector3 v12 = v2-v1;
-            Vector3 v14 = v4-v1;
+            Vector3<float> v13 = v3-v1;
+            Vector3<float> v12 = v2-v1;
+            Vector3<float> v14 = v4-v1;
 
             float a1 = v13.dot(v12);
             float a2 = v13.dot(v14);

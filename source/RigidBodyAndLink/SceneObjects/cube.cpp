@@ -7,9 +7,10 @@
  */
 
 #include "cube.h"
+#include "RigidBodyAndLink/fixedWing.h"
 
 Cube::Cube(const Vector3<float> &size)
-    : PhysicsObject("meshes/cube.obj")
+    : PhysicsObject("C:/Users/ques2902/Desktop/Meshes/cube.obj")
     , m_vertexBufferVertices(GL_ARRAY_BUFFER)
     , m_vertexBufferNormals(GL_ARRAY_BUFFER)
     , m_vertexBufferTextureCoords(GL_ARRAY_BUFFER)
@@ -28,6 +29,7 @@ Cube::Cube(const Vector3<float> &size)
 
     m_previousTransform = Transform::identity();
 
+    m_body = new RigidBody();
     // Create the VBOs and VAO
     m_createVertexBufferAndArrayObject();
 
@@ -95,14 +97,14 @@ void Cube::m_createVertexBufferAndArrayObject() {
     // Create the VBO for the vertices data
     m_vertexBufferVertices.create();
     m_vertexBufferVertices.bind();
-    auto sizeVertices = GLsizei(m_vertices.size() * sizeof(Vector3<double>));
+    auto sizeVertices = GLsizei(m_vertices.size() * sizeof(Vector3<float>));
     m_vertexBufferVertices.copyDataIntoVBO(sizeVertices, getVerticesPointer(), GL_STATIC_DRAW);
     m_vertexBufferVertices.unbind();
 
     // Create the VBO for the normals data
     m_vertexBufferNormals.create();
     m_vertexBufferNormals.bind();
-    auto sizeNormals = GLsizei(m_normals.size() * sizeof(Vector3<double>));
+    auto sizeNormals = GLsizei(m_normals.size() * sizeof(Vector3<float>));
     m_vertexBufferNormals.copyDataIntoVBO(sizeNormals, getNormalsPointer(), GL_STATIC_DRAW);
     m_vertexBufferNormals.unbind();
 
@@ -110,7 +112,7 @@ void Cube::m_createVertexBufferAndArrayObject() {
         // Create the VBO for the texture co data
         m_vertexBufferTextureCoords.create();
         m_vertexBufferTextureCoords.bind();
-        auto sizeTextureCoords = GLsizei(m_uvs.size() * sizeof(Vector2<double>));
+        auto sizeTextureCoords = GLsizei(m_uvs.size() * sizeof(Vector2<float>));
         m_vertexBufferTextureCoords.copyDataIntoVBO(sizeTextureCoords, getUVTextureCoordinatesPointer(), GL_STATIC_DRAW);
         m_vertexBufferTextureCoords.unbind();
     }

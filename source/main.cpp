@@ -12,10 +12,10 @@
 
 int main() {
 
-    World myWorld;
-    SimulationViewer viewer;
+    SimulationViewer applicationViewer;
+    applicationViewer.start();
 
-    viewer.start();
+    World myWorld;
 
     // TODO get from user input maybe opengl window in future
     std::string fileName = "C:/Users/ques2902/Desktop/simulationV1.yaml";
@@ -27,7 +27,7 @@ int main() {
     {
 
         if (myWorld.simulationConfiguration.fixedDuration) {
-            int numSteps = myWorld.simulationConfiguration.duration / myWorld.simulationConfiguration.dt;
+            int numSteps = myWorld.simulationConfiguration.duration / myWorld.simulationConfiguration.dt.count();
 
             std::cout << "Simulation start" << std::endl;
             for (int step = 0; step < numSteps+1; ++step){

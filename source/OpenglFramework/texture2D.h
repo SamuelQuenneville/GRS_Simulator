@@ -17,14 +17,14 @@ class Texture2D {
 
 public:
     Texture2D();
-    Texture2D(uint32_t width, uint32_t height, uint32_t internalFormat, uint32_t format, uint32_t type);
+    Texture2D(unsigned int width, unsigned int height, unsigned int internalFormat, unsigned int format, unsigned int type);
     ~Texture2D();
 
     // Create the texture
-    void create(uint32_t width, uint32_t height, uint32_t internalFormat, uint32_t format, uint32_t type, void* data = nullptr);
+    void create(unsigned int width, unsigned int height, unsigned int internalFormat, unsigned int format, unsigned int type, void* data = nullptr);
 
-    void create(uint32_t width, uint32_t height, uint32_t internalFormat, uint32_t format, uint32_t type,
-                uint32_t minFilter, uint32_t maxFilter, uint32_t wrapS, uint32_t wrapT, void* data);
+    void create(unsigned int width, unsigned int height, unsigned int internalFormat, unsigned int format, unsigned int type,
+                unsigned int minFilter, unsigned int maxFilter, unsigned int wrapS, unsigned int wrapT, void* data);
 
     void destroy();
 
@@ -32,20 +32,17 @@ public:
     void unbind() const;
 
     // Get the OpenGL texture ID
-    [[nodiscard]] uint32_t getID() const;
+    [[nodiscard]] unsigned int getID() const;
 
-    [[nodiscard]] uint32_t getUnit() const;
-    void setUnit(uint32_t unit);
-
-    [[nodiscard]] uint32_t getWidth() const;
-    [[nodiscard]] uint32_t getHeight() const;
+    [[nodiscard]] unsigned int getUnit() const;
+    void setUnit(unsigned int unit);
 
 private:
     GLuint m_id;
     GLuint m_unit;
 
-    uint32_t m_width;
-    uint32_t m_height;
+    unsigned int m_width;
+    unsigned int m_height;
 };
 
 

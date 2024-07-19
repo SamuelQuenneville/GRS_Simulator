@@ -9,10 +9,14 @@
 #ifndef GRS_SIMULATOR_SIMULATIONVIEWER_H
 #define GRS_SIMULATOR_SIMULATIONVIEWER_H
 
-#include "gui.h"
+#include "gui.h" // need to be before GLFW include
 
 #include <iostream>
 #include <GLFW/glfw3.h>
+
+#include "world.h"
+#include "timer.h"
+#include "Scenes/oneAircraftGrounded.h"
 
 class SimulationViewer {
 
@@ -37,21 +41,37 @@ public:
     friend class Gui;
 
 private:
-    static const float SCROLL_SENSITIVITY;
-
     bool m_isInitialized;
 
     GLFWwindow* m_window;
     int m_windowWidth;
     int m_windowHeight;
 
+    std::unique_ptr<World> m_world;
+    Timer m_timer;
+
     Gui m_gui;
+    Scene* m_scene;
+
+    double m_totalDynamicTime;
+    double m_dynamicStepTime;
+
+    void m_update();
+    void m_updateDynamics();
+
+    void m_render();
+
+    bool m_sceneCreated;
+    void m_createScene();
+    //void m_destroyScenes();
+
+    void m_playSimulation();
+    void m_pauseSimulation();
+    void m_restartSimulation();
 
     static void m_setGlfwHints();
     void m_setCallback();
-
-    //void m_createScene();
-    //void m_destroyScenes();
+    static void m_enableGlfwDebugOutput();
 };
 
 

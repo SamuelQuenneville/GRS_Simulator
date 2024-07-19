@@ -40,6 +40,9 @@ public:
     [[nodiscard]] bool getIsDisplayed() const {return m_isDisplayed;};
     void setIsDisplayed(bool isDisplayed) {m_isDisplayed = isDisplayed;};
 
+    [[nodiscard]] bool getHasConfigFile() const {return m_hasConfigFile;};
+    [[nodiscard]] std::string configFilePath() const {return m_configFilePath;};
+
 protected:
     SimulationViewer* m_viewer;
 
@@ -49,7 +52,7 @@ protected:
     // Configuration panel
     nanogui::Widget* m_configurationPanel;
     nanogui::Label* m_fileLabel;
-    nanogui::Label* m_simRunTime;
+    nanogui::Label* m_simRunTimeLabel;
 
     //
     char m_configFilePath[256] = {};
@@ -57,6 +60,8 @@ protected:
     char m_dir[256] = {};
     char m_configFileName[256] = {};
     char m_ext[256] = {};
+
+    bool m_hasConfigFile;
 
     // True if the GUI is displayed
     bool m_isDisplayed;

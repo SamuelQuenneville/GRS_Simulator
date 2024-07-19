@@ -50,7 +50,7 @@ public:
     void rotateAroundLocalPoint(const Vector3<double>& axis, float angle, const Vector3<double>& worldPoint);
 
 protected:
-    Matrix4<double> m_transformMatrix = Matrix4<double>::zeros();
+    Matrix4<double> m_transformMatrix = Matrix4<double>::identity();
 };
 
 

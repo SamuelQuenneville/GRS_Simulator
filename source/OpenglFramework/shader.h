@@ -24,10 +24,10 @@ class Shader {
 
 public:
     Shader();
-    Shader(const std::string& filenameVertexShader, const std::string& filenameFragmentShader);
+    Shader(const std::string filenameVertexShader, const std::string filenameFragmentShader);
     ~Shader();
 
-    bool create(const std::string& filenameVertexShader, const std::string& filenameFragmentShader);
+    bool create(const std::string filenameVertexShader, const std::string filenameFragmentShader);
 
     void destroy();
 
@@ -58,15 +58,7 @@ public:
 
     // Set a 3x3 matrix uniform value to this shader (be careful if the uniform is not
     // used in the shader, the compiler will remove it, then when you will try to set it, an assert will occur)
-    void setMatrix3x3Uniform(const std::string& variableName, const float* matrix, bool transpose = false, bool errorIfMissing = true) const;
-
-    // Set a 3x3 matrix uniform value to this shader (be careful if the uniform is not
-    // used in the shader, the compiler will remove it, then when you will try to set it, an assert will occur)
     void setMatrix3x3Uniform(const std::string& variableName, const Matrix3<double>& matrix, bool errorIfMissing = true) const;
-
-    // Set a 4x4 matrix uniform value to this shader (be careful if the uniform is not
-    // used in the shader, the compiler will remove it, then when you will try to set it, an assert will occur)
-    void setMatrix4x4Uniform(const std::string& variableName, const float* matrix, bool transpose = false, bool errorIfMissing = true) const;
 
     // Set a 4x4 matrix uniform value to this shader (be careful if the uniform is not
     // used in the shader, the compiler will remove it, then when you will try to set it, an assert will occur)

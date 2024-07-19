@@ -14,7 +14,7 @@ Shader::Shader()
 
 }
 
-Shader::Shader(const std::string& filenameVertexShader, const std::string& filenameFragmentShader)
+Shader::Shader(const std::string filenameVertexShader, const std::string filenameFragmentShader)
     : Shader()
 {
     create(filenameVertexShader, filenameFragmentShader);
@@ -24,7 +24,7 @@ Shader::~Shader() {
     destroy();
 }
 
-bool Shader::create(const std::string& filenameVertexShader, const std::string& filenameFragmentShader) {
+bool Shader::create(const std::string filenameVertexShader, const std::string filenameFragmentShader) {
     // Set the shader filenames
     m_filenameVertexShader = filenameVertexShader;
     m_filenameFragmentShader = filenameFragmentShader;
@@ -241,14 +241,6 @@ void Shader::setVector4Uniform(const std::string& variableName, const Vector4<do
     }
 }
 
-void Shader::setMatrix3x3Uniform(const std::string& variableName, const float* matrix, bool transpose, bool errorIfMissing) const {
-    assert(m_programObjectId != 0);
-    GLint location = getUniformLocation(variableName, errorIfMissing);
-    if (location != -1) {
-        glUniformMatrix3fv(location, 1, transpose, matrix);
-    }
-}
-
 void
 Shader::setMatrix3x3Uniform(const std::string& variableName, const Matrix3<double>& matrix, bool errorIfMissing) const {
     assert(m_programObjectId != 0);
@@ -261,14 +253,6 @@ Shader::setMatrix3x3Uniform(const std::string& variableName, const Matrix3<doubl
     GLint location = getUniformLocation(variableName, errorIfMissing);
     if (location != -1) {
         glUniformMatrix3fv(location, 1, true, mat);
-    }
-}
-
-void Shader::setMatrix4x4Uniform(const std::string& variableName, const float* matrix, bool transpose, bool errorIfMissing) const {
-    assert(m_programObjectId != 0);
-    GLint location = getUniformLocation(variableName, errorIfMissing);
-    if (location != -1) {
-        glUniformMatrix4fv(location, 1, transpose, matrix);
     }
 }
 

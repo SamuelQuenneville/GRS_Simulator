@@ -34,10 +34,10 @@ public:
         PAYLOAD
     };
 
-    virtual void update(double dt) = 0;
+    virtual void update(double dt);
     virtual Vector3<double> calcExternalForce();
 
-    virtual void setInitialStates(initialStates& states) = 0;
+    virtual void setInitialStates(initialStates& states);
 
     virtual void addConnection(Node& node);
     virtual void deleteConnection(Node& node);
@@ -57,7 +57,7 @@ public:
     std::vector<Node*> connectedNode;
 
 private:
-    Transform m_transform;
+    Transform m_transform = Transform::identity();
     Vector3<double> m_angularVelocity{0,0,0};   // Earth reference frame
 };
 

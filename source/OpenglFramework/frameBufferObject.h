@@ -18,9 +18,9 @@ public:
     FrameBufferObject();
     ~FrameBufferObject();
 
-    bool create(uint32_t width, uint32_t height, bool needRenderBuffer = true);
+    bool create(unsigned int width, unsigned int height, bool needRenderBuffer = true);
 
-    void attachTexture(uint32_t position, uint32_t textureId) const;
+    void attachTexture(unsigned int position, unsigned int textureId) const;
 
     void bind() const;
     void unbind() const;
@@ -28,8 +28,8 @@ public:
     void destroy();
 
 private:
-    uint32_t m_frameBufferId;
-    uint32_t m_renderBufferId;
+    unsigned int m_frameBufferId;
+    unsigned int m_renderBufferId;
 };
 
 

@@ -48,7 +48,7 @@ void Camera::setFieldOfView(float fov) {
     m_updateProjectionMatrix();
 }
 
-void Camera::setZoom(float fraction) {
+void Camera::setZoom(double fraction) {
     Vector3<double> zoomVector(0, 0, m_sceneRadius * fraction);
     translateLocal(zoomVector);
 }

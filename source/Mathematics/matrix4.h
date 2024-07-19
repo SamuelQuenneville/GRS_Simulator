@@ -170,19 +170,19 @@ public:
 
     // * operator
     Vector3<T> operator*(const Vector3<T>& rhs) const {
-        Vector3<T> u = {{m_data[0][0]*rhs.x() + m_data[0][1]*rhs.y() + m_data[0][2]*rhs.z() + m_data[0][3]},
-                        {m_data[1][0]*rhs.x() + m_data[1][1]*rhs.y() + m_data[1][2]*rhs.z() + m_data[1][3]},
-                        {m_data[2][0]*rhs.x() + m_data[2][1]*rhs.y() + m_data[2][2]*rhs.z() + m_data[2][3]}};
+        Vector3<T> u = {m_data[0][0]*rhs.x() + m_data[0][1]*rhs.y() + m_data[0][2]*rhs.z() + m_data[0][3],
+                        m_data[1][0]*rhs.x() + m_data[1][1]*rhs.y() + m_data[1][2]*rhs.z() + m_data[1][3],
+                        m_data[2][0]*rhs.x() + m_data[2][1]*rhs.y() + m_data[2][2]*rhs.z() + m_data[2][3]};
         double w = m_data[3][0]*rhs.x() + m_data[3][1]*rhs.y() + m_data[3][2]*rhs.z() + m_data[3][3];
         return u/w;
     }
 
     // * operator
     Vector4<T> operator*(const Vector4<T>& rhs) const {
-        Vector4<T> u = {{m_data[0][0]*rhs.x() + m_data[0][1]*rhs.y() + m_data[0][2]*rhs.z() + rhs.w*m_data[0][3]},
-                        {m_data[1][0]*rhs.x() + m_data[1][1]*rhs.y() + m_data[1][2]*rhs.z() + rhs.w*m_data[1][3]},
-                        {m_data[2][0]*rhs.x() + m_data[2][1]*rhs.y() + m_data[2][2]*rhs.z() + rhs.w*m_data[2][3]},
-                        {m_data[3][0]*rhs.x() + m_data[3][1]*rhs.y() + m_data[3][2]*rhs.z() + rhs.w*m_data[3][3]}};
+        Vector4<T> u = {m_data[0][0]*rhs.x() + m_data[0][1]*rhs.y() + m_data[0][2]*rhs.z() + rhs.w*m_data[0][3],
+                        m_data[1][0]*rhs.x() + m_data[1][1]*rhs.y() + m_data[1][2]*rhs.z() + rhs.w*m_data[1][3],
+                        m_data[2][0]*rhs.x() + m_data[2][1]*rhs.y() + m_data[2][2]*rhs.z() + rhs.w*m_data[2][3],
+                        m_data[3][0]*rhs.x() + m_data[3][1]*rhs.y() + m_data[3][2]*rhs.z() + rhs.w*m_data[3][3]};
         if(u.w != 0)
             return u/u.w;
         else
@@ -371,22 +371,6 @@ public:
             }
             std::cout << std::endl;
         }
-    }
-
-    // Return the pointer to the data array of the matrix
-    float* dataBlock() {
-        return m_data[0];
-    }
-
-    // Return the constant pointer to the data array of the matrix
-    const float* dataBlock() const {
-        return m_data[0];
-    }
-
-    // Return a given value from the matrix
-    T getValue(int i, int j) const {
-        assert(i >= 0 && i<4 && j >= 0 && j<4);
-        return m_data[i][j];
     }
 
     // Return the trace of the matrix

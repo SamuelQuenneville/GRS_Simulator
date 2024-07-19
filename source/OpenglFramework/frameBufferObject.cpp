@@ -19,7 +19,7 @@ FrameBufferObject::~FrameBufferObject() {
     destroy();
 }
 
-bool FrameBufferObject::create(uint32_t width, uint32_t height, bool needRenderBuffer) {
+bool FrameBufferObject::create(unsigned int width, unsigned int height, bool needRenderBuffer) {
     // Destroy the current FBO
     destroy();
 
@@ -53,7 +53,7 @@ bool FrameBufferObject::create(uint32_t width, uint32_t height, bool needRenderB
     return true;
 }
 
-void FrameBufferObject::attachTexture(uint32_t position, uint32_t textureId) const {
+void FrameBufferObject::attachTexture(unsigned int position, unsigned int textureId) const {
     assert(m_frameBufferId);
 
     // Bind the current FBO

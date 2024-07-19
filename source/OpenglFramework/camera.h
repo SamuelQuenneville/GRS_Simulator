@@ -30,7 +30,7 @@ public:
     void setFieldOfView(float fov);
 
     // Set the zoom of the camera (a fraction between 0 and 1)
-    void setZoom(float fraction);
+    void setZoom(double fraction);
 
     void translateCamera(float dx, float dy, const Vector3<double>& worldPoint);
 

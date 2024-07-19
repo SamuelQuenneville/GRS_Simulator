@@ -58,3 +58,11 @@ void RigidBody::setAngularVelocity(const Vector3<double>& newAngularVelocity) {
 const Vector3<double> &RigidBody::getAngularVelocity() {
     return m_angularVelocity;
 }
+
+void RigidBody::update(double dt) {
+
+}
+
+void RigidBody::setInitialStates(initialStates &states) {
+
+}
