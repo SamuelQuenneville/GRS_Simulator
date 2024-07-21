@@ -13,6 +13,7 @@
 #include "world.h"
 #include "RigidBodyAndLink/SceneObjects/cube.h"
 #include "RigidBodyAndLink/SceneObjects/aircraft.h"
+#include "RigidBodyAndLink/SceneObjects/launcher.h"
 
 class OneAircraftGrounded : public Scene {
 
@@ -31,7 +32,7 @@ public:
 protected:
     // Floor
     Cube* m_ground{};
-    Aircraft* m_aircraft;
+    Launcher* m_launcher{};
 
     World* m_world;
 

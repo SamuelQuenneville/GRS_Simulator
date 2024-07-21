@@ -120,10 +120,10 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
                     int n = sscanf(buffer.c_str(), "%*s %d/%d %d/%d %d/%d %d/%d", &id1, &tId1, &id2, &tId2, &id3, &tId3, &id4, &tId4);
                     if (n == 8) isFaceQuad = true;
 
-                    uvsIndices.push_back(tId1-1);
-                    uvsIndices.push_back(tId2-1);
-                    uvsIndices.push_back(tId3-1);
-                    if (isFaceQuad) uvsIndices.push_back(tId4-1);
+                    uvsIndices.emplace_back(tId1-1);
+                    uvsIndices.emplace_back(tId2-1);
+                    uvsIndices.emplace_back(tId3-1);
+                    if (isFaceQuad) uvsIndices.emplace_back(tId4-1);
                 }
                 else {
                     tmp = line.substr(found1+1);
@@ -138,22 +138,22 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
                     else {
                         int n = sscanf(buffer.c_str(), "%*s %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d", &id1, &tId1, &nId1, &id2, &tId2, &nId2, &id3, &tId3, &nId3, &id4, &tId4, &nId4);
                         if (n == 12) isFaceQuad = true;
-                        uvsIndices.push_back(tId1-1);
-                        uvsIndices.push_back(tId2-1);
-                        uvsIndices.push_back(tId3-1);
-                        if (isFaceQuad) uvsIndices.push_back(tId4-1);
+                        uvsIndices.emplace_back(tId1-1);
+                        uvsIndices.emplace_back(tId2-1);
+                        uvsIndices.emplace_back(tId3-1);
+                        if (isFaceQuad) uvsIndices.emplace_back(tId4-1);
                     }
-                    normalsIndices.push_back(nId1-1);
-                    normalsIndices.push_back(nId2-1);
-                    normalsIndices.push_back(nId3-1);
-                    if (isFaceQuad) normalsIndices.push_back(nId4-1);
+                    normalsIndices.emplace_back(nId1-1);
+                    normalsIndices.emplace_back(nId2-1);
+                    normalsIndices.emplace_back(nId3-1);
+                    if (isFaceQuad) normalsIndices.emplace_back(nId4-1);
                 }
             }
-            verticesIndices.push_back(id1-1);
-            verticesIndices.push_back(id2-1);
-            verticesIndices.push_back(id3-1);
-            if (isFaceQuad) verticesIndices.push_back((id4-1));
-            isQuad.push_back(isFaceQuad);
+            verticesIndices.emplace_back(id1-1);
+            verticesIndices.emplace_back(id2-1);
+            verticesIndices.emplace_back(id3-1);
+            if (isFaceQuad) verticesIndices.emplace_back((id4-1));
+            isQuad.emplace_back(isFaceQuad);
         }
     }
 
@@ -196,8 +196,8 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
         // For each vertex, we check if there is already a vertex with same UV and normals.
         for (int v = 0; v < nbVertices; v++) {
 
-            int normalIndex = hasNormals ? normalsIndices[i + v] : -1;
-            int uvIndex = hasUvs ? uvsIndices[i + v] : -1;
+            int normalIndex = int(hasNormals ? normalsIndices[i + v] : -1);
+            int uvIndex = int(hasUvs ? uvsIndices[i + v] : -1);
 
             // If the vertex with same UV and normal doesn't exist yet in the map
             std::tuple<int, int, int> key = std::make_tuple(verticesIndices[i+v], normalIndex, uvIndex);
@@ -205,20 +205,20 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
             if (itFound == mapVertNormTexToVertexIndex.end()) {
 
                 // Create a new vertex
-                newVerticesIndices[v]= meshVertices.size();
-                meshVertices.push_back(vertices[verticesIndices[i+v]]);
+                newVerticesIndices[v]= int(meshVertices.size());
+                meshVertices.emplace_back(vertices[verticesIndices[i+v]]);
                 if (hasNormals) {
-                    meshNormals.push_back(normals[normalsIndices[i+v]]);
+                    meshNormals.emplace_back(normals[normalsIndices[i+v]]);
                 }
                 if (hasUvs) {
-                    meshUVs.push_back(uvs[uvsIndices[i+v]]);
+                    meshUVs.emplace_back(uvs[uvsIndices[i+v]]);
                 }
 
                 mapVertNormTexToVertexIndex.insert(std::make_pair(key, newVerticesIndices[v]));
             }
             else {
                 // Get the vertex index to use
-                newVerticesIndices[v] = itFound->second;
+                newVerticesIndices[v] = int(itFound->second);
             }
         }
 
@@ -232,40 +232,40 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
         if (!isQuad[j]) {
 
             // Add the vertex indices
-            meshIndices[meshPart].push_back(i1);
-            meshIndices[meshPart].push_back(i2);
-            meshIndices[meshPart].push_back(i3);
+            meshIndices[meshPart].emplace_back(i1);
+            meshIndices[meshPart].emplace_back(i2);
+            meshIndices[meshPart].emplace_back(i3);
 
             i+=3;
         }
         else {  // If the current vertex is in a quad
 
-            Vector3<float> v1 = meshVertices[i1];
-            Vector3<float> v2 = meshVertices[i2];
-            Vector3<float> v3 = meshVertices[i3];
-            Vector3<float> v4 = meshVertices[i4];
+            Vector3<float> v4 = meshVertices[i1];
+            Vector3<float> v5 = meshVertices[i2];
+            Vector3<float> v6 = meshVertices[i3];
+            Vector3<float> v7 = meshVertices[i4];
 
-            Vector3<float> v13 = v3-v1;
-            Vector3<float> v12 = v2-v1;
-            Vector3<float> v14 = v4-v1;
+            Vector3<float> v13 = v6-v4;
+            Vector3<float> v12 = v5-v4;
+            Vector3<float> v14 = v7-v4;
 
             float a1 = v13.dot(v12);
             float a2 = v13.dot(v14);
             if((a1 >= 0 && a2 <= 0) || (a1 <= 0 && a2 >= 0)) {
-                meshIndices[meshPart].push_back(i1);
-                meshIndices[meshPart].push_back(i2);
-                meshIndices[meshPart].push_back(i3);
-                meshIndices[meshPart].push_back(i1);
-                meshIndices[meshPart].push_back(i3);
-                meshIndices[meshPart].push_back(i4);
+                meshIndices[meshPart].emplace_back(i1);
+                meshIndices[meshPart].emplace_back(i2);
+                meshIndices[meshPart].emplace_back(i3);
+                meshIndices[meshPart].emplace_back(i1);
+                meshIndices[meshPart].emplace_back(i3);
+                meshIndices[meshPart].emplace_back(i4);
             }
             else {
-                meshIndices[meshPart].push_back(i1);
-                meshIndices[meshPart].push_back(i2);
-                meshIndices[meshPart].push_back(i4);
-                meshIndices[meshPart].push_back(i2);
-                meshIndices[meshPart].push_back(i3);
-                meshIndices[meshPart].push_back(i4);
+                meshIndices[meshPart].emplace_back(i1);
+                meshIndices[meshPart].emplace_back(i2);
+                meshIndices[meshPart].emplace_back(i4);
+                meshIndices[meshPart].emplace_back(i2);
+                meshIndices[meshPart].emplace_back(i3);
+                meshIndices[meshPart].emplace_back(i4);
             }
 
             i+=4;

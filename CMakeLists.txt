@@ -107,6 +107,8 @@ set(GRS_RIGID_BODIES_AND_LINK
         source/RigidBodyAndLink/SceneObjects/cube.h
         source/RigidBodyAndLink/SceneObjects/aircraft.cpp
         source/RigidBodyAndLink/SceneObjects/aircraft.h
+        source/RigidBodyAndLink/SceneObjects/launcher.cpp
+        source/RigidBodyAndLink/SceneObjects/launcher.h
 )
 
 set(GRS_SCENES
