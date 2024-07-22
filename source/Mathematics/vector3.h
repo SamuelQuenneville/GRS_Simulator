@@ -24,6 +24,13 @@ public:
 
     Vector3(T x, T y, T z) : m_elements{x, y, z} {}
 
+    template <typename U>
+    explicit Vector3(const Vector3<U>& v) {
+        m_elements[0] = static_cast<T>(v[0]);
+        m_elements[1] = static_cast<T>(v[1]);
+        m_elements[2] = static_cast<T>(v[2]);
+    }
+
     T& operator[](int index) {
         if (index >= 0 && index < 3) {
             return m_elements[index];
@@ -117,6 +124,12 @@ public:
         os << vec.m_elements[0] << "," << vec.m_elements[1] << "," << vec.m_elements[2];
         return os;
     }
+
 };
+
+template <typename T, typename U>
+Vector3<T> cast(const Vector3<U>& v) {
+    return Vector3<T>(v);
+}
 
 #endif //GRS_SIMULATOR_VECTOR3_H

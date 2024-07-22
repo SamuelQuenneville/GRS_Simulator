@@ -109,6 +109,8 @@ set(GRS_RIGID_BODIES_AND_LINK
         source/RigidBodyAndLink/SceneObjects/aircraft.h
         source/RigidBodyAndLink/SceneObjects/launcher.cpp
         source/RigidBodyAndLink/SceneObjects/launcher.h
+        source/RigidBodyAndLink/SceneObjects/tetherLine.cpp
+        source/RigidBodyAndLink/SceneObjects/tetherLine.h
 )
 
 set(GRS_SCENES

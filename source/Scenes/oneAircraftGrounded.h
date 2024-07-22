@@ -14,11 +14,12 @@
 #include "RigidBodyAndLink/SceneObjects/cube.h"
 #include "RigidBodyAndLink/SceneObjects/aircraft.h"
 #include "RigidBodyAndLink/SceneObjects/launcher.h"
+#include "RigidBodyAndLink/SceneObjects/tetherLine.h"
 
 class OneAircraftGrounded : public Scene {
 
 public:
-    explicit OneAircraftGrounded(const std::string& name, World* world);
+    explicit OneAircraftGrounded(World *world);
     ~OneAircraftGrounded() override;
 
     void createPhysicsWorld();
@@ -29,14 +30,19 @@ public:
     void updatePhysics() override;
     void reset() override;
 
+    virtual void renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;
+
 protected:
-    // Floor
+    World* m_world;
+
     Cube* m_ground{};
     Launcher* m_launcher{};
 
-    World* m_world;
-
-
+    // All the points to render the lines
+    TetherLine* m_tether{};
+    std::vector<Vector3<float>> mLinePoints;
+    VertexBufferObject mVBOVertices;
+    VertexArrayObject mVAO;
 };
 
 

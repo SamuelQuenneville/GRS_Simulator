@@ -14,6 +14,7 @@ SimulationViewer::SimulationViewer()
     , m_window(nullptr)
     , m_gui(this)
     , m_scene(nullptr)
+    , m_elapsedTime(0)
     , m_totalDynamicTime(0)
     , m_dynamicStepTime(0)
 
@@ -87,8 +88,6 @@ void SimulationViewer::start() {
             m_scene->reshape(m_windowWidth, m_windowHeight);
             m_scene->setWindowDimension(m_windowWidth, m_windowHeight);
             m_scene->reset();
-
-            //m_timer.start();
         }
 
         if (m_sceneCreated) {
@@ -186,8 +185,7 @@ void SimulationViewer::m_createScene() {
             m_sceneCreated = true;
             break;
         case ONE_AIRCRAFT_GROUNDED:
-            sceneName = "One Aircraft Grounded";
-            m_scene = new OneAircraftGrounded(sceneName, m_world.get());
+            m_scene = new OneAircraftGrounded(m_world.get());
             m_sceneCreated = true;
             break;
         case TWO_AIRCRAFT_GROUNDED_V:
@@ -301,6 +299,7 @@ void SimulationViewer::m_updateDynamics() {
 
             // Take a physics simulation step
             m_scene->updatePhysics();
+            m_elapsedTime += m_world->simulationConfiguration.dt.count();
 
             m_dynamicStepTime = glfwGetTime() - currentTime;
 

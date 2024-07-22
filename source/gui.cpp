@@ -37,6 +37,7 @@ void Gui::init(GLFWwindow* window) {
 
 void Gui::update() {
     m_fileLabel->set_caption(std::string("File : ") + m_configFileName);
+    m_simRunTimeLabel->set_caption(std::string("Run Time : ") + doubleToString(m_viewer->getElapsedTime(),2));
 }
 
 void Gui::drawAll() {

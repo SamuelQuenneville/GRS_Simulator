@@ -25,9 +25,9 @@ public:
     ~SimulationViewer();
 
     void start();
-    //void render();
 
     bool onWindowResized(int width, int height);
+    [[nodiscard]] double getElapsedTime() const {return m_elapsedTime;};
 
     // Default event handler
     void keyboard_event(int key, int scancode, int action, int modifiers);
@@ -53,6 +53,7 @@ private:
     Gui m_gui;
     Scene* m_scene;
 
+    double m_elapsedTime;
     double m_totalDynamicTime;
     double m_dynamicStepTime;
 
