@@ -8,12 +8,12 @@
 
 #include "scene.h"
 
-Scene::Scene()
+Scene::Scene(const std::string& executablePath)
     : m_elapsedTime(std::chrono::seconds::zero())
-    , m_depthShader("C:/Users/ques2902/Desktop//Shaders/depth.vert", "C:/Users/ques2902/Desktop//Shaders/depth.frag")
-    , m_phongShader("C:/Users/ques2902/Desktop//Shaders/phong.vert", "C:/Users/ques2902/Desktop//Shaders/phong.frag")
-    , m_colorShader("C:/Users/ques2902/Desktop//Shaders/color.vert", "C:/Users/ques2902/Desktop//Shaders/color.frag")
-    , m_quadShader("C:/Users/ques2902/Desktop//Shaders/quad.vert", "C:/Users/ques2902/Desktop//Shaders/quad.frag")
+    , m_depthShader(executablePath + R"(\source\Shaders\depth.vert)", executablePath + R"(\source\Shaders\depth.frag)")
+    , m_phongShader(executablePath + R"(\source\Shaders\phong.vert)", executablePath + R"(\source\Shaders\phong.frag)")
+    , m_colorShader(executablePath + R"(\source\Shaders\color.vert)", executablePath + R"(\source\Shaders\color.frag)")
+    , m_quadShader(executablePath + R"(\source\Shaders\quad.vert)", executablePath + R"(\source\Shaders\quad.frag)")
     , m_lastMouseX(0)
     , m_lastMouseY(0)
     , m_windowWidth(0)
@@ -29,8 +29,8 @@ Scene::Scene()
     m_light0.translateWorld({30.0f, 80.0f, 30.0f});
     m_light1.translateWorld({30.0f, 80.0f, 30.0f});
 
-    float lightIntensity0 = 0.5;
-    float lightIntensity1 = 0.2;
+    float lightIntensity0 = 0.5f;
+    float lightIntensity1 = 0.2f;
     Color lightColor0(lightIntensity0 * 1.0f, lightIntensity0 * 1.0f, lightIntensity0 * 1.0f, 1.0f);
     Color lightColor1(lightIntensity1 * 1.0f, lightIntensity1 * 1.0f, lightIntensity1 * 1.0f, 1.0f);
 
@@ -44,7 +44,7 @@ Scene::Scene()
     for (auto & m_shadowMapLightCamera : m_shadowMapLightCameras) {
         m_shadowMapLightCamera.setDimensions(SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT);
         m_shadowMapLightCamera.setFieldOfView(100.0f);
-        m_shadowMapLightCamera.setSceneRadius(100);
+        m_shadowMapLightCamera.setSceneRadius(100.0f);
     }
 
     m_shadowMapBiasMatrix.setAllValues(0.5, 0.0, 0.0, 0.5,
@@ -143,7 +143,7 @@ void Scene::render() {
         i.bind();
     }
     for (int i = 0; i < NB_SHADOW_MAPS; i++) {
-        textureUnits[i] = GLint(m_shadowMapTexture[i].getUnit());
+        textureUnits[i] = static_cast<GLint>(m_shadowMapTexture[i].getUnit());
     }
 
     // Set the variables of the phong shader
@@ -157,7 +157,7 @@ void Scene::render() {
     m_phongShader.setVector3Uniform("light1DiffuseColor", {m_light1.getDiffuseColor().r, m_light1.getDiffuseColor().g, m_light1.getDiffuseColor().b});
     m_phongShader.setIntUniform("shadowMapSampler0", textureUnits[0]);
     m_phongShader.setIntUniform("isShadowEnabled", true);
-    m_phongShader.setVector2Uniform("shadowMapDimension", {double(SHADOWMAP_WIDTH), double(SHADOWMAP_HEIGHT)});
+    m_phongShader.setVector2Uniform("shadowMapDimension", {static_cast<double>(SHADOWMAP_WIDTH), static_cast<double>(SHADOWMAP_HEIGHT)});
     m_phongShader.unbind();
 
     // Set the variables of the color shader
@@ -178,23 +178,23 @@ void Scene::render() {
     renderSinglePass(m_phongShader, worldToCameraMatrix);
 
     // Is shadow mapping is enabled
-    for (const auto & i : m_shadowMapTexture) {
-        i.unbind();
+    for (const auto & texture : m_shadowMapTexture) {
+        texture.unbind();
     }
 }
 
-void Scene::renderSinglePass(Shader &shader, const Matrix4<double> &worldToCameraMatrix) {
+void Scene::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
     // Bind the shader
     shader.bind();
 
     // Render all the moving physics objects of the scene
-    for (auto & m_physicsObject : m_physicsObjects) {
-        m_physicsObject->render(shader, worldToCameraMatrix);
+    for (auto & physicsObject : m_physicsObjects) {
+        physicsObject->render(shader, worldToCameraMatrix);
     }
 
     // Render the static objects (floor could be obstacle...)
-    for (auto & m_staticObject : m_staticObjects) {
-        m_staticObject->render(shader, worldToCameraMatrix);
+    for (auto & staticObject : m_staticObjects) {
+        staticObject->render(shader, worldToCameraMatrix);
     }
 
     // Unbind the shader
@@ -226,11 +226,11 @@ Scene::mouseMotionEvent(double xMouse, double yMouse, int leftButtonState, int r
     }
         // Translation
     else if (middleButtonState == GLFW_PRESS || rightButtonState == GLFW_PRESS || (leftButtonState == GLFW_PRESS && altKeyState == GLFW_PRESS)) {
-        m_translate(xMouse, yMouse);
+        m_translate(static_cast<int>(xMouse), static_cast<int>(yMouse));
     }
         // Rotation
     else if (leftButtonState == GLFW_PRESS) {
-        m_rotate(xMouse, yMouse);
+        m_rotate(static_cast<int>(xMouse), static_cast<int>(yMouse));
     }
 
     // Remember the mouse position
@@ -283,10 +283,9 @@ void Scene::m_createShadowMapFrameBufferObjectAndTexture() {
 
         m_shadowMapTexture[i].setUnit(i);
 
-        // Make sure that texture lookups outside the texture coords range will not
-        // treat as being in shadow
+        // Make sure that texture lookups outside the texture coords range will not treat as being in shadow
         glBindTexture(GL_TEXTURE_2D, m_shadowMapTexture[i].getID());
-        GLfloat border[] = { 1.0f, 0.0f, 0.0f, 0.0f };
+        GLfloat border[] = {1.0f, 0.0f, 0.0f, 0.0f};
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border);
         glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -303,10 +302,10 @@ void Scene::m_createShadowMapFrameBufferObjectAndTexture() {
     }
 }
 
-void Scene::m_setScenePosition(const Vector3<double> &position, double sceneRadius) {
+void Scene::m_setScenePosition(const Vector3<double>& position, double sceneRadius) {
     // Set the position and radius of the scene
     m_centerOfScene = position;
-    m_camera.setSceneRadius(sceneRadius);
+    m_camera.setSceneRadius(static_cast<float>(sceneRadius));
 
     // Reset the camera position and zoom in order to view all the scene
     m_resetCameraToViewAll();
@@ -332,7 +331,7 @@ void Scene::m_translate(int xMouse, int yMouse) {
     auto dy = static_cast<float>(yMouse - m_lastMouseY);
 
     // Translate the camera
-    m_camera.translateCamera(-dx / float(m_camera.getWidth()),-dy / float(m_camera.getHeight()), m_centerOfScene);
+    m_camera.translateCamera(-dx / static_cast<float>(m_camera.getWidth()),-dy / static_cast<float>(m_camera.getHeight()), m_centerOfScene);
 }
 
 void Scene::m_rotate(int xMouse, int yMouse) {
@@ -345,14 +344,14 @@ void Scene::m_rotate(int xMouse, int yMouse) {
     const double newVerticalAngle = m_currentCameraVerticalAngle + deltaVertRotationAngle;
 
     // Limit Vertical angle
-    constexpr double piOver2 = M_PI * 0.5f;
+    constexpr double piOver2 = M_PI * 0.5;
     if (newVerticalAngle > piOver2 || newVerticalAngle < -piOver2) {
         deltaVertRotationAngle = 0;
     }
 
     Vector3 localVertAxis = m_camera.getTransformMatrix().getUpperLeft3x3Matrix().getInverse() * Vector3<double>(0, 1, 0);
-    m_camera.rotateAroundLocalPoint(Vector3<double>(1, 0, 0), deltaVertRotationAngle, m_centerOfScene);
-    m_camera.rotateAroundLocalPoint(localVertAxis, deltaHorizRotationAngle, m_centerOfScene);
+    m_camera.rotateAroundLocalPoint(Vector3<double>(1, 0, 0), static_cast<float>(deltaVertRotationAngle), m_centerOfScene);
+    m_camera.rotateAroundLocalPoint(localVertAxis, static_cast<float>(deltaHorizRotationAngle), m_centerOfScene);
 
     m_currentCameraVerticalAngle += deltaVertRotationAngle;
 }

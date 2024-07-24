@@ -21,7 +21,7 @@ public:
     float getThrustOut(float desiredSpeed, bool disableIntegrator);
     void setAircraftStates(const fixedWingStates& aircraftStates);
 
-    const PID::pidInfo& getPidInfo() const { return m_pidInfo;};
+    [[nodiscard]] const PID::pidInfo& getPidInfo() const { return m_pidInfo;};
 
 private:
     worldPhysics m_physics;

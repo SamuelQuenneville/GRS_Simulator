@@ -14,6 +14,8 @@ SimulationViewer::SimulationViewer()
     , m_window(nullptr)
     , m_gui(this)
     , m_scene(nullptr)
+    , m_singlePhysicsStepEnabled(false)
+    , m_singlePhysicsStepDone(false)
     , m_elapsedTime(0)
     , m_totalDynamicTime(0)
     , m_dynamicStepTime(0)
@@ -33,7 +35,7 @@ SimulationViewer::SimulationViewer()
 }
 
 SimulationViewer::~SimulationViewer(){
-    //m_destroyScenes();
+    m_destroyScenes();
 }
 
 void SimulationViewer::start() {
@@ -126,7 +128,7 @@ bool SimulationViewer::onWindowResized(int width, int height) {
 }
 
 void SimulationViewer::keyboard_event(int key, int scancode, int action, int modifiers) {
-    //mGui.onKeyboardEvent(key, scancode, action, modifiers);
+    m_gui.onKeyboardEvent(key, scancode, action, modifiers);
 
     // Close application on escape key
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
@@ -211,9 +213,23 @@ void SimulationViewer::m_createScene() {
     }
 }
 
+void SimulationViewer::m_destroyScenes() {
+    delete m_scene;
+    m_scene = nullptr;
+}
+
 void SimulationViewer::m_playSimulation() {
     if (!m_timer.isRunning()) {
         m_timer.start();
+    }
+}
+
+void SimulationViewer::m_toggleTakeSingleStep() {
+    m_singlePhysicsStepEnabled = true;
+    m_singlePhysicsStepDone = false;
+
+    if (m_timer.isRunning()) {
+        m_singlePhysicsStepEnabled = false;
     }
 }
 
@@ -309,17 +325,30 @@ void SimulationViewer::m_updateDynamics() {
     }
 }
 
+void SimulationViewer::m_updateSingleDynamicsStep() {
+    assert(!m_timer.isRunning());
+    m_scene->updatePhysics();
+    m_elapsedTime += m_world->simulationConfiguration.dt.count();
+}
+
 void SimulationViewer::m_update() {
     double currentTime = glfwGetTime();
 
-    m_updateDynamics();
+    // Update the physics
+    if (m_singlePhysicsStepEnabled && !m_singlePhysicsStepDone) {
+        m_updateSingleDynamicsStep();
+        m_singlePhysicsStepDone = true;
+    }
+    else {
+        m_updateDynamics();
+    }
 
     // Compute the physics update time
     m_totalDynamicTime = glfwGetTime() - currentTime;
 
     // Compute the interpolation factor
     double factor = m_timer.computeInterpolationFactor(m_world->simulationConfiguration.dt);
-    assert(factor >= 0.0f && factor <= 1.0f);
+    assert(factor >= 0.0 && factor <= 1.0);
 
     // Notify the scene about the interpolation factor
     m_scene->setInterpolationFactor(factor);
@@ -329,7 +358,8 @@ void SimulationViewer::m_update() {
 }
 
 void SimulationViewer::m_render() {
-    int bufferWidth, bufferHeight;
+    int bufferWidth;
+    int bufferHeight;
     glfwMakeContextCurrent(m_window);
     glfwGetFramebufferSize(m_window, &bufferWidth, &bufferHeight);
 

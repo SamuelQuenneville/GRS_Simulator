@@ -75,7 +75,7 @@ float PID::updateAll(float target, float measurement, bool limit) {
     float derivativeOut = m_derivative * m_kd;
 
     // calculate slew limit modifier and applied them to PD
-    m_pidInfo.Dmod = m_slewLimiter.modifier((m_pidInfo.P + m_pidInfo.D) * m_slewLimitScale, m_dt);
+    m_pidInfo.Dmod = m_slewLimiter.modifier((m_pidInfo.P + m_pidInfo.D) * static_cast<float>(m_slewLimitScale), m_dt);
     m_pidInfo.slew_rate = m_slewLimiter.getSlewRate();
 
     proportionalOut *= m_pidInfo.Dmod;

@@ -8,10 +8,6 @@
 
 #include "quaternion.h"
 
-std::string Quaternion::toString() const {
-    return "Quaternion(" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z) + "," + std::to_string(w) + ")";
-}
-
 void Quaternion::m_initWithEulerAngles(double angleX, double angleY, double angleZ) {
     double angle = angleX * 0.5;
     const double sinX = std::sin(angle);
@@ -47,12 +43,6 @@ Quaternion::Quaternion()
 
 Quaternion::Quaternion(double newX, double newY, double newZ, double newW)
     : x(newX), y(newY), z(newZ), w(newW)
-{
-
-}
-
-Quaternion::Quaternion(const Vector3<double>& vector, double newW)
-    : x(vector.x()), y(vector.y()), z(vector.z()), w(newW)
 {
 
 }
@@ -128,18 +118,6 @@ void Quaternion::setAllValues(double newX, double newY, double newZ, double newW
     w = newW;
 }
 
-void Quaternion::setToZero() {
-    setAllValues(0,0,0,0);
-}
-
-void Quaternion::setToIdentity() {
-    setAllValues(0,0,0,1);
-}
-
-Vector3<double> Quaternion::getVector() const {
-    return {x,y,z};
-}
-
 double Quaternion::lengthSquare() const {
     return x*x + y*y + z*z + w*w;
 }
@@ -158,26 +136,6 @@ void Quaternion::normalize() {
     } else {
         throw std::invalid_argument("Can't normalize zero quaternion"+std::string(__FILE__)+" line: "+std::to_string(__LINE__));
     }
-}
-
-void Quaternion::inverse() {
-    x = -x;
-    y = -y;
-    z = -z;
-}
-
-Quaternion Quaternion::getUnit() const {
-    double len = length();
-
-    if (len != 0) {
-        return {x / len, y / len, z / len, w / len};
-    } else {
-        throw std::invalid_argument("Can't normalize zero quaternion"+std::string(__FILE__)+" line: "+std::to_string(__LINE__));
-    }
-}
-
-Quaternion Quaternion::getConjugate() const {
-    return {-x, -y, -z, w};
 }
 
 Quaternion Quaternion::getInverse() const {
@@ -224,44 +182,8 @@ Quaternion Quaternion::fromEulerAngles(double angleX, double angleY, double angl
     return quaternion;
 }
 
-Quaternion Quaternion::fromEulerAngles(const Vector3<double>& eulerAngles) {
-    Quaternion quaternion;
-    quaternion.m_initWithEulerAngles(eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
-
-    return quaternion;
-}
-
 double Quaternion::dot(const Quaternion& quaternion) const {
     return (x*quaternion.x + y*quaternion.y + z*quaternion.z + w*quaternion.w);
-}
-
-void Quaternion::getRotationAngleAxis(double& angle, Vector3<double>& axis) const {
-
-    // Compute the rotation angle
-    angle = std::acos(w) * 2.0;
-
-    // Compute the 3D rotation axis
-    Vector3 rotationAxis(x, y, z);
-
-    // Normalize the rotation axis
-    rotationAxis = rotationAxis.normalize();
-
-    // Set the rotation axis values
-    axis.setAllValues(rotationAxis.x(), rotationAxis.y(), rotationAxis.z());
-}
-
-bool Quaternion::isFinite() const {
-    return std::isfinite(x) && std::isfinite(y) && std::isfinite(z) && std::isfinite(w);
-}
-
-bool Quaternion::isUnit() const {
-    const double length = std::sqrt(x*x + y*y + z*z + w*w);
-    const double tolerance = 1e-5f;
-    return std::abs(length - 1.0) < tolerance;
-}
-
-bool Quaternion::isValid() const {
-    return isFinite() && isUnit();
 }
 
 Quaternion Quaternion::slerp(const Quaternion &quaternion1, const Quaternion& quaternion2, double t) {
@@ -308,7 +230,7 @@ Quaternion Quaternion::operator-(const Quaternion& quaternion) const {
     return {x - quaternion.x, y - quaternion.y, z - quaternion.z, w - quaternion.w};
 }
 
-Quaternion &Quaternion::operator+=(const Quaternion& quaternion) {
+Quaternion& Quaternion::operator+=(const Quaternion& quaternion) {
     x += quaternion.x;
     y += quaternion.y;
     z += quaternion.z;
@@ -316,7 +238,7 @@ Quaternion &Quaternion::operator+=(const Quaternion& quaternion) {
     return *this;
 }
 
-Quaternion &Quaternion::operator-=(const Quaternion& quaternion) {
+Quaternion& Quaternion::operator-=(const Quaternion& quaternion) {
     x -= quaternion.x;
     y -= quaternion.y;
     z -= quaternion.z;

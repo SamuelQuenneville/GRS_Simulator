@@ -11,7 +11,6 @@
 
 #include "OpenglFramework/meshReader.h"
 #include "OpenglFramework/shader.h"
-#include "Mathematics/transform.h"
 #include "Mathematics/color.h"
 #include "RigidBodyAndLink/rigidBody.h"
 
@@ -21,7 +20,7 @@ public:
     PhysicsObject();
     explicit PhysicsObject(const std::string& meshFilePath);
 
-    virtual void updateTransform(double interpolationFactor) = 0;
+    virtual void updateTransform(double interpolationFactor) {};
 
     virtual void render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) = 0;
 

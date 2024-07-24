@@ -19,7 +19,7 @@
 class OneAircraftGrounded : public Scene {
 
 public:
-    explicit OneAircraftGrounded(World *world);
+    explicit OneAircraftGrounded(World* world);
     ~OneAircraftGrounded() override;
 
     void createPhysicsWorld();
@@ -30,7 +30,7 @@ public:
     void updatePhysics() override;
     void reset() override;
 
-    virtual void renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;
+    void renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;
 
 protected:
     World* m_world;
@@ -38,11 +38,8 @@ protected:
     Cube* m_ground{};
     Launcher* m_launcher{};
 
-    // All the points to render the lines
     TetherLine* m_tether{};
     std::vector<Vector3<float>> mLinePoints;
-    VertexBufferObject mVBOVertices;
-    VertexArrayObject mVAO;
 };
 
 

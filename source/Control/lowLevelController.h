@@ -19,7 +19,6 @@ class LowLevelController {
 public:
     virtual INPUTS calculateAircraftControlInputs(const STATES& currentStates, const COMMANDS& commands) = 0;
     virtual ~LowLevelController() = default;
-
 };
 
 

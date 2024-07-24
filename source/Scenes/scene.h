@@ -18,7 +18,7 @@
 class Scene {
 
 public:
-    Scene();
+    explicit Scene(const std::string& executablePath);
     virtual ~Scene();
 
     virtual void reshape(int width, int height);

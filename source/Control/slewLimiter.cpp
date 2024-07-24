@@ -48,8 +48,8 @@ SlewLimiter::SlewLimiter(const float& slewRateMax, const float& slewRateTau) :
   output within slew rate
  */
 float SlewLimiter::modifier(float sample, float dt) {
-    if (m_slewRateMax <= 0) {
-        return 1.0;
+    if (m_slewRateMax <= 0.0f) {
+        return true;
     }
 
     // Calculate a low pass filtered slew rate

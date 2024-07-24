@@ -9,11 +9,6 @@
 #ifndef GRS_SIMULATOR_SHADER_H
 #define GRS_SIMULATOR_SHADER_H
 
-#include <string>
-#include <iostream>
-#include <stdexcept>
-#include <exception>
-#include <cassert>
 #include <fstream>
 #include <nanogui/opengl.h>
 
@@ -24,10 +19,10 @@ class Shader {
 
 public:
     Shader();
-    Shader(const std::string filenameVertexShader, const std::string filenameFragmentShader);
+    Shader(const std::string& filenameVertexShader, const std::string& filenameFragmentShader);
     ~Shader();
 
-    bool create(const std::string filenameVertexShader, const std::string filenameFragmentShader);
+    bool create(const std::string& filenameVertexShader, const std::string& filenameFragmentShader);
 
     void destroy();
 

@@ -18,10 +18,10 @@ void Mesh::destroy() {
 }
 
 void Mesh::calculateNormals() {
-    m_normals = std::vector<Vector3<float>>(getNumbersVertices(), {0, 0, 0});
+    m_normals = std::vector<Vector3<float>>(getNumbersVertices(), Vector3<float>::zeros());
 
     // For each triangular face
-    for (unsigned int i=0; i < getNumbersFaces(); i++) {
+    for (int i=0; i < getNumbersFaces(); i++) {
 
         // Get the three vertices index of the current face
         unsigned int v1 = getVertexIndexInFace(i, 0);
@@ -46,7 +46,7 @@ void Mesh::calculateNormals() {
     }
 
     // Normalize the normal at each vertex
-    for (unsigned int i=0; i < getNumbersVertices(); i++) {
+    for (int i=0; i < getNumbersVertices(); i++) {
         m_normals[i] = m_normals[i].normalize();
     }
 }
@@ -56,7 +56,7 @@ unsigned int Mesh::getNumbersFaces(unsigned int part) const {
 }
 
 unsigned int Mesh::getNumbersVertices() const {
-    return m_vertices.size();;
+    return m_vertices.size();
 }
 
 unsigned int Mesh::getNumbersParts() const {
@@ -71,7 +71,7 @@ void Mesh::setVertices(std::vector<Vector3<float>>& vertices) {
     m_vertices = vertices;
 }
 
-const std::vector<Vector3<float>> &Mesh::getNormals() const {
+const std::vector<Vector3<float>>& Mesh::getNormals() const {
     return m_normals;
 }
 
@@ -79,7 +79,7 @@ void Mesh::setNormals(std::vector<Vector3<float>>& normals) {
     m_normals = normals;
 }
 
-const std::vector<Vector2<float>> &Mesh::getUVs() const {
+const std::vector<Vector2<float>>& Mesh::getUVs() const {
     return m_uvs;
 }
 

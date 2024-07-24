@@ -23,7 +23,7 @@ public:
     explicit Gui(SimulationViewer* app);
     ~Gui() = default;
 
-    /// Initialize the GUI
+    // Initialize the GUI
     void init(GLFWwindow* window);
 
     void update();
@@ -33,7 +33,6 @@ public:
 
     void onWindowResizeEvent(int width, int height);
     void onMouseMotionEvent(double x, double y);
-    bool onScrollEvent(double x, double y);
     void onMouseButtonEvent(int button, int action, int modifiers);
     void onKeyboardEvent(int key, int scancode, int action, int modifiers);
 
@@ -67,7 +66,7 @@ protected:
     bool m_isDisplayed;
 
     void m_createConfigurationPanel();
-    std::string doubleToString(double value, int precision);
+    static std::string doubleToString(double value, int precision);
 };
 
 

@@ -17,7 +17,7 @@ Node& RigidBody::node() {
 }
 
 Vector3<double> RigidBody::calcExternalForce() {
-    Vector3<double> sumExternalForce = {0,0,0};
+    Vector3<double> sumExternalForce = Vector3<double>::zeros();
 
     for(const Node* node : connectedNode) {
         sumExternalForce += node->force();
@@ -57,12 +57,4 @@ void RigidBody::setAngularVelocity(const Vector3<double>& newAngularVelocity) {
 
 const Vector3<double> &RigidBody::getAngularVelocity() {
     return m_angularVelocity;
-}
-
-void RigidBody::update(double dt) {
-
-}
-
-void RigidBody::setInitialStates(initialStates &states) {
-
 }

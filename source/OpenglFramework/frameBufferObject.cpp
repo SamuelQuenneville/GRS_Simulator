@@ -35,7 +35,7 @@ bool FrameBufferObject::create(unsigned int width, unsigned int height, bool nee
         assert(m_renderBufferId != 0);
 
         glBindRenderbuffer(GL_RENDERBUFFER, m_renderBufferId);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, width, height);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
         glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferId);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,m_renderBufferId);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);

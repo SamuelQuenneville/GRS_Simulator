@@ -58,8 +58,7 @@ void System::createSystemOneAircraft(fixedWingProperties& aircraftProperties, in
     m_initHlcCommands();
 }
 
-void
-System::createSystemOneAircraftGrounded(fixedWingProperties &aircraftProperties, tetherProperties &tetherProperties, initialStates &aircraftStates) {
+void System::createSystemOneAircraftGrounded(fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, initialStates& aircraftStates) {
     // Create HLC
     m_controller = std::make_unique<HlcSingleAircraft>(m_physics, m_logger, m_systemConfiguration.hlcRate);
 
@@ -114,7 +113,7 @@ std::vector<fixedWingStates> System::m_getAircraftStates() {
 
 bool System::m_shouldCallHlc() {
     if (m_timeSinceHlcCall >= 1.0/m_systemConfiguration.hlcRate) {
-        m_timeSinceHlcCall = 0;
+        m_timeSinceHlcCall = 0.0;
         return true;
     }
     return false;

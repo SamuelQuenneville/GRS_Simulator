@@ -39,7 +39,7 @@ public:
     /*
       get last oscillation slew rate
      */
-    float getSlewRate() const {
+    [[nodiscard]] float getSlewRate() const {
         return m_outputSlewRate;
     }
 

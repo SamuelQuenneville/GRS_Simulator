@@ -9,12 +9,8 @@
 #ifndef GRS_SIMULATOR_MESHREADER_H
 #define GRS_SIMULATOR_MESHREADER_H
 
-#include <stdexcept>
 #include <fstream>
 #include <sstream>
-#include <locale>
-#include <cctype>
-#include <algorithm>
 #include <unordered_map>
 #include <tuple>
 #include "mesh.h"

@@ -417,55 +417,6 @@ public:
         return rotationMatrix;
     }
 
-    // Return a 4x4 perspective projection matrix
-    Matrix4<T> perspectiveProjectionMatrix(float nearDistance, float farDistance, int width, int height, float fieldOfView) {
-        // Compute the aspect ratio
-        T aspect = float(width) / float(height);
-
-        T top = nearDistance * std::tan((fieldOfView / 2.0) * (M_PI / 180.0));
-        T bottom = -top;
-        T left = bottom * aspect;
-        T right = top * aspect;
-
-        T fx = 2.0f * nearDistance / (right - left);
-        T fy = 2.0f * nearDistance / (top - bottom);
-        T fz = -(farDistance + nearDistance) / (farDistance - nearDistance);
-        T fw = -2.0f * farDistance * nearDistance / (farDistance - nearDistance);
-
-        // Compute the projection matrix
-        return {
-                {fx, 0, 0, 0},
-                {0, fy, 0, 0},
-                {0, 0, fz, fw},
-                {0, 0, -1, 0}
-               };
-
-        }
-
-    // Return a 4x4 orthographic projection matrix
-    Matrix4<T> orthoProjectionMatrix(float nearDistance, float farDistance, int width, int height) {
-        // Compute the aspect ratio
-        T aspect = float(width) / float(height);
-
-        T top = height * 0.5;
-        T bottom = -top;
-        T left = bottom * aspect;
-        T right = top * aspect;
-
-        T fx = 2.0 / (right - left);
-        T fy = 2.0 / (top - bottom);
-        T fz = -2.0 / (farDistance - nearDistance);
-        T fw = -(farDistance + nearDistance) / (farDistance - nearDistance);
-
-        // Compute the projection matrix
-        return {
-                {fx, 0,  0,  0},
-                {0,  fy, 0,  0},
-                {0,  0,  fz, fw},
-                {0,  0,  0,  1}
-               };
-        }
-
     // Return the identity matrix
     static Matrix4<T> identity() {
         return {

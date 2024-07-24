@@ -17,7 +17,7 @@
 class Aircraft : public PhysicsObject {
 
 public :
-    Aircraft(FixedWing* aircraft, const Vector3<double>& scaling = Vector3<double>(1, 1, 1));
+    Aircraft(FixedWing* aircraft, const Vector3<double>& scaling, const std::string& executablePath);
     ~Aircraft() override;
 
     void render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;

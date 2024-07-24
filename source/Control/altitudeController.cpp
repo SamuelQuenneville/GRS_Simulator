@@ -17,11 +17,11 @@ AltitudeController::AltitudeController(worldPhysics& physics, float rate)
 
 float AltitudeController::getPitchOut(float desiredAltitude, bool disableIntegrator) {
     // Limit integrator if the last pitch output too high
-    bool limitIntegrator = fabsf(m_lastOutRad) >= radians(20.0);
+    bool limitIntegrator = fabsf(m_lastOutRad) >= radians(20.0f);
     m_altPID.setDt(m_dt);
 
     // Get airspeed
-    float airspeed = std::sqrt(m_aircraftStates.u * m_aircraftStates.u + m_aircraftStates.v * m_aircraftStates.v + m_aircraftStates.w * m_aircraftStates.w);
+    auto airspeed = static_cast<float>(std::sqrt(m_aircraftStates.u * m_aircraftStates.u + m_aircraftStates.v * m_aircraftStates.v + m_aircraftStates.w * m_aircraftStates.w));
 
     bool underspeed = airspeed <= 11.0;
     if (underspeed || disableIntegrator) {
@@ -33,7 +33,7 @@ float AltitudeController::getPitchOut(float desiredAltitude, bool disableIntegra
     }
 
     // Get altitude
-    float altitudeMeters = -m_aircraftStates.z;
+    auto altitudeMeters = static_cast<float>(-m_aircraftStates.z);
 
     // the P and I elements are scaled by sq(scaler). To use an
     // unmodified AC_PID object we scale the inputs and calculate FF separately
@@ -51,16 +51,16 @@ float AltitudeController::getPitchOut(float desiredAltitude, bool disableIntegra
     m_lastOutRad = pitchOutRad;
 
     // output is scaled to centidegrees of pitch
-    return constrainFloat(degrees(pitchOutRad) * 100, -3000, 3000);
+    return constrainFloat(degrees(pitchOutRad) * 100.0f, -3000.0f, 3000.0f);
 }
 
 void AltitudeController::resetIntegrator() {
-    m_pidInfo.I = 0;
+    m_pidInfo.I = 0.0f;
     m_altPID.resetI();
 }
 
 void AltitudeController::resetIntegratorTakeoff() {
-    float iRad = radians(20.0);
+    float iRad = radians(20.0f);
     m_pidInfo.I = iRad;
     m_altPID.setIntegrator(iRad);
 }

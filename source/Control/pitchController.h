@@ -16,15 +16,15 @@
 class PitchController {
 
 public:
-    explicit PitchController(worldPhysics &physics, float rate);
+    explicit PitchController(worldPhysics& physics, float rate);
 
     int32_t getServoOut(float navPitch, float scaler, bool disableIntegrator);
     int32_t getRateOut(float desiredRate, float scaler, bool disableIntegrator, float airspeed);
-    float getCoordinationRateOffset(float airspeed) const;
+    [[nodiscard]] float getCoordinationRateOffset(float airspeed) const;
 
-    const PID::pidInfo& getPidInfo() const { return m_pidInfo;};
+    [[nodiscard]] const PID::pidInfo& getPidInfo() const { return m_pidInfo;};
 
-    void setAircraftStates(const fixedWingStates &aircraftStates) {m_aircraftStates = aircraftStates;};
+    void setAircraftStates(const fixedWingStates& aircraftStates) {m_aircraftStates = aircraftStates;};
 
     void resetIntegrator();
 
@@ -32,20 +32,20 @@ private:
     worldPhysics m_physics;
 
     // pitch time constant
-    static constexpr float m_tau = 0.5;
+    static constexpr float m_tau = 0.5f;
 
     // maximum & minimum pitch rate
-    static constexpr float m_rmax = 20.0;
-    static constexpr float m_rmin = 20.0; // declare positive
+    static constexpr float m_rmax = 20.0f;
+    static constexpr float m_rmin = 20.0f; // declare positive
 
     // roll compensation
-    static constexpr float m_rollCompensation = 1.0;
+    static constexpr float m_rollCompensation = 1.0f;
 
     // controller frequency
     float m_dt;
 
-    float m_lastOut = 0.0;
-    float m_angleErrorDeg = 0.0;
+    float m_lastOut = 0.0f;
+    float m_angleErrorDeg = 0.0f;
 
     PID m_ratePID{0.04, 0.15, 0, 0.345, 0.666, 1.5, 7, 4, 0.02, 150, 1};
     PID::pidInfo m_pidInfo{};

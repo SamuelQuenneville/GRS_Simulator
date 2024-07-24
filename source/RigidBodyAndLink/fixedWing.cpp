@@ -241,6 +241,8 @@ void FixedWing::setInitialStates(initialStates &states) {
 
     centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
     centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
+
+    setTransform(Transform({centerOfMass->position().x(), -centerOfMass->position().z(), centerOfMass->position().y()}, Quaternion::fromEulerAngles(m_states.phi,-m_states.psi,m_states.theta)));
 }
 
 void FixedWing::m_writeLog(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> tetherForceBody) {

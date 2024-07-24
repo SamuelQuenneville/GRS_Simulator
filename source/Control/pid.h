@@ -35,17 +35,17 @@ public:
     void updateIntegral(bool limit);
 
     // get results from pid controller
-    float getI() const;
+    [[nodiscard]] float getI() const;
     float getFF();
 
     // reset the integrator
     void resetI();
 
     // get accessor
-    float getFilterAlpha(float filterHz) const;
-    float getFilterTargetAlpha() const;
-    float getFilterErrorAlpha() const;
-    float getFilterDerivativeAlpha() const;
+    [[nodiscard]] float getFilterAlpha(float filterHz) const;
+    [[nodiscard]] float getFilterTargetAlpha() const;
+    [[nodiscard]] float getFilterErrorAlpha() const;
+    [[nodiscard]] float getFilterDerivativeAlpha() const;
 
     // set accessor
     void filterTargetHz(float hz);
@@ -77,7 +77,7 @@ public:
         bool  limit;
     };
 
-    const pidInfo& getPidInfo() const { return m_pidInfo;};
+    [[nodiscard]] const pidInfo& getPidInfo() const { return m_pidInfo;};
 
 protected:
     float m_kp;

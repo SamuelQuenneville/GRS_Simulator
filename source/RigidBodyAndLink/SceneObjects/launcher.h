@@ -17,7 +17,7 @@
 class Launcher : public PhysicsObject {
 
 public :
-    Launcher(const Vector3<double>& scaling = Vector3<double>(1, 1, 1));
+    Launcher(const Vector3<double>& scaling, const std::string& executablePath);
     ~Launcher() override;
 
     void render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;

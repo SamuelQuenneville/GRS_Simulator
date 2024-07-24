@@ -9,7 +9,6 @@
 #ifndef GRS_SIMULATOR_RIGIDBODY_H
 #define GRS_SIMULATOR_RIGIDBODY_H
 
-#include <vector>
 #include <map>
 #include <memory>
 #include <algorithm>
@@ -34,10 +33,10 @@ public:
         PAYLOAD
     };
 
-    virtual void update(double dt);
+    virtual void update(double dt) {};
     virtual Vector3<double> calcExternalForce();
 
-    virtual void setInitialStates(initialStates& states);
+    virtual void setInitialStates(initialStates& states) {};
 
     virtual void addConnection(Node& node);
     virtual void deleteConnection(Node& node);

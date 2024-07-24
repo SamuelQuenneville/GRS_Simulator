@@ -67,16 +67,6 @@ void Gui::onMouseMotionEvent(double x, double y) {
     m_screen->cursor_pos_callback_event(x, y);
 }
 
-bool Gui::onScrollEvent(double x, double y) {
-
-    double xMouse, yMouse;
-    glfwGetCursorPos(m_window, &xMouse, &yMouse);
-
-    m_screen->scroll_callback_event(x, y);
-
-    return false;
-}
-
 void Gui::onMouseButtonEvent(int button, int action, int modifiers) {
     m_screen->mouse_button_callback_event(button, action, modifiers);
 }
@@ -114,6 +104,13 @@ void Gui::m_createConfigurationPanel() {
     buttonPlay->set_callback([&] {
         if (m_hasConfigFile) {
             m_viewer->m_playSimulation();
+        }
+    });
+    auto* buttonPlayStep = new nanogui::ToolButton(group2, FA_STEP_FORWARD);
+    buttonPlayStep->set_flags(nanogui::Button::NormalButton);
+    buttonPlayStep->set_callback([&] {
+        if (m_hasConfigFile) {
+            m_viewer->m_toggleTakeSingleStep();
         }
     });
     auto* buttonPause = new nanogui::ToolButton(group2, FA_PAUSE);

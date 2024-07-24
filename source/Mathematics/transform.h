@@ -29,9 +29,6 @@ public:
 
     void setToIdentity();
 
-    // Set the transform from an OpenGL transform matrix
-    void setFromOpenGL(double* openglMatrix);
-
     // Get the OpenGL matrix of the transform
     void getOpenGLMatrix(double* openglMatrix) const;
 
@@ -44,19 +41,14 @@ public:
     // Return the identity transform
     static Transform identity();
 
-    [[nodiscard]] bool isValid() const;
-
     // operator
     Vector3<double> operator*(const Vector3<double>& vector) const;
     Transform operator*(const Transform& transform2) const;
     Transform& operator=(const Transform& transform2);
 
-    [[nodiscard]] std::string toString() const;
-
 private:
     Vector3<double> m_position;
     Quaternion m_orientation;
-
 };
 
 

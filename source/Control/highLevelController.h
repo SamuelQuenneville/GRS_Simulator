@@ -11,7 +11,6 @@
 
 #include <cmath>
 #include <memory>
-#include <vector>
 
 #include "Definitions/configurationDefinitions.h"
 #include "Log/logger.h"
@@ -22,7 +21,6 @@ class HighLevelController {
 public:
     virtual COMMANDS calculateInputs(const std::vector<STATES>& currentStates, const target& target) = 0;
     virtual ~HighLevelController() = default;
-
 };
 
 

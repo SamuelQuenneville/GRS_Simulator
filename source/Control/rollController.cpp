@@ -17,7 +17,7 @@ RollController::RollController(worldPhysics& physics, float rate)
 
 int32_t RollController::getServoOut(float navRoll, float scaler, bool disableIntegrator) {
     // Calculate the desired roll rate (deg/sec) from the angle error
-    m_angleErrorDeg = navRoll - degrees(m_aircraftStates.phi);
+    m_angleErrorDeg = navRoll - degrees(static_cast<float>(m_aircraftStates.phi));
     float desiredRate = m_angleErrorDeg / m_tau;
 
     // limit the demanded roll rate
@@ -31,12 +31,12 @@ int32_t RollController::getServoOut(float navRoll, float scaler, bool disableInt
 }
 
 int32_t RollController::getRateOut(float desiredRate, float scaler, bool disableIntegrator) {
-    bool limitIntegrator = fabsf(m_lastOut) >= 45;
+    bool limitIntegrator = fabsf(m_lastOut) >= 45.0f;
     float oldIntegrator = m_ratePID.getI();
     m_ratePID.setDt(m_dt);
 
-    float airspeed = std::sqrt(m_aircraftStates.u * m_aircraftStates.u + m_aircraftStates.v * m_aircraftStates.v + m_aircraftStates.w * m_aircraftStates.w);
-    bool underspeed = airspeed <= 11.0;
+    auto airspeed = static_cast<float>(std::sqrt(m_aircraftStates.u * m_aircraftStates.u + m_aircraftStates.v * m_aircraftStates.v + m_aircraftStates.w * m_aircraftStates.w));
+    bool underspeed = airspeed <= 11.0f;
     if(underspeed) {
         limitIntegrator = true;
     }
@@ -46,7 +46,7 @@ int32_t RollController::getRateOut(float desiredRate, float scaler, bool disable
     //
     // note that we run AC_PID in radians so that the normal scaling
     // range for IMAX in AC_PID applies (usually an IMAX value less than 1.0)
-    m_ratePID.updateAll(radians(desiredRate) * scaler * scaler, m_aircraftStates.p * scaler * scaler, limitIntegrator);
+    m_ratePID.updateAll(radians(desiredRate) * scaler * scaler, static_cast<float>(m_aircraftStates.p) * scaler * scaler, limitIntegrator);
 
     if (underspeed) {
         // when underspeed we lock the integrator
@@ -74,7 +74,7 @@ int32_t RollController::getRateOut(float desiredRate, float scaler, bool disable
 
     // fix the logged target and actual values to not have the scalers applied
     pinfo.target = desiredRate;
-    pinfo.actual = degrees(m_aircraftStates.p);
+    pinfo.actual = degrees(static_cast<float>(m_aircraftStates.p));
 
     // sum components
     float out = pinfo.FF + pinfo.P + pinfo.I + pinfo.D;
@@ -83,10 +83,10 @@ int32_t RollController::getRateOut(float desiredRate, float scaler, bool disable
     m_lastOut = out;
 
     // output is scaled to notional centidegrees of deflection
-    return constrainInt32(out * 100, -1500, 1500);
+    return constrainInt32(static_cast<int32_t>(out) * 100, -1500, 1500);
 }
 
 void RollController::resetIntegrator() {
-    m_pidInfo.I = 0;
+    m_pidInfo.I = 0.0f;
     m_ratePID.resetI();
 }

@@ -120,6 +120,10 @@ public:
                        m_elements[0] * other.m_elements[1] - m_elements[1] * other.m_elements[0]);
     }
 
+    static Vector3<T> zeros() {
+        return Vector3<T> {0, 0, 0};
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const Vector3& vec) {
         os << vec.m_elements[0] << "," << vec.m_elements[1] << "," << vec.m_elements[2];
         return os;

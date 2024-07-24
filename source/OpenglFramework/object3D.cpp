@@ -25,7 +25,7 @@ void Object3D::setToIdentity() {
 }
 
 Vector3<double> Object3D::getOrigin() const {
-    return m_transformMatrix * Vector3<double>(0.0, 0.0, 0.0);
+    return m_transformMatrix * Vector3<double>::zeros();
 }
 
 void Object3D::translateWorld(const Vector3<double>& vector) {

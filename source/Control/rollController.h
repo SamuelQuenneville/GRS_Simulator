@@ -21,7 +21,7 @@ public:
     int32_t getServoOut(float navRoll, float scaler, bool disableIntegrator);
     int32_t getRateOut(float desiredRate, float scaler, bool disableIntegrator);
 
-    const PID::pidInfo& getPidInfo() const { return m_pidInfo;};
+    [[nodiscard]] const PID::pidInfo& getPidInfo() const { return m_pidInfo;};
 
     void setAircraftStates(const fixedWingStates& aircraftStates) {m_aircraftStates = aircraftStates;};
 
@@ -31,16 +31,16 @@ private:
     worldPhysics m_physics;
 
     // roll time constant
-    static constexpr float m_tau = 0.5;
+    static constexpr float m_tau = 0.5f;
 
     // maximum roll rate (degrees/sec)
-    static constexpr float m_rmax = 60.0;
+    static constexpr float m_rmax = 60.0f;
 
     // controller frequency
     float m_dt;
 
-    float m_lastOut = 0.0;
-    float m_angleErrorDeg = 0.0;
+    float m_lastOut = 0.0f;
+    float m_angleErrorDeg = 0.0f;
 
     PID m_ratePID{0.08, 0.15, 0, 0.345, 0.666, 3, 7, 4, 0.02, 150, 1};
     PID::pidInfo m_pidInfo{};

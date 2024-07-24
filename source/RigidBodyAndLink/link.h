@@ -9,7 +9,6 @@
 #ifndef GRS_SIMULATOR_LINK_H
 #define GRS_SIMULATOR_LINK_H
 
-
 #include <vector>
 #include <map>
 #include <memory>

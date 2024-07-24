@@ -27,7 +27,7 @@ T DigitalLPF<T>::apply(const T& sample, float cutOffFrequency, float dt) {
         return m_output;
     }
     float rc = 1.0f/(M_2PI * cutOffFrequency);
-    m_alpha = constrainFloat(dt/(dt+rc), 0.0f, 1.0f);
+    m_alpha = constrainFloat(dt / (dt + rc), 0.0f, 1.0f);
     m_output += (sample - m_output) * m_alpha;
     if (!m_initialised) {
         m_initialised = true;

@@ -63,13 +63,13 @@ inline T wrapPI(const T radian) {
 
 // degrees -> radians
 template <typename T>
-static inline constexpr double radians(T deg) {
+static inline constexpr T radians(T deg) {
     return deg * DEG_TO_RAD;
 }
 
 // radians -> degrees
 template <typename T>
-static inline constexpr float degrees(T rad) {
+static inline constexpr T degrees(T rad) {
     return rad * RAD_TO_DEG;
 }
 
@@ -90,7 +90,7 @@ T constrainValue(T amt, T low, T high) {
 }
 
 template <typename T>
-T constrainValueLine(T amt, T low, T high, uint32_t line) {
+T constrainValueLine(T amt, T low, T high) {
     if (amt < low) {
         return low;
     }
@@ -102,7 +102,7 @@ T constrainValueLine(T amt, T low, T high, uint32_t line) {
     return amt;
 }
 
-#define constrainFloat(amt, low, high) constrainValueLine(float(amt), float(low), float(high), uint32_t(__LINE__))
+#define constrainFloat(amt, low, high) constrainValueLine(static_cast<float>(amt), static_cast<float>(low), static_cast<float>(high))
 
 inline int32_t constrainInt32(const int32_t amt, const int32_t low, const int32_t high) {
     return constrainValue(amt, low, high);
@@ -117,7 +117,7 @@ T calcLowpassAlphaDt(T dt, T cutOffFrequency) {
         return 1.0;
     }
     T rc = 1.0f/(M_2PI * cutOffFrequency);
-    return constrainFloat(dt/(dt+rc), 0.0f, 1.0f);
+    return constrainFloat(dt / (dt + rc), 0.0f, 1.0f);
 }
 
 /*

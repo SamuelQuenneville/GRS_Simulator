@@ -8,7 +8,7 @@
 
 #include "hlcSingleAircraft.h"
 
-HlcSingleAircraft::HlcSingleAircraft(worldPhysics &physics, Logger& logger, float rate)
+HlcSingleAircraft::HlcSingleAircraft(worldPhysics& physics, Logger& logger, float rate)
         : m_physics(physics)
         , m_logger(logger)
         , m_rate(rate)
@@ -32,7 +32,7 @@ fixedWingCommands HlcSingleAircraft::calculateInputs(const std::vector<fixedWing
     return commandsInputs;
 }
 
-void HlcSingleAircraft::m_writeLog(const fixedWingCommands &commands) {
+void HlcSingleAircraft::m_writeLog(const fixedWingCommands& commands) {
     hlcLogMessage logMessage{};
 
     logMessage = {

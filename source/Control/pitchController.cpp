@@ -17,11 +17,11 @@ PitchController::PitchController(worldPhysics& physics, float rate)
 }
 
 int32_t PitchController::getRateOut(float desiredRate, float scaler, bool disableIntegrator, float airspeed) {
-    bool limitIntegrator = fabsf(m_lastOut) >= 45;
+    bool limitIntegrator = fabsf(m_lastOut) >= 45.0f;
     float oldIntegrator = m_ratePID.getI();
     m_ratePID.setDt(m_dt);
 
-    bool underspeed = airspeed <= 11.0;
+    bool underspeed = airspeed <= 11.0f;
     if(underspeed) {
         limitIntegrator = true;
     }
@@ -31,7 +31,7 @@ int32_t PitchController::getRateOut(float desiredRate, float scaler, bool disabl
     //
     // note that we run AC_PID in radians so that the normal scaling
     // range for IMAX in AC_PID applies (usually an IMAX value less than 1.0)
-    m_ratePID.updateAll(radians(desiredRate) * scaler * scaler, m_aircraftStates.q * scaler * scaler, limitIntegrator);
+    m_ratePID.updateAll(radians(desiredRate) * scaler * scaler, static_cast<float>(m_aircraftStates.q) * scaler * scaler, limitIntegrator);
 
     if (underspeed) {
         // when underspeed we lock the integrator
@@ -59,7 +59,7 @@ int32_t PitchController::getRateOut(float desiredRate, float scaler, bool disabl
 
     // fix the logged target and actual values to not have the scalers applied
     pinfo.target = desiredRate;
-    pinfo.actual = degrees(m_aircraftStates.q);
+    pinfo.actual = degrees(static_cast<float>(m_aircraftStates.q));
 
     // sum components
     float out = pinfo.FF + pinfo.P + pinfo.I + pinfo.D;
@@ -67,41 +67,41 @@ int32_t PitchController::getRateOut(float desiredRate, float scaler, bool disabl
     m_lastOut = out;
 
     // output is scaled to notional centidegrees of deflection
-    return constrainInt32(out * 100, -2000, 2000);
+    return constrainInt32(static_cast<int32_t>(out) * 100, -2000, 2000);
 }
 
 float PitchController::getCoordinationRateOffset(float airspeed) const {
     float rateOffset;
-    float bankAngle = m_aircraftStates.phi;
+    auto bankAngle =static_cast<float>(m_aircraftStates.phi);
 
     // limit bank angle between +- 80 deg if right way up
     if (fabsf(bankAngle) < radians(90))	{
-        bankAngle = constrainFloat(bankAngle,-radians(80),radians(80));
+        bankAngle = constrainFloat(bankAngle, -radians(80), radians(80));
     } else {
         if (bankAngle > 0.0f) {
-            bankAngle = constrainFloat(bankAngle,radians(100),radians(180));
+            bankAngle = constrainFloat(bankAngle, radians(100), radians(180));
         } else {
-            bankAngle = constrainFloat(bankAngle,-radians(180),-radians(100));
+            bankAngle = constrainFloat(bankAngle, -radians(180), -radians(100));
         }
     }
 
     if (std::abs(degrees(m_aircraftStates.theta)) > 70.0) {
         // don't do turn coordination handling when at very high pitch angles
-        rateOffset = 0.0;
+        rateOffset = 0.0f;
     } else {
-        rateOffset = cosf(m_aircraftStates.theta)*fabsf(degrees((m_physics.gravity / MAX(airspeed , 11.0)) * tanf(bankAngle) * sinf(bankAngle))) * m_rollCompensation;
+        rateOffset = cosf(static_cast<float>(m_aircraftStates.theta))*fabsf(degrees((static_cast<float>(m_physics.gravity / MAX(airspeed , 11.0)) * tanf(bankAngle) * sinf(bankAngle)))) * m_rollCompensation;
     }
 
     return rateOffset;
 }
 
 int32_t PitchController::getServoOut(float navPitch, float scaler, bool disableIntegrator) {
-    float airspeed = std::sqrt(m_aircraftStates.u * m_aircraftStates.u + m_aircraftStates.v * m_aircraftStates.v + m_aircraftStates.w * m_aircraftStates.w);
+    auto airspeed = static_cast<float>(std::sqrt(m_aircraftStates.u * m_aircraftStates.u + m_aircraftStates.v * m_aircraftStates.v + m_aircraftStates.w * m_aircraftStates.w));
 
     float rateOffset = getCoordinationRateOffset(airspeed);
 
     // Calculate the desired pitch rate (deg/sec) from the angle error
-    m_angleErrorDeg = navPitch - degrees(m_aircraftStates.theta);
+    m_angleErrorDeg = navPitch - degrees(static_cast<float>(m_aircraftStates.theta));
     float desiredRate = m_angleErrorDeg / m_tau;
 
     //qDebug() << "_angleErrorDeg = " << _angleErrorDeg << "| desiredRate = " << desiredRate;
@@ -119,6 +119,6 @@ int32_t PitchController::getServoOut(float navPitch, float scaler, bool disableI
 }
 
 void PitchController::resetIntegrator() {
-    m_pidInfo.I = 0;
+    m_pidInfo.I = 0.0f;
     m_ratePID.resetI();
 }

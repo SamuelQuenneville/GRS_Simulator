@@ -53,7 +53,7 @@ void Tether::update(double dt) {
 
     // Calculate the tension force and distribute to the nodes
     Vector3<double> tensionForce = m_calcTensionForce();
-    startPoint->setForce(-tensionForce);    // TODO confirm negative sign here
+    startPoint->setForce(-tensionForce);
     endPoint->setForce(tensionForce);
 
     // Log
@@ -80,7 +80,7 @@ Vector3<double> Tether::m_calcTensionForce() {
 
     double tension = -tetherNormalize.dot(forceSpring);
     if(tension<0) {
-        forceSpring = {0,0,0};
+        forceSpring = Vector3<double>::zeros();
     }
 
     m_tetherLogInfos.deformation = tetherDeformation;
@@ -130,15 +130,15 @@ std::tuple<double, double> Tether::m_calcLiftDragCoeff(double Cf, double Cn, dou
 
 // TODO implement tether aerodynamic and discretization
 Vector3<double> Tether::m_calcTetherAeroForces(Vector3<double> windSpeed) {
-    Vector3<double> forceAero = {0,0,0};
+    Vector3<double> forceAero = Vector3<double>::zeros();
     m_tetherLogInfos.forceAero = forceAero;
 
     return forceAero;
 }
 
 void Tether::grounded() {
-    startPoint->setPosition({0,0,0});
-    startPoint->setVelocity({0,0,0});
+    startPoint->setPosition(Vector3<double>::zeros());
+    startPoint->setVelocity(Vector3<double>::zeros());
 }
 
 void Tether::m_writeLog() {

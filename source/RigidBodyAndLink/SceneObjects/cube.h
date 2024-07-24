@@ -16,7 +16,7 @@
 class Cube : public PhysicsObject {
 
 public:
-    explicit Cube(const Vector3<float> &size);
+    Cube(const Vector3<float>& size, const std::string& executablePath);
     ~Cube() override;
 
     void render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;

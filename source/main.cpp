@@ -6,8 +6,6 @@
  * Createk Innovation Lab
  */
 
-#include <Windows.h>
-#include "world.h"
 #include "simulationViewer.h"
 
 int main() {

@@ -9,7 +9,7 @@
 #include "transform.h"
 
 Transform::Transform()
-    : m_position(Vector3(0.0, 0.0, 0.0))
+    : m_position(Vector3<double>::zeros())
     , m_orientation(Quaternion::identity())
 {
 
@@ -30,17 +30,8 @@ Transform::Transform(const Vector3<double>& position, const Quaternion& orientat
 }
 
 void Transform::setToIdentity() {
-    m_position = Vector3(0.0, 0.0, 0.0);
+    m_position = Vector3<double>::zeros();
     m_orientation = Quaternion::identity();
-}
-
-void Transform::setFromOpenGL(double *openglMatrix) {
-    Matrix3 matrix{{openglMatrix[0], openglMatrix[4], openglMatrix[8]},
-                   {openglMatrix[1], openglMatrix[5], openglMatrix[9]},
-                   {openglMatrix[2], openglMatrix[6], openglMatrix[10]}};
-
-    m_orientation = Quaternion(matrix);
-    m_position.setAllValues(openglMatrix[12],openglMatrix[13],openglMatrix[14]);
 }
 
 void Transform::getOpenGLMatrix(double* openglMatrix) const {
@@ -76,11 +67,7 @@ Transform Transform::interpolateTransforms(const Transform& oldTransform, const 
 }
 
 Transform Transform::identity() {
-    return {Vector3<double>(0, 0, 0), Quaternion::identity()};
-}
-
-bool Transform::isValid() const {
-    return m_position.isFinite() && m_orientation.isValid();
+    return {Vector3<double>::zeros(), Quaternion::identity()};
 }
 
 Vector3<double> Transform::operator*(const Vector3<double>& vector) const {
@@ -119,8 +106,4 @@ Transform& Transform::operator=(const Transform& transform2) {
     m_position = transform2.getPosition();
     m_orientation = transform2.getOrientation();
     return *this;
-}
-
-std::string Transform::toString() const {
-    return "Transform(" + m_position.toString() + "," + m_orientation.toString() + ")";
 }

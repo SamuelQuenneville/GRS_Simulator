@@ -9,8 +9,8 @@
 #include "launcher.h"
 
 // Constructor
-Launcher::Launcher(const Vector3<double>& scaling)
-        : PhysicsObject("C:/Users/ques2902/Desktop/Meshes/launcher.obj")
+Launcher::Launcher(const Vector3<double>& scaling, const std::string& executablePath)
+        : PhysicsObject(executablePath + R"(\source\Meshes\launcher.obj)")
         , m_vertexBufferVertices(GL_ARRAY_BUFFER)
         , m_vertexBufferNormals(GL_ARRAY_BUFFER)
         , m_vertexBufferTextureCoords(GL_ARRAY_BUFFER)
@@ -72,16 +72,16 @@ void Launcher::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix
     GLint vertexNormalLoc = shader.getAttribLocation("vertexNormal", false);
 
     glEnableVertexAttribArray(vertexPositionLoc);
-    glVertexAttribPointer(vertexPositionLoc, 3, GL_FLOAT, GL_FALSE, 0, (char*)nullptr);
+    glVertexAttribPointer(vertexPositionLoc, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     m_vertexBufferNormals.bind();
 
-    if (vertexNormalLoc != -1) glVertexAttribPointer(vertexNormalLoc, 3, GL_FLOAT, GL_FALSE, 0, (char*)nullptr);
+    if (vertexNormalLoc != -1) glVertexAttribPointer(vertexNormalLoc, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     if (vertexNormalLoc != -1) glEnableVertexAttribArray(vertexNormalLoc);
 
     // For each part of the mesh
-    for (unsigned int i=0; i<getNumbersParts(); i++) {
-        glDrawElements(GL_TRIANGLES, GLsizei(getNumbersFaces(i) * 3), GL_UNSIGNED_INT, (char*)nullptr);
+    for (int i=0; i<getNumbersParts(); i++) {
+        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(getNumbersFaces(i) * 3), GL_UNSIGNED_INT, nullptr);
     }
 
     glDisableVertexAttribArray(vertexPositionLoc);
@@ -104,14 +104,14 @@ void Launcher::m_createVertexBufferAndArrayObject() {
     // Create the VBO for the vertices data
     m_vertexBufferVertices.create();
     m_vertexBufferVertices.bind();
-    auto sizeVertices = GLsizei(m_vertices.size() * sizeof(Vector3<float>));
+    auto sizeVertices = static_cast<GLsizei>(m_vertices.size() * sizeof(Vector3<float>));
     m_vertexBufferVertices.copyDataIntoVBO(sizeVertices, getVerticesPointer(), GL_STATIC_DRAW);
     m_vertexBufferVertices.unbind();
 
     // Create the VBO for the normals data
     m_vertexBufferNormals.create();
     m_vertexBufferNormals.bind();
-    auto sizeNormals = GLsizei(m_normals.size() * sizeof(Vector3<float>));
+    auto sizeNormals = static_cast<GLsizei>(m_normals.size() * sizeof(Vector3<float>));
     m_vertexBufferNormals.copyDataIntoVBO(sizeNormals, getNormalsPointer(), GL_STATIC_DRAW);
     m_vertexBufferNormals.unbind();
 
@@ -119,7 +119,7 @@ void Launcher::m_createVertexBufferAndArrayObject() {
         // Create the VBO for the texture co data
         m_vertexBufferTextureCoords.create();
         m_vertexBufferTextureCoords.bind();
-        auto sizeTextureCoords = GLsizei(m_uvs.size() * sizeof(Vector2<float>));
+        auto sizeTextureCoords = static_cast<GLsizei>(m_uvs.size() * sizeof(Vector2<float>));
         m_vertexBufferTextureCoords.copyDataIntoVBO(sizeTextureCoords, getUVTextureCoordinatesPointer(), GL_STATIC_DRAW);
         m_vertexBufferTextureCoords.unbind();
     }
@@ -127,7 +127,7 @@ void Launcher::m_createVertexBufferAndArrayObject() {
     // Create th VBO for the indices data
     m_vertexBufferIndices.create();
     m_vertexBufferIndices.bind();
-    auto sizeIndices = GLsizei(m_indices[0].size() * sizeof(unsigned int));
+    auto sizeIndices = static_cast<GLsizei>(m_indices[0].size() * sizeof(unsigned int));
     m_vertexBufferIndices.copyDataIntoVBO(sizeIndices, getIndicesPointer(), GL_STATIC_DRAW);
     m_vertexBufferIndices.unbind();
 

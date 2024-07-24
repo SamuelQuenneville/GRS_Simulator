@@ -32,7 +32,6 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
 
     // If we cannot open the file
     if(!meshFile.is_open()) {
-
         // Throw an exception and display an error message
         std::string errorMessage("Error : Cannot open the file " + filename);
         std::cerr << errorMessage << std::endl;
@@ -53,7 +52,6 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
     std::vector<unsigned int > verticesIndices;
     std::vector<unsigned int> normalsIndices;
     std::vector<unsigned int> uvsIndices;
-
 
     // ---------- Collect the data from the file ---------- //
 
@@ -83,9 +81,9 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
         }
         else if (word == "f") { // Face
             line = buffer;
-            found1 = (int)line.find('/');
+            found1 = static_cast<int>(line.find('/'));
             bool isFaceQuad = false;
-            found2 = (int)line.substr(found1+1).find('/');
+            found2 = static_cast<int>(line.substr(found1+1).find('/'));
 
             // If the face definition is of the form "f v1 v2 v3 v4"
             if(found1 == std::string::npos) {
@@ -93,7 +91,7 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
                 if (nbVertices == 4) isFaceQuad = true;
             }
                 // If the face definition is of the form "f v1// v2// v3// v4//"
-            else if (found2 == 0 && (int)line.substr(found1+found2+1).find(' ') == 0) {
+            else if (found2 == 0 && static_cast<int>(line.substr(found1+found2+1).find(' ') == 0)) {
                 int nbVertices = sscanf(buffer.c_str(), "%*s %d// %d// %d// %d//", &id1, &id2, &id3, &id4);
                 if (nbVertices == 4) isFaceQuad = true;
             }
@@ -111,9 +109,9 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
 
                 //get the part of the string until the second index
                 tmp = line.substr(found1+1);
-                found2 = (int)tmp.find(' ');
+                found2 = static_cast<int>(tmp.find(' '));
                 tmp = tmp.substr(0,found2);
-                found2 = (int)tmp.find('/');
+                found2 = static_cast<int>(tmp.find('/'));
 
                 // If the face definition is of the form "f vert1/textcoord1 vert2/textcoord2 ..."
                 if(found2 == std::string::npos) {
@@ -127,7 +125,7 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
                 }
                 else {
                     tmp = line.substr(found1+1);
-                    found2 = (int)tmp.find('/');
+                    found2 = static_cast<int>(tmp.find('/'));
 
                     // If the face definition is of the form "f vert1//normal1 vert2//normal2 ..."
                     if(found2 == 0) {
@@ -196,8 +194,8 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
         // For each vertex, we check if there is already a vertex with same UV and normals.
         for (int v = 0; v < nbVertices; v++) {
 
-            int normalIndex = int(hasNormals ? normalsIndices[i + v] : -1);
-            int uvIndex = int(hasUvs ? uvsIndices[i + v] : -1);
+            auto normalIndex = static_cast<int>(hasNormals ? normalsIndices[i + v] : -1);
+            auto uvIndex = static_cast<int>(hasUvs ? uvsIndices[i + v] : -1);
 
             // If the vertex with same UV and normal doesn't exist yet in the map
             std::tuple<int, int, int> key = std::make_tuple(verticesIndices[i+v], normalIndex, uvIndex);
@@ -205,7 +203,7 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
             if (itFound == mapVertNormTexToVertexIndex.end()) {
 
                 // Create a new vertex
-                newVerticesIndices[v]= int(meshVertices.size());
+                newVerticesIndices[v]= static_cast<int>(meshVertices.size());
                 meshVertices.emplace_back(vertices[verticesIndices[i+v]]);
                 if (hasNormals) {
                     meshNormals.emplace_back(normals[normalsIndices[i+v]]);
@@ -218,7 +216,7 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
             }
             else {
                 // Get the vertex index to use
-                newVerticesIndices[v] = int(itFound->second);
+                newVerticesIndices[v] = static_cast<int>(itFound->second);
             }
         }
 

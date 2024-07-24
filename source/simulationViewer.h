@@ -11,10 +11,8 @@
 
 #include "gui.h" // need to be before GLFW include
 
-#include <iostream>
 #include <GLFW/glfw3.h>
 
-#include "world.h"
 #include "timer.h"
 #include "Scenes/oneAircraftGrounded.h"
 
@@ -59,16 +57,21 @@ private:
 
     void m_update();
     void m_updateDynamics();
+    void m_updateSingleDynamicsStep();
 
     void m_render();
 
     bool m_sceneCreated;
     void m_createScene();
-    //void m_destroyScenes();
+    void m_destroyScenes();
 
     void m_playSimulation();
+    void m_toggleTakeSingleStep();
     void m_pauseSimulation();
     void m_restartSimulation();
+
+    bool m_singlePhysicsStepEnabled;
+    bool m_singlePhysicsStepDone;
 
     static void m_setGlfwHints();
     void m_setCallback();

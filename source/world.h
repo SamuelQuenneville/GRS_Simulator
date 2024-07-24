@@ -9,6 +9,8 @@
 #ifndef GRS_SIMULATOR_WORLD_H
 #define GRS_SIMULATOR_WORLD_H
 
+#include <windows.h>
+
 #include "Configuration/configurationParser.h"
 #include "system.h"
 
@@ -42,6 +44,8 @@ public:
 
     [[nodiscard]] systemType getSystemType() const;
     System* system();
+
+    static std::string getExecutablePath();
 
 private:
     std::unique_ptr<Logger> m_logger;

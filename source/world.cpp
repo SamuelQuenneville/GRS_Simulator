@@ -100,3 +100,18 @@ systemType World::getSystemType() const {
 System* World::system() {
     return m_system.get();
 }
+
+std::string World::getExecutablePath() {
+    WCHAR pathChar[MAX_PATH];
+    GetModuleFileNameW(nullptr, pathChar, MAX_PATH);
+
+    char ch[260];
+    char defChar = ' ';
+    WideCharToMultiByte(CP_ACP,0,pathChar,-1, ch,260,&defChar, nullptr);
+
+    // A std:string  using the char* constructor.
+    std::string path(ch);
+    std::string executablePath = path.substr(0, path.find_last_of('\\'));
+
+    return executablePath;
+}
