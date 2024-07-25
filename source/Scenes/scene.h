@@ -53,6 +53,7 @@ protected:
     std::chrono::duration<double> m_elapsedTime;   // Elapsed time (in seconds)
 
     std::vector<PhysicsObject*> m_physicsObjects;
+    std::vector<PhysicsObject*> m_tethersObjects;
     std::vector<PhysicsObject*> m_staticObjects;
 
     Shader m_depthShader;

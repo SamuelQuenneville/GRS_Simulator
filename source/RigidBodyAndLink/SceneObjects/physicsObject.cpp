@@ -12,6 +12,7 @@ PhysicsObject::PhysicsObject()
     : Mesh()
 {
     m_body = nullptr;
+    m_link = nullptr;
     m_color = Color(1,1,1,1);
 }
 

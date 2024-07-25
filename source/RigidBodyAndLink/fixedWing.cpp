@@ -21,7 +21,7 @@ FixedWing::FixedWing(worldPhysics& physics, Logger& logger, fixedWingProperties&
 
 }
 
-void FixedWing::setStates(const fixedWingStates &newStates) {
+void FixedWing::setStates(const fixedWingStates& newStates) {
     m_states = newStates;
 
     centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
@@ -55,7 +55,7 @@ void FixedWing::update(double dt) {
     centerOfMass->setForce(m_bodyToEarth(forcesAeroBody) + externalForcesEarth);
     centerOfMass->setMoment(m_bodyToEarth(momentsAeroBody));
 
-    setTransform(Transform({centerOfMass->position().x(), -centerOfMass->position().z(), centerOfMass->position().y()}, Quaternion::fromEulerAngles(m_states.phi,-m_states.psi,m_states.theta)));
+    setTransform(Transform(centerOfMass->position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi,-m_states.psi,m_states.theta)));
 
     // Log
     m_writeLog(forcesAeroBody, momentsAeroBody, m_earthToBody(externalForcesEarth));
@@ -226,7 +226,7 @@ Vector3<double> FixedWing::m_bodyToEarth(const Vector3<double>& bodyVector) cons
     return earthVector;
 }
 
-void FixedWing::setInitialStates(initialStates &states) {
+void FixedWing::setInitialStates(initialStates& states) {
     m_states.x = states.position.at(0);
     m_states.y = states.position.at(1);
     m_states.z = states.position.at(2);

@@ -70,6 +70,10 @@ public:
         }
     }
 
+    Vector3<T> toOpenglRef() const {
+        return Vector3<T>(m_elements[0], -m_elements[2], m_elements[1]);
+    }
+
     [[nodiscard]] bool isFinite() const {
         return std::isfinite(m_elements[0]) && std::isfinite(m_elements[1]) && std::isfinite(m_elements[2]);
     }

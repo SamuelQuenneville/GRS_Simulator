@@ -34,6 +34,7 @@ public:
     void createSystemTwoAircraftFreeY();
 
     std::vector<std::unique_ptr<FixedWing>>& aircraft() {return m_aircraft;};
+    std::vector<std::unique_ptr<Tether>>& tethers() {return m_links;};
 
 private:
     worldPhysics& m_physics;

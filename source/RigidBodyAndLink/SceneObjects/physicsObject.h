@@ -13,6 +13,7 @@
 #include "OpenglFramework/shader.h"
 #include "Mathematics/color.h"
 #include "RigidBodyAndLink/rigidBody.h"
+#include "RigidBodyAndLink/link.h"
 
 class PhysicsObject : public Mesh {
 
@@ -21,6 +22,7 @@ public:
     explicit PhysicsObject(const std::string& meshFilePath);
 
     virtual void updateTransform(double interpolationFactor) {};
+    virtual void updatePosition() {};
 
     virtual void render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) = 0;
 
@@ -31,6 +33,7 @@ public:
 
 protected:
     RigidBody* m_body;
+    Link* m_link;
 
     Transform m_previousTransform;
 

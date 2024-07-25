@@ -13,15 +13,16 @@
 #include "OpenglFramework/shader.h"
 #include "OpenglFramework/vertexBufferObject.h"
 #include "OpenglFramework/vertexArrayObject.h"
+#include "RigidBodyAndLink/tether.h"
 
 
 class TetherLine : public PhysicsObject {
 
 public:
-    TetherLine();
+    explicit TetherLine(Tether* tether);
     ~TetherLine() override = default;
 
-    void setPosition(const Vector3<float>& point1, const Vector3<float>& point2);
+    void updatePosition() override;
 
     void render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;
 

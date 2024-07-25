@@ -72,9 +72,13 @@ void Scene::reshape(int width, int height) {
 }
 
 void Scene::update() {
-    for (auto & m_physicsObject : m_physicsObjects) {
+    for (auto& physicsObject : m_physicsObjects) {
         // Update the transform used for the rendering
-        m_physicsObject->updateTransform(m_interpolationFactor);
+        physicsObject->updateTransform(m_interpolationFactor);
+    }
+
+    for (auto& tetherObject : m_tethersObjects) {
+        tetherObject->updatePosition();
     }
 }
 

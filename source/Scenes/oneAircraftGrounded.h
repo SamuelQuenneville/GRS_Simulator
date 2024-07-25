@@ -37,9 +37,6 @@ protected:
 
     Cube* m_ground{};
     Launcher* m_launcher{};
-
-    TetherLine* m_tether{};
-    std::vector<Vector3<float>> mLinePoints;
 };
 
 

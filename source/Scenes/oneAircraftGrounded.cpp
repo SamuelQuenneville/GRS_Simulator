@@ -33,7 +33,10 @@ void OneAircraftGrounded::createPhysicsWorld() {
     }
 
     // ------------ TETHER ----------- //
-    m_tether = new TetherLine();
+    for(const auto& tether : m_world->system()->tethers()) {
+        auto* tetherObject = new TetherLine(tether.get());
+        m_tethersObjects.push_back(tetherObject);
+    }
 
     // ---------- LAUNCHER ---------- //
     m_launcher = new Launcher({1,1,1}, World::getExecutablePath());
@@ -49,23 +52,25 @@ void OneAircraftGrounded::createPhysicsWorld() {
 void OneAircraftGrounded::destroyPhysicsWorld() {
     if (m_world != nullptr) {
         // Destroy all the physics objects of the scene
-        for (auto & physicsObject : m_physicsObjects) {
+        for (auto& physicsObject : m_physicsObjects) {
             delete physicsObject;
         }
 
-        for (auto & staticObject : m_staticObjects) {
+        for (auto& staticObject : m_staticObjects) {
             delete staticObject;
         }
 
+        for (auto& tethersObject : m_tethersObjects) {
+            delete tethersObject;
+        }
+
         m_physicsObjects.clear();
+        m_tethersObjects.clear();
         m_staticObjects.clear();
     }
 }
 
 void OneAircraftGrounded::initBodiesPositions() {
-    for (auto & physicsObject : m_physicsObjects) {
-        m_tether->setPosition(Vector3<float>::zeros(), cast<float>(physicsObject->getTransform().getPosition()));
-    }
     m_launcher->setTransform(Transform({-0.849, 0.816, 30.0}, Quaternion::fromEulerAngles(-M_PI/2.0,-M_PI/2.0, radians(19.0))));
     m_ground->setTransform(Transform({0.0, -0.5, 0.0}, Quaternion::identity()));
 }
@@ -83,8 +88,9 @@ void OneAircraftGrounded::reset() {
 
 void OneAircraftGrounded::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
 
-    m_tether->setPosition(Vector3<float>::zeros(), cast<float>(m_physicsObjects.at(0)->getTransform().getPosition()));
-    m_tether->render(m_colorShader, worldToCameraMatrix);
+    for (auto& tethersObject : m_tethersObjects) {
+        tethersObject->render(m_colorShader, worldToCameraMatrix);
+    }
 
     // Bind the shader
     shader.bind();
