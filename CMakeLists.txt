@@ -36,6 +36,10 @@ set(GRS_CONTROL
         source/Control/groundspeedController.h
         source/Control/hlcSingleAircraft.cpp
         source/Control/hlcSingleAircraft.h
+        source/Control/hlcTwinAircraft.cpp
+        source/Control/hlcTwinAircraft.h
+        source/Control/phaseController.cpp
+        source/Control/phaseController.h
 )
 
 set(GRS_DEFINITIONS
@@ -118,6 +122,8 @@ set(GRS_SCENES
         source/Scenes/scene.h
         source/Scenes/oneAircraftGrounded.cpp
         source/Scenes/oneAircraftGrounded.h
+        source/Scenes/twoAircraftGrounded.cpp
+        source/Scenes/twoAircraftGrounded.h
 )
 
 set(GRS_SOURCE

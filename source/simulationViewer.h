@@ -15,6 +15,7 @@
 
 #include "timer.h"
 #include "Scenes/oneAircraftGrounded.h"
+#include "Scenes/twoAircraftGrounded.h"
 
 class SimulationViewer {
 

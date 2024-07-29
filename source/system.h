@@ -15,6 +15,7 @@
 #include "Definitions/systemDefinitions.h"
 #include "Control/llcBaseVersion.h"
 #include "Control/hlcSingleAircraft.h"
+#include "Control/hlcTwinAircraft.h"
 
 
 class System {
@@ -27,8 +28,8 @@ public:
 
     // Create the different configuration of system
     void createSystemOneAircraft(fixedWingProperties& aircraftProperties, initialStates& aircraftStates);
-    void createSystemOneAircraftGrounded(fixedWingProperties &aircraftProperties, tetherProperties &tetherProperties, initialStates &aircraftStates);
-    void createSystemTwoAircraftGroundedV();
+    void createSystemOneAircraftGrounded(fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, initialStates& aircraftStates);
+    void createSystemTwoAircraftGroundedV(fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, initialStates& aircraftStates1, initialStates& aircraftStates2);
     void createSystemTwoAircraftFreeV();
     void createSystemTwoAircraftGroundedY();
     void createSystemTwoAircraftFreeY();
@@ -47,10 +48,11 @@ private:
     void m_initHlcCommands();
 
     target m_target{};
-    fixedWingCommands m_commands{};
-    std::unique_ptr<HlcSingleAircraft> m_controller;
+    std::map<int, fixedWingCommands> m_commands{};
+    std::unique_ptr<HighLevelController<fixedWingCommands, fixedWingStates>> m_controller;
 
     std::vector<fixedWingStates> m_getAircraftStates();
+    std::vector<int> m_getAircraftIds();
 
     std::vector<std::unique_ptr<FixedWing>> m_aircraft;
     std::vector<std::unique_ptr<Tether>> m_links;

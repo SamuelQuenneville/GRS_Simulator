@@ -70,7 +70,7 @@ void World::createSystem() {
             m_system->createSystemOneAircraftGrounded(m_aircraftProperties, m_tetherProperties, m_initialAircraftStatesVector.front());
             break;
         case TWO_AIRCRAFT_GROUNDED_V:
-            m_system->createSystemTwoAircraftGroundedV();
+            m_system->createSystemTwoAircraftGroundedV(m_aircraftProperties, m_tetherProperties, m_initialAircraftStatesVector.front(), m_initialAircraftStatesVector.back());
             break;
         case TWO_AIRCRAFT_FREE_V:
             m_system->createSystemTwoAircraftFreeV();

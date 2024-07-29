@@ -16,7 +16,7 @@ class HlcSingleAircraft : public HighLevelController<fixedWingCommands, fixedWin
 
 public:
     HlcSingleAircraft(worldPhysics& physics, Logger& logger, float rate);
-    fixedWingCommands calculateInputs(const std::vector<fixedWingStates>& currentStates, const target& target) override;
+    std::map<int, fixedWingCommands> calculateInputs(const std::vector<int>& ids, const std::vector<fixedWingStates>& currentStates, const target& target) override;
 
 private:
     worldPhysics m_physics;

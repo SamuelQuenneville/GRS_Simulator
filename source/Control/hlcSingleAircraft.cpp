@@ -17,7 +17,7 @@ HlcSingleAircraft::HlcSingleAircraft(worldPhysics& physics, Logger& logger, floa
 }
 
 // currentStates should be of dimension 1
-fixedWingCommands HlcSingleAircraft::calculateInputs(const std::vector<fixedWingStates>& currentStates, const target& target) {
+std::map<int, fixedWingCommands> HlcSingleAircraft::calculateInputs(const std::vector<int>& ids, const std::vector<fixedWingStates>& currentStates, const target& target) {
     m_groundspeedController->setAircraftStates(currentStates[0]);
 
     float requiredThrust = m_groundspeedController->getThrustOut(target.groundspeed, false);
@@ -29,7 +29,7 @@ fixedWingCommands HlcSingleAircraft::calculateInputs(const std::vector<fixedWing
     commandsInputs.altitude = target.positionPayload[2];
 
     m_writeLog(commandsInputs);
-    return commandsInputs;
+    return std::map<int, fixedWingCommands> {{ids[0], commandsInputs}};
 }
 
 void HlcSingleAircraft::m_writeLog(const fixedWingCommands& commands) {

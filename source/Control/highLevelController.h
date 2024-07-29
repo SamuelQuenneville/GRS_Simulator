@@ -11,6 +11,7 @@
 
 #include <cmath>
 #include <memory>
+#include <map>
 
 #include "Definitions/configurationDefinitions.h"
 #include "Log/logger.h"
@@ -19,7 +20,7 @@ template <typename COMMANDS, typename STATES>
 class HighLevelController {
 
 public:
-    virtual COMMANDS calculateInputs(const std::vector<STATES>& currentStates, const target& target) = 0;
+    virtual std::map<int, COMMANDS> calculateInputs(const std::vector<int>& ids, const std::vector<STATES>& currentStates, const target& target) = 0;
     virtual ~HighLevelController() = default;
 };
 

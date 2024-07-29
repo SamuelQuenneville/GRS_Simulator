@@ -11,10 +11,6 @@
 
 #include "scene.h"
 #include "world.h"
-#include "RigidBodyAndLink/SceneObjects/cube.h"
-#include "RigidBodyAndLink/SceneObjects/aircraft.h"
-#include "RigidBodyAndLink/SceneObjects/launcher.h"
-#include "RigidBodyAndLink/SceneObjects/tetherLine.h"
 
 class OneAircraftGrounded : public Scene {
 

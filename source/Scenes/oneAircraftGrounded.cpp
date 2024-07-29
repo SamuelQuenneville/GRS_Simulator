@@ -26,14 +26,14 @@ OneAircraftGrounded::~OneAircraftGrounded() {
 void OneAircraftGrounded::createPhysicsWorld() {
 
     // ---------- AIRCRAFT ---------- //
-    for(const auto& aircraft : m_world->system()->aircraft()) {
+    for (const auto& aircraft : m_world->system()->aircraft()) {
         auto* aircraftObject = new Aircraft(aircraft.get(), {2, 2, 2}, World::getExecutablePath());
         aircraftObject->setColor(Color::red());
         m_physicsObjects.push_back(aircraftObject);
     }
 
     // ------------ TETHER ----------- //
-    for(const auto& tether : m_world->system()->tethers()) {
+    for (const auto& tether : m_world->system()->tethers()) {
         auto* tetherObject = new TetherLine(tether.get());
         m_tethersObjects.push_back(tetherObject);
     }
@@ -96,12 +96,12 @@ void OneAircraftGrounded::renderSinglePass(Shader& shader, const Matrix4<double>
     shader.bind();
 
     // Render all the moving physics objects of the scene
-    for (auto & physicsObject : m_physicsObjects) {
+    for (auto& physicsObject : m_physicsObjects) {
         physicsObject->render(shader, worldToCameraMatrix);
     }
 
     // Render the static objects (floor could be obstacle...)
-    for (auto & staticObject : m_staticObjects) {
+    for (auto& staticObject : m_staticObjects) {
         staticObject->render(shader, worldToCameraMatrix);
     }
 

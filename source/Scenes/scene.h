@@ -11,6 +11,10 @@
 
 
 #include "RigidBodyAndLink/SceneObjects/physicsObject.h"
+#include "RigidBodyAndLink/SceneObjects/cube.h"
+#include "RigidBodyAndLink/SceneObjects/aircraft.h"
+#include "RigidBodyAndLink/SceneObjects/launcher.h"
+#include "RigidBodyAndLink/SceneObjects/tetherLine.h"
 #include "OpenglFramework/light.h"
 #include "OpenglFramework/camera.h"
 #include "OpenglFramework/frameBufferObject.h"
