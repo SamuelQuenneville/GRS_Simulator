@@ -18,7 +18,7 @@ LlcBaseVersion::LlcBaseVersion(worldPhysics& physics, Logger& logger, float rate
     m_altController = std::make_unique<AltitudeController>(m_physics, m_rate);
 }
 
-fixedWingControlInputs LlcBaseVersion::calculateAircraftControlInputs(const fixedWingStates& currentStates, const fixedWingCommands& commands) {
+fixedWingControlInputs LlcBaseVersion::calculateAircraftControlInputs(int aircraftId, const fixedWingStates& currentStates, const fixedWingCommands& commands) {
 
     m_rollController->setAircraftStates(currentStates);
     m_pitchController->setAircraftStates(currentStates);
@@ -32,7 +32,7 @@ fixedWingControlInputs LlcBaseVersion::calculateAircraftControlInputs(const fixe
     controlInputs.deltaRudder = 0.0;//_stabilizeYaw(0.0); // Always 0
     controlInputs.deltaThrust = commands.thrust;
 
-    m_writeLog(controlInputs);
+    m_writeLog(aircraftId, controlInputs);
     return controlInputs;
 }
 
@@ -73,10 +73,11 @@ int32_t LlcBaseVersion::m_stabilizeRpm(double commandedRpm) {
     return true;
 }
 
-void LlcBaseVersion::m_writeLog(fixedWingControlInputs &inputs) {
+void LlcBaseVersion::m_writeLog(int aircraftId, fixedWingControlInputs& inputs) {
     llcLogMessage logMessage{};
 
     logMessage = {
+            aircraftId,
             inputs,
             m_pitchController->getPidInfo(),
             m_rollController->getPidInfo(),

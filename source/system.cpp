@@ -86,7 +86,7 @@ void System::createSystemOneAircraftGrounded(fixedWingProperties& aircraftProper
 }
 
 void System::createSystemTwoAircraftGroundedV(fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, initialStates& aircraftStates1, initialStates& aircraftStates2) {
-    // Create HLC TODO change the HLC
+    // Create HLC
     m_controller = std::make_unique<HlcTwinAircraft>(m_physics, m_logger, m_systemConfiguration.hlcRate);
 
     // Create LLC

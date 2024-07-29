@@ -79,8 +79,8 @@ void TwoAircraftGrounded::destroyPhysicsWorld() {
 }
 
 void TwoAircraftGrounded::initBodiesPositions() {
-    m_launcher1->setTransform(Transform({-0.849, 0.816, 30.0}, Quaternion::fromEulerAngles(-M_PI/2.0,-M_PI/2.0, radians(19.0))));
-    m_launcher2->setTransform(Transform({0.849, 0.816, -30.0}, Quaternion::fromEulerAngles(-M_PI/2.0,-M_PI/2.0+M_PI, radians(-19.0))));
+    m_launcher1->setTransform(Transform({-0.849, 0.816, 30.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0), 0.0, M_PI/2.0)));
+    m_launcher2->setTransform(Transform({0.849, 0.816, -30.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0),0.0, -M_PI/2.0)));
     m_ground->setTransform(Transform({0.0, -0.5, 0.0}, Quaternion::identity()));
 }
 
@@ -95,7 +95,7 @@ void TwoAircraftGrounded::reset() {
     initBodiesPositions();
 }
 
-void TwoAircraftGrounded::renderSinglePass(Shader &shader, const Matrix4<double> &worldToCameraMatrix) {
+void TwoAircraftGrounded::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
     for (auto& tethersObject : m_tethersObjects) {
         tethersObject->render(m_colorShader, worldToCameraMatrix);
     }

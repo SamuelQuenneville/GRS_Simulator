@@ -146,6 +146,9 @@ file(COPY "source/Shaders/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/source/Shad
 # Copy the Meshes used for the demo into the build directory
 file(COPY "source/Meshes/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/source/Meshes/")
 
+# Copy the Meshes used for the demo into the build directory
+file(COPY "inputFilesExamples/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/inputFilesExamples/")
+
 add_executable(GRS_Simulator
         ${GRS_CONFIGURATION}
         ${GRS_CONTROL}

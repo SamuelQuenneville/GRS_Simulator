@@ -1,0 +1,66 @@
+---
+#--------------------------------------------------
+# Sig aerodynamic (@25m/s) & geometric properties #
+#     X (downstream) / Y (right) / Z (up)         #
+#--------------------------------------------------
+AircraftProperties:
+  MASS        : 4.475000 # kg
+  WING_SURFACE: 0.536250 # m^2
+  WING_CHORD  : 0.330000 # m
+  WING_SPAN   : 1.625000 # m
+  ASPECT_RATIO: 4.924242
+  OSWALD_EFF  : 0.920800
+  #
+  INERTIA_X : 0.187100 # kg*m^2
+  INERTIA_Y : 0.333500 # kg*m^2
+  INERTIA_Z : 0.482700 # kg*m^2
+  INERTIA_XY: 0.000000 # kg*m^2
+  INERTIA_XZ: 0.000000 # kg*m^2
+  INERTIA_YZ: 0.000000 # kg*m^2
+  #
+  DELTA_AIL_MIN_DEG: -20.000000 # degrees
+  DELTA_AIL_MAX_DEG: 20.000000 # degrees
+  DELTA_ELE_MIN_DEG: -20.000000 # degrees
+  DELTA_ELE_MAX_DEG: 20.000000 # degrees
+  DELTA_RUD_MIN_DEG: -20.000000 # degrees
+  DELTA_RUD_MAX_DEG: 20.000000 # degrees
+  #
+  # Model Baseline
+  TRIM_ALPHA: 0.912140 # deg
+  TRIM_ELE  : -1.381480 # deg
+  # Lift and Drag
+  CL_0    : 0.213850 # rad
+  CL_ALPHA: 4.328933 # rad
+  CD_0    : 0.020000 # rad
+  # Force x direction
+  Cx_q        : -0.020758 # rad
+  Cx_DELTA_ELE: 0.000037 # deg
+  # Force y direction
+  Cy_0        : 0.000000 # rad
+  Cy_BETA     : -0.183746 # rad
+  Cy_p        : 0.057221 # rad
+  Cy_r        : 0.187631 # rad
+  Cy_DELTA_AIL: -0.000734 # deg
+  Cy_DELTA_RUD: -0.002336 # deg
+  # Force z direction
+  Cz_q        : -7.433721 # rad
+  Cz_DELTA_ELE: -0.007384 # deg
+  # Moment l
+  Cl_0        : -0.000000 # rad
+  Cl_BETA     : -0.031543 # rad
+  Cl_p        : -0.390092 # rad
+  Cl_r        : 0.061276 # rad
+  Cl_DELTA_AIL: 0.006081 # deg
+  Cl_DELTA_RUD: -0.000155 # deg
+  # Moment m
+  Cm_0         : 0.000000 # rad
+  Cm_ALPHA     : -0.742082 # rad
+  Cm_q         : -8.258848 # rad
+  Cm_DELTA_ELE : -0.017966 # deg
+  # Moment n
+  Cn_0        : -0.000000 # rad
+  Cn_BETA     : 0.082855 # rad
+  Cn_p        : -0.023115 # rad
+  Cn_r        : -0.095821 # rad
+  Cn_DELTA_AIL: 0.000253 # deg
+  Cn_DELTA_RUD: 0.001265 # deg

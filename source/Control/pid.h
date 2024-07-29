@@ -62,7 +62,7 @@ public:
     // flags
     struct pidFlags {
         bool resetFilter :1; // true when input filter should be reset during next call to set_input
-    } flags;
+    } flags{};
 
     struct pidInfo {
         float target;
@@ -86,21 +86,20 @@ protected:
     float m_kff;
     float m_kimin;
     float m_kimax;
-    float m_filterTargetHz;
-    float m_filterErrorHz;
-    float m_filterDerivativeHz;
-    float m_slewRateMax;
-    float m_slewRateTau;
+    float m_filterTargetHz = 0.0f;
+    float m_filterErrorHz = 0.0f;
+    float m_filterDerivativeHz = 0.0f;
+    float m_slewRateMax = 0.0f;
+    float m_slewRateTau = 0.0f;
 
     float m_dt;
-    float m_integrator;
-    float m_derivative;
-    float m_target;
-    float m_error;
+    float m_integrator = 0.0f;
+    float m_derivative = 0.0f;
+    float m_target = 0.0f;
+    float m_error = 0.0f;
     int8_t m_slewLimitScale;
-    uint16_t m_resetCounter;
 
-    pidInfo m_pidInfo;
+    pidInfo m_pidInfo{};
     SlewLimiter m_slewLimiter{m_slewRateMax, m_slewRateTau};
 };
 

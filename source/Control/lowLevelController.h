@@ -17,7 +17,7 @@ template <typename INPUTS, typename STATES, typename COMMANDS>
 class LowLevelController {
 
 public:
-    virtual INPUTS calculateAircraftControlInputs(const STATES& currentStates, const COMMANDS& commands) = 0;
+    virtual INPUTS calculateAircraftControlInputs(int aircraftId, const STATES& currentStates, const COMMANDS& commands) = 0;
     virtual ~LowLevelController() = default;
 };
 

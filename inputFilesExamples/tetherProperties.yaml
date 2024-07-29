@@ -1,0 +1,12 @@
+---
+#--------------------------------------------------
+#          Tether geometric properties            #
+#--------------------------------------------------
+
+TetherProperties:
+  LINEAR_MASS: 0.05  # kg/m
+  LENGTH     : 30.0  # m
+  DIAMETER   : 0.002 # m
+  RIGIDITY   : 3000.0 # spring model k value
+  DAMPING    : 300.0 # spring model b value
+  NUM_SEGMENTS: 5

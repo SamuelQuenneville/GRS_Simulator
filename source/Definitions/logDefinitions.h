@@ -54,6 +54,7 @@ struct hlcLogMessage {
 };
 
 struct llcLogMessage {
+    int aircraftId;
     fixedWingControlInputs inputs;
     PID::pidInfo pitchPid;
     PID::pidInfo rollPid;

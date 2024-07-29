@@ -8,28 +8,23 @@
 
 #include "quaternion.h"
 
-void Quaternion::m_initWithEulerAngles(double angleX, double angleY, double angleZ) {
-    double angle = angleX * 0.5;
-    const double sinX = std::sin(angle);
-    const double cosX = std::cos(angle);
+void Quaternion::m_initWithEulerAngles(double roll, double pitch, double yaw) {
+    double angle = roll * 0.5;
+    const double sinRoll = std::sin(angle);
+    const double cosRoll = std::cos(angle);
 
-    angle = angleY * 0.5;
-    const double sinY = std::sin(angle);
-    const double cosY = std::cos(angle);
+    angle = pitch * 0.5;
+    const double sinPitch = std::sin(angle);
+    const double cosPitch = std::cos(angle);
 
-    angle = angleZ * 0.5;
-    const double sinZ = std::sin(angle);
-    const double cosZ = std::cos(angle);
+    angle = yaw * 0.5;
+    const double sinYaw = std::sin(angle);
+    const double cosYaw = std::cos(angle);
 
-    const double cosYcosZ = cosY * cosZ;
-    const double sinYcosZ = sinY * cosZ;
-    const double cosYsinZ = cosY * sinZ;
-    const double sinYsinZ = sinY * sinZ;
-
-    x = sinX * cosYcosZ - cosX * sinYsinZ;
-    y = cosX * sinYcosZ + sinX * cosYsinZ;
-    z = cosX * cosYsinZ - sinX * sinYcosZ;
-    w = cosX * cosYcosZ + sinX * sinYsinZ;
+    w = cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw;
+    x = sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw;
+    y = cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw;
+    z = cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw;
 
     // Normalize the quaternion
     normalize();
@@ -175,18 +170,21 @@ Quaternion Quaternion::identity() {
     return {0,0,0,1};
 }
 
-Quaternion Quaternion::fromEulerAngles(double angleX, double angleY, double angleZ) {
+Quaternion Quaternion::fromEulerAngles(double roll, double pitch, double yaw) {
     Quaternion quaternion;
-    quaternion.m_initWithEulerAngles(angleX, angleY, angleZ);
+    quaternion.m_initWithEulerAngles(roll, pitch, yaw);
 
-    return quaternion;
+    // NED to y up
+    Quaternion correction(0.707,0.0,0.0,0.707);
+
+    return correction * quaternion;
 }
 
 double Quaternion::dot(const Quaternion& quaternion) const {
     return (x*quaternion.x + y*quaternion.y + z*quaternion.z + w*quaternion.w);
 }
 
-Quaternion Quaternion::slerp(const Quaternion &quaternion1, const Quaternion& quaternion2, double t) {
+Quaternion Quaternion::slerp(const Quaternion& quaternion1, const Quaternion& quaternion2, double t) {
     assert(t >= 0.0 && t <= 1.0);
 
     double invert = 1.0;

@@ -71,7 +71,7 @@ void OneAircraftGrounded::destroyPhysicsWorld() {
 }
 
 void OneAircraftGrounded::initBodiesPositions() {
-    m_launcher->setTransform(Transform({-0.849, 0.816, 30.0}, Quaternion::fromEulerAngles(-M_PI/2.0,-M_PI/2.0, radians(19.0))));
+    m_launcher->setTransform(Transform({-0.849, 0.816, 30.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0), 0.0, M_PI/2.0)));
     m_ground->setTransform(Transform({0.0, -0.5, 0.0}, Quaternion::identity()));
 }
 

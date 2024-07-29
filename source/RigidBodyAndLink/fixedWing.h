@@ -64,7 +64,6 @@ private:
     fixedWingStates m_eulerIntegration(fixedWingStates& derivatives, double dt) const;
 
     void m_writeLog(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> tetherForceBody);
-
 };
 
 #endif //GRS_SIMULATOR_FIXEDWING_H

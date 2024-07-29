@@ -38,7 +38,7 @@ RigidBody::rigidBodyType FixedWing::getType() const {
 
 void FixedWing::update(double dt) {
 
-    fixedWingControlInputs inputs(m_controller->calculateAircraftControlInputs(getStates(), getCommands()));
+    fixedWingControlInputs inputs(m_controller->calculateAircraftControlInputs(getId(), getStates(), getCommands()));
     setInputs(inputs);
 
     Vector3<double> externalForcesEarth = calcExternalForce();
@@ -55,7 +55,8 @@ void FixedWing::update(double dt) {
     centerOfMass->setForce(m_bodyToEarth(forcesAeroBody) + externalForcesEarth);
     centerOfMass->setMoment(m_bodyToEarth(momentsAeroBody));
 
-    setTransform(Transform(centerOfMass->position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi,-m_states.psi,m_states.theta)));
+    // phi rotated because aircraft mesh is rotated
+    setTransform(Transform(centerOfMass->position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi - M_PI/2,m_states.theta,m_states.psi)));
 
     // Log
     m_writeLog(forcesAeroBody, momentsAeroBody, m_earthToBody(externalForcesEarth));
@@ -242,7 +243,7 @@ void FixedWing::setInitialStates(initialStates& states) {
     centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
     centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
 
-    setTransform(Transform({centerOfMass->position().x(), -centerOfMass->position().z(), centerOfMass->position().y()}, Quaternion::fromEulerAngles(m_states.phi,-m_states.psi,m_states.theta)));
+    setTransform(Transform(centerOfMass->position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi - M_PI/2,m_states.theta,m_states.psi)));
 }
 
 void FixedWing::m_writeLog(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> tetherForceBody) {

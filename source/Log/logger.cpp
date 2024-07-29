@@ -91,7 +91,7 @@ void Logger::writeTetherMessage(tetherLogMessage& message) {
                  << message.earthForcesAero     << std::endl;
 }
 
-void Logger::writeHlcMessage(hlcLogMessage &message) {
+void Logger::writeHlcMessage(hlcLogMessage& message) {
 
     m_hlcLog << getLoggerTime()                  << ","
              << message.commands.altitude        << ","
@@ -110,9 +110,10 @@ void Logger::writeHlcMessage(hlcLogMessage &message) {
              << message.groundspeedPid.limit     << std::endl;
 }
 
-void Logger::writeLlcMessage(llcLogMessage &message) {
+void Logger::writeLlcMessage(llcLogMessage& message) {
 
-    m_llcLog << getLoggerTime()               << ","
+    m_llcLog << message.aircraftId            << ","
+             << getLoggerTime()               << ","
              << message.inputs.deltaAileron   << ","
              << message.inputs.deltaElevator  << ","
              << message.inputs.deltaRudder    << ","

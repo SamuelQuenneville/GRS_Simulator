@@ -229,7 +229,7 @@ Scene::mouseMotionEvent(double xMouse, double yMouse, int leftButtonState, int r
         m_zoom(-dy / h);
     }
         // Translation
-    else if (middleButtonState == GLFW_PRESS || rightButtonState == GLFW_PRESS || (leftButtonState == GLFW_PRESS && altKeyState == GLFW_PRESS)) {
+    else if (middleButtonState == GLFW_PRESS || rightButtonState == GLFW_PRESS) {
         m_translate(static_cast<int>(xMouse), static_cast<int>(yMouse));
     }
         // Rotation
