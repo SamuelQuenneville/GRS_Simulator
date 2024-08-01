@@ -28,8 +28,9 @@ public:
     ~Color() = default;
 
     // Return the white color
-    static Color white() {return {1.0f, 1.0f, 1.0f, 1.0f};}
-    static Color red() {return {1.0f, 0.0f, 0.0f, 1.0f};}
+    static Color white()  {return {1.0f, 1.0f, 1.0f, 1.0f};}
+    static Color red()    {return {1.0f, 0.0f, 0.0f, 1.0f};}
+    static Color blue()   {return {0.0f, 0.0f, 1.0f, 1.0f};}
     static Color yellow() {return {1.0f, 1.0f, 0.0f, 1.0f};}
 
     static Color backgroundColor() {return {0.298f, 0.298f, 0.32157f, 1.0f};}

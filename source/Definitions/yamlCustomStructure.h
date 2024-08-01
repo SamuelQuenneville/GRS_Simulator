@@ -15,6 +15,7 @@
 
 #include "tetherDefinitions.h"
 #include "fixedWingDefinitions.h"
+#include "payloadDefinitions.h"
 #include "configurationDefinitions.h"
 
 /*
@@ -33,6 +34,7 @@ namespace YAML {
             rhs.logFilesDirectory               = node["LOG_FILE_DIRECTORY"].as<std::string>();
             rhs.aircraftPropertiesFileDirectory = node["AIRCRAFT_PROPERTIES_FILE_NAME"].as<std::string>();
             rhs.tetherPropertiesFileDirectory   = node["TETHER_PROPERTIES_FILE_NAME"].as<std::string>();
+            rhs.payloadPropertiesFileDirectory  = node["PAYLOAD_PROPERTIES_FILE_NAME"].as<std::string>();
             rhs.systemConfiguration             = node["SYSTEM_CONFIGURATION"].as<std::string>();
             rhs.fixedDuration                   = node["FIXED_DURATION"].as<bool>();
             rhs.duration                        = node["DURATION"].as<float>();
@@ -67,6 +69,7 @@ namespace YAML {
 
             rhs.positionPayload = node["POS_PAYLOAD"].as<std::vector<double>>();
             rhs.groundspeed     = node["GROUNDSPEED"].as<float>();
+            rhs.radius          = node["RADIUS"].as<float>();
             rhs.aircraftPitch   = node["AIRCRAFT_PITCH"].as<float>();
             rhs.aircraftRoll    = node["AIRCRAFT_ROLL"].as<float>();
             return true;
@@ -86,6 +89,19 @@ namespace YAML {
             rhs.rigidity     = node["RIGIDITY"].as<float>();
             rhs.damping      = node["DAMPING"].as<float>();
             rhs.numSegments  = node["NUM_SEGMENTS"].as<int>();
+            return true;
+        }
+    };
+
+    template<>
+    struct convert<payloadProperties> {
+        static bool decode(const Node& node, payloadProperties& rhs) {
+            if(!node.IsMap()) {
+                return false;
+            }
+
+            rhs.mass = node["MASS"].as<float>();
+            rhs.dimension = node["DIMENSION"].as<std::vector<float>>();
             return true;
         }
     };

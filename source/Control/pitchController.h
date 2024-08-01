@@ -22,7 +22,7 @@ public:
     int32_t getRateOut(float desiredRate, float scaler, bool disableIntegrator, float airspeed);
     [[nodiscard]] float getCoordinationRateOffset(float airspeed) const;
 
-    [[nodiscard]] const PID::pidInfo& getPidInfo() const { return m_pidInfo;};
+    [[nodiscard]] const PID::pidInfo& getPidInfo() const {return m_pidInfo;};
 
     void setAircraftStates(const fixedWingStates& aircraftStates) {m_aircraftStates = aircraftStates;};
 

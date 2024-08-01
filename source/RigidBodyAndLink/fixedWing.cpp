@@ -199,6 +199,10 @@ double FixedWing::airspeed() const {
     return std::sqrt(m_states.u * m_states.u + m_states.v * m_states.v + m_states.w * m_states.w);
 }
 
+double FixedWing::groundspeed() const {
+    return std::sqrt(m_states.vx * m_states.vx + m_states.vy * m_states.vy + m_states.vz * m_states.vz);
+}
+
 Matrix3<double> FixedWing::rotationMatrixCBodyEarth() const {
     // Calculate the rotation matrix between the Earth and Body frame
     Matrix3 phiRotationC1   = Matrix3<double>::makeXRotation(m_states.phi);

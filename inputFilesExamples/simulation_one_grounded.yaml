@@ -7,8 +7,9 @@
 #
 SimulationParameters:
   LOG_FILE_DIRECTORY: 'C:/Users/ques2902/Desktop/LogSim'
-  AIRCRAFT_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/Desktop/sigCoeffs.yaml'
-  TETHER_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/Desktop/tetherProperties.yaml'
+  AIRCRAFT_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/sigCoeffs.yaml'
+  TETHER_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/tetherProperties.yaml'
+  PAYLOAD_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/payloadProperties.yaml'
   SYSTEM_CONFIGURATION: 'ONE_AIRCRAFT_GROUNDED' # SEE OPTIONS!!!
   FIXED_DURATION: true
   DURATION: 100 # seconds
@@ -30,6 +31,7 @@ InitialStatesAircraft_1:
 Target:
   POS_PAYLOAD: [0.0, 0.0, 10.0]
   GROUNDSPEED: 25.0 # m/s
+  RADIUS: 25.0 # m
   AIRCRAFT_PITCH: 0.0
   AIRCRAFT_ROLL: 0.0
 #

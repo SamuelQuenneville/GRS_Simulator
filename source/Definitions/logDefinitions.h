@@ -11,9 +11,12 @@
 
 #pragma once
 
+#include <map>
+
 #include "Mathematics/vector3.h"
 #include "Definitions/fixedWingDefinitions.h"
 #include "Control/pid.h"
+#include "Control/lateralController.h"
 
 struct fixedWingLogMessage {
     int uavId{};
@@ -34,7 +37,7 @@ struct fixedWingLogMessage {
 struct payloadLogMessage {
     Vector3<double> nedPosition;
     Vector3<double> earthSpeed;
-    Vector3<double> earthForcesTether;
+    std::map<int, Vector3<double>> earthForcesTethers;
 };
 
 struct tetherLogMessage {
@@ -49,8 +52,12 @@ struct tetherLogMessage {
 };
 
 struct hlcLogMessage {
-    fixedWingCommands commands;
-    PID::pidInfo groundspeedPid;
+    fixedWingCommands commands1;
+    PID::pidInfo groundspeedPid1;
+    LateralController::ctrlInfo lateralController1;
+    fixedWingCommands commands2;
+    PID::pidInfo groundspeedPid2;
+    LateralController::ctrlInfo lateralController2;
 };
 
 struct llcLogMessage {

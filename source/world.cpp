@@ -39,6 +39,7 @@ void World::readConfigurationFile(const std::string& fileName) {
 
     m_aircraftProperties = ConfigurationParser::parseFixedWingProperties(simParams.aircraftPropertiesFileDirectory);
     m_tetherProperties = ConfigurationParser::parseTetherProperties(simParams.tetherPropertiesFileDirectory);
+    m_payloadProperties = ConfigurationParser::parsePayloadProperties(simParams.payloadPropertiesFileDirectory);
 
     int numberAircraftInSystem = getNumberOfAircraftInSystem(m_systemConfiguration.type);
 
@@ -70,16 +71,16 @@ void World::createSystem() {
             m_system->createSystemOneAircraftGrounded(m_aircraftProperties, m_tetherProperties, m_initialAircraftStatesVector.front());
             break;
         case TWO_AIRCRAFT_GROUNDED_V:
-            m_system->createSystemTwoAircraftGroundedV(m_aircraftProperties, m_tetherProperties, m_initialAircraftStatesVector.front(), m_initialAircraftStatesVector.back());
+            m_system->createSystemTwoAircraftV(true, m_aircraftProperties, m_tetherProperties, m_payloadProperties, m_initialAircraftStatesVector, m_initialPayloadStates);
             break;
         case TWO_AIRCRAFT_FREE_V:
-            m_system->createSystemTwoAircraftFreeV();
+            m_system->createSystemTwoAircraftV(false, m_aircraftProperties, m_tetherProperties, m_payloadProperties, m_initialAircraftStatesVector, m_initialPayloadStates);
             break;
         case TWO_AIRCRAFT_GROUNDED_Y:
-            m_system->createSystemTwoAircraftGroundedY();
+            m_system->createSystemTwoAircraftY();
             break;
         case TWO_AIRCRAFT_FREE_Y:
-            m_system->createSystemTwoAircraftFreeY();
+            m_system->createSystemTwoAircraftY();
             break;
     }
 }

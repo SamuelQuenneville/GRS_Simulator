@@ -7,7 +7,6 @@
  */
 
 #include "cube.h"
-#include "RigidBodyAndLink/fixedWing.h"
 
 Cube::Cube(const Vector3<float>& size, const std::string& executablePath)
     : PhysicsObject(executablePath + R"(\source\Meshes\cube.obj)")

@@ -22,6 +22,7 @@ struct simulationParameters {
     std::string logFilesDirectory;
     std::string aircraftPropertiesFileDirectory;
     std::string tetherPropertiesFileDirectory;
+    std::string payloadPropertiesFileDirectory;
     std::string systemConfiguration;
     bool fixedDuration;
     float duration;
@@ -40,6 +41,7 @@ struct initialStates {
 struct target {
     std::vector<double> positionPayload;    // [x y z]
     float groundspeed;                      // m/s
+    float radius;                           // m
     float aircraftPitch;                    // degrees
     float aircraftRoll;                     // degrees
 };

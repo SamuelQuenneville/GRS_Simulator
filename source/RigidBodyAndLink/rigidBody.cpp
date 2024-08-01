@@ -26,6 +26,16 @@ Vector3<double> RigidBody::calcExternalForce() {
     return sumExternalForce;
 }
 
+std::map<int, Vector3<double>> RigidBody::externalForces() {
+    std::map<int, Vector3<double>> forces;
+
+    for(const Node* node : connectedNode) {
+        forces.emplace(node->getId(), node->force());
+    }
+
+    return forces;
+}
+
 void RigidBody::addConnection(Node& node) {
     connectedNode.push_back(&node);
 }

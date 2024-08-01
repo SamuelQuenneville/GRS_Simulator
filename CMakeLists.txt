@@ -40,6 +40,8 @@ set(GRS_CONTROL
         source/Control/hlcTwinAircraft.h
         source/Control/phaseController.cpp
         source/Control/phaseController.h
+        source/Control/lateralController.cpp
+        source/Control/lateralController.h
 )
 
 set(GRS_DEFINITIONS
@@ -50,6 +52,7 @@ set(GRS_DEFINITIONS
         source/Definitions/systemDefinitions.h
         source/Definitions/logDefinitions.h
         source/Definitions/yamlCustomStructure.h
+        source/Definitions/payloadDefinitions.h
 )
 
 set(GRS_LOG
@@ -115,6 +118,10 @@ set(GRS_RIGID_BODIES_AND_LINK
         source/RigidBodyAndLink/SceneObjects/launcher.h
         source/RigidBodyAndLink/SceneObjects/tetherLine.cpp
         source/RigidBodyAndLink/SceneObjects/tetherLine.h
+        source/RigidBodyAndLink/payload.cpp
+        source/RigidBodyAndLink/payload.h
+        source/RigidBodyAndLink/SceneObjects/payloadObject.cpp
+        source/RigidBodyAndLink/SceneObjects/payloadObject.h
 )
 
 set(GRS_SCENES

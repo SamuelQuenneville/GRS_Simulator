@@ -31,6 +31,8 @@ public:
 protected:
     World* m_world;
 
+    PayloadObject* m_payload;
+
     Cube* m_ground{};
     Launcher* m_launcher1{};
     Launcher* m_launcher2{};

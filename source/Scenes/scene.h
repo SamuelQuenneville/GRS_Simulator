@@ -15,6 +15,7 @@
 #include "RigidBodyAndLink/SceneObjects/aircraft.h"
 #include "RigidBodyAndLink/SceneObjects/launcher.h"
 #include "RigidBodyAndLink/SceneObjects/tetherLine.h"
+#include "RigidBodyAndLink/SceneObjects/payloadObject.h"
 #include "OpenglFramework/light.h"
 #include "OpenglFramework/camera.h"
 #include "OpenglFramework/frameBufferObject.h"

@@ -11,6 +11,7 @@
 
 #include "RigidBodyAndLink//fixedWing.h"
 #include "RigidBodyAndLink/tether.h"
+#include "RigidBodyAndLink/payload.h"
 
 #include "Definitions/systemDefinitions.h"
 #include "Control/llcBaseVersion.h"
@@ -29,13 +30,12 @@ public:
     // Create the different configuration of system
     void createSystemOneAircraft(fixedWingProperties& aircraftProperties, initialStates& aircraftStates);
     void createSystemOneAircraftGrounded(fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, initialStates& aircraftStates);
-    void createSystemTwoAircraftGroundedV(fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, initialStates& aircraftStates1, initialStates& aircraftStates2);
-    void createSystemTwoAircraftFreeV();
-    void createSystemTwoAircraftGroundedY();
-    void createSystemTwoAircraftFreeY();
+    void createSystemTwoAircraftV(bool isGrounded, fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, payloadProperties& payloadProperties, std::vector<initialStates>& aircraftStates, initialStates& payloadStates);
+    void createSystemTwoAircraftY();
 
     std::vector<std::unique_ptr<FixedWing>>& aircraft() {return m_aircraft;};
     std::vector<std::unique_ptr<Tether>>& tethers() {return m_links;};
+    std::unique_ptr<Payload>& payload() {return m_payload;};
 
 private:
     worldPhysics& m_physics;
@@ -56,6 +56,7 @@ private:
 
     std::vector<std::unique_ptr<FixedWing>> m_aircraft;
     std::vector<std::unique_ptr<Tether>> m_links;
+    std::unique_ptr<Payload> m_payload;
 };
 
 

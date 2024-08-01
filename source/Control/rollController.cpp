@@ -83,7 +83,7 @@ int32_t RollController::getRateOut(float desiredRate, float scaler, bool disable
     m_lastOut = out;
 
     // output is scaled to notional centidegrees of deflection
-    return constrainInt32(static_cast<int32_t>(out) * 100, -1500, 1500);
+    return constrainInt32(static_cast<int32_t>(out * 100), -1500, 1500);
 }
 
 void RollController::resetIntegrator() {

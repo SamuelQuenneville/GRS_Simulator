@@ -12,6 +12,7 @@ TwoAircraftGrounded::TwoAircraftGrounded(World *world)
     : Scene(World::getExecutablePath())
     , m_world(world)
     , m_ground(nullptr)
+    , m_payload(nullptr)
 {
     // Set the center of the scene
     m_setScenePosition({0, 40, 20}, 100);
@@ -36,6 +37,11 @@ void TwoAircraftGrounded::createPhysicsWorld() {
 
         m_physicsObjects.push_back(aircraftObject);
     }
+
+    // -----------  PAYLOAD ---------- //
+    m_payload = new PayloadObject(m_world->system()->payload().get(), {0.4,0.4,0.4}, World::getExecutablePath());
+    m_payload->setColor(Color::blue());
+    m_physicsObjects.push_back(m_payload);
 
     // ------------ TETHER ----------- //
     for (const auto& tether : m_world->system()->tethers()) {
@@ -82,6 +88,8 @@ void TwoAircraftGrounded::initBodiesPositions() {
     m_launcher1->setTransform(Transform({-0.849, 0.816, 30.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0), 0.0, M_PI/2.0)));
     m_launcher2->setTransform(Transform({0.849, 0.816, -30.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0),0.0, -M_PI/2.0)));
     m_ground->setTransform(Transform({0.0, -0.5, 0.0}, Quaternion::identity()));
+
+    m_payload->setTransform(Transform({0.0,0.0,0.0}, Quaternion::identity()));
 }
 
 void TwoAircraftGrounded::updatePhysics() {

@@ -56,6 +56,7 @@ private:
     systemConfiguration m_systemConfiguration{};
     fixedWingProperties m_aircraftProperties{};
     tetherProperties m_tetherProperties{};
+    payloadProperties m_payloadProperties{};
 
     std::vector<initialStates> m_initialAircraftStatesVector;
     initialStates m_initialPayloadStates;

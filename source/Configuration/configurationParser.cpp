@@ -22,6 +22,11 @@ tetherProperties ConfigurationParser::parseTetherProperties(const std::string& f
     return node["TetherProperties"].as<tetherProperties>();
 }
 
+payloadProperties ConfigurationParser::parsePayloadProperties(const std::string &filePath) {
+    YAML::Node node = YAML::LoadFile(filePath);
+    return node["PayloadProperties"].as<payloadProperties>();
+}
+
 initialStates ConfigurationParser::parseInitialStates(YAML::Node& node, const std::string& nodeName) {
     return node[nodeName].as<initialStates>();
 }

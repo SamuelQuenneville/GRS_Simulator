@@ -36,6 +36,7 @@ public:
     void setInputs(const fixedWingControlInputs& newInputs) {m_inputs = newInputs;};
 
     [[nodiscard]] double airspeed() const;
+    [[nodiscard]] double groundspeed() const;
 
     [[nodiscard]] Matrix3<double> rotationMatrixCBodyEarth() const;
 

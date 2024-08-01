@@ -397,9 +397,9 @@ public:
         T det = determinant();
 
         // Check if the determinant is equal to zero
-        assert(det > std::numeric_limits<float>::epsilon());
+        assert(det > std::numeric_limits<double>::epsilon());
 
-        float invDeterminant = 1.0f / det;
+        double invDeterminant = 1.0 / det;
         Matrix3 tempMatrix{{(m_data[1][1]*m_data[2][2]-m_data[2][1]*m_data[1][2]), -(m_data[0][1]*m_data[2][2]-m_data[2][1]*m_data[0][2]), (m_data[0][1]*m_data[1][2]-m_data[0][2]*m_data[1][1])},
                            {-(m_data[1][0]*m_data[2][2]-m_data[2][0]*m_data[1][2]), (m_data[0][0]*m_data[2][2]-m_data[2][0]*m_data[0][2]), -(m_data[0][0]*m_data[1][2]-m_data[1][0]*m_data[0][2])},
                            {(m_data[1][0]*m_data[2][1]-m_data[2][0]*m_data[1][1]), -(m_data[0][0]*m_data[2][1]-m_data[2][0]*m_data[0][1]), (m_data[0][0]*m_data[1][1]-m_data[0][1]*m_data[1][0])}};

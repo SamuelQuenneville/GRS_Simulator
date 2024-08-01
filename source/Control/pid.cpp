@@ -94,7 +94,7 @@ void PID::updateIntegral(bool limit) {
     if (!isZero(m_ki) && isPositive(m_dt)) {
         // ensure that integrator can only be reduced if the output is saturated
         if (!limit || ((isPositive(m_integrator) && isNegative(m_error)) || (isNegative(m_integrator) && isPositive(m_error)))) {
-            m_integrator += ((float)m_error * m_ki) * m_dt;
+            m_integrator += (m_error * m_ki) * m_dt;
             m_integrator = constrainFloat(m_integrator, m_kimin, m_kimax);
         }
     } else {

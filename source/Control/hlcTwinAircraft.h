@@ -11,6 +11,7 @@
 
 #include "Control/highLevelController.h"
 #include "Control/groundspeedController.h"
+#include "Control/lateralController.h"
 
 class HlcTwinAircraft : public HighLevelController<fixedWingCommands, fixedWingStates> {
 
@@ -23,9 +24,12 @@ private:
     Logger& m_logger;
     float m_rate;
 
-    std::unique_ptr<GroundspeedController> m_groundspeedController;
+    std::unique_ptr<GroundspeedController> m_groundspeedController1;
+    std::unique_ptr<GroundspeedController> m_groundspeedController2;
+    std::unique_ptr<LateralController> m_lateralController1;
+    std::unique_ptr<LateralController> m_lateralController2;
 
-    void m_writeLog(const fixedWingCommands& commands);
+    void m_writeLog(const fixedWingCommands& commands1, const fixedWingCommands& commands2);
 };
 
 

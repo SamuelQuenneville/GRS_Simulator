@@ -18,6 +18,7 @@ Logger::Logger(const std::string& logDirectory)
 Logger::~Logger() {
     stopLog(m_aircraftLog);
     stopLog(m_tethersLog);
+    stopLog(m_payloadLog);
     stopLog(m_hlcLog);
     stopLog(m_llcLog);
 }
@@ -45,6 +46,7 @@ void Logger::m_initDirectory(const std::string& logDirectory) {
 
     m_aircraftLog = startLog(logDirectory + date + "_aircraft.csv");
     m_tethersLog = startLog(logDirectory + date + "_tethers.csv");
+    m_payloadLog = startLog(logDirectory + date + "_payload.csv");
     m_hlcLog = startLog(logDirectory + date + "_hlc.csv");
     m_llcLog = startLog(logDirectory + date + "_llc.csv");
 }
@@ -93,21 +95,60 @@ void Logger::writeTetherMessage(tetherLogMessage& message) {
 
 void Logger::writeHlcMessage(hlcLogMessage& message) {
 
-    m_hlcLog << getLoggerTime()                  << ","
-             << message.commands.altitude        << ","
-             << message.commands.phi             << ","
-             << message.commands.theta           << ","
-             << message.commands.thrust          << ","
-             << message.groundspeedPid.target    << ","
-             << message.groundspeedPid.actual    << ","
-             << message.groundspeedPid.error     << ","
-             << message.groundspeedPid.P         << ","
-             << message.groundspeedPid.I         << ","
-             << message.groundspeedPid.D         << ","
-             << message.groundspeedPid.FF        << ","
-             << message.groundspeedPid.Dmod      << ","
-             << message.groundspeedPid.slew_rate << ","
-             << message.groundspeedPid.limit     << std::endl;
+    m_hlcLog << "1"                               << ","
+             << getLoggerTime()                   << ","
+             << message.commands1.altitude        << ","
+             << message.commands1.phi             << ","
+             << message.commands1.theta           << ","
+             << message.commands1.thrust          << ","
+             << message.groundspeedPid1.target    << ","
+             << message.groundspeedPid1.actual    << ","
+             << message.groundspeedPid1.error     << ","
+             << message.groundspeedPid1.P         << ","
+             << message.groundspeedPid1.I         << ","
+             << message.groundspeedPid1.D         << ","
+             << message.groundspeedPid1.FF        << ","
+             << message.groundspeedPid1.Dmod      << ","
+             << message.groundspeedPid1.slew_rate << ","
+             << message.groundspeedPid1.limit     << ","
+             << message.lateralController1.actualPositionX       << ","
+             << message.lateralController1.targetPositionX       << ","
+             << message.lateralController1.actualPositionY       << ","
+             << message.lateralController1.targetPositionY       << ","
+             << message.lateralController1.radius                << ","
+             << message.lateralController1.kx                    << ","
+             << message.lateralController1.xtrackPositionError   << ","
+             << message.lateralController1.kv                    << ","
+             << message.lateralController1.xtrackVelocityError   << ","
+             << message.lateralController1.accelerationTarget    << std::endl;
+
+    m_hlcLog << "2"                               << ","
+             << getLoggerTime()                   << ","
+             << message.commands2.altitude        << ","
+             << message.commands2.phi             << ","
+             << message.commands2.theta           << ","
+             << message.commands2.thrust          << ","
+             << message.groundspeedPid2.target    << ","
+             << message.groundspeedPid2.actual    << ","
+             << message.groundspeedPid2.error     << ","
+             << message.groundspeedPid2.P         << ","
+             << message.groundspeedPid2.I         << ","
+             << message.groundspeedPid2.D         << ","
+             << message.groundspeedPid2.FF        << ","
+             << message.groundspeedPid2.Dmod      << ","
+             << message.groundspeedPid2.slew_rate << ","
+             << message.groundspeedPid2.limit     << ","
+             << message.lateralController2.actualPositionX       << ","
+             << message.lateralController2.targetPositionX       << ","
+             << message.lateralController2.actualPositionY       << ","
+             << message.lateralController2.targetPositionY       << ","
+             << message.lateralController2.radius                << ","
+             << message.lateralController2.kx                    << ","
+             << message.lateralController2.xtrackPositionError   << ","
+             << message.lateralController2.kv                    << ","
+             << message.lateralController2.xtrackVelocityError   << ","
+             << message.lateralController2.accelerationTarget    << std::endl;
+
 }
 
 void Logger::writeLlcMessage(llcLogMessage& message) {
@@ -148,4 +189,18 @@ void Logger::writeLlcMessage(llcLogMessage& message) {
              << message.altitudePid.Dmod      << ","
              << message.altitudePid.slew_rate << ","
              << message.altitudePid.limit     << std::endl;
+}
+
+void Logger::writePayloadMessage(payloadLogMessage& message) {
+    m_payloadLog << getLoggerTime()     << ","
+             << message.nedPosition     << ","
+             << message.earthSpeed      << ",";
+
+    for (const auto& force : message.earthForcesTethers) {
+        m_payloadLog << force.first  << ","
+                     << force.second << ",";
+    }
+
+    m_payloadLog << std::endl;
+
 }

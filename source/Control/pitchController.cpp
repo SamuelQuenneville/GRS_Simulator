@@ -67,7 +67,7 @@ int32_t PitchController::getRateOut(float desiredRate, float scaler, bool disabl
     m_lastOut = out;
 
     // output is scaled to notional centidegrees of deflection
-    return constrainInt32(static_cast<int32_t>(out) * 100, -2000, 2000);
+    return constrainInt32(static_cast<int32_t>(out * 100), -2000, 2000);
 }
 
 float PitchController::getCoordinationRateOffset(float airspeed) const {

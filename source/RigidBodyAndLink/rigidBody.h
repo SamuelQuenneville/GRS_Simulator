@@ -35,6 +35,7 @@ public:
 
     virtual void update(double dt) {};
     virtual Vector3<double> calcExternalForce();
+    virtual std::map<int, Vector3<double>> externalForces();
 
     virtual void setInitialStates(initialStates& states) {};
 
