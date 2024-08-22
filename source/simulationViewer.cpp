@@ -87,6 +87,8 @@ void SimulationViewer::start() {
             m_world->createSystem();
             m_createScene();
 
+            m_gui.setTargetFromConfig(m_world->system()->getTarget().groundspeed, m_world->system()->getTarget().positionPayload);
+
             m_scene->reshape(m_windowWidth, m_windowHeight);
             m_scene->setWindowDimension(m_windowWidth, m_windowHeight);
             m_scene->reset();
@@ -190,12 +192,16 @@ void SimulationViewer::m_createScene() {
             m_scene = new OneAircraftGrounded(m_world.get());
             m_sceneCreated = true;
             break;
+        case TWO_AIRCRAFT:
+            m_scene = new TwoAircraft(m_world.get());
+            m_sceneCreated = true;
+            break;
         case TWO_AIRCRAFT_GROUNDED_V:
-            m_scene = new TwoAircraftGrounded(m_world.get());
+            m_scene = new TwoAircraftV(m_world.get());
             m_sceneCreated = true;
             break;
         case TWO_AIRCRAFT_FREE_V:
-            m_scene = new TwoAircraftGrounded(m_world.get());
+            m_scene = new TwoAircraftV(m_world.get());
             m_sceneCreated = true;
             break;
         case TWO_AIRCRAFT_GROUNDED_Y:
@@ -353,6 +359,10 @@ void SimulationViewer::m_update() {
 
     // Update the scene
     m_scene->update();
+}
+
+void SimulationViewer::m_updateTarget(double groundspeed, std::vector<double> payloadPosition) {
+    m_scene->updateTarget(groundspeed, payloadPosition);
 }
 
 void SimulationViewer::m_render() {

@@ -79,6 +79,13 @@ void OneAircraftGrounded::updatePhysics() {
     m_world->update();
 }
 
+void OneAircraftGrounded::updateTarget(double groundspeed, std::vector<double> payloadPosition) {
+    target t = m_world->system()->getTarget();
+    t.groundspeed = static_cast<float>(groundspeed);
+    t.positionPayload = payloadPosition;
+    m_world->system()->setTarget(t);
+}
+
 void OneAircraftGrounded::reset() {
     Scene::reset();
     destroyPhysicsWorld();

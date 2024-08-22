@@ -13,6 +13,7 @@ World::World() {
     systemTypeStringToEnum = {
             {"ONE_AIRCRAFT", ONE_AIRCRAFT},
             {"ONE_AIRCRAFT_GROUNDED", ONE_AIRCRAFT_GROUNDED},
+            {"TWO_AIRCRAFT", TWO_AIRCRAFT},
             {"TWO_AIRCRAFT_GROUNDED_V", TWO_AIRCRAFT_GROUNDED_V},
             {"TWO_AIRCRAFT_FREE_V", TWO_AIRCRAFT_FREE_V},
             {"TWO_AIRCRAFT_GROUNDED_Y", TWO_AIRCRAFT_GROUNDED_Y},
@@ -69,6 +70,9 @@ void World::createSystem() {
             break;
         case ONE_AIRCRAFT_GROUNDED:
             m_system->createSystemOneAircraftGrounded(m_aircraftProperties, m_tetherProperties, m_initialAircraftStatesVector.front());
+            break;
+        case TWO_AIRCRAFT:
+            m_system->createSystemTwoAircraft(m_aircraftProperties, m_initialAircraftStatesVector);
             break;
         case TWO_AIRCRAFT_GROUNDED_V:
             m_system->createSystemTwoAircraftV(true, m_aircraftProperties, m_tetherProperties, m_payloadProperties, m_initialAircraftStatesVector, m_initialPayloadStates);

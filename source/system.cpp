@@ -22,12 +22,11 @@ void System::update(double dt) {
 
     // Call HLC
     if (m_shouldCallHlc()) {
-        std::vector<fixedWingStates> aircraftStatesVector = m_getAircraftStates();
-        m_commands = m_controller->calculateInputs(m_getAircraftIds(), aircraftStatesVector, m_target);
+        m_commands = m_controller->calculateInputs(m_getAircraftIds(), m_getAircraftStates(), m_target);
     }
 
     // Call tether update()
-    if (m_systemConfiguration.type != ONE_AIRCRAFT) {
+    if (m_systemConfiguration.type != ONE_AIRCRAFT || m_systemConfiguration.type != TWO_AIRCRAFT) {
         for(const auto& tether : m_links) {
             tether->update(dt);
         }
@@ -90,9 +89,32 @@ void System::createSystemOneAircraftGrounded(fixedWingProperties& aircraftProper
     m_initHlcCommands();
 }
 
-void System::createSystemTwoAircraftV(bool isGrounded, fixedWingProperties &aircraftProperties, tetherProperties &tetherProperties, payloadProperties &payloadProperties, std::vector<initialStates> &aircraftStates, initialStates &payloadStates) {
+void System::createSystemTwoAircraft(fixedWingProperties& aircraftProperties, std::vector<initialStates>& aircraftStates) {
     // Create HLC
-    m_controller = std::make_unique<HlcTwinAircraft>(m_physics, m_logger, m_systemConfiguration.hlcRate);
+    m_controller = std::make_unique<HlcTwinAircraft>(m_physics, m_logger, m_systemConfiguration.hlcRate, 30.0);
+
+    // Create LLC
+    std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController1 = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_systemConfiguration.llcRate);
+    std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController2 = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_systemConfiguration.llcRate);
+
+    // Create aircraft and set initial conditions
+    std::unique_ptr<FixedWing> aircraft1 = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController1));
+    aircraft1->setInitialStates(aircraftStates.front());
+
+    std::unique_ptr<FixedWing> aircraft2 = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController2));
+    aircraft2->setInitialStates(aircraftStates.back());
+
+    // Push back Bodies and Links into lists
+    m_aircraft.push_back(std::move(aircraft1));
+    m_aircraft.push_back(std::move(aircraft2));
+
+    // Compute first HLC commands
+    m_initHlcCommands();
+}
+
+void System::createSystemTwoAircraftV(bool isGrounded, fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, payloadProperties& payloadProperties, std::vector<initialStates>& aircraftStates, initialStates& payloadStates) {
+    // Create HLC
+    m_controller = std::make_unique<HlcTwinAircraft>(m_physics, m_logger, m_systemConfiguration.hlcRate, tetherProperties.length);
 
     // Create LLC
     std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController1 = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_systemConfiguration.llcRate);
@@ -172,4 +194,3 @@ std::vector<int> System::m_getAircraftIds() {
     }
     return idsList;
 }
-

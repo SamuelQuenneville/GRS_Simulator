@@ -26,10 +26,12 @@ public:
 
     void update(double dt);
     void setTarget(const target& newTarget) {m_target = newTarget;};
+    target& getTarget() {return m_target;};
 
     // Create the different configuration of system
     void createSystemOneAircraft(fixedWingProperties& aircraftProperties, initialStates& aircraftStates);
     void createSystemOneAircraftGrounded(fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, initialStates& aircraftStates);
+    void createSystemTwoAircraft(fixedWingProperties& aircraftProperties, std::vector<initialStates>& aircraftStates);
     void createSystemTwoAircraftV(bool isGrounded, fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, payloadProperties& payloadProperties, std::vector<initialStates>& aircraftStates, initialStates& payloadStates);
     void createSystemTwoAircraftY();
 

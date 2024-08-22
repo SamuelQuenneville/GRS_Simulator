@@ -359,4 +359,3 @@ void Scene::m_rotate(int xMouse, int yMouse) {
 
     m_currentCameraVerticalAngle += deltaVertRotationAngle;
 }
-

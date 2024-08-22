@@ -17,7 +17,7 @@
 class LateralController {
 
 public:
-    explicit LateralController(worldPhysics& physics);
+    explicit LateralController(worldPhysics& physics, float rate);
 
     void updateLoiter(const Vector2<double>& centerWP, float radius, float loiterDirection, bool isTethered);
     [[nodiscard]] float navRollCmd() const;
@@ -44,6 +44,8 @@ private:
     fixedWingStates m_aircraftStates{};
 
     ctrlInfo m_ctrlInfo{};
+
+    float m_dt;
 
     float m_integrator = 0.0f;
 

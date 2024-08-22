@@ -23,6 +23,7 @@ PID::PID(float proportionalGain, float integralGain, float derivativeGain, float
     filterDerivativeHz(inputFilterDerivativeHz);
 
     m_slewRateMax = initialSrmax;
+    m_slewRateTau = initialSrtau;
     m_slewLimitScale = 1;
 
     flags.resetFilter = true;

@@ -15,7 +15,8 @@
 
 #include "timer.h"
 #include "Scenes/oneAircraftGrounded.h"
-#include "Scenes/twoAircraftGrounded.h"
+#include "Scenes/twoAircraftV.h"
+#include "Scenes/twoAircraft.h"
 
 class SimulationViewer {
 
@@ -59,6 +60,8 @@ private:
     void m_update();
     void m_updateDynamics();
     void m_updateSingleDynamicsStep();
+
+    void m_updateTarget(double groundspeed,  std::vector<double> payloadPosition);
 
     void m_render();
 

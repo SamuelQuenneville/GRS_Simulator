@@ -35,17 +35,11 @@ float AltitudeController::getPitchOut(float desiredAltitude, bool disableIntegra
     // Get altitude
     auto altitudeMeters = static_cast<float>(-m_aircraftStates.z);
 
-    // the P and I elements are scaled by sq(scaler). To use an
-    // unmodified AC_PID object we scale the inputs and calculate FF separately
     m_altPID.updateAll(desiredAltitude, altitudeMeters, limitIntegrator);
-
     m_pidInfo = m_altPID.getPidInfo();
-    auto& pinfo = m_pidInfo;
-    // No feedforward
-    pinfo.FF = 0.0f;
 
     // sum components
-    float pitchOutRad = pinfo.FF + pinfo.P + pinfo.I + pinfo.D;
+    float pitchOutRad = m_pidInfo.P + m_pidInfo.I + m_pidInfo.D;
 
     // remember the last output to trigger the I limit
     m_lastOutRad = pitchOutRad;

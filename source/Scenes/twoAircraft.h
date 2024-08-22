@@ -6,17 +6,16 @@
  * Createk Innovation Lab
  */
 
-#ifndef GRS_SIMULATOR_TWOAIRCRAFTGROUNDED_H
-#define GRS_SIMULATOR_TWOAIRCRAFTGROUNDED_H
+#ifndef GRS_SIMULATOR_TWOAIRCRAFT_H
+#define GRS_SIMULATOR_TWOAIRCRAFT_H
 
 #include "scene.h"
 #include "world.h"
 
-class TwoAircraftGrounded : public Scene {
-
+class TwoAircraft : public Scene {
 public:
-    explicit TwoAircraftGrounded(World* world);
-    ~TwoAircraftGrounded() override;
+    explicit TwoAircraft(World* world);
+    ~TwoAircraft() override;
 
     void createPhysicsWorld();
     void destroyPhysicsWorld();
@@ -24,6 +23,7 @@ public:
     void initBodiesPositions();
 
     void updatePhysics() override;
+    void updateTarget(double groundspeed, std::vector<double> payloadPosition) override;
     void reset() override;
 
     void renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;
@@ -31,12 +31,10 @@ public:
 protected:
     World* m_world;
 
-    PayloadObject* m_payload;
-
     Cube* m_ground{};
     Launcher* m_launcher1{};
     Launcher* m_launcher2{};
 };
 
 
-#endif //GRS_SIMULATOR_TWOAIRCRAFTGROUNDED_H
+#endif //GRS_SIMULATOR_TWOAIRCRAFT_H

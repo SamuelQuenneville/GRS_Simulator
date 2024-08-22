@@ -21,14 +21,14 @@ public:
     float getThrustOut(float desiredSpeed, bool disableIntegrator);
     void setAircraftStates(const fixedWingStates& aircraftStates);
 
-    [[nodiscard]] const PID::pidInfo& getPidInfo() const { return m_pidInfo;};
+    [[nodiscard]] const PID::pidInfo& getPidInfo() const {return m_pidInfo;};
 
 private:
     worldPhysics m_physics;
 
     float m_dt;
-
-    PID m_thrustPid{2.0,2.0,0.5,0.0,20.0,3.0,10.0,3.0,0.02,360.0,1.0};
+    // PID --> 2.0 2.0 0.5 alex walsh
+    PID m_thrustPid{2.0,1.0,0.8,0.0,20.0,3.0,10.0,3.0,0.02,360.0,1.0};
     PID::pidInfo m_pidInfo{};
 
     fixedWingStates m_aircraftStates{};

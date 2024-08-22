@@ -8,8 +8,9 @@
 
 #include "lateralController.h"
 
-LateralController::LateralController(worldPhysics& physics)
+LateralController::LateralController(worldPhysics& physics, float rate)
     : m_physics(physics)
+    , m_dt(1.0f/rate)
     , m_periodL1(25.0)
     , m_dampingL1(0.707)
 {
@@ -18,7 +19,7 @@ LateralController::LateralController(worldPhysics& physics)
 
 void LateralController::updateLoiter(const Vector2<double>& centerWP, float radius, float loiterDirection, bool isTethered) {
 
-    auto groundspeed = static_cast<float>(std::sqrt(m_aircraftStates.vx * m_aircraftStates.vx + m_aircraftStates.vy * m_aircraftStates.vy + m_aircraftStates.vz * m_aircraftStates.vz));
+    auto groundspeed = static_cast<float>(std::sqrt(m_aircraftStates.vx * m_aircraftStates.vx + m_aircraftStates.vy * m_aircraftStates.vy));
 
     // Calculate initial guidance gains
     float qL = m_periodL1 * m_dampingL1 / M_PI;
@@ -32,8 +33,7 @@ void LateralController::updateLoiter(const Vector2<double>& centerWP, float radi
     Vector2<double> unitDistanceNorthEastFromWP = distanceNorthEastFromWP.normalize();
 
     // Adaptive L1 for small radii
-    if (m_distanceL1 > radius && std::abs(distanceFromWP - radius) <= m_distanceL1)
-    {
+    if (m_distanceL1 > radius && std::abs(distanceFromWP - radius) <= m_distanceL1) {
         m_distanceL1 = MAX(std::abs(distanceFromWP - radius),radius);
         qL = m_distanceL1 / groundspeed;
         m_periodL1 = M_PI * qL / m_dampingL1;
@@ -54,24 +54,26 @@ void LateralController::updateLoiter(const Vector2<double>& centerWP, float radi
     float xtrackVelCirc = -ltrackVelCap;
     float xtrackErrCirc = distanceFromWP - radius;
 
-    m_integrator += 0.0;//(xtrackErrCirc * 0.002f) * 1.0f/20.0f;
-
     // Calculate acceleration to capture centerWP
     float latAccDemCap = kL * groundspeed * groundspeed / m_distanceL1 * sinf(nu);
 
     // Tangent velocity
     float velTangent = xtrackVelCap * loiterDirection;
 
-    // Centripetal acceleration (CHECK FOR CABLE TENSION)
+    // Centripetal acceleration
     float latAccDemCircCtrl;
     if (isTethered) {
-        latAccDemCircCtrl = 0.0f;
+        latAccDemCircCtrl = 0.0;
     } else {
         latAccDemCircCtrl = velTangent * velTangent / radius;
     }
 
     // Control acceleration
-    float latAccDemPD = xtrackErrCirc * kx + xtrackVelCirc * kv + m_integrator;
+    float PD = xtrackErrCirc*kx*0.2f + xtrackVelCirc*kv*0.05f;
+    m_integrator += (xtrackErrCirc * 0.4f) * m_dt;
+    m_integrator = constrainFloat(m_integrator, -1.2, 1.2);
+
+    float latAccDemPD = PD + m_integrator;
 
     // Sum PD control and centripetal acceleration for lateral manoeuvre demand
     float latAccDemCirc = loiterDirection * (latAccDemPD + latAccDemCircCtrl);
@@ -98,6 +100,6 @@ void LateralController::updateLoiter(const Vector2<double>& centerWP, float radi
 
 float LateralController::navRollCmd() const {
     float cmd = atanf(m_latAccDem / static_cast<float>(m_physics.gravity));
-    cmd = constrainFloat(cmd, -M_PI/4.0f, M_PI/4.0f);
+    cmd = constrainFloat(cmd, -M_PI/8.0f, M_PI/8.0f);
     return cmd;
 }

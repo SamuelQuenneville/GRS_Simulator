@@ -6,13 +6,13 @@
  * Createk Innovation Lab
  */
 
-#include "twoAircraftGrounded.h"
+#include "twoAircraft.h"
 
-TwoAircraftGrounded::TwoAircraftGrounded(World *world)
-    : Scene(World::getExecutablePath())
-    , m_world(world)
-    , m_ground(nullptr)
-    , m_payload(nullptr)
+
+TwoAircraft::TwoAircraft(World *world)
+        : Scene(World::getExecutablePath())
+        , m_world(world)
+        , m_ground(nullptr)
 {
     // Set the center of the scene
     m_setScenePosition({0, 40, 20}, 100);
@@ -20,11 +20,11 @@ TwoAircraftGrounded::TwoAircraftGrounded(World *world)
     m_resetCameraToViewAll();
 }
 
-TwoAircraftGrounded::~TwoAircraftGrounded() {
+TwoAircraft::~TwoAircraft() {
     destroyPhysicsWorld();
 }
 
-void TwoAircraftGrounded::createPhysicsWorld() {
+void TwoAircraft::createPhysicsWorld() {
 
     // ---------- AIRCRAFT ---------- //
     for (const auto& aircraft : m_world->system()->aircraft()) {
@@ -36,17 +36,6 @@ void TwoAircraftGrounded::createPhysicsWorld() {
         }
 
         m_physicsObjects.push_back(aircraftObject);
-    }
-
-    // -----------  PAYLOAD ---------- //
-    m_payload = new PayloadObject(m_world->system()->payload().get(), {0.4,0.4,0.4}, World::getExecutablePath());
-    m_payload->setColor(Color::blue());
-    m_physicsObjects.push_back(m_payload);
-
-    // ------------ TETHER ----------- //
-    for (const auto& tether : m_world->system()->tethers()) {
-        auto* tetherObject = new TetherLine(tether.get());
-        m_tethersObjects.push_back(tetherObject);
     }
 
     // ---------- LAUNCHER ---------- //
@@ -63,7 +52,7 @@ void TwoAircraftGrounded::createPhysicsWorld() {
     m_staticObjects.push_back(m_ground);
 }
 
-void TwoAircraftGrounded::destroyPhysicsWorld() {
+void TwoAircraft::destroyPhysicsWorld() {
     if (m_world != nullptr) {
         // Destroy all the physics objects of the scene
         for (auto& physicsObject : m_physicsObjects) {
@@ -74,40 +63,36 @@ void TwoAircraftGrounded::destroyPhysicsWorld() {
             delete staticObject;
         }
 
-        for (auto& tethersObject : m_tethersObjects) {
-            delete tethersObject;
-        }
-
         m_physicsObjects.clear();
-        m_tethersObjects.clear();
         m_staticObjects.clear();
     }
 }
 
-void TwoAircraftGrounded::initBodiesPositions() {
-    m_launcher1->setTransform(Transform({-0.849, 0.816, 30.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0), 0.0, M_PI/2.0)));
-    m_launcher2->setTransform(Transform({0.849, 0.816, -30.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0),0.0, -M_PI/2.0)));
+void TwoAircraft::initBodiesPositions() {
+    m_launcher1->setTransform(Transform({-0.849, 0.816, 100.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0), 0.0, M_PI/2.0)));
+    m_launcher2->setTransform(Transform({0.849, 0.816, -100.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0),0.0, -M_PI/2.0)));
     m_ground->setTransform(Transform({0.0, -0.5, 0.0}, Quaternion::identity()));
-
-    m_payload->setTransform(Transform({0.0,0.0,0.0}, Quaternion::identity()));
 }
 
-void TwoAircraftGrounded::updatePhysics() {
+void TwoAircraft::updatePhysics() {
     m_world->update();
 }
 
-void TwoAircraftGrounded::reset() {
+void TwoAircraft::updateTarget(double groundspeed, std::vector<double> payloadPosition) {
+    target t = m_world->system()->getTarget();
+    t.groundspeed = static_cast<float>(groundspeed);
+    t.positionPayload = payloadPosition;
+    m_world->system()->setTarget(t);
+}
+
+void TwoAircraft::reset() {
     Scene::reset();
     destroyPhysicsWorld();
     createPhysicsWorld();
     initBodiesPositions();
 }
 
-void TwoAircraftGrounded::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
-    for (auto& tethersObject : m_tethersObjects) {
-        tethersObject->render(m_colorShader, worldToCameraMatrix);
-    }
-
+void TwoAircraft::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
     // Bind the shader
     shader.bind();
 

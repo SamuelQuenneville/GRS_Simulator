@@ -26,8 +26,10 @@ private:
     worldPhysics m_physics;
 
     float m_dt;
+    float m_integrator=0.0f;
+    float m_lastError=0.0f;
 
-    PID m_phasePid{50.0,8.0,0.0,0.0,50.0,3.0,10.0,3.0,0.02,360.0,1.0};
+    PID m_phasePid{20.0,8.0,0.0,0.0,50.0,3.0,10.0,3.0,0.02,360.0,1.0};
     PID::pidInfo m_pidInfo{};
 
     fixedWingStates m_aircraftStates{};

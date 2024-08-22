@@ -27,7 +27,7 @@ struct tetherProperties {
 };
 
 struct tetherLogInfos {
-    double deformation{};             // m
+    double deformation{};           // m
     Vector3<double> forceSpring;    // N
     Vector3<double> forceAero;      // N
 };

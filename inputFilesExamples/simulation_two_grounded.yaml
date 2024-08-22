@@ -35,8 +35,8 @@ InitialStatesAircraft_2:
 #
 Target:
   POS_PAYLOAD: [0.0, 0.0, 10.0]
-  GROUNDSPEED: 25.0 # m/s
-  RADIUS: 25.0 # m
+  GROUNDSPEED: 30.0 # m/s
+  RADIUS: 26.0 # m
   AIRCRAFT_PITCH: 0.0
   AIRCRAFT_ROLL: 0.0
 #

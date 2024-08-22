@@ -30,6 +30,7 @@ public:
 
     // Update the physics world (take a simulation step) can be called several times per frame
     virtual void updatePhysics() = 0;
+    virtual void updateTarget(double groundspeed,  std::vector<double> payloadPosition) = 0;
 
     virtual void update();
     virtual void render();

@@ -34,9 +34,9 @@ InitialStatesAircraft_2:
   ORIENTATION: [0.0, 0.322, 3.1415] # [roll pitch yaw]
 #
 Target:
-  POS_PAYLOAD: [0.0, 0.0, 2.0]
+  POS_PAYLOAD: [0.0, 0.0, 0.0]
   GROUNDSPEED: 30.0 # m/s
-  RADIUS: 25.0 # m
+  RADIUS: 26.0 # m
   AIRCRAFT_PITCH: 0.0
   AIRCRAFT_ROLL: 0.0
 #

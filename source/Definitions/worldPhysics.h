@@ -14,15 +14,15 @@
 #include "Mathematics/vector3.h"
 
 struct worldPhysics {
-    double gravity = 9.81;
-    double airDensity = 1.225;
-    double soundSpeed = 343.0;
+    float gravity = 9.81;
+    float airDensity = 1.225;
+    float soundSpeed = 343.0;
 
-    Vector3<double> wind = {0,0,0};
+    Vector3<float> wind = {0,0,0};
 
-    void setGravity(const double newGravity) {gravity = newGravity;};
-    void setAirDensity(const double newDensity) {airDensity = newDensity;};
-    void updateWind(const Vector3<double>& newWind) {wind = newWind;};
+    void setGravity(const float newGravity) {gravity = newGravity;};
+    void setAirDensity(const float newDensity) {airDensity = newDensity;};
+    void updateWind(const Vector3<float>& newWind) {wind = newWind;};
 };
 
 #endif //GRS_SIMULATOR_WORLDPHYSICS_H
