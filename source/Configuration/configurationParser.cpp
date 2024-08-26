@@ -47,5 +47,10 @@ initialStates ConfigurationParser::parseInitialStates(YAML::Node& node, const st
 }
 
 target ConfigurationParser::parseSystemTarget(YAML::Node& node) {
-    return node["Target"].as<target>();;
+    return node["Target"].as<target>();
+}
+
+std::vector<float> ConfigurationParser::parseWind(const std::string &filePath) {
+    YAML::Node node = YAML::LoadFile(filePath);
+    return node["Wind"].as<std::vector<float>>();
 }

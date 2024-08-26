@@ -53,6 +53,9 @@ void World::readConfigurationFile(const std::string& fileName) {
 
     m_initialPayloadStates = ConfigurationParser::parseInitialStates(nodeConfiguration, "InitialStatesPayload");
     m_systemTarget = ConfigurationParser::parseSystemTarget(nodeConfiguration);
+
+    std::vector<float> wind = ConfigurationParser::parseWind(fileName);
+    worldPhysics.updateWind({wind[0], wind[1], wind[2]});
 }
 
 Logger& World::logger() {

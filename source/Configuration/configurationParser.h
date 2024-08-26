@@ -33,6 +33,7 @@ public:
     static ctrlGains parseControllerGains(const std::string& filePath);
     static initialStates parseInitialStates(YAML::Node& node, const std::string& nodeName);
     static target parseSystemTarget(YAML::Node& node);
+    static std::vector<float> parseWind(const std::string& filePath);
 };
 
 

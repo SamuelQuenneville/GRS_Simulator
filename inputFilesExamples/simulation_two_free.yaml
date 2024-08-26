@@ -41,3 +41,4 @@ Target:
   AIRCRAFT_PITCH: 0.0
   AIRCRAFT_ROLL: 0.0
 #
+Wind: [0.0, 0.0, 0.0] # [wx wy wz]

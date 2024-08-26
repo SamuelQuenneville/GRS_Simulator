@@ -20,9 +20,9 @@ struct worldPhysics {
 
     Vector3<float> wind = {0,0,0};
 
-    void setGravity(const float newGravity) {gravity = newGravity;};
-    void setAirDensity(const float newDensity) {airDensity = newDensity;};
-    void updateWind(const Vector3<float>& newWind) {wind = newWind;};
+    [[maybe_unused]] void setGravity(const float newGravity) {gravity = newGravity;};
+    [[maybe_unused]] void setAirDensity(const float newDensity) {airDensity = newDensity;};
+    [[maybe_unused]] void updateWind(const Vector3<float>& newWind) {wind = newWind;};
 };
 
 #endif //GRS_SIMULATOR_WORLDPHYSICS_H
