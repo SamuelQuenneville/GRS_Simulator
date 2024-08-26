@@ -57,6 +57,7 @@ private:
     fixedWingProperties m_aircraftProperties{};
     tetherProperties m_tetherProperties{};
     payloadProperties m_payloadProperties{};
+    ctrlGains m_ctrlGains{};
 
     std::vector<initialStates> m_initialAircraftStatesVector;
     initialStates m_initialPayloadStates;

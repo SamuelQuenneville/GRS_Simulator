@@ -8,12 +8,13 @@
 
 #include "hlcSingleAircraft.h"
 
-HlcSingleAircraft::HlcSingleAircraft(worldPhysics& physics, Logger& logger, float rate)
+HlcSingleAircraft::HlcSingleAircraft(worldPhysics& physics, Logger& logger, hlcGains& gains, float rate)
         : m_physics(physics)
         , m_logger(logger)
+        , m_gains(gains)
         , m_rate(rate)
 {
-    m_groundspeedController = std::make_unique<GroundspeedController>(m_physics, m_rate);
+    m_groundspeedController = std::make_unique<GroundspeedController>(m_physics, m_gains.groundspeedCtrlGains, m_rate);
 }
 
 // currentStates should be of dimension 1

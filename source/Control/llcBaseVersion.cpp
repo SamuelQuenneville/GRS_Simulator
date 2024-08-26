@@ -8,14 +8,15 @@
 
 #include "llcBaseVersion.h"
 
-LlcBaseVersion::LlcBaseVersion(worldPhysics& physics, Logger& logger, float rate)
+LlcBaseVersion::LlcBaseVersion(worldPhysics& physics, Logger& logger,llcGains& gains, float rate)
     : m_physics(physics)
     , m_logger(logger)
+    , m_gains(gains)
     , m_rate(rate)
 {
-    m_rollController = std::make_unique<RollController>(m_physics, m_rate);
-    m_pitchController = std::make_unique<PitchController>(m_physics, m_rate);
-    m_altController = std::make_unique<AltitudeController>(m_physics, m_rate);
+    m_rollController = std::make_unique<RollController>(m_physics, m_gains.rollCtrlGains,m_rate);
+    m_pitchController = std::make_unique<PitchController>(m_physics, m_gains.pitchCtrlGains, m_rate);
+    m_altController = std::make_unique<AltitudeController>(m_physics, m_gains.altitudeCtrlGains, m_rate);
 }
 
 fixedWingControlInputs LlcBaseVersion::calculateAircraftControlInputs(int aircraftId, const fixedWingStates& currentStates, const fixedWingCommands& commands) {
@@ -24,12 +25,12 @@ fixedWingControlInputs LlcBaseVersion::calculateAircraftControlInputs(int aircra
     m_pitchController->setAircraftStates(currentStates);
     m_altController->setAircraftStates(currentStates);
 
-    double altPitch = m_altController->getPitchOut(static_cast<float>(commands.altitude), false)/100.0;
+    double altPitch = m_altController->getPitchOut(static_cast<float>(commands.altitude), false);
 
     fixedWingControlInputs controlInputs{};
-    controlInputs.deltaAileron = m_stabilizeRoll(commands.phi) / 100.0;
-    controlInputs.deltaElevator = -1.0 * m_stabilizePitch(altPitch + commands.theta) / 100.0; // PixHawk define positive del_e up, we use Cm_de negative so del_e must be positive down
-    controlInputs.deltaRudder = 0.0;//_stabilizeYaw(0.0); // Always 0
+    controlInputs.deltaAileron = m_stabilizeRoll(commands.phi);
+    controlInputs.deltaElevator = -1.0 * m_stabilizePitch(altPitch + commands.theta); // PixHawk define positive del_e up, we use Cm_de negative so del_e must be positive down
+    controlInputs.deltaRudder = 0.0;//_stabilizeYaw(0.0), Always 0
     controlInputs.deltaThrust = commands.thrust;
 
     m_writeLog(aircraftId, controlInputs);
@@ -37,28 +38,28 @@ fixedWingControlInputs LlcBaseVersion::calculateAircraftControlInputs(int aircra
 }
 
 void LlcBaseVersion::m_calcNavigationRoll(double commandedRoll) {
-    m_navigationRoll = commandedRoll;
+    m_navigationRoll = static_cast<float>(commandedRoll);
 }
 
 void LlcBaseVersion::m_calcNavigationPitch(double commandedPitch) {
-    m_navigationPitch = commandedPitch;
+    m_navigationPitch = static_cast<float>(commandedPitch);
 }
 
 void LlcBaseVersion::m_calcNavigationYaw(double commandedYaw) {
-    m_navigationYaw = commandedYaw;
+    m_navigationYaw = static_cast<float>(commandedYaw);
 }
 
-int32_t LlcBaseVersion::m_stabilizeRoll(double commandedRoll) {
+float LlcBaseVersion::m_stabilizeRoll(double commandedRoll) {
     m_calcNavigationRoll(commandedRoll);
 
-    int32_t rollOut = m_rollController->getServoOut(static_cast<float>(m_navigationRoll), 1.0f, false);
+    float rollOut = m_rollController->getServoOut(m_navigationRoll, 1.0f, false);
     return rollOut;
 }
 
-int32_t LlcBaseVersion::m_stabilizePitch(double commandedPitch) {
+float LlcBaseVersion::m_stabilizePitch(double commandedPitch) {
     m_calcNavigationPitch(commandedPitch);
 
-    int32_t pitchOut = m_pitchController->getServoOut(static_cast<float>(m_navigationPitch), 1.0f, false);
+    float pitchOut = m_pitchController->getServoOut(m_navigationPitch, 1.0f, false);
     return pitchOut;
 }
 

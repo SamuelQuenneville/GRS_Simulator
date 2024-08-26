@@ -8,8 +8,9 @@
 
 #include "lateralController.h"
 
-LateralController::LateralController(worldPhysics& physics, float rate)
+LateralController::LateralController(worldPhysics& physics, lateralControllerGains& gains, float rate)
     : m_physics(physics)
+    , m_gains(gains)
     , m_dt(1.0f/rate)
     , m_periodL1(25.0)
     , m_dampingL1(0.707)
@@ -69,14 +70,13 @@ void LateralController::updateLoiter(const Vector2<double>& centerWP, float radi
     }
 
     // Control acceleration
-    float PD = xtrackErrCirc*kx*0.2f + xtrackVelCirc*kv*0.05f;
-    m_integrator += (xtrackErrCirc * 0.4f) * m_dt;
-    m_integrator = constrainFloat(m_integrator, -1.2, 1.2);
+    m_integrator += (xtrackErrCirc * m_gains.I) * m_dt;
+    m_integrator = constrainFloat(m_integrator, -m_gains.iLimit, m_gains.iLimit);
 
-    float latAccDemPD = PD + m_integrator;
+    float latAccDemPID = xtrackErrCirc * kx * m_gains.P + xtrackVelCirc * kv * m_gains.D + m_integrator;
 
-    // Sum PD control and centripetal acceleration for lateral manoeuvre demand
-    float latAccDemCirc = loiterDirection * (latAccDemPD + latAccDemCircCtrl);
+    // Sum PID control and centripetal acceleration for lateral manoeuvre demand
+    float latAccDemCirc = loiterDirection * (latAccDemPID + latAccDemCircCtrl);
 
     // Switch between a capture and loiter
     if (xtrackErrCirc > 0.0f && loiterDirection * latAccDemCap < loiterDirection * latAccDemCirc)
@@ -100,6 +100,6 @@ void LateralController::updateLoiter(const Vector2<double>& centerWP, float radi
 
 float LateralController::navRollCmd() const {
     float cmd = atanf(m_latAccDem / static_cast<float>(m_physics.gravity));
-    cmd = constrainFloat(cmd, -M_PI/8.0f, M_PI/8.0f);
+    cmd = constrainFloat(cmd, -m_gains.rollSaturation, m_gains.rollSaturation);
     return cmd;
 }

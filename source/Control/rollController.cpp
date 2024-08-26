@@ -8,14 +8,16 @@
 
 #include "rollController.h"
 
-RollController::RollController(worldPhysics& physics, float rate)
+RollController::RollController(worldPhysics& physics, rollControllerGains& gains, float rate)
     : m_physics(physics)
+    , m_gains(gains)
     , m_dt(1.0f/rate)
 {
-
+    m_ratePID(m_gains.P, m_gains.I, m_gains.D, m_gains.FF, -m_gains.iLimit, m_gains.iLimit,
+              m_gains.targetFilter, m_gains.errorFilter, m_gains.derivativeFilter, m_dt);
 }
 
-int32_t RollController::getServoOut(float navRoll, float scaler, bool disableIntegrator) {
+float RollController::getServoOut(float navRoll, float scaler, bool disableIntegrator) {
     // Calculate the desired roll rate (deg/sec) from the angle error
     m_angleErrorDeg = navRoll - degrees(static_cast<float>(m_aircraftStates.phi));
     float desiredRate = m_angleErrorDeg / m_tau;
@@ -30,7 +32,7 @@ int32_t RollController::getServoOut(float navRoll, float scaler, bool disableInt
     return getRateOut(desiredRate, scaler, disableIntegrator);
 }
 
-int32_t RollController::getRateOut(float desiredRate, float scaler, bool disableIntegrator) {
+float RollController::getRateOut(float desiredRate, float scaler, bool disableIntegrator) {
     bool limitIntegrator = fabsf(m_lastOut) >= 45.0f;
     float oldIntegrator = m_ratePID.getI();
     m_ratePID.setDt(m_dt);
@@ -77,13 +79,10 @@ int32_t RollController::getRateOut(float desiredRate, float scaler, bool disable
     pinfo.actual = degrees(static_cast<float>(m_aircraftStates.p));
 
     // sum components
-    float out = pinfo.FF + pinfo.P + pinfo.I + pinfo.D;
-
-    // remember the last output to trigger the I limit
-    m_lastOut = out;
+    m_lastOut = pinfo.FF + pinfo.P + pinfo.I + pinfo.D;
 
     // output is scaled to notional centidegrees of deflection
-    return constrainInt32(static_cast<int32_t>(out * 100), -1500, 1500);
+    return constrainFloat(m_lastOut, m_gains.aileronMin,  m_gains.aileronMax);
 }
 
 void RollController::resetIntegrator() {

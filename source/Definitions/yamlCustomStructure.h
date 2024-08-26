@@ -17,6 +17,7 @@
 #include "fixedWingDefinitions.h"
 #include "payloadDefinitions.h"
 #include "configurationDefinitions.h"
+#include "controllerGains.h"
 
 /*
  *   YAML template for custom struct
@@ -35,6 +36,7 @@ namespace YAML {
             rhs.aircraftPropertiesFileDirectory = node["AIRCRAFT_PROPERTIES_FILE_NAME"].as<std::string>();
             rhs.tetherPropertiesFileDirectory   = node["TETHER_PROPERTIES_FILE_NAME"].as<std::string>();
             rhs.payloadPropertiesFileDirectory  = node["PAYLOAD_PROPERTIES_FILE_NAME"].as<std::string>();
+            rhs.controllerGainsFileDirectory    = node["CONTROLLER_GAINS_FILE_NAME"].as<std::string>();
             rhs.systemConfiguration             = node["SYSTEM_CONFIGURATION"].as<std::string>();
             rhs.fixedDuration                   = node["FIXED_DURATION"].as<bool>();
             rhs.duration                        = node["DURATION"].as<float>();
@@ -42,6 +44,122 @@ namespace YAML {
             rhs.llcRate                         = node["LLC_RATE"].as<int>();
             rhs.windOn                          = node["WIND_ON"].as<bool>();
             rhs.tetherAeroOn                    = node["TETHER_AERO_ON"].as<bool>();
+            return true;
+        }
+    };
+
+    template<>
+    struct convert<phaseControllerGains> {
+        static bool decode(const Node& node, phaseControllerGains& rhs) {
+            if(!node.IsMap()) {
+                return false;
+            }
+
+            rhs.P = node["P"].as<float>();
+            rhs.I = node["I"].as<float>();
+            rhs.D = node["D"].as<float>();
+            rhs.iLimit = node["I_LIMIT"].as<float>();
+            rhs.thrustSaturation = node["THRUST_SATURATION"].as<float>();
+            return true;
+        }
+    };
+
+    template<>
+    struct convert<lateralControllerGains> {
+        static bool decode(const Node& node, lateralControllerGains& rhs) {
+            if(!node.IsMap()) {
+                return false;
+            }
+
+            rhs.P = node["P"].as<float>();
+            rhs.I = node["I"].as<float>();
+            rhs.D = node["D"].as<float>();
+            rhs.iLimit = node["I_LIMIT"].as<float>();
+            rhs.rollSaturation = node["ROLL_SATURATION"].as<float>();
+            return true;
+        }
+    };
+
+    template<>
+    struct convert<groundspeedControllerGains> {
+        static bool decode(const Node& node, groundspeedControllerGains& rhs) {
+            if(!node.IsMap()) {
+                return false;
+            }
+
+            rhs.P = node["P"].as<float>();
+            rhs.I = node["I"].as<float>();
+            rhs.D = node["D"].as<float>();
+            rhs.FF = node["FF"].as<float>();
+            rhs.iLimit = node["I_LIMIT"].as<float>();
+            rhs.targetFilter = node["TARGET_FILTER"].as<float>();
+            rhs.derivativeFilter = node["DERIVATIVE_FILTER"].as<float>();
+            rhs.errorFilter = node["ERROR_FILTER"].as<float>();
+            rhs.thrustMin = node["THRUST_MIN"].as<float>();
+            rhs.thrustMax = node["THRUST_MAX"].as<float>();
+            return true;
+        }
+    };
+
+    template<>
+    struct convert<altitudeControllerGains> {
+        static bool decode(const Node& node, altitudeControllerGains& rhs) {
+            if (!node.IsMap()) {
+                return false;
+            }
+
+            rhs.P = node["P"].as<float>();
+            rhs.I = node["I"].as<float>();
+            rhs.D = node["D"].as<float>();
+            rhs.FF = node["FF"].as<float>();
+            rhs.iLimit = node["I_LIMIT"].as<float>();
+            rhs.targetFilter = node["TARGET_FILTER"].as<float>();
+            rhs.derivativeFilter = node["DERIVATIVE_FILTER"].as<float>();
+            rhs.errorFilter = node["ERROR_FILTER"].as<float>();
+            rhs.pitchMin = node["PITCH_MIN"].as<float>();
+            rhs.pitchMax = node["PITCH_MAX"].as<float>();
+            return true;
+        }
+    };
+
+    template<>
+    struct convert<pitchControllerGains> {
+        static bool decode(const Node& node, pitchControllerGains& rhs) {
+            if(!node.IsMap()) {
+                return false;
+            }
+
+            rhs.P = node["P"].as<float>();
+            rhs.I = node["I"].as<float>();
+            rhs.D = node["D"].as<float>();
+            rhs.FF = node["FF"].as<float>();
+            rhs.iLimit = node["I_LIMIT"].as<float>();
+            rhs.targetFilter = node["TARGET_FILTER"].as<float>();
+            rhs.derivativeFilter = node["DERIVATIVE_FILTER"].as<float>();
+            rhs.errorFilter = node["ERROR_FILTER"].as<float>();
+            rhs.elevatorMin = node["ELEVATOR_MIN"].as<float>();
+            rhs.elevatorMax = node["ELEVATOR_MAX"].as<float>();
+            return true;
+        }
+    };
+
+    template<>
+    struct convert<rollControllerGains> {
+        static bool decode(const Node& node, rollControllerGains& rhs) {
+            if(!node.IsMap()) {
+                return false;
+            }
+
+            rhs.P = node["P"].as<float>();
+            rhs.I = node["I"].as<float>();
+            rhs.D = node["D"].as<float>();
+            rhs.FF = node["FF"].as<float>();
+            rhs.iLimit = node["I_LIMIT"].as<float>();
+            rhs.targetFilter = node["TARGET_FILTER"].as<float>();
+            rhs.derivativeFilter = node["DERIVATIVE_FILTER"].as<float>();
+            rhs.errorFilter = node["ERROR_FILTER"].as<float>();
+            rhs.aileronMin = node["AILERON_MIN"].as<float>();
+            rhs.aileronMax = node["AILERON_MAX"].as<float>();
             return true;
         }
     };

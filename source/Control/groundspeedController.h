@@ -12,11 +12,12 @@
 #include "Control/pid.h"
 #include "Definitions/fixedWingDefinitions.h"
 #include "Definitions/worldPhysics.h"
+#include "Definitions/controllerGains.h"
 
 class GroundspeedController {
 
 public:
-    explicit GroundspeedController(worldPhysics& physics, float rate);
+    explicit GroundspeedController(worldPhysics& physics, groundspeedControllerGains& gains, float rate);
 
     float getThrustOut(float desiredSpeed, bool disableIntegrator);
     void setAircraftStates(const fixedWingStates& aircraftStates);
@@ -25,6 +26,7 @@ public:
 
 private:
     worldPhysics m_physics;
+    groundspeedControllerGains& m_gains;
 
     float m_dt;
     // PID --> 2.0 2.0 0.5 alex walsh

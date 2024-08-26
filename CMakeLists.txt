@@ -53,6 +53,7 @@ set(GRS_DEFINITIONS
         source/Definitions/logDefinitions.h
         source/Definitions/yamlCustomStructure.h
         source/Definitions/payloadDefinitions.h
+        source/Definitions/controllerGains.h
 )
 
 set(GRS_LOG

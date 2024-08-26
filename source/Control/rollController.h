@@ -12,16 +12,17 @@
 #include "Control/pid.h"
 #include "Definitions/fixedWingDefinitions.h"
 #include "Definitions/worldPhysics.h"
+#include "Definitions/controllerGains.h"
 
 class RollController {
 
 public:
-    explicit RollController(worldPhysics& physics, float rate);
+    explicit RollController(worldPhysics& physics, rollControllerGains& gains, float rate);
 
-    int32_t getServoOut(float navRoll, float scaler, bool disableIntegrator);
-    int32_t getRateOut(float desiredRate, float scaler, bool disableIntegrator);
+    float getServoOut(float navRoll, float scaler, bool disableIntegrator);
+    float getRateOut(float desiredRate, float scaler, bool disableIntegrator);
 
-    [[nodiscard]] const PID::pidInfo& getPidInfo() const { return m_pidInfo;};
+    [[nodiscard]] const PID::pidInfo& getPidInfo() const {return m_pidInfo;};
 
     void setAircraftStates(const fixedWingStates& aircraftStates) {m_aircraftStates = aircraftStates;};
 
@@ -29,6 +30,7 @@ public:
 
 private:
     worldPhysics m_physics;
+    rollControllerGains& m_gains;
 
     // roll time constant
     static constexpr float m_tau = 0.5f;

@@ -11,13 +11,14 @@
 
 #include "Definitions/fixedWingDefinitions.h"
 #include "Definitions/worldPhysics.h"
+#include "Definitions/controllerGains.h"
 #include "Mathematics/grsMath.h"
 #include "Mathematics/vector2.h"
 
 class LateralController {
 
 public:
-    explicit LateralController(worldPhysics& physics, float rate);
+    explicit LateralController(worldPhysics& physics, lateralControllerGains& gains, float rate);
 
     void updateLoiter(const Vector2<double>& centerWP, float radius, float loiterDirection, bool isTethered);
     [[nodiscard]] float navRollCmd() const;
@@ -42,6 +43,7 @@ public:
 private:
     worldPhysics m_physics;
     fixedWingStates m_aircraftStates{};
+    lateralControllerGains& m_gains;
 
     ctrlInfo m_ctrlInfo{};
 

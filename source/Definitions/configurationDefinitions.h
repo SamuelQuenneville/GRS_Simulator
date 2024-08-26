@@ -23,6 +23,7 @@ struct simulationParameters {
     std::string aircraftPropertiesFileDirectory;
     std::string tetherPropertiesFileDirectory;
     std::string payloadPropertiesFileDirectory;
+    std::string controllerGainsFileDirectory;
     std::string systemConfiguration;
     bool fixedDuration;
     float duration;

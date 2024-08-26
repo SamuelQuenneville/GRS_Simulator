@@ -12,7 +12,7 @@ Logger::Logger(const std::string& logDirectory)
     : m_logDirectory(logDirectory)
 {
     m_initDirectory(logDirectory);
-    m_simulationTime = 0;
+    m_simulationTime = 0.0;
 }
 
 Logger::~Logger() {
@@ -120,7 +120,13 @@ void Logger::writeHlcMessage(hlcLogMessage& message) {
              << message.lateralController1.xtrackPositionError   << ","
              << message.lateralController1.kv                    << ","
              << message.lateralController1.xtrackVelocityError   << ","
-             << message.lateralController1.accelerationTarget    << std::endl;
+             << message.lateralController1.accelerationTarget    << ","
+             << message.phaseController1.phase                   << ","
+             << message.phaseController1.phaseTarget             << ","
+             << message.phaseController1.P                       << ","
+             << message.phaseController1.I                       << ","
+             << message.phaseController1.D                       << ","
+             << message.phaseController1.thrustOut               << std::endl;
 
     m_hlcLog << "2"                               << ","
              << getLoggerTime()                   << ","
@@ -147,7 +153,13 @@ void Logger::writeHlcMessage(hlcLogMessage& message) {
              << message.lateralController2.xtrackPositionError   << ","
              << message.lateralController2.kv                    << ","
              << message.lateralController2.xtrackVelocityError   << ","
-             << message.lateralController2.accelerationTarget    << std::endl;
+             << message.lateralController2.accelerationTarget    << ","
+             << message.phaseController2.phase                   << ","
+             << message.phaseController2.phaseTarget             << ","
+             << message.phaseController2.P                       << ","
+             << message.phaseController2.I                       << ","
+             << message.phaseController2.D                       << ","
+             << message.phaseController2.thrustOut               << std::endl;
 
 }
 
@@ -193,8 +205,8 @@ void Logger::writeLlcMessage(llcLogMessage& message) {
 
 void Logger::writePayloadMessage(payloadLogMessage& message) {
     m_payloadLog << getLoggerTime()     << ","
-             << message.nedPosition     << ","
-             << message.earthSpeed      << ",";
+                 << message.nedPosition     << ","
+                 << message.earthSpeed      << ",";
 
     for (const auto& force : message.earthForcesTethers) {
         m_payloadLog << force.first  << ","

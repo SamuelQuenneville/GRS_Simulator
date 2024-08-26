@@ -1,0 +1,67 @@
+---
+#--------------------------------------------------
+#                Controller Gains                 #
+#--------------------------------------------------
+
+PhaseController:
+  P: 3.0
+  I: 0.5
+  D: 0.25
+  I_LIMIT: 10.0
+  THRUST_SATURATION: 60.0
+#
+LateralController:
+  P: 0.2
+  I: 0.4
+  D: 0.05
+  I_LIMIT: 1.2
+  ROLL_SATURATION: 22.5
+#
+GroundspeedController:
+  P: 2.0
+  I: 1.0
+  D: 0.8
+  FF: 0.0
+  I_LIMIT: 20.0
+  TARGET_FILTER: 3.0
+  DERIVATIVE_FILTER: 10.0
+  ERROR_FILTER: 3.0
+  THRUST_MIN: 0.0
+  THRUST_MAX: 60.0
+#
+AltitudeController:
+  P: 0.070
+  I: 0.035
+  D: 0.0087
+  FF: 0.0
+  I_LIMIT: 0.35
+  TARGET_FILTER: 3.0
+  DERIVATIVE_FILTER: 10.0
+  ERROR_FILTER: 3.0
+  PITCH_MIN: -30.0
+  PITCH_MAX: 30.0
+#
+PitchController:
+  P: 0.04
+  I: 0.15
+  D: 0.0
+  FF: 0.345
+  I_LIMIT: 0.666
+  TARGET_FILTER: 1.5
+  DERIVATIVE_FILTER: 7.0
+  ERROR_FILTER: 4.0
+  ELEVATOR_MIN: -20.0
+  ELEVATOR_MAX: 20.0
+#
+RollController:
+  P: 0.08
+  I: 0.15
+  D: 0.0
+  FF: 0.345
+  I_LIMIT: 0.666
+  TARGET_FILTER: 3.0
+  DERIVATIVE_FILTER: 7.0
+  ERROR_FILTER: 4.0
+  AILERON_MIN: -15.0
+  AILERON_MAX: 15.0
+#

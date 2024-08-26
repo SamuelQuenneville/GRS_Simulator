@@ -15,12 +15,13 @@
 class HlcSingleAircraft : public HighLevelController<fixedWingCommands, fixedWingStates> {
 
 public:
-    HlcSingleAircraft(worldPhysics& physics, Logger& logger, float rate);
+    HlcSingleAircraft(worldPhysics& physics, Logger& logger, hlcGains& gains, float rate);
     std::map<int, fixedWingCommands> calculateInputs(const std::vector<int>& ids, const std::vector<fixedWingStates>& currentStates, const target& target) override;
 
 private:
     worldPhysics m_physics;
     Logger& m_logger;
+    hlcGains& m_gains;
     float m_rate;
 
     std::unique_ptr<GroundspeedController> m_groundspeedController;

@@ -17,18 +17,19 @@
 class HlcTwinAircraft : public HighLevelController<fixedWingCommands, fixedWingStates> {
 
 public:
-    HlcTwinAircraft(worldPhysics& physics, Logger& logger, float rate, double tetherLength);
+    HlcTwinAircraft(worldPhysics& physics, Logger& logger, hlcGains& gains, float rate, double tetherLength);
     std::map<int, fixedWingCommands> calculateInputs(const std::vector<int>& ids, const std::vector<fixedWingStates>& currentStates, const target& target) override;
 
 private:
     worldPhysics m_physics;
     Logger& m_logger;
+    hlcGains& m_gains;
     float m_rate;
 
     double m_tetherLength;
 
-    double m_phaseDesired1 = 0.0;
-    double m_phaseDesired2 = 0.0;
+    float m_phaseDesired1 = 0.0;
+    float m_phaseDesired2 = 0.0;
 
     std::unique_ptr<GroundspeedController> m_groundspeedController1;
     std::unique_ptr<GroundspeedController> m_groundspeedController2;

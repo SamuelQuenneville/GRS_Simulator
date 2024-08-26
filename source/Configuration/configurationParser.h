@@ -18,6 +18,7 @@
 #include "Definitions/fixedWingDefinitions.h"
 #include "Definitions/tetherDefinitions.h"
 #include "Definitions/payloadDefinitions.h"
+#include "Definitions/controllerGains.h"
 
 class ConfigurationParser {
 
@@ -29,6 +30,7 @@ public:
     static fixedWingProperties parseFixedWingProperties(const std::string& filePath);
     static tetherProperties parseTetherProperties(const std::string& filePath);
     static payloadProperties parsePayloadProperties(const std::string& filePath);
+    static ctrlGains parseControllerGains(const std::string& filePath);
     static initialStates parseInitialStates(YAML::Node& node, const std::string& nodeName);
     static target parseSystemTarget(YAML::Node& node);
 };

@@ -8,16 +8,18 @@
 
 #include "altitudeController.h"
 
-AltitudeController::AltitudeController(worldPhysics& physics, float rate)
+AltitudeController::AltitudeController(worldPhysics& physics, altitudeControllerGains& gains, float rate)
     : m_physics(physics)
+    , m_gains(gains)
     , m_dt(1.0f/rate)
 {
-
+    m_altPID(m_gains.P, m_gains.I, m_gains.D, m_gains.FF, -m_gains.iLimit, m_gains.iLimit,
+             m_gains.targetFilter, m_gains.errorFilter, m_gains.derivativeFilter, m_dt);
 }
 
 float AltitudeController::getPitchOut(float desiredAltitude, bool disableIntegrator) {
     // Limit integrator if the last pitch output too high
-    bool limitIntegrator = fabsf(m_lastOutRad) >= radians(20.0f);
+    bool limitIntegrator = fabsf(m_lastOutRad) >= m_gains.iLimit;
     m_altPID.setDt(m_dt);
 
     // Get airspeed
@@ -45,7 +47,7 @@ float AltitudeController::getPitchOut(float desiredAltitude, bool disableIntegra
     m_lastOutRad = pitchOutRad;
 
     // output is scaled to centidegrees of pitch
-    return constrainFloat(degrees(pitchOutRad) * 100.0f, -3000.0f, 3000.0f);
+    return constrainFloat(degrees(pitchOutRad), m_gains.pitchMin, m_gains.pitchMax);
 }
 
 void AltitudeController::resetIntegrator() {
@@ -54,7 +56,7 @@ void AltitudeController::resetIntegrator() {
 }
 
 void AltitudeController::resetIntegratorTakeoff() {
-    float iRad = radians(20.0f);
+    float iRad = m_gains.iLimit;
     m_pidInfo.I = iRad;
     m_altPID.setIntegrator(iRad);
 }

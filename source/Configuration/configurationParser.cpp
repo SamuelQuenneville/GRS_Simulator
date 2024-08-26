@@ -27,6 +27,21 @@ payloadProperties ConfigurationParser::parsePayloadProperties(const std::string 
     return node["PayloadProperties"].as<payloadProperties>();
 }
 
+ctrlGains ConfigurationParser::parseControllerGains(const std::string &filePath) {
+    YAML::Node node = YAML::LoadFile(filePath);
+
+    ctrlGains gains{};
+    gains.hlc.phaseCtrlGains       = node["PhaseController"].as<phaseControllerGains>();
+    gains.hlc.lateralCtrlGains     = node["LateralController"].as<lateralControllerGains>();
+    gains.hlc.groundspeedCtrlGains = node["GroundspeedController"].as<groundspeedControllerGains>();
+
+    gains.llc.altitudeCtrlGains = node["AltitudeController"].as<altitudeControllerGains>();
+    gains.llc.pitchCtrlGains    = node["PitchController"].as<pitchControllerGains>();
+    gains.llc.rollCtrlGains     = node["RollController"].as<rollControllerGains>();
+
+    return gains;
+}
+
 initialStates ConfigurationParser::parseInitialStates(YAML::Node& node, const std::string& nodeName) {
     return node[nodeName].as<initialStates>();
 }

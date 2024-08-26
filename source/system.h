@@ -14,6 +14,7 @@
 #include "RigidBodyAndLink/payload.h"
 
 #include "Definitions/systemDefinitions.h"
+#include "Definitions/controllerGains.h"
 #include "Control/llcBaseVersion.h"
 #include "Control/hlcSingleAircraft.h"
 #include "Control/hlcTwinAircraft.h"
@@ -22,11 +23,13 @@
 class System {
 
 public:
-    explicit System(worldPhysics& worldPhysics, Logger& logger, systemConfiguration& configuration);
+    explicit System(worldPhysics& worldPhysics, Logger& logger, systemConfiguration& configuration, ctrlGains& gains);
 
     void update(double dt);
     void setTarget(const target& newTarget) {m_target = newTarget;};
     target& getTarget() {return m_target;};
+
+    void setControllerGains(const ctrlGains& newGains) {m_ctrlGains = newGains;};
 
     // Create the different configuration of system
     void createSystemOneAircraft(fixedWingProperties& aircraftProperties, initialStates& aircraftStates);
@@ -43,6 +46,7 @@ private:
     worldPhysics& m_physics;
     Logger& m_logger;
     systemConfiguration& m_systemConfiguration;
+    ctrlGains& m_ctrlGains;
 
     double m_timeSinceHlcCall;
     bool m_shouldCallHlc();

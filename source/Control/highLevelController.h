@@ -14,6 +14,7 @@
 #include <map>
 
 #include "Definitions/configurationDefinitions.h"
+#include "Definitions/controllerGains.h"
 #include "Log/logger.h"
 
 template <typename COMMANDS, typename STATES>

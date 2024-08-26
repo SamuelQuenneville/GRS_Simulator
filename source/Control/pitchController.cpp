@@ -9,14 +9,16 @@
 #include "pitchController.h"
 
 
-PitchController::PitchController(worldPhysics& physics, float rate)
+PitchController::PitchController(worldPhysics& physics, pitchControllerGains& gains, float rate)
     : m_physics(physics)
+    , m_gains(gains)
     , m_dt(1.0f/rate)
 {
-
+    m_ratePID(m_gains.P, m_gains.I, m_gains.D, m_gains.FF, -m_gains.iLimit, m_gains.iLimit,
+              m_gains.targetFilter, m_gains.errorFilter, m_gains.derivativeFilter, m_dt);
 }
 
-int32_t PitchController::getRateOut(float desiredRate, float scaler, bool disableIntegrator, float airspeed) {
+float PitchController::getRateOut(float desiredRate, float scaler, bool disableIntegrator, float airspeed) {
     bool limitIntegrator = fabsf(m_lastOut) >= 45.0f;
     float oldIntegrator = m_ratePID.getI();
     m_ratePID.setDt(m_dt);
@@ -62,12 +64,10 @@ int32_t PitchController::getRateOut(float desiredRate, float scaler, bool disabl
     pinfo.actual = degrees(static_cast<float>(m_aircraftStates.q));
 
     // sum components
-    float out = pinfo.FF + pinfo.P + pinfo.I + pinfo.D;
-    // remember the last output to trigger the I limit
-    m_lastOut = out;
+    m_lastOut = pinfo.FF + pinfo.P + pinfo.I + pinfo.D;
 
     // output is scaled to notional centidegrees of deflection
-    return constrainInt32(static_cast<int32_t>(out * 100), -2000, 2000);
+    return constrainFloat(m_lastOut, m_gains.elevatorMin, m_gains.elevatorMax);
 }
 
 float PitchController::getCoordinationRateOffset(float airspeed) const {
@@ -95,7 +95,7 @@ float PitchController::getCoordinationRateOffset(float airspeed) const {
     return rateOffset;
 }
 
-int32_t PitchController::getServoOut(float navPitch, float scaler, bool disableIntegrator) {
+float PitchController::getServoOut(float navPitch, float scaler, bool disableIntegrator) {
     auto airspeed = static_cast<float>(std::sqrt(m_aircraftStates.u * m_aircraftStates.u + m_aircraftStates.v * m_aircraftStates.v + m_aircraftStates.w * m_aircraftStates.w));
 
     float rateOffset = getCoordinationRateOffset(airspeed);
@@ -104,7 +104,6 @@ int32_t PitchController::getServoOut(float navPitch, float scaler, bool disableI
     m_angleErrorDeg = navPitch - degrees(static_cast<float>(m_aircraftStates.theta));
     float desiredRate = m_angleErrorDeg / m_tau;
 
-    //qDebug() << "_angleErrorDeg = " << _angleErrorDeg << "| desiredRate = " << desiredRate;
     // limit the maximum pitch rate demand
     if (desiredRate < -m_rmin) {
         desiredRate = -m_rmin;

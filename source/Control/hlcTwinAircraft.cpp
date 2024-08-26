@@ -8,20 +8,19 @@
 
 #include "hlcTwinAircraft.h"
 
-HlcTwinAircraft::HlcTwinAircraft(worldPhysics& physics, Logger& logger, float rate, double tetherLength)
+HlcTwinAircraft::HlcTwinAircraft(worldPhysics& physics, Logger& logger, hlcGains& gains, float rate, double tetherLength)
     : m_physics(physics)
     , m_logger(logger)
+    , m_gains(gains)
     , m_rate(rate)
     , m_tetherLength(tetherLength)
 {
-    m_groundspeedController1 = std::make_unique<GroundspeedController>(m_physics, m_rate);
-    m_groundspeedController2 = std::make_unique<GroundspeedController>(m_physics, m_rate);
-    m_lateralController1 = std::make_unique<LateralController>(m_physics, m_rate);
-    m_lateralController2 = std::make_unique<LateralController>(m_physics, m_rate);
-    m_phaseController1 = std::make_unique<PhaseController>(m_physics, m_rate);
-    m_phaseController2 = std::make_unique<PhaseController>(m_physics, m_rate);
-
-    m_phaseDesired1 = M_PI/2.0;
+    m_groundspeedController1 = std::make_unique<GroundspeedController>(m_physics, m_gains.groundspeedCtrlGains, m_rate);
+    m_groundspeedController2 = std::make_unique<GroundspeedController>(m_physics, m_gains.groundspeedCtrlGains,m_rate);
+    m_lateralController1 = std::make_unique<LateralController>(m_physics, m_gains.lateralCtrlGains, m_rate);
+    m_lateralController2 = std::make_unique<LateralController>(m_physics, m_gains.lateralCtrlGains,m_rate);
+    m_phaseController1 = std::make_unique<PhaseController>(m_physics, m_gains.phaseCtrlGains, m_rate);
+    m_phaseController2 = std::make_unique<PhaseController>(m_physics, m_gains.phaseCtrlGains, m_rate);
 }
 
 std::map<int, fixedWingCommands> HlcTwinAircraft::calculateInputs(const std::vector<int>& ids, const std::vector<fixedWingStates>& currentStates, const target& target) {
@@ -43,32 +42,26 @@ std::map<int, fixedWingCommands> HlcTwinAircraft::calculateInputs(const std::vec
     float requiredThrustSpeed1 = m_groundspeedController1->getThrustOut(target.groundspeed, false);
     float requiredThrustSpeed2 = m_groundspeedController2->getThrustOut(target.groundspeed, false);
 
-//    double a = m_phaseDesired1 + target.groundspeed / target.radius * (-1.0f/m_rate);
-//    double b = m_phaseDesired1 + M_PI;
-//
-//    m_phaseDesired1 = wrapPI(a);
-//    m_phaseDesired2 = wrapPI(b);
-//
-//    float requiredThrustPhase1 = m_phaseController1->getThrustOut(m_phaseDesired1,false);
-//    float requiredThrustPhase2 = m_phaseController2->getThrustOut(m_phaseDesired2,false);
+    m_phaseDesired1 = static_cast<float>(std::atan2(currentStates[0].y, currentStates[0].x));
+    m_phaseDesired2 = wrapPI(m_phaseDesired1 + M_PI);
 
-    float requiredThrust1 = constrainFloat(requiredThrustSpeed1 , 0.0f, 60.0f);
-    float requiredThrust2 = constrainFloat(requiredThrustSpeed2 , 0.0f, 60.0f);
+    float requiredThrustPhase1 = m_phaseController1->getThrustOut(m_phaseDesired1);
+    float requiredThrustPhase2 = m_phaseController2->getThrustOut(m_phaseDesired2);
 
     // Altitude --> y = y_payload + sqrt(L0^2 - R^2)
     double altTarget = target.positionPayload[2] + std::sqrt(m_tetherLength*m_tetherLength - target.radius*target.radius);
 
     // Create commands struct
     fixedWingCommands commandsInputs1{};
-    commandsInputs1.thrust = requiredThrust1;
-    commandsInputs1.theta = target.aircraftPitch;
-    commandsInputs1.phi = degrees(m_lateralController1->navRollCmd());
+    commandsInputs1.thrust   = constrainFloat(requiredThrustSpeed1 + requiredThrustPhase1, 0.0f, 60.0f);;
+    commandsInputs1.theta    = target.aircraftPitch;
+    commandsInputs1.phi      = degrees(m_lateralController1->navRollCmd());
     commandsInputs1.altitude = altTarget;
 
     fixedWingCommands commandsInputs2{};
-    commandsInputs2.thrust = requiredThrust2;
-    commandsInputs2.theta = target.aircraftPitch;
-    commandsInputs2.phi = degrees(m_lateralController2->navRollCmd());
+    commandsInputs2.thrust   = constrainFloat(requiredThrustSpeed2 + requiredThrustPhase2, 0.0f, 60.0f);
+    commandsInputs2.theta    = target.aircraftPitch;
+    commandsInputs2.phi      = degrees(m_lateralController2->navRollCmd());
     commandsInputs2.altitude = altTarget;
 
     m_writeLog(commandsInputs1, commandsInputs2);
@@ -82,9 +75,11 @@ void HlcTwinAircraft::m_writeLog(const fixedWingCommands& commands1, const fixed
             commands1,
             m_groundspeedController1->getPidInfo(),
             m_lateralController1->getCtrlInfo(),
+            m_phaseController1->getCtrlInfo(),
             commands2,
             m_groundspeedController2->getPidInfo(),
-            m_lateralController2->getCtrlInfo()
+            m_lateralController2->getCtrlInfo(),
+            m_phaseController2->getCtrlInfo()
     };
 
     m_logger.writeHlcMessage(logMessage);

@@ -12,25 +12,39 @@
 #include "Control/pid.h"
 #include "Definitions/fixedWingDefinitions.h"
 #include "Definitions/worldPhysics.h"
+#include "Definitions/controllerGains.h"
+#include "Definitions/controllerGains.h"
 
 class PhaseController {
 
 public:
-    explicit PhaseController(worldPhysics& physics, float rate);
+    explicit PhaseController(worldPhysics& physics, phaseControllerGains& gains, float rate);
 
-    float getThrustOut(float desiredPhase, bool disableIntegrator);
+    float getThrustOut(float desiredPhase);
     void setAircraftStates(const fixedWingStates& aircraftStates);
 
-    [[nodiscard]] const PID::pidInfo& getPidInfo() const { return m_pidInfo;};
+    void setGains(const phaseControllerGains& gains);
+
+    struct ctrlInfo {
+        float phase;
+        float phaseTarget;
+        float P;
+        float I;
+        float D;
+        float thrustOut;
+    };
+
+    [[nodiscard]] const ctrlInfo& getCtrlInfo() const {return m_ctrlInfo;};
+
 private:
     worldPhysics m_physics;
+    phaseControllerGains& m_gains;
+    ctrlInfo m_ctrlInfo{};
+
+    float m_loiterDirection = -1.0f;
 
     float m_dt;
-    float m_integrator=0.0f;
-    float m_lastError=0.0f;
-
-    PID m_phasePid{20.0,8.0,0.0,0.0,50.0,3.0,10.0,3.0,0.02,360.0,1.0};
-    PID::pidInfo m_pidInfo{};
+    float m_lastError = 0.0f;
 
     fixedWingStates m_aircraftStates{};
 };

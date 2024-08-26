@@ -8,11 +8,13 @@
 
 #include "groundspeedController.h"
 
-GroundspeedController::GroundspeedController(worldPhysics& physics, float rate)
+GroundspeedController::GroundspeedController(worldPhysics& physics, groundspeedControllerGains& gains, float rate)
     : m_physics(physics)
+    , m_gains(gains)
     , m_dt(1.0f/rate)
 {
-
+    m_thrustPid(m_gains.P, m_gains.I, m_gains.D, m_gains.FF, -m_gains.iLimit, m_gains.iLimit,
+                m_gains.targetFilter, m_gains.errorFilter, m_gains.derivativeFilter, m_dt);
 }
 
 float GroundspeedController::getThrustOut(float desiredSpeed, bool disableIntegrator) {
@@ -33,7 +35,7 @@ float GroundspeedController::getThrustOut(float desiredSpeed, bool disableIntegr
 
     float thrustDem = m_pidInfo.P + m_pidInfo.I + m_pidInfo.D;
 
-    return constrainFloat(thrustDem, 0.0f, 60.0f);
+    return constrainFloat(thrustDem, m_gains.thrustMin, m_gains.thrustMax);
 }
 
 void GroundspeedController::setAircraftStates(const fixedWingStates& aircraftStates) {

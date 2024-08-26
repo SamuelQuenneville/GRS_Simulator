@@ -12,14 +12,15 @@
 #include "Control/pid.h"
 #include "Definitions/fixedWingDefinitions.h"
 #include "Definitions/worldPhysics.h"
+#include "Definitions/controllerGains.h"
 
 class PitchController {
 
 public:
-    explicit PitchController(worldPhysics& physics, float rate);
+    explicit PitchController(worldPhysics& physics, pitchControllerGains& gains, float rate);
 
-    int32_t getServoOut(float navPitch, float scaler, bool disableIntegrator);
-    int32_t getRateOut(float desiredRate, float scaler, bool disableIntegrator, float airspeed);
+    float getServoOut(float navPitch, float scaler, bool disableIntegrator);
+    float getRateOut(float desiredRate, float scaler, bool disableIntegrator, float airspeed);
     [[nodiscard]] float getCoordinationRateOffset(float airspeed) const;
 
     [[nodiscard]] const PID::pidInfo& getPidInfo() const {return m_pidInfo;};
@@ -30,6 +31,7 @@ public:
 
 private:
     worldPhysics m_physics;
+    pitchControllerGains& m_gains;
 
     // pitch time constant
     static constexpr float m_tau = 0.5f;

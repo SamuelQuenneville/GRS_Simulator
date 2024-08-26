@@ -17,6 +17,7 @@
 #include "Definitions/fixedWingDefinitions.h"
 #include "Control/pid.h"
 #include "Control/lateralController.h"
+#include "Control/phaseController.h"
 
 struct fixedWingLogMessage {
     int uavId{};
@@ -55,9 +56,11 @@ struct hlcLogMessage {
     fixedWingCommands commands1;
     PID::pidInfo groundspeedPid1;
     LateralController::ctrlInfo lateralController1;
+    PhaseController::ctrlInfo phaseController1;
     fixedWingCommands commands2;
     PID::pidInfo groundspeedPid2;
     LateralController::ctrlInfo lateralController2;
+    PhaseController::ctrlInfo phaseController2;
 };
 
 struct llcLogMessage {

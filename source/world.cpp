@@ -41,6 +41,7 @@ void World::readConfigurationFile(const std::string& fileName) {
     m_aircraftProperties = ConfigurationParser::parseFixedWingProperties(simParams.aircraftPropertiesFileDirectory);
     m_tetherProperties = ConfigurationParser::parseTetherProperties(simParams.tetherPropertiesFileDirectory);
     m_payloadProperties = ConfigurationParser::parsePayloadProperties(simParams.payloadPropertiesFileDirectory);
+    m_ctrlGains = ConfigurationParser::parseControllerGains(simParams.controllerGainsFileDirectory);
 
     int numberAircraftInSystem = getNumberOfAircraftInSystem(m_systemConfiguration.type);
 
@@ -60,7 +61,7 @@ Logger& World::logger() {
 
 void World::createSystem() {
 
-    m_system = std::make_unique<System>(worldPhysics, logger(), m_systemConfiguration);
+    m_system = std::make_unique<System>(worldPhysics, logger(), m_systemConfiguration, m_ctrlGains);
     m_system->setTarget(m_systemTarget);
 
     systemType type = m_systemConfiguration.type;

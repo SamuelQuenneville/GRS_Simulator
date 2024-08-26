@@ -12,11 +12,12 @@
 #include "Control/pid.h"
 #include "Definitions/fixedWingDefinitions.h"
 #include "Definitions/worldPhysics.h"
+#include "Definitions/controllerGains.h"
 
 class AltitudeController {
 
 public:
-    explicit AltitudeController(worldPhysics& physics, float rate);
+    explicit AltitudeController(worldPhysics& physics, altitudeControllerGains& gains, float rate);
 
     float getPitchOut(float desiredAltitude, bool disableIntegrator);
 
@@ -28,6 +29,7 @@ public:
 
 private:
     worldPhysics m_physics;
+    altitudeControllerGains& m_gains;
 
     float m_dt;
     float m_lastOutRad = 0;

@@ -17,13 +17,14 @@
 class LlcBaseVersion : public LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands> {
 
 public:
-    LlcBaseVersion(worldPhysics& physics, Logger& logger, float rate);
+    LlcBaseVersion(worldPhysics& physics, Logger& logger, llcGains& gains, float rate);
 
     fixedWingControlInputs calculateAircraftControlInputs(int aircraftId, const fixedWingStates& currentStates, const fixedWingCommands& commands) override;
 
 private:
     worldPhysics m_physics;
     Logger& m_logger;
+    llcGains& m_gains;
 
     // Controller rate Hz
     float m_rate;
@@ -34,13 +35,13 @@ private:
     void m_calcNavigationPitch(double commandedPitch);
     void m_calcNavigationYaw(double commandedYaw);
 
-    double m_navigationRoll = 0.0;
-    double m_navigationPitch = 0.0;
-    double m_navigationYaw = 0.0;
+    float m_navigationRoll = 0.0;
+    float m_navigationPitch = 0.0;
+    float m_navigationYaw = 0.0;
 
     // stabilize aircraft attitude at navigation[roll, pitch, yaw]
-    int32_t m_stabilizeRoll(double commandedRoll);
-    int32_t m_stabilizePitch(double commandedPitch);
+    float m_stabilizeRoll(double commandedRoll);
+    float m_stabilizePitch(double commandedPitch);
     int32_t m_stabilizeYaw(double commandedYaw);
     int32_t m_stabilizeRpm(double commandedRpm);
 
