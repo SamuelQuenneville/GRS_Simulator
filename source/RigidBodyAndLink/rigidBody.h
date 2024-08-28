@@ -28,11 +28,6 @@ public:
     RigidBody();
     virtual ~RigidBody() = default;
 
-    enum rigidBodyType {
-        AIRCRAFT,
-        PAYLOAD
-    };
-
     virtual void update(double dt) {};
     virtual Vector3<double> calcExternalForce();
     virtual std::map<int, Vector3<double>> externalForces();
@@ -58,7 +53,7 @@ public:
 
 private:
     Transform m_transform = Transform::identity();
-    Vector3<double> m_angularVelocity{0,0,0};   // Earth reference frame
+    Vector3<double> m_angularVelocity{0.0,0.0,0.0};   // Earth reference frame
 };
 
 

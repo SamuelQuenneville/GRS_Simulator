@@ -47,19 +47,19 @@ private:
     const float& m_slewRateMax;
     const float& m_slewRateTau;
     LowPassFilterFloat m_slewFilter;
-    float m_outputSlewRate;
-    float m_modifierSlewRate;
-    float m_lastSample;
-    float m_maxPosSlewRate;
-    float m_maxNegSlewRate;
-    uint32_t m_maxPosSlewEventMs;
-    uint32_t m_maxNegSlewEventMs;
-    uint8_t m_posEventIndex;
-    uint8_t m_negEventIndex;
-    uint32_t m_posEventMs[N_EVENTS];
-    uint32_t m_negEventMs[N_EVENTS];
-    bool m_posEventStored;
-    bool m_negEventStored;
+    float m_outputSlewRate{};
+    float m_modifierSlewRate{};
+    float m_lastSample{};
+    float m_maxPosSlewRate{};
+    float m_maxNegSlewRate{};
+    uint32_t m_maxPosSlewEventMs{};
+    uint32_t m_maxNegSlewEventMs{};
+    uint8_t m_posEventIndex{};
+    uint8_t m_negEventIndex{};
+    uint32_t m_posEventMs[N_EVENTS]{};
+    uint32_t m_negEventMs[N_EVENTS]{};
+    bool m_posEventStored{};
+    bool m_negEventStored{};
 };
 
 #endif //GRS_SIMULATOR_SLEWLIMITER_H

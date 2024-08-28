@@ -22,12 +22,12 @@ tetherProperties ConfigurationParser::parseTetherProperties(const std::string& f
     return node["TetherProperties"].as<tetherProperties>();
 }
 
-payloadProperties ConfigurationParser::parsePayloadProperties(const std::string &filePath) {
+payloadProperties ConfigurationParser::parsePayloadProperties(const std::string& filePath) {
     YAML::Node node = YAML::LoadFile(filePath);
     return node["PayloadProperties"].as<payloadProperties>();
 }
 
-ctrlGains ConfigurationParser::parseControllerGains(const std::string &filePath) {
+ctrlGains ConfigurationParser::parseControllerGains(const std::string& filePath) {
     YAML::Node node = YAML::LoadFile(filePath);
 
     ctrlGains gains{};
@@ -50,7 +50,7 @@ target ConfigurationParser::parseSystemTarget(YAML::Node& node) {
     return node["Target"].as<target>();
 }
 
-std::vector<float> ConfigurationParser::parseWind(const std::string &filePath) {
+std::vector<float> ConfigurationParser::parseWind(const std::string& filePath) {
     YAML::Node node = YAML::LoadFile(filePath);
     return node["Wind"].as<std::vector<float>>();
 }

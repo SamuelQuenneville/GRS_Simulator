@@ -217,16 +217,12 @@ bool Scene::mouseButtonEvent(int button, bool down, int mods, double mousePosX, 
     return true;
 }
 
-bool
-Scene::mouseMotionEvent(double xMouse, double yMouse, int leftButtonState, int rightButtonState, int middleButtonState, int altKeyState) {
+bool Scene::mouseMotionEvent(double xMouse, double yMouse, int leftButtonState, int rightButtonState, int middleButtonState, int altKeyState) {
     // Zoom
     if (leftButtonState == GLFW_PRESS && altKeyState == GLFW_PRESS) {
 
-        auto dy = static_cast<float>(yMouse - m_lastMouseY);
-        auto h = static_cast<float>(m_windowHeight);
-
         // Zoom the camera
-        m_zoom(-dy / h);
+        m_zoom(-static_cast<float>(yMouse - m_lastMouseY) / static_cast<float>(m_windowHeight));
     }
         // Translation
     else if (middleButtonState == GLFW_PRESS || rightButtonState == GLFW_PRESS) {
@@ -306,10 +302,10 @@ void Scene::m_createShadowMapFrameBufferObjectAndTexture() {
     }
 }
 
-void Scene::m_setScenePosition(const Vector3<double>& position, double sceneRadius) {
+void Scene::m_setScenePosition(const Vector3<double>& position, float sceneRadius) {
     // Set the position and radius of the scene
     m_centerOfScene = position;
-    m_camera.setSceneRadius(static_cast<float>(sceneRadius));
+    m_camera.setSceneRadius(sceneRadius);
 
     // Reset the camera position and zoom in order to view all the scene
     m_resetCameraToViewAll();
@@ -339,23 +335,19 @@ void Scene::m_translate(int xMouse, int yMouse) {
 }
 
 void Scene::m_rotate(int xMouse, int yMouse) {
-    const double deltaXMouse = m_lastMouseX - xMouse;
-    const double deltaYMouse = m_lastMouseY - yMouse;
-
-    double deltaHorizRotationAngle = deltaXMouse / m_windowWidth  * M_PI;
-    double deltaVertRotationAngle = deltaYMouse / m_windowHeight  * M_PI;
+    float deltaHorizRotationAngle = static_cast<float>(m_lastMouseX - xMouse) / static_cast<float>(m_windowWidth) * M_PI;
+    float deltaVertRotationAngle  = static_cast<float>(m_lastMouseY - yMouse) / static_cast<float>(m_windowHeight) * M_PI;
 
     const double newVerticalAngle = m_currentCameraVerticalAngle + deltaVertRotationAngle;
 
     // Limit Vertical angle
-    constexpr double piOver2 = M_PI * 0.5;
-    if (newVerticalAngle > piOver2 || newVerticalAngle < -piOver2) {
-        deltaVertRotationAngle = 0;
+    if (newVerticalAngle > (M_PI * 0.5) || newVerticalAngle < -(M_PI * 0.5)) {
+        deltaVertRotationAngle = 0.0;
     }
 
-    Vector3 localVertAxis = m_camera.getTransformMatrix().getUpperLeft3x3Matrix().getInverse() * Vector3<double>(0, 1, 0);
-    m_camera.rotateAroundLocalPoint(Vector3<double>(1, 0, 0), static_cast<float>(deltaVertRotationAngle), m_centerOfScene);
-    m_camera.rotateAroundLocalPoint(localVertAxis, static_cast<float>(deltaHorizRotationAngle), m_centerOfScene);
+    Vector3 localVertAxis = m_camera.getTransformMatrix().getUpperLeft3x3Matrix().getInverse() * Vector3<double>(0.0, 1.0, 0.0);
+    m_camera.rotateAroundLocalPoint(Vector3<double>(1.0, 0.0, 0.0), deltaVertRotationAngle, m_centerOfScene);
+    m_camera.rotateAroundLocalPoint(localVertAxis, deltaHorizRotationAngle, m_centerOfScene);
 
     m_currentCameraVerticalAngle += deltaVertRotationAngle;
 }

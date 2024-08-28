@@ -27,7 +27,7 @@ void TetherLine::render(Shader& shader, const Matrix4<double>& worldToCameraMatr
     shader.setMatrix4x4Uniform("worldToCameraMatrix", worldToCameraMatrix);
 
     // Set the vertex color
-    Vector4<double> color(0, 0, 0, 1);
+    Vector4<double> color(0.0, 0.0, 0.0, 1.0);
     shader.setIntUniform("isGlobalVertexColorEnabled", 1, false);
     shader.setVector4Uniform("globalVertexColor", color, false);
 

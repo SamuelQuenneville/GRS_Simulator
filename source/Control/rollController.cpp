@@ -33,7 +33,7 @@ float RollController::getServoOut(float navRoll, float scaler, bool disableInteg
 }
 
 float RollController::getRateOut(float desiredRate, float scaler, bool disableIntegrator) {
-    bool limitIntegrator = fabsf(m_lastOut) >= 45.0f;
+    bool limitIntegrator = std::fabs(m_lastOut) >= 45.0f;
     float oldIntegrator = m_ratePID.getI();
     m_ratePID.setDt(m_dt);
 
@@ -55,31 +55,28 @@ float RollController::getRateOut(float desiredRate, float scaler, bool disableIn
         m_ratePID.setIntegrator(oldIntegrator);
     }
 
-    // FF should be scaled by scaler/eas2tas, but since we have scaled
-    // the AC_PID target above by scaler*scaler we need to instead
-    // divide by scaler*eas2tas to get the right scaling
-    const float ff = degrees(m_ratePID.getFF() / scaler);
-
     if (disableIntegrator) {
         m_ratePID.resetI();
     }
 
     // convert AC_PID info object to same scale as old controller
     m_pidInfo = m_ratePID.getPidInfo();
-    auto& pinfo = m_pidInfo;
 
-    const float degScale = degrees(1);
-    pinfo.FF = ff;
-    pinfo.P *= degScale;
-    pinfo.I *= degScale;
-    pinfo.D *= degScale;
+    m_pidInfo.P  = degrees(m_pidInfo.P);
+    m_pidInfo.I  = degrees(m_pidInfo.I);
+    m_pidInfo.D  = degrees(m_pidInfo.D);
+
+    // FF should be scaled by scaler/eas2tas, but since we have scaled
+    // the AC_PID target above by scaler*scaler we need to instead
+    // divide by scaler*eas2tas to get the right scaling
+    m_pidInfo.FF = degrees(m_ratePID.getFF() / scaler);
 
     // fix the logged target and actual values to not have the scalers applied
-    pinfo.target = desiredRate;
-    pinfo.actual = degrees(static_cast<float>(m_aircraftStates.p));
+    m_pidInfo.target = desiredRate;
+    m_pidInfo.actual = degrees(static_cast<float>(m_aircraftStates.p));
 
     // sum components
-    m_lastOut = pinfo.FF + pinfo.P + pinfo.I + pinfo.D;
+    m_lastOut = m_pidInfo.P + m_pidInfo.I + m_pidInfo.D + m_pidInfo.FF;
 
     // output is scaled to notional centidegrees of deflection
     return constrainFloat(m_lastOut, m_gains.aileronMin,  m_gains.aileronMax);

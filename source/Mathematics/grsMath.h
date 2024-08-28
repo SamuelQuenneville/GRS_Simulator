@@ -42,7 +42,7 @@ static inline auto MAX(const A& one, const B& two) -> decltype(one > two ? one :
  */
 template <typename T>
 inline T wrap2PI(const T radian) {
-    T res = fmod(static_cast<double>(radian), M_2PI);
+    T res = std::fmod(static_cast<double>(radian), M_2PI);
     if (res < 0) {
         res += M_2PI;
     }
@@ -125,7 +125,7 @@ T calcLowpassAlphaDt(T dt, T cutOffFrequency) {
  */
 template <typename T>
 T angleNorm(T res) {
-    if (fabs(res) == M_PI){
+    if (std::fabs(res) == M_PI){
         return res;
     }
 
@@ -149,7 +149,7 @@ template <typename T>
 inline bool isZero(const T fVal1) {
     static_assert(std::is_floating_point<T>::value || std::is_base_of<T,float>::value,
                   "Template parameter not of type float");
-    return (fabsf(static_cast<float>(fVal1)) < __FLT_EPSILON__);
+    return (std::fabs(static_cast<float>(fVal1)) < __FLT_EPSILON__);
 }
 
 /*

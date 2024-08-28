@@ -102,7 +102,7 @@ protected:
     double m_initialZoom;
 
     void m_createShadowMapFrameBufferObjectAndTexture();
-    void m_setScenePosition(const Vector3<double>& position, double sceneRadius);
+    void m_setScenePosition(const Vector3<double>& position, float sceneRadius);
     void m_resetCameraToViewAll();
 
     void m_zoom(double zoomDiff);

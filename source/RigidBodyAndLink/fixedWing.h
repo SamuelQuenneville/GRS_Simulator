@@ -13,19 +13,16 @@
 #include "Definitions/fixedWingDefinitions.h"
 #include "Control/lowLevelController.h"
 
-
 class FixedWing : public RigidBody {
 
 public:
     FixedWing(worldPhysics& physics, Logger& logger, fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller);
 
     [[nodiscard]] int getId() const;
-    [[nodiscard]] rigidBodyType getType() const;
 
     void update(double dt) override;
 
     [[nodiscard]] fixedWingStates getStates() const {return m_states;};
-    virtual void setStates(const fixedWingStates& newStates);
 
     void setInitialStates(initialStates& states) override;
 
@@ -43,7 +40,6 @@ public:
 private:
     int m_id;
     static int m_idCounter;
-    rigidBodyType m_type;
 
     worldPhysics m_physics;
     Logger& m_logger;
@@ -55,14 +51,15 @@ private:
 
     std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> m_controller;
 
-    [[nodiscard]] Vector3<double> m_calcForceAeroBodyFrame(const fixedWingControlInputs& inputs) const;
-    [[nodiscard]] Vector3<double> m_calcMomentAeroBodyFrame(const fixedWingControlInputs& inputs) const;
+    [[nodiscard]] std::tuple<double, double, double> m_angleOfAttackSideSlip() const;
+    [[nodiscard]] Vector3<double> m_calcForceAeroBodyFrame(double airspeed, double alphaRadian, double betaRadian) const;
+    [[nodiscard]] Vector3<double> m_calcMomentAeroBodyFrame(double airspeed, double alphaRadian, double betaRadian) const;
 
     [[nodiscard]] Vector3<double> m_earthToBody(const Vector3<double>& earthVector) const;
     [[nodiscard]] Vector3<double> m_bodyToEarth(const Vector3<double>& bodyVector) const;
 
     fixedWingStates m_calcStatesDerivatives(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> externalForceEarth);
-    fixedWingStates m_eulerIntegration(fixedWingStates& derivatives, double dt) const;
+    void m_eulerIntegration(fixedWingStates& derivatives, double dt);
 
     void m_writeLog(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> tetherForceBody);
 };

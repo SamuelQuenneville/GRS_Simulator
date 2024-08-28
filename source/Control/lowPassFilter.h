@@ -76,7 +76,7 @@ public:
 private:
     T m_output;
     float m_alpha = 1.0f;
-    bool m_initialised;
+    bool m_initialised = false;
 };
 
 // LPF base class
@@ -92,7 +92,7 @@ public:
     void setCutOffFrequency(float sampleFrequency, float cutOffFrequency);
 
     // return the cutoff frequency
-    float getCutOffFreq() const;
+    [[nodiscard]] float getCutOffFreq() const;
     T apply(T sample, float dt);
     T apply(T sample);
     const T& get() const;
@@ -100,7 +100,7 @@ public:
     void reset() { m_filter.reset(); }
 
 protected:
-    float m_cutOffFrequency;
+    float m_cutOffFrequency{};
 
 private:
     DigitalLPF<T> m_filter;

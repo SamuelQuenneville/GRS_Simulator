@@ -19,7 +19,7 @@ AltitudeController::AltitudeController(worldPhysics& physics, altitudeController
 
 float AltitudeController::getPitchOut(float desiredAltitude, bool disableIntegrator) {
     // Limit integrator if the last pitch output too high
-    bool limitIntegrator = fabsf(m_lastOutRad) >= m_gains.iLimit;
+    bool limitIntegrator = std::fabs(m_lastOutRad) >= m_gains.iLimit;
     m_altPID.setDt(m_dt);
 
     // Get airspeed
@@ -34,20 +34,14 @@ float AltitudeController::getPitchOut(float desiredAltitude, bool disableIntegra
         m_altPID.resetI();
     }
 
-    // Get altitude
-    auto altitudeMeters = static_cast<float>(-m_aircraftStates.z);
-
-    m_altPID.updateAll(desiredAltitude, altitudeMeters, limitIntegrator);
+    m_altPID.updateAll(desiredAltitude, static_cast<float>(-m_aircraftStates.z), limitIntegrator);
     m_pidInfo = m_altPID.getPidInfo();
 
     // sum components
-    float pitchOutRad = m_pidInfo.P + m_pidInfo.I + m_pidInfo.D;
-
-    // remember the last output to trigger the I limit
-    m_lastOutRad = pitchOutRad;
+    m_lastOutRad = m_pidInfo.P + m_pidInfo.I + m_pidInfo.D;
 
     // output is scaled to centidegrees of pitch
-    return constrainFloat(degrees(pitchOutRad), m_gains.pitchMin, m_gains.pitchMax);
+    return constrainFloat(degrees(m_lastOutRad), m_gains.pitchMin, m_gains.pitchMax);
 }
 
 void AltitudeController::resetIntegrator() {

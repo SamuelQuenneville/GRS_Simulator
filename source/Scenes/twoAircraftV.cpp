@@ -15,8 +15,8 @@ TwoAircraftV::TwoAircraftV(World *world)
     , m_payload(nullptr)
 {
     // Set the center of the scene
-    m_setScenePosition({0, 40, 20}, 100);
-    setInitialZoom(1.5);
+    m_setScenePosition({0.0, 40.0, 20.0}, 100.0f);
+    setInitialZoom(1.5f);
     m_resetCameraToViewAll();
 }
 
@@ -28,7 +28,7 @@ void TwoAircraftV::createPhysicsWorld() {
 
     // ---------- AIRCRAFT ---------- //
     for (const auto& aircraft : m_world->system()->aircraft()) {
-        auto* aircraftObject = new Aircraft(aircraft.get(), {2, 2, 2}, World::getExecutablePath());
+        auto* aircraftObject = new Aircraft(aircraft.get(), {2.0, 2.0, 2.0}, World::getExecutablePath());
         if (aircraft->getId() == 1) {
             aircraftObject->setColor(Color::red());
         } else if (aircraft->getId() == 2) {
@@ -50,15 +50,15 @@ void TwoAircraftV::createPhysicsWorld() {
     }
 
     // ---------- LAUNCHER ---------- //
-    m_launcher1 = new Launcher({1,1,1}, World::getExecutablePath());
+    m_launcher1 = new Launcher({1.0,1.0,1.0}, World::getExecutablePath());
     m_launcher1->setColor(Color::backgroundColor());
-    m_launcher2 = new Launcher({1,1,1}, World::getExecutablePath());
+    m_launcher2 = new Launcher({1.0,1.0,1.0}, World::getExecutablePath());
     m_launcher2->setColor(Color::backgroundColor());
     m_staticObjects.push_back(m_launcher1);
     m_staticObjects.push_back(m_launcher2);
 
     // ---------- GROUND ---------- //
-    m_ground = new Cube({50, 0.5, 50}, World::getExecutablePath());
+    m_ground = new Cube({50.0, 0.5, 50.0}, World::getExecutablePath());
     m_ground->setColor(Color::floorColor());
     m_staticObjects.push_back(m_ground);
 

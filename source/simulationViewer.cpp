@@ -16,9 +16,9 @@ SimulationViewer::SimulationViewer()
     , m_scene(nullptr)
     , m_singlePhysicsStepEnabled(false)
     , m_singlePhysicsStepDone(false)
-    , m_elapsedTime(0)
-    , m_totalDynamicTime(0)
-    , m_dynamicStepTime(0)
+    , m_elapsedTime(0.0)
+    , m_totalDynamicTime(0.0)
+    , m_dynamicStepTime(0.0)
 
 {
     m_world = std::make_unique<World>();
@@ -40,7 +40,7 @@ SimulationViewer::~SimulationViewer(){
 
 void SimulationViewer::start() {
     glfwInit();
-    glfwSetTime(0);
+    glfwSetTime(0.0);
 
     m_setGlfwHints();
 
@@ -129,7 +129,7 @@ bool SimulationViewer::onWindowResized(int width, int height) {
     return true;
 }
 
-void SimulationViewer::keyboard_event(int key, int scancode, int action, int modifiers) {
+void SimulationViewer::keyboardEvent(int key, int scancode, int action, int modifiers) {
     m_gui.onKeyboardEvent(key, scancode, action, modifiers);
 
     // Close application on escape key
@@ -145,7 +145,7 @@ void SimulationViewer::keyboard_event(int key, int scancode, int action, int mod
     }
 }
 
-void SimulationViewer::mouse_button_event(int button, int action, int modifiers) {
+void SimulationViewer::mouseButtonEvent(int button, int action, int modifiers) {
     m_gui.onMouseButtonEvent(button, action, modifiers);
 
     // Get the mouse cursor position
@@ -159,7 +159,7 @@ void SimulationViewer::mouse_button_event(int button, int action, int modifiers)
     }
 }
 
-void SimulationViewer::mouse_motion_event(double x, double y) {
+void SimulationViewer::mouseMotionEvent(double x, double y) {
     m_gui.onMouseMotionEvent(x, y);
 
     int leftButtonState   = glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_LEFT);
@@ -172,7 +172,7 @@ void SimulationViewer::mouse_motion_event(double x, double y) {
     }
 }
 
-void SimulationViewer::scroll_event(double x, double y) {
+void SimulationViewer::scrollEvent(double x, double y) {
     if (m_scene) {
         m_scene->scrollingEvent(x, y, 1.0f);
     }
@@ -266,25 +266,25 @@ void SimulationViewer::m_setGlfwHints() {
 void SimulationViewer::m_setCallback() {
     glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double x, double y) {
                                  auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
-                                 app->mouse_motion_event(x, y);
+        app->mouseMotionEvent(x, y);
                              }
     );
 
     glfwSetMouseButtonCallback(m_window, [](GLFWwindow* window, int button, int action, int modifiers) {
                                    auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
-                                   app->mouse_button_event(button, action, modifiers);
+        app->mouseButtonEvent(button, action, modifiers);
                                }
     );
 
     glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
                            auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
-                           app->keyboard_event(key, scancode, action, mods);
+        app->keyboardEvent(key, scancode, action, mods);
                        }
     );
 
     glfwSetScrollCallback(m_window, [](GLFWwindow* window, double x, double y) {
                               auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
-                              app->scroll_event(x, y);
+        app->scrollEvent(x, y);
                           }
     );
 

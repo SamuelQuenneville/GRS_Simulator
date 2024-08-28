@@ -14,7 +14,7 @@ System::System(worldPhysics& worldPhysics, Logger& logger, systemConfiguration& 
     , m_systemConfiguration(configuration)
     , m_ctrlGains(gains)
 {
-    m_timeSinceHlcCall = 0;
+    m_timeSinceHlcCall = 0.0;
 }
 
 void System::update(double dt) {

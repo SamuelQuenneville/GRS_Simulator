@@ -12,7 +12,6 @@ int FixedWing::m_idCounter = 0;
 
 FixedWing::FixedWing(worldPhysics& physics, Logger& logger, fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller)
         : m_id(++m_idCounter)
-        , m_type(RigidBody::AIRCRAFT)
         , m_physics(physics)
         , m_logger(logger)
         , m_properties(properties)
@@ -21,19 +20,8 @@ FixedWing::FixedWing(worldPhysics& physics, Logger& logger, fixedWingProperties&
 
 }
 
-void FixedWing::setStates(const fixedWingStates& newStates) {
-    m_states = newStates;
-
-    centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
-    centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
-}
-
 int FixedWing::getId() const {
     return m_id;
-}
-
-RigidBody::rigidBodyType FixedWing::getType() const {
-    return m_type;
 }
 
 void FixedWing::update(double dt) {
@@ -42,16 +30,17 @@ void FixedWing::update(double dt) {
     setInputs(inputs);
 
     Vector3<double> externalForcesEarth = calcExternalForce();
-    Vector3<double> forcesAeroBody   = m_calcForceAeroBodyFrame(inputs);
-    Vector3<double> momentsAeroBody  = m_calcMomentAeroBodyFrame(inputs);
 
-    fixedWingStates derivatives   = m_calcStatesDerivatives(forcesAeroBody, momentsAeroBody, externalForcesEarth);
-    fixedWingStates updatedStates = m_eulerIntegration(derivatives, dt);
+    auto&&[airspeed, alphaRadian, betaRadian] = m_angleOfAttackSideSlip();
+    Vector3<double> forcesAeroBody      = m_calcForceAeroBodyFrame(airspeed, alphaRadian, betaRadian);
+    Vector3<double> momentsAeroBody     = m_calcMomentAeroBodyFrame(airspeed, alphaRadian, betaRadian);
 
-    // Set new states to this body
-    setStates(updatedStates);
+    fixedWingStates derivatives = m_calcStatesDerivatives(forcesAeroBody, momentsAeroBody, externalForcesEarth);
+    m_eulerIntegration(derivatives, dt);
 
     // Set new forces/moments to the node of this body
+    centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
+    centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
     centerOfMass->setForce(m_bodyToEarth(forcesAeroBody) + externalForcesEarth);
     centerOfMass->setMoment(m_bodyToEarth(momentsAeroBody));
 
@@ -62,73 +51,63 @@ void FixedWing::update(double dt) {
     m_writeLog(forcesAeroBody, momentsAeroBody, m_earthToBody(externalForcesEarth));
 }
 
-Vector3<double> FixedWing::m_calcForceAeroBodyFrame(const fixedWingControlInputs& inputs) const {
-
+std::tuple<double, double, double> FixedWing::m_angleOfAttackSideSlip() const {
     // airspeed (Va)
     double Va = airspeed();
 
-    // alpha and beta
-    double alpha = 0.0;  // (rad)
-    double beta  = 0.0;  // (rad)
+    // alphaRadian and betaRadian
+    double alphaRadian = 0.0;
+    double betaRadian  = 0.0;
 
     if(Va >= 0.1){
-        alpha = std::atan2(m_states.w, m_states.u);  // (rad)
-        beta  = std::asin(m_states.v / Va);             // (rad)
+        alphaRadian = std::atan2(m_states.w, m_states.u);
+        betaRadian  = std::asin(m_states.v / Va);
     }
 
-    double delAlpha = alpha - radians(m_properties.trimAlpha);
+    return {Va, alphaRadian, betaRadian};
+}
+
+Vector3<double> FixedWing::m_calcForceAeroBodyFrame(double airspeed, double alphaRadian, double betaRadian) const {
+
+    double delAlpha = alphaRadian - radians(m_properties.trimAlpha);
     // CL and CD
     double CL = m_properties.CL_0 + m_properties.CL_ALPHA * delAlpha;
     double CD = m_properties.CD_0 + (CL*CL) / (M_PI * m_properties.oswaldEfficiency * m_properties.aspectRatio);
 
     // stability vs body frame
-    double CX = -CD * std::cos(alpha) + CL * std::sin(alpha);
-    double CZ = -CD * std::sin(alpha) - CL * std::cos(alpha);
+    double CX = -CD * std::cos(alphaRadian) + CL * std::sin(alphaRadian);
+    double CZ = -CD * std::sin(alphaRadian) - CL * std::cos(alphaRadian);
 
     // q_bar
-    double qBarSurface = 0.5 * m_physics.airDensity * Va * Va * m_properties.wingSurface;
+    double qBarSurface = 0.5 * m_physics.airDensity * airspeed * airspeed * m_properties.wingSurface;
 
     // del_commands
-    double delElevator = inputs.deltaElevator - m_properties.trimElevator;
+    double delElevator = m_inputs.deltaElevator - m_properties.trimElevator;
 
     // Forces in body frame
-    double Fx = inputs.deltaThrust + qBarSurface * (CX + m_properties.Cx_q * m_properties.wingChord/(2.0*Va) * m_states.q + m_properties.Cx_DELTA_ELE * delElevator);
-    double Fy = qBarSurface * (m_properties.Cy_0 + m_properties.Cy_BETA * beta + m_properties.Cy_p * m_properties.wingSpan / (2.0*Va) * m_states.p + m_properties.Cy_r * m_properties.wingSpan / (2.0*Va) * m_states.r + m_properties.Cy_DELTA_AIL * inputs.deltaAileron + m_properties.Cy_DELTA_RUD * inputs.deltaRudder);
-    double Fz = qBarSurface * (CZ + m_properties.Cz_q * m_properties.wingChord / (2.0*Va) * m_states.q + m_properties.Cz_DELTA_ELE * delElevator);
+    double Fx = m_inputs.deltaThrust + qBarSurface * (CX + m_properties.Cx_q * m_properties.wingChord / (2.0 * airspeed) * m_states.q + m_properties.Cx_DELTA_ELE * delElevator);
+    double Fy = qBarSurface * (m_properties.Cy_0 + m_properties.Cy_BETA * betaRadian + m_properties.Cy_p * m_properties.wingSpan / (2.0 * airspeed) * m_states.p + m_properties.Cy_r * m_properties.wingSpan / (2.0 * airspeed) * m_states.r + m_properties.Cy_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cy_DELTA_RUD * m_inputs.deltaRudder);
+    double Fz = qBarSurface * (CZ + m_properties.Cz_q * m_properties.wingChord / (2.0 * airspeed) * m_states.q + m_properties.Cz_DELTA_ELE * delElevator);
 
-    Vector3<double> forcesBody{Fx,Fy,Fz};
-    return forcesBody;
+    return {Fx,Fy,Fz};
 }
 
-Vector3<double> FixedWing::m_calcMomentAeroBodyFrame(const fixedWingControlInputs& inputs) const {
+Vector3<double> FixedWing::m_calcMomentAeroBodyFrame(double airspeed, double alphaRadian, double betaRadian) const {
 
-    // airspeed (Va)
-    double Va = airspeed();
-
-    // alpha and beta
-    double alpha = 0.0;   // (rad)
-    double beta  = 0.0;   // (rad)
-
-    if(Va >= 0.1){
-        alpha = std::atan2(m_states.w, m_states.u);  // (rad)
-        beta  = std::asin(m_states.v / Va);             // (rad)
-    }
-
-    double delAlpha = alpha - radians(m_properties.trimAlpha);
+    double delAlpha = alphaRadian - radians(m_properties.trimAlpha);
 
     // q_bar
-    double qBarSurface = 0.5 * m_physics.airDensity * Va * Va * m_properties.wingSurface;
+    double qBarSurface = 0.5 * m_physics.airDensity * airspeed * airspeed * m_properties.wingSurface;
 
     // del_commands
-    double delElevator = inputs.deltaElevator - m_properties.trimElevator;
+    double delElevator = m_inputs.deltaElevator - m_properties.trimElevator;
 
     // Moments in body frame
-    double Mx = qBarSurface * m_properties.wingSpan * (m_properties.Cl_0 + m_properties.Cl_BETA * beta + m_properties.Cl_p*m_properties.wingSpan/(2.0*Va)*m_states.p + m_properties.Cl_r*m_properties.wingSpan/(2.0*Va)*m_states.r + m_properties.Cl_DELTA_AIL* inputs.deltaAileron + m_properties.Cl_DELTA_RUD*inputs.deltaRudder);
-    double My = qBarSurface * m_properties.wingChord * (m_properties.Cm_0 + m_properties.Cm_ALPHA * delAlpha + m_properties.Cm_q * m_properties.wingChord / (2.0*Va) * m_states.q + m_properties.Cm_DELTA_ELE * delElevator);
-    double Mz = qBarSurface * m_properties.wingSpan * (m_properties.Cn_0 + m_properties.Cn_BETA * beta + m_properties.Cn_p*m_properties.wingSpan/(2.0*Va)*m_states.p + m_properties.Cn_r*m_properties.wingSpan/(2.0*Va)*m_states.r + m_properties.Cn_DELTA_AIL* inputs.deltaAileron + m_properties.Cn_DELTA_RUD*inputs.deltaRudder);
+    double Mx = qBarSurface * m_properties.wingSpan * (m_properties.Cl_0 + m_properties.Cl_BETA * betaRadian + m_properties.Cl_p * m_properties.wingSpan / (2.0 * airspeed) * m_states.p + m_properties.Cl_r * m_properties.wingSpan / (2.0 * airspeed) * m_states.r + m_properties.Cl_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cl_DELTA_RUD * m_inputs.deltaRudder);
+    double My = qBarSurface * m_properties.wingChord * (m_properties.Cm_0 + m_properties.Cm_ALPHA * delAlpha + m_properties.Cm_q * m_properties.wingChord / (2.0 * airspeed) * m_states.q + m_properties.Cm_DELTA_ELE * delElevator);
+    double Mz = qBarSurface * m_properties.wingSpan * (m_properties.Cn_0 + m_properties.Cn_BETA * betaRadian + m_properties.Cn_p * m_properties.wingSpan / (2.0 * airspeed) * m_states.p + m_properties.Cn_r * m_properties.wingSpan / (2.0 * airspeed) * m_states.r + m_properties.Cn_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cn_DELTA_RUD * m_inputs.deltaRudder);
 
-    Vector3<double> momentsBody{Mx,My,Mz};
-    return momentsBody;
+    return {Mx,My,Mz};
 }
 
 fixedWingStates FixedWing::m_calcStatesDerivatives(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> externalForceEarth) {
@@ -148,12 +127,13 @@ fixedWingStates FixedWing::m_calcStatesDerivatives(Vector3<double> forceAeroBody
     double sinTheta = std::sin(m_states.theta);
     double cosPsi   = std::cos(m_states.psi);
     double sinPsi   = std::sin(m_states.psi);
-    double tanTheta = std::tan(m_states.theta);
     double secTheta = 1.0 / cosTheta;
+    double tanTheta = sinTheta * secTheta;
+
 
     // Calculate the derivatives of the states
     fixedWingStates derivatives{};
-    double tau = m_properties.inertiaX * m_properties.inertiaZ - m_properties.inertiaXZ * m_properties.inertiaXZ;
+    double oneOverTau = 1.0 / (m_properties.inertiaX * m_properties.inertiaZ - m_properties.inertiaXZ * m_properties.inertiaXZ);
 
     derivatives.x     = m_states.u * (cosTheta*cosPsi) + m_states.v * (-cosPhi*sinPsi + sinPhi*sinTheta*cosPsi) + m_states.w * (sinPhi*sinPsi + cosPhi*sinTheta*cosPsi) + m_physics.wind[0];
     derivatives.y     = m_states.u * (cosTheta*sinPsi) + m_states.v * (cosPhi*cosPsi + sinPhi*sinTheta*sinPsi) + m_states.w * (-sinPhi*cosPsi + cosPhi*sinTheta*sinPsi) + m_physics.wind[1];
@@ -164,35 +144,30 @@ fixedWingStates FixedWing::m_calcStatesDerivatives(Vector3<double> forceAeroBody
     derivatives.phi   = m_states.p + (m_states.q * sinPhi + m_states.r * cosPhi) * tanTheta;
     derivatives.theta = m_states.q * cosPhi - m_states.r * sinPhi;
     derivatives.psi   = (m_states.q * sinPhi + m_states.r * cosPhi) * secTheta;
-    derivatives.p     = 1.0 / tau * (m_states.q * m_states.r * (m_properties.inertiaZ * (m_properties.inertiaY - m_properties.inertiaZ) - m_properties.inertiaXZ * m_properties.inertiaXZ) + m_states.q * m_states.p * (m_properties.inertiaXZ * (m_properties.inertiaZ - m_properties.inertiaY + m_properties.inertiaX))) + 1.0 / tau * (m_properties.inertiaZ * momentAeroBody[0] + m_properties.inertiaXZ * momentAeroBody[2]);
+    derivatives.p     = oneOverTau * (m_states.q * m_states.r * (m_properties.inertiaZ * (m_properties.inertiaY - m_properties.inertiaZ) - m_properties.inertiaXZ * m_properties.inertiaXZ) + m_states.q * m_states.p * (m_properties.inertiaXZ * (m_properties.inertiaZ - m_properties.inertiaY + m_properties.inertiaX))) + oneOverTau * (m_properties.inertiaZ * momentAeroBody[0] + m_properties.inertiaXZ * momentAeroBody[2]);
     derivatives.q     = 1.0 / m_properties.inertiaY * (m_states.p * m_states.r * (m_properties.inertiaZ - m_properties.inertiaX) - (m_states.p * m_states.p - m_states.r * m_states.r) * m_properties.inertiaXZ) + 1.0 / m_properties.inertiaY * (momentAeroBody[1]);
-    derivatives.r     = 1.0 / tau * (m_states.q * m_states.p * (m_properties.inertiaX * (m_properties.inertiaX - m_properties.inertiaY) + m_properties.inertiaXZ * m_properties.inertiaXZ) - m_states.q * m_states.r * (m_properties.inertiaXZ * (m_properties.inertiaZ - m_properties.inertiaY + m_properties.inertiaX))) + 1.0 / tau * (m_properties.inertiaXZ * momentAeroBody[0] + m_properties.inertiaX * momentAeroBody[2]);
+    derivatives.r     = oneOverTau * (m_states.q * m_states.p * (m_properties.inertiaX * (m_properties.inertiaX - m_properties.inertiaY) + m_properties.inertiaXZ * m_properties.inertiaXZ) - m_states.q * m_states.r * (m_properties.inertiaXZ * (m_properties.inertiaZ - m_properties.inertiaY + m_properties.inertiaX))) + oneOverTau * (m_properties.inertiaXZ * momentAeroBody[0] + m_properties.inertiaX * momentAeroBody[2]);
 
     return derivatives;
 }
 
-fixedWingStates FixedWing::m_eulerIntegration(fixedWingStates& derivatives, double dt) const {
+void FixedWing::m_eulerIntegration(fixedWingStates& derivatives, double dt) {
+    m_states.x     += derivatives.x * dt;
+    m_states.y     += derivatives.y * dt;
+    m_states.z     += derivatives.z * dt;
+    m_states.u     += derivatives.u * dt;
+    m_states.v     += derivatives.v * dt;
+    m_states.w     += derivatives.w * dt;
+    m_states.phi   += derivatives.phi * dt;
+    m_states.theta += derivatives.theta * dt;
+    m_states.psi   += derivatives.psi * dt;
+    m_states.p     += derivatives.p * dt;
+    m_states.q     += derivatives.q * dt;
+    m_states.r     += derivatives.r * dt;
 
-    fixedWingStates updatedStates{};
-
-    updatedStates.x     = m_states.x + derivatives.x * dt;
-    updatedStates.y     = m_states.y + derivatives.y * dt;
-    updatedStates.z     = m_states.z + derivatives.z * dt;
-    updatedStates.u     = m_states.u + derivatives.u * dt;
-    updatedStates.v     = m_states.v + derivatives.v * dt;
-    updatedStates.w     = m_states.w + derivatives.w * dt;
-    updatedStates.phi   = m_states.phi + derivatives.phi * dt;
-    updatedStates.theta = m_states.theta + derivatives.theta * dt;
-    updatedStates.psi   = m_states.psi + derivatives.psi * dt;
-    updatedStates.p     = m_states.p + derivatives.p * dt;
-    updatedStates.q     = m_states.q + derivatives.q * dt;
-    updatedStates.r     = m_states.r + derivatives.r * dt;
-
-    updatedStates.vx    = derivatives.x;
-    updatedStates.vy    = derivatives.y;
-    updatedStates.vz    = derivatives.z;
-
-    return updatedStates;
+    m_states.vx = derivatives.x;
+    m_states.vy = derivatives.y;
+    m_states.vz = derivatives.z;
 }
 
 double FixedWing::airspeed() const {
@@ -200,7 +175,7 @@ double FixedWing::airspeed() const {
 }
 
 double FixedWing::groundspeed() const {
-    return std::sqrt(m_states.vx * m_states.vx + m_states.vy * m_states.vy + m_states.vz * m_states.vz);
+    return std::sqrt(m_states.vx * m_states.vx + m_states.vy * m_states.vy);
 }
 
 Matrix3<double> FixedWing::rotationMatrixCBodyEarth() const {
@@ -214,21 +189,11 @@ Matrix3<double> FixedWing::rotationMatrixCBodyEarth() const {
 }
 
 Vector3<double> FixedWing::m_earthToBody(const Vector3<double>& earthVector) const {
-
-    Matrix3 C_BodyEarth = rotationMatrixCBodyEarth();
-
-    // Convert Earth frame to Body frame
-    Vector3<double> bodyVector = C_BodyEarth * earthVector;
-    return bodyVector;
+    return rotationMatrixCBodyEarth() * earthVector;
 }
 
 Vector3<double> FixedWing::m_bodyToEarth(const Vector3<double>& bodyVector) const {
-
-    Matrix3 C_EarthBody = rotationMatrixCBodyEarth().transpose();
-
-    // Convert Earth frame to Body frame
-    Vector3<double> earthVector = C_EarthBody * bodyVector;
-    return earthVector;
+    return rotationMatrixCBodyEarth().transpose() * bodyVector;
 }
 
 void FixedWing::setInitialStates(initialStates& states) {
@@ -240,9 +205,9 @@ void FixedWing::setInitialStates(initialStates& states) {
     m_states.v = states.speed.at(1);
     m_states.w = states.speed.at(2);
 
-    m_states.phi = states.orientation.at(0);
+    m_states.phi   = states.orientation.at(0);
     m_states.theta = states.orientation.at(1);
-    m_states.psi = states.orientation.at(2);
+    m_states.psi   = states.orientation.at(2);
 
     centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
     centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
@@ -255,10 +220,10 @@ void FixedWing::m_writeLog(Vector3<double> forceAeroBody, Vector3<double> moment
 
     logMessage = {
             m_id,
-            getInputs().deltaAileron,
-            getInputs().deltaElevator,
-            getInputs().deltaRudder,
-            getInputs().deltaThrust,
+            m_inputs.deltaAileron,
+            m_inputs.deltaElevator,
+            m_inputs.deltaRudder,
+            m_inputs.deltaThrust,
             centerOfMass->position(),
             centerOfMass->velocity(),
             {m_states.u, m_states.v, m_states.w},

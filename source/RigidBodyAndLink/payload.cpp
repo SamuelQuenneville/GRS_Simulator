@@ -23,12 +23,11 @@ void Payload::update(double dt) {
         Vector3<double> externalForcesEarth = calcExternalForce();
 
         payloadStates derivatives   = m_calcStatesDerivatives(externalForcesEarth);
-        payloadStates updatedStates = m_eulerIntegration(derivatives, dt);
-
-        // Set new states to this body
-        setStates(updatedStates);
+        m_eulerIntegration(derivatives, dt);
 
         // Set new forces/moments to the node of this body
+        centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
+        centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
         centerOfMass->setForce(externalForcesEarth);
 
         setTransform(Transform(centerOfMass->position().toOpenglRef(), Quaternion::identity()));
@@ -36,13 +35,6 @@ void Payload::update(double dt) {
 
     // Log
     m_writeLog();
-}
-
-void Payload::setStates(const payloadStates& newStates) {
-    m_states = newStates;
-
-    centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
-    centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
 }
 
 void Payload::setInitialStates(initialStates& states) {
@@ -82,22 +74,19 @@ payloadStates Payload::m_calcStatesDerivatives(Vector3<double> externalForceEart
     return derivatives;
 }
 
-payloadStates Payload::m_eulerIntegration(payloadStates& derivatives, double dt) const {
-    payloadStates updatedStates{};
+void Payload::m_eulerIntegration(payloadStates& derivatives, double dt) {
+    m_states.vx += derivatives.vx * dt;
+    m_states.vy += derivatives.vy * dt;
+    m_states.vz += derivatives.vz * dt;
 
-    updatedStates.vx = m_states.vx + derivatives.vx * dt;
-    updatedStates.vy = m_states.vy + derivatives.vy * dt;
-    updatedStates.vz = m_states.vz + derivatives.vz * dt;
-
-    updatedStates.x  = m_states.x + updatedStates.vx * dt;
-    updatedStates.y  = m_states.y + updatedStates.vy * dt;
-    updatedStates.z  = m_states.z + updatedStates.vz * dt;
+    m_states.x += m_states.vx * dt;
+    m_states.y += m_states.vy * dt;
+    m_states.z += m_states.vz * dt;
 
     // Simulate the ground
-    if (updatedStates.z >= -0.001 && derivatives.vz >= -0.001) {
-        updatedStates.z  = 0.0;
-        updatedStates.vz = 0.0;
+    if (m_states.z >= -0.001 && derivatives.vz >= -0.001) {
+        m_states.z  = 0.0;
+        m_states.vz = 0.0;
     }
 
-    return updatedStates;
 }

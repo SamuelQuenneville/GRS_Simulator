@@ -34,8 +34,8 @@ void LateralController::updateLoiter(const Vector2<double>& centerWP, float radi
     Vector2<double> unitDistanceNorthEastFromWP = distanceNorthEastFromWP.normalize();
 
     // Adaptive L1 for small radii
-    if (m_distanceL1 > radius && std::abs(distanceFromWP - radius) <= m_distanceL1) {
-        m_distanceL1 = MAX(std::abs(distanceFromWP - radius),radius);
+    if (m_distanceL1 > radius && std::fabs(distanceFromWP - radius) <= m_distanceL1) {
+        m_distanceL1 = std::fmax(std::fabs(distanceFromWP - radius),radius);
         qL = m_distanceL1 / groundspeed;
         m_periodL1 = M_PI * qL / m_dampingL1;
     }
@@ -47,7 +47,7 @@ void LateralController::updateLoiter(const Vector2<double>& centerWP, float radi
     // Calculate nu to capture centerWP
     auto xtrackVelCap = static_cast<float>(unitDistanceNorthEastFromWP.x() * m_aircraftStates.vy - unitDistanceNorthEastFromWP.y() * m_aircraftStates.vx);
     float ltrackVelCap = - static_cast<float>(m_aircraftStates.vx * unitDistanceNorthEastFromWP.x() + m_aircraftStates.vy * unitDistanceNorthEastFromWP.y());
-    float nu = atan2f(xtrackVelCap,ltrackVelCap);
+    float nu = std::atan2(xtrackVelCap,ltrackVelCap);
 
     nu = constrainFloat(nu, -M_PI / 2.0f, M_PI / 2.0f);
 
@@ -56,7 +56,7 @@ void LateralController::updateLoiter(const Vector2<double>& centerWP, float radi
     float xtrackErrCirc = distanceFromWP - radius;
 
     // Calculate acceleration to capture centerWP
-    float latAccDemCap = kL * groundspeed * groundspeed / m_distanceL1 * sinf(nu);
+    float latAccDemCap = kL * groundspeed * groundspeed / m_distanceL1 * std::sin(nu);
 
     // Tangent velocity
     float velTangent = xtrackVelCap * loiterDirection;
@@ -64,7 +64,7 @@ void LateralController::updateLoiter(const Vector2<double>& centerWP, float radi
     // Centripetal acceleration
     float latAccDemCircCtrl;
     if (isTethered) {
-        latAccDemCircCtrl = 0.0;
+        latAccDemCircCtrl = 0.0f;
     } else {
         latAccDemCircCtrl = velTangent * velTangent / radius;
     }
@@ -99,7 +99,7 @@ void LateralController::updateLoiter(const Vector2<double>& centerWP, float radi
 }
 
 float LateralController::navRollCmd() const {
-    float cmd = atanf(m_latAccDem / static_cast<float>(m_physics.gravity));
+    float cmd = std::atan(m_latAccDem / static_cast<float>(m_physics.gravity));
     cmd = constrainFloat(cmd, -m_gains.rollSaturation, m_gains.rollSaturation);
     return cmd;
 }

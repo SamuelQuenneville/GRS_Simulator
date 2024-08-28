@@ -13,7 +13,7 @@ PhysicsObject::PhysicsObject()
 {
     m_body = nullptr;
     m_link = nullptr;
-    m_color = Color(1,1,1,1);
+    m_color = Color(1.0f,1.0f,1.0f,1.0f);
 }
 
 PhysicsObject::PhysicsObject(const std::string& meshFilePath)
@@ -38,7 +38,7 @@ const Transform& PhysicsObject::getTransform() const {
 
 void PhysicsObject::setTransform(const Transform& transform) {
     m_body->setTransform(transform);
-    updateTransform(1.0f);
+    updateTransform(1.0);
 }
 
 Matrix4<double> PhysicsObject::m_calculateTransform(double interpolationFactor, const Matrix4<double>& scalingMatrix) {

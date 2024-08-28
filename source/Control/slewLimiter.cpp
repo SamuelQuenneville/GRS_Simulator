@@ -57,7 +57,7 @@ float SlewLimiter::modifier(float sample, float dt) {
     m_lastSample = sample;
 
     uint32_t nowMilliseconds  = std::chrono::duration_cast< std::chrono::milliseconds >(std::chrono::system_clock::now().time_since_epoch()).count();
-    const float decayAlpha = fminf(dt, m_slewRateTau) / m_slewRateTau;
+    const float decayAlpha = std::fmin(dt, m_slewRateTau) / m_slewRateTau;
 
     // Store a series of positive slew rate exceedance events
     if (!m_posEventStored && slewRate > m_slewRateMax) {
@@ -95,14 +95,14 @@ float SlewLimiter::modifier(float sample, float dt) {
     // Decay the peak positive and negative slew rate if they are outside the window
     // Never drop PID gains below 10% of configured value
     if (slewRate > m_maxPosSlewRate) {
-        m_maxPosSlewRate = fminf(slewRate, 10.0f * m_slewRateMax);
+        m_maxPosSlewRate = std::fmin(slewRate, 10.0f * m_slewRateMax);
         m_maxPosSlewEventMs = nowMilliseconds;
     } else if (nowMilliseconds - m_maxPosSlewEventMs > WINDOW_MS) {
         m_maxPosSlewRate *= (1.0f - decayAlpha);
     }
 
     if (slewRate < -m_maxNegSlewRate) {
-        m_maxNegSlewRate = fminf(-slewRate, 10.0f * m_slewRateMax);
+        m_maxNegSlewRate = std::fmin(-slewRate, 10.0f * m_slewRateMax);
         m_maxNegSlewEventMs = nowMilliseconds;
     } else if (nowMilliseconds - m_maxNegSlewEventMs > WINDOW_MS) {
         m_maxNegSlewRate *= (1.0f - decayAlpha);
@@ -115,19 +115,19 @@ float SlewLimiter::modifier(float sample, float dt) {
     // unwanted gain reduction and is only applied to the slew rate used for gain reduction
     float modifierInput = rawSlewRate;
     if (nowMilliseconds - oldestMilliseconds > (N_EVENTS + 1) * WINDOW_MS) {
-        const float oldestTimeFromWindow = 0.001f*(float)(nowMilliseconds - oldestMilliseconds - (N_EVENTS + 1) * WINDOW_MS);
-        modifierInput *= expf(-oldestTimeFromWindow / m_slewRateTau);
+        const float oldestTimeFromWindow = 0.001f * static_cast<float>(nowMilliseconds - oldestMilliseconds - (N_EVENTS + 1) * WINDOW_MS);
+        modifierInput *= std::exp(-oldestTimeFromWindow / m_slewRateTau);
     }
 
     // Apply a filter to increases in slew rate only to reduce the effect of gusts and large controller
     // set point changes
-    const float attackAlpha = fminf(2.0f * decayAlpha, 1.0f);
+    const float attackAlpha = std::fmin(2.0f * decayAlpha, 1.0f);
 
     m_modifierSlewRate = (1.0f - attackAlpha) * m_modifierSlewRate + attackAlpha * modifierInput;
-    m_modifierSlewRate = fminf(m_modifierSlewRate, modifierInput);
+    m_modifierSlewRate = std::fmin(m_modifierSlewRate, modifierInput);
 
     m_outputSlewRate = (1.0f - attackAlpha) * m_outputSlewRate + attackAlpha * rawSlewRate;
-    m_outputSlewRate = fminf(m_outputSlewRate, rawSlewRate);
+    m_outputSlewRate = std::fmin(m_outputSlewRate, rawSlewRate);
 
     // Calculate the gain adjustment
     float mod;

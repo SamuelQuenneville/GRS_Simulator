@@ -30,10 +30,10 @@ public:
     [[nodiscard]] double getElapsedTime() const {return m_elapsedTime;};
 
     // Default event handler
-    void keyboard_event(int key, int scancode, int action, int modifiers);
-    void mouse_button_event(int button, int action, int modifiers);
-    void mouse_motion_event(double x, double y);
-    void scroll_event(double x, double y);
+    void keyboardEvent(int key, int scancode, int action, int modifiers);
+    void mouseButtonEvent(int button, int action, int modifiers);
+    void mouseMotionEvent(double x, double y);
+    void scrollEvent(double x, double y);
 
     // Called when an OpenGL Error occurs
     static void GLAPIENTRY onOpenGLError(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam );

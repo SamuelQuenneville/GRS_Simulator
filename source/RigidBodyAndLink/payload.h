@@ -20,7 +20,6 @@ public:
     void update(double dt) override;
 
     [[nodiscard]] payloadStates getStates() const {return m_states;};
-    virtual void setStates(const payloadStates& newStates);
 
     void setInitialStates(initialStates& states) override;
 
@@ -34,7 +33,7 @@ private:
     bool m_isGrounded; // static body
 
     [[nodiscard]] payloadStates m_calcStatesDerivatives(Vector3<double> externalForceEarth) const;
-    payloadStates m_eulerIntegration(payloadStates& derivatives, double dt) const;
+    void m_eulerIntegration(payloadStates& derivatives, double dt);
 
 
     void m_writeLog();

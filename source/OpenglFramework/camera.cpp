@@ -49,7 +49,7 @@ void Camera::setFieldOfView(float fov) {
 }
 
 void Camera::setZoom(double fraction) {
-    Vector3<double> zoomVector(0, 0, m_sceneRadius * fraction);
+    Vector3<double> zoomVector(0.0, 0.0, m_sceneRadius * fraction);
     translateLocal(zoomVector);
 }
 
@@ -82,7 +82,7 @@ void Camera::m_updateProjectionMatrix() {
     // Compute the aspect ratio
     double aspect = double(m_width) / double(m_height);
 
-    double top = m_nearPlane * std::tan((m_fieldOfView / 2.0) * (M_PI / 180.0));
+    double top = m_nearPlane * std::tan(m_fieldOfView  * M_PI / 360.0);
     double bottom = -top;
     double left = bottom * aspect;
     double right = top * aspect;

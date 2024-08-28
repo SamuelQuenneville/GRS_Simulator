@@ -21,8 +21,7 @@ float GroundspeedController::getThrustOut(float desiredSpeed, bool disableIntegr
     m_thrustPid.setDt(m_dt);
 
     // get groundspeed m/s
-    auto airspeed = static_cast<float>(std::sqrt(m_aircraftStates.u * m_aircraftStates.u + m_aircraftStates.v * m_aircraftStates.v + m_aircraftStates.w * m_aircraftStates.w));
-    float groundspeed = airspeed * static_cast<float>(std::cos(m_aircraftStates.theta));
+    auto groundspeed = static_cast<float>(std::sqrt(m_aircraftStates.vx * m_aircraftStates.vx + m_aircraftStates.vy * m_aircraftStates.vy));
 
     // reset I if required
     if (disableIntegrator){
