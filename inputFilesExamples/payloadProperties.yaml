@@ -6,3 +6,4 @@
 PayloadProperties:
   MASS      : 20.0  # kg/m
   DIMENSION : [0.4, 0.4, 0.4] # [x y z]
+  CDA       : 0.5

@@ -16,9 +16,9 @@ PhaseController::PhaseController(worldPhysics& physics, phaseControllerGains& ga
 
 }
 
-float PhaseController::getThrustOut(float desiredPhase) {
+float PhaseController::getThrustOut(float desiredPhase, const payloadStates& payloadStates) {
     // phase angle
-    m_ctrlInfo.phase = std::atan2(static_cast<float>(m_aircraftStates.y), static_cast<float>(m_aircraftStates.x));
+    m_ctrlInfo.phase = std::atan2(static_cast<float>(m_aircraftStates.y - payloadStates.y), static_cast<float>(m_aircraftStates.x - payloadStates.x));
     m_ctrlInfo.phaseTarget = desiredPhase;
 
     // compute errors
@@ -40,6 +40,6 @@ void PhaseController::setAircraftStates(const fixedWingStates& aircraftStates) {
     m_aircraftStates = aircraftStates;
 }
 
-void PhaseController::setGains(const phaseControllerGains &gains) {
+void PhaseController::setGains(const phaseControllerGains& gains) {
     m_gains = gains;
 }

@@ -20,7 +20,7 @@ Payload::Payload(worldPhysics& physics, Logger& logger, payloadProperties& prope
 void Payload::update(double dt) {
 
     if (!m_isGrounded) {
-        Vector3<double> externalForcesEarth = calcExternalForce();
+        Vector3<double> externalForcesEarth = calcExternalForce() + m_calcAeroForces();
 
         payloadStates derivatives   = m_calcStatesDerivatives(externalForcesEarth);
         m_eulerIntegration(derivatives, dt);
@@ -67,6 +67,10 @@ void Payload::m_writeLog() {
 payloadStates Payload::m_calcStatesDerivatives(Vector3<double> externalForceEarth) const {
     payloadStates derivatives{};
 
+    derivatives.x = m_states.vx;
+    derivatives.y = m_states.vy;
+    derivatives.z = m_states.vz;
+
     derivatives.vx  = externalForceEarth[0] / m_properties.mass;
     derivatives.vy  = externalForceEarth[1] / m_properties.mass;
     derivatives.vz  = (externalForceEarth[2] + m_properties.mass * m_physics.gravity) / m_properties.mass;
@@ -75,18 +79,30 @@ payloadStates Payload::m_calcStatesDerivatives(Vector3<double> externalForceEart
 }
 
 void Payload::m_eulerIntegration(payloadStates& derivatives, double dt) {
+
+    m_states.x += derivatives.x * dt;
+    m_states.y += derivatives.y * dt;
+    m_states.z += derivatives.z * dt;
+
     m_states.vx += derivatives.vx * dt;
     m_states.vy += derivatives.vy * dt;
     m_states.vz += derivatives.vz * dt;
-
-    m_states.x += m_states.vx * dt;
-    m_states.y += m_states.vy * dt;
-    m_states.z += m_states.vz * dt;
 
     // Simulate the ground
     if (m_states.z >= -0.001 && derivatives.vz >= -0.001) {
         m_states.z  = 0.0;
         m_states.vz = 0.0;
     }
+}
 
+Vector3<double> Payload::m_calcAeroForces() {
+    Vector3<double> dragForces = Vector3<double>::zeros();
+
+    // Drag = -coeff * ||v_rel|| * v_rel; same as ||v_rel||^2 * v_rel/||v_rel||
+    double coeff = 0.5 * m_physics.airDensity * m_properties.cda;
+    Vector3<double> v_rel = centerOfMass->velocity() - cast<double>(m_physics.wind);
+
+    dragForces = -coeff * v_rel.length() * v_rel;
+
+    return dragForces;
 }

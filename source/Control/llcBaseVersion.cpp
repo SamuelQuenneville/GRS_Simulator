@@ -32,7 +32,7 @@ fixedWingControlInputs LlcBaseVersion::calculateAircraftControlInputs(int aircra
     controlInputs.deltaRudder   = 0.0;//_stabilizeYaw(0.0), Always 0
     controlInputs.deltaThrust   = commands.thrust;
 
-    //m_writeLog(aircraftId, controlInputs);
+    m_writeLog(aircraftId, controlInputs);
     return controlInputs;
 }
 

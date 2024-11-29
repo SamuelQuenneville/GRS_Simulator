@@ -90,10 +90,10 @@ void LateralController::updateLoiter(const Vector2<double>& centerWP, float radi
     m_ctrlInfo.targetPositionX     = centerWP.x();
     m_ctrlInfo.actualPositionY     = m_aircraftStates.y;
     m_ctrlInfo.targetPositionY     = centerWP.y();
-    m_ctrlInfo.radius              = radius;
-    m_ctrlInfo.kx                  = kx;
+    m_ctrlInfo.radius              = m_integrator; //radius;
+    m_ctrlInfo.kx                  = xtrackErrCirc * kx * m_gains.P; //kx;
     m_ctrlInfo.xtrackPositionError = xtrackErrCirc;
-    m_ctrlInfo.kv                  = kv;
+    m_ctrlInfo.kv                  = xtrackVelCirc * kv * m_gains.D; //kv;
     m_ctrlInfo.xtrackVelocityError = xtrackVelCirc;
     m_ctrlInfo.accelerationTarget  = m_latAccDem;
 }

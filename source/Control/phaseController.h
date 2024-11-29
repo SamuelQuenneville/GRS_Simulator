@@ -14,13 +14,14 @@
 #include "Definitions/worldPhysics.h"
 #include "Definitions/controllerGains.h"
 #include "Definitions/controllerGains.h"
+#include "Definitions/payloadDefinitions.h"
 
 class PhaseController {
 
 public:
     explicit PhaseController(worldPhysics& physics, phaseControllerGains& gains, float rate);
 
-    float getThrustOut(float desiredPhase);
+    float getThrustOut(float desiredPhase, const payloadStates& payloadStates);
     void setAircraftStates(const fixedWingStates& aircraftStates);
 
     void setGains(const phaseControllerGains& gains);

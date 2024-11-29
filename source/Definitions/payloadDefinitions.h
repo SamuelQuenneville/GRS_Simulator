@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <vector>
+
 struct payloadStates {
     double x;     // north-position-Earth   (m)
     double y;     // east-position-Earth    (m)
@@ -31,7 +33,8 @@ struct payloadStates {
 
 struct payloadProperties {
     float mass{};
-    std::vector<float> dimension;
+    std::vector<float> dimension{};
+    float cda{};
 
 //    double inertiaX{};  // kg*m^2
 //    double inertiaY{};  // kg*m^2

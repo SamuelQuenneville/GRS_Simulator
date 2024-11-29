@@ -23,7 +23,11 @@ void System::update(double dt) {
 
     // Call HLC
     if (m_shouldCallHlc()) {
-        m_commands = m_controller->calculateInputs(m_getAircraftIds(), m_getAircraftStates(), m_target);
+        if (m_payload != nullptr) {
+            m_commands = m_controller->calculateInputs(m_getAircraftIds(), m_getAircraftStates(), m_payload->getStates(), m_target);
+        } else {
+            m_commands = m_controller->calculateInputs(m_getAircraftIds(), m_getAircraftStates(), m_target);
+        }
     }
 
     // Call tether update()

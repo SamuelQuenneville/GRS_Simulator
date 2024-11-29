@@ -218,8 +218,9 @@ namespace YAML {
                 return false;
             }
 
-            rhs.mass = node["MASS"].as<float>();
+            rhs.mass      = node["MASS"].as<float>();
             rhs.dimension = node["DIMENSION"].as<std::vector<float>>();
+            rhs.cda       = node["CDA"].as<float>();
             return true;
         }
     };

@@ -32,6 +32,8 @@ private:
 
     bool m_isGrounded; // static body
 
+    Vector3<double> m_calcAeroForces();
+
     [[nodiscard]] payloadStates m_calcStatesDerivatives(Vector3<double> externalForceEarth) const;
     void m_eulerIntegration(payloadStates& derivatives, double dt);
 

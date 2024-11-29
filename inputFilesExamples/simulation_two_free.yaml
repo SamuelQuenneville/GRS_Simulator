@@ -12,7 +12,7 @@ SimulationParameters:
   PAYLOAD_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/payloadProperties.yaml'
   CONTROLLER_GAINS_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/controllerGains.yaml'
   SYSTEM_CONFIGURATION: 'TWO_AIRCRAFT_FREE_V' # SEE OPTIONS!!!
-  FIXED_DURATION: true
+  FIXED_DURATION: false
   DURATION: 100 # seconds
   HLC_RATE: 20  # Hertz
   LLC_RATE: 400 # Hertz

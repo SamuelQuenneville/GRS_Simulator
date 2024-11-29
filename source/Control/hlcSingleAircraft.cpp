@@ -43,3 +43,7 @@ void HlcSingleAircraft::m_writeLog(const fixedWingCommands& commands) {
 
     m_logger.writeHlcMessage(logMessage);
 }
+
+std::map<int, fixedWingCommands> HlcSingleAircraft::calculateInputs(const std::vector<int> &ids, const std::vector<fixedWingStates> &currentStates, const payloadStates &payloadStates, const target &target) {
+    return {};
+}

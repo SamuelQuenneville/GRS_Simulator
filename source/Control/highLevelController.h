@@ -15,6 +15,7 @@
 
 #include "Definitions/configurationDefinitions.h"
 #include "Definitions/controllerGains.h"
+#include "Definitions/payloadDefinitions.h"
 #include "Log/logger.h"
 
 template <typename COMMANDS, typename STATES>
@@ -22,6 +23,7 @@ class HighLevelController {
 
 public:
     virtual std::map<int, COMMANDS> calculateInputs(const std::vector<int>& ids, const std::vector<STATES>& currentStates, const target& target) = 0;
+    virtual std::map<int, COMMANDS> calculateInputs(const std::vector<int>& ids, const std::vector<STATES>& currentStates, const payloadStates& payloadStates, const target& target) = 0;
     virtual ~HighLevelController() = default;
 };
 
