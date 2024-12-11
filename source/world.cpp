@@ -17,7 +17,8 @@ World::World() {
             {"TWO_AIRCRAFT_GROUNDED_V", TWO_AIRCRAFT_GROUNDED_V},
             {"TWO_AIRCRAFT_FREE_V", TWO_AIRCRAFT_FREE_V},
             {"TWO_AIRCRAFT_GROUNDED_Y", TWO_AIRCRAFT_GROUNDED_Y},
-            {"TWO_AIRCRAFT_FREE_Y", TWO_AIRCRAFT_FREE_Y}
+            {"TWO_AIRCRAFT_FREE_Y", TWO_AIRCRAFT_FREE_Y},
+            {"THREE_AIRCRAFT_FREE_V", THREE_AIRCRAFT_FREE_V}
     };
 
 }
@@ -84,6 +85,9 @@ void World::createSystem() {
         case TWO_AIRCRAFT_FREE_V:
             m_system->createSystemTwoAircraftV(false, m_aircraftProperties, m_tetherProperties, m_payloadProperties, m_initialAircraftStatesVector, m_initialPayloadStates);
             break;
+        case THREE_AIRCRAFT_FREE_V:
+            m_system->createSystemThreeAircraftV(false, m_aircraftProperties, m_tetherProperties, m_payloadProperties, m_initialAircraftStatesVector, m_initialPayloadStates);
+            break;
         case TWO_AIRCRAFT_GROUNDED_Y:
             m_system->createSystemTwoAircraftY();
             break;
@@ -97,6 +101,8 @@ int World::getNumberOfAircraftInSystem(systemType type) {
 
     if (type == ONE_AIRCRAFT || type == ONE_AIRCRAFT_GROUNDED) {
         return 1;
+    } else if (type == THREE_AIRCRAFT_FREE_V) {
+        return 3;
     } else {
         return 2;
     }

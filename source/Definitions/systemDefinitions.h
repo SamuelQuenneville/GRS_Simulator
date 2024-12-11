@@ -19,6 +19,7 @@ enum systemType {
     TWO_AIRCRAFT_FREE_V,
     TWO_AIRCRAFT_GROUNDED_Y,
     TWO_AIRCRAFT_FREE_Y,
+    THREE_AIRCRAFT_FREE_V,
 };
 
 struct systemConfiguration {

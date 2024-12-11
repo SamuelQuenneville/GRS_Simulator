@@ -1,0 +1,49 @@
+---
+#--------------------------------------------------
+#                  Run Simulation                 #
+#--------------------------------------------------
+# Description:
+#
+#
+SimulationParameters:
+  LOG_FILE_DIRECTORY: 'C:/Users/ques2902/Desktop/LogSim'
+  AIRCRAFT_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/sigCoeffs.yaml'
+  TETHER_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/tetherProperties.yaml'
+  PAYLOAD_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/payloadProperties.yaml'
+  CONTROLLER_GAINS_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/controllerGains.yaml'
+  SYSTEM_CONFIGURATION: 'THREE_AIRCRAFT_FREE_V' # SEE OPTIONS!!!
+  FIXED_DURATION: false
+  DURATION: 100 # seconds
+  HLC_RATE: 20  # Hertz
+  LLC_RATE: 400 # Hertz
+  WIND_ON: false
+  TETHER_AERO_ON: false
+#
+InitialStatesPayload:
+  POSITION   : [0.0, 0.0, 0.0] # [x y z]
+  SPEED      : [0.0, 0.0, 0.0] # [vx vy vz]
+  ORIENTATION: [0.0, 0.0, 0.0] # [roll pitch yaw]
+#
+InitialStatesAircraft_1:
+  POSITION   : [0.0, 30.0, -1.382] # [x y z]
+  SPEED      : [14.229, 0.0, -4.7469] # [vx vy vz]
+  ORIENTATION: [0.0, 0.322, 0.0] # [roll pitch yaw]
+#
+InitialStatesAircraft_2:
+  POSITION   : [25.98, -15.0, -1.382] # [x y z]
+  SPEED      : [14.229, 0.0, -4.7469] # [vx vy vz]
+  ORIENTATION: [0.0, 0.322, -2.0944] # [roll pitch yaw]
+#
+InitialStatesAircraft_3:
+  POSITION   : [-25.98, -15.0, -1.382] # [x y z]
+  SPEED      : [14.229, 0.0, -4.7469] # [vx vy vz]
+  ORIENTATION: [0.0, 0.322, -4.1888] # [roll pitch yaw]
+#
+Target:
+  POS_PAYLOAD: [0.0, 0.0, 0.0]
+  GROUNDSPEED: 30.0 # m/s
+  RADIUS: 26.0 # m
+  AIRCRAFT_PITCH: 0.0
+  AIRCRAFT_ROLL: 0.0
+#
+Wind: [0.0, 0.0, 0.0] # [wx wy wz]

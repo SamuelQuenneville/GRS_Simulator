@@ -35,7 +35,7 @@ void Logger::m_initDirectory(const std::string& logDirectory) {
     std::filesystem::create_directories(logDirectory);
 
     time_t rawTime;
-    struct tm * timeInfo;
+    struct tm* timeInfo;
     char buffer[80];
 
     time(&rawTime);

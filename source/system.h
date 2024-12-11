@@ -37,6 +37,7 @@ public:
     void createSystemTwoAircraft(fixedWingProperties& aircraftProperties, std::vector<initialStates>& aircraftStates);
     void createSystemTwoAircraftV(bool isGrounded, fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, payloadProperties& payloadProperties, std::vector<initialStates>& aircraftStates, initialStates& payloadStates);
     void createSystemTwoAircraftY();
+    void createSystemThreeAircraftV(bool isGround, fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, payloadProperties& payloadProperties, std::vector<initialStates>& aircraftStates, initialStates& payloadStates);
 
     std::vector<std::unique_ptr<FixedWing>>& aircraft() {return m_aircraft;};
     std::vector<std::unique_ptr<Tether>>& tethers() {return m_links;};

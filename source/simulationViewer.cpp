@@ -204,14 +204,8 @@ void SimulationViewer::m_createScene() {
             m_scene = new TwoAircraftV(m_world.get());
             m_sceneCreated = true;
             break;
-        case TWO_AIRCRAFT_GROUNDED_Y:
-            sceneName = "Two Aircraft Grounded Y";
-
-            m_sceneCreated = true;
-            break;
-        case TWO_AIRCRAFT_FREE_Y:
-            sceneName = "Two Aircraft Free Y";
-
+        case THREE_AIRCRAFT_FREE_V:
+            m_scene = new ThreeAircraftV(m_world.get());
             m_sceneCreated = true;
             break;
     }

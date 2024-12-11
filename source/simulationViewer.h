@@ -17,6 +17,7 @@
 #include "Scenes/oneAircraftGrounded.h"
 #include "Scenes/twoAircraftV.h"
 #include "Scenes/twoAircraft.h"
+#include "Scenes/threeAircraftV.h"
 
 class SimulationViewer {
 
