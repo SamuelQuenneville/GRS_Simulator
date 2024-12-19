@@ -20,6 +20,10 @@ FixedWing::FixedWing(worldPhysics& physics, Logger& logger, fixedWingProperties&
 
 }
 
+FixedWing::~FixedWing() {
+    --m_idCounter;
+}
+
 int FixedWing::getId() const {
     return m_id;
 }

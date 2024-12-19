@@ -38,6 +38,8 @@ public:
     Logger& logger();
 
     void createSystem();
+    void resetSystem();
+    void deleteSystem();
 
     std::map<std::string, systemType> systemTypeStringToEnum;
     static int getNumberOfAircraftInSystem(systemType type);

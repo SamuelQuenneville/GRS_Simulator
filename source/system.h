@@ -24,6 +24,7 @@ class System {
 
 public:
     explicit System(worldPhysics& worldPhysics, Logger& logger, systemConfiguration& configuration, ctrlGains& gains);
+    ~System();
 
     void update(double dt);
     void setTarget(const target& newTarget) {m_target = newTarget;};

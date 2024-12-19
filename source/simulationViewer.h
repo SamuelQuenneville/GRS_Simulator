@@ -74,6 +74,7 @@ private:
     void m_toggleTakeSingleStep();
     void m_pauseSimulation();
     void m_restartSimulation();
+    void m_stopSimulation();
 
     bool m_singlePhysicsStepEnabled;
     bool m_singlePhysicsStepDone;

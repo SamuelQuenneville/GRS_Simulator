@@ -238,7 +238,25 @@ void SimulationViewer::m_pauseSimulation() {
 }
 
 void SimulationViewer::m_restartSimulation() {
+    if (m_timer.isRunning()) {
+        m_timer.stop();
+        m_timer.reset();
+    }
+    m_elapsedTime = 0.0;
 
+    m_world->resetSystem();
+    m_scene->reset();
+}
+
+void SimulationViewer::m_stopSimulation() {
+    if (m_timer.isRunning()) {
+        m_timer.stop();
+    }
+    m_elapsedTime = 0.0;
+
+    m_world->deleteSystem();
+    m_scene->destroy();
+    m_sceneCreated = false;
 }
 
 void SimulationViewer::m_setGlfwHints() {

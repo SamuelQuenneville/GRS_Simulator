@@ -127,6 +127,16 @@ void Gui::m_createConfigurationPanel() {
             m_viewer->m_restartSimulation();
         }
     });
+    auto* buttonStop = new nanogui::ToolButton(group2, FA_STOP);
+    buttonStop->set_flags(nanogui::Button::NormalButton);
+    buttonStop->set_callback([&] {
+       if (m_hasConfigFile) {
+           m_hasConfigFile = false;
+           m_configFilePath[0] = '\0';
+           m_configFileName[0] = '\0';
+           m_viewer->m_stopSimulation();
+       }
+    });
 
     // Group 3 Sim Infos
     new nanogui::Label(m_configurationPanel, std::string("Simulation Infos :"),"sans-bold",20);

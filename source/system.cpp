@@ -17,6 +17,12 @@ System::System(worldPhysics& worldPhysics, Logger& logger, systemConfiguration& 
     m_timeSinceHlcCall = 0.0;
 }
 
+System::~System() {
+    m_aircraft.clear();
+    m_links.clear();
+
+}
+
 void System::update(double dt) {
     // keep track of simulation time
     m_timeSinceHlcCall += dt;

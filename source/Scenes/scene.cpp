@@ -209,6 +209,11 @@ void Scene::reset() {
     m_elapsedTime = std::chrono::seconds::zero();
 }
 
+void Scene::destroy() {
+    m_elapsedTime = std::chrono::seconds ::zero();
+}
+
+
 bool Scene::mouseButtonEvent(int button, bool down, int mods, double mousePosX, double mousePosY) {
     if (down) {
         m_lastMouseX = mousePosX;

@@ -97,6 +97,21 @@ void World::createSystem() {
     }
 }
 
+void World::resetSystem() {
+    m_logger.reset();
+    m_system.reset();
+
+    m_logger = std::make_unique<Logger>(m_logDirectory);
+    createSystem();
+}
+
+void World::deleteSystem() {
+    m_logger.reset();
+    m_system.reset();
+
+    m_initialAircraftStatesVector.clear();
+}
+
 int World::getNumberOfAircraftInSystem(systemType type) {
 
     if (type == ONE_AIRCRAFT || type == ONE_AIRCRAFT_GROUNDED) {

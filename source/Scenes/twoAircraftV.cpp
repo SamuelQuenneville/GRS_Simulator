@@ -117,6 +117,11 @@ void TwoAircraftV::reset() {
     initBodiesPositions();
 }
 
+void TwoAircraftV::destroy() {
+    Scene::destroy();
+    destroyPhysicsWorld();
+}
+
 void TwoAircraftV::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
     for (auto& tethersObject : m_tethersObjects) {
         tethersObject->render(m_colorShader, worldToCameraMatrix);

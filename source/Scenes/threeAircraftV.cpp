@@ -127,6 +127,11 @@ void ThreeAircraftV::reset() {
     initBodiesPositions();
 }
 
+void ThreeAircraftV::destroy() {
+    Scene::destroy();
+    destroyPhysicsWorld();
+}
+
 void ThreeAircraftV::renderSinglePass(Shader &shader, const Matrix4<double> &worldToCameraMatrix) {
     for (auto& tethersObject : m_tethersObjects) {
         tethersObject->render(m_colorShader, worldToCameraMatrix);

@@ -36,6 +36,7 @@ public:
     virtual void render();
     virtual void renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix);
     virtual void reset();
+    virtual void destroy();
 
     virtual bool mouseButtonEvent(int button, bool down, int mods, double mousePosX, double mousePosY);
     virtual bool mouseMotionEvent(double xMouse, double yMouse, int leftButtonState, int rightButtonState, int middleButtonState, int altKeyState);

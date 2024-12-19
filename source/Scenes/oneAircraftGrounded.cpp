@@ -93,6 +93,11 @@ void OneAircraftGrounded::reset() {
     initBodiesPositions();
 }
 
+void OneAircraftGrounded::destroy() {
+    Scene::destroy();
+    destroyPhysicsWorld();
+}
+
 void OneAircraftGrounded::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
 
     for (auto& tethersObject : m_tethersObjects) {

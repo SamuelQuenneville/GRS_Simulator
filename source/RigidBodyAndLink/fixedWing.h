@@ -17,6 +17,7 @@ class FixedWing : public RigidBody {
 
 public:
     FixedWing(worldPhysics& physics, Logger& logger, fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller);
+    ~FixedWing();
 
     [[nodiscard]] int getId() const;
 

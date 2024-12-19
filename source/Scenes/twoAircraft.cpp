@@ -92,6 +92,11 @@ void TwoAircraft::reset() {
     initBodiesPositions();
 }
 
+void TwoAircraft::destroy() {
+    Scene::destroy();
+    destroyPhysicsWorld();
+}
+
 void TwoAircraft::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
     // Bind the shader
     shader.bind();

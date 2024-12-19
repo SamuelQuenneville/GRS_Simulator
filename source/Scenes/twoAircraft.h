@@ -25,6 +25,7 @@ public:
     void updatePhysics() override;
     void updateTarget(double groundspeed, std::vector<double> payloadPosition) override;
     void reset() override;
+    void destroy() override;
 
     void renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;
 
