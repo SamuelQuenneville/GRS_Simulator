@@ -29,11 +29,7 @@ void TwoAircraftV::createPhysicsWorld() {
     // ---------- AIRCRAFT ---------- //
     for (const auto& aircraft : m_world->system()->aircraft()) {
         auto* aircraftObject = new Aircraft(aircraft.get(), {2.0, 2.0, 2.0}, World::getExecutablePath());
-        if (aircraft->getId() == 1) {
-            aircraftObject->setColor(Color::red());
-        } else if (aircraft->getId() == 2) {
-            aircraftObject->setColor(Color::yellow());
-        }
+        aircraftObject->setColor(Color::color(aircraft->getId()));
 
         m_physicsObjects.push_back(aircraftObject);
     }

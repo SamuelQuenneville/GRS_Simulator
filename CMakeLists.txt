@@ -136,6 +136,8 @@ set(GRS_SCENES
         source/Scenes/twoAircraft.h
         source/Scenes/threeAircraftV.cpp
         source/Scenes/threeAircraftV.h
+        source/Scenes/oneAircraft.cpp
+        source/Scenes/oneAircraft.h
 )
 
 set(GRS_SOURCE

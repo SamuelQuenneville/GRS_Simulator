@@ -12,6 +12,10 @@ simulationParameters ConfigurationParser::parseSimulationParameters(YAML::Node& 
     return node["SimulationParameters"].as<simulationParameters>();
 }
 
+systemConfiguration ConfigurationParser::parseSystemConfiguration(YAML::Node &node) {
+    return node["SystemConfiguration"].as<systemConfiguration>();
+}
+
 fixedWingProperties ConfigurationParser::parseFixedWingProperties(const std::string& filePath) {
     YAML::Node node = YAML::LoadFile(filePath);
     return node["AircraftProperties"].as<fixedWingProperties>();
@@ -43,7 +47,11 @@ ctrlGains ConfigurationParser::parseControllerGains(const std::string& filePath)
 }
 
 initialStates ConfigurationParser::parseInitialStates(YAML::Node& node, const std::string& nodeName) {
-    return node[nodeName].as<initialStates>();
+    if (node[nodeName]) {
+        return node[nodeName].as<initialStates>();
+    } else {
+        throw std::invalid_argument( "Mismatch between number of UAV and number of initial states nodes" );
+    }
 }
 
 target ConfigurationParser::parseSystemTarget(YAML::Node& node) {

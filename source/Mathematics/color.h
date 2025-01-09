@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <vector>
+
 class Color {
 
 public:
@@ -35,6 +37,16 @@ public:
 
     static Color backgroundColor() {return {0.298f, 0.298f, 0.32157f, 1.0f};}
     static Color floorColor() {return {0.78f, 0.78f, 0.78f, 1.0f};}
+
+    static inline Color color(int index) {
+        switch (index) {
+            case 1: return red();
+            case 2: return yellow();
+            case 3: return blue();
+            case 4: return white();
+            default: throw std::out_of_range("Color index is out of range");
+        }
+    }
 
     // = operator
     Color& operator=(const Color& color) {

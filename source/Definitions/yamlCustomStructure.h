@@ -37,13 +37,26 @@ namespace YAML {
             rhs.tetherPropertiesFileDirectory   = node["TETHER_PROPERTIES_FILE_NAME"].as<std::string>();
             rhs.payloadPropertiesFileDirectory  = node["PAYLOAD_PROPERTIES_FILE_NAME"].as<std::string>();
             rhs.controllerGainsFileDirectory    = node["CONTROLLER_GAINS_FILE_NAME"].as<std::string>();
-            rhs.systemConfiguration             = node["SYSTEM_CONFIGURATION"].as<std::string>();
             rhs.fixedDuration                   = node["FIXED_DURATION"].as<bool>();
             rhs.duration                        = node["DURATION"].as<float>();
+            rhs.windOn                          = node["WIND_ON"].as<bool>();
+            return true;
+        }
+    };
+
+    template<>
+    struct convert<systemConfiguration> {
+        static bool decode(const Node& node, systemConfiguration& rhs) {
+            if(!node.IsMap()) {
+                return false;
+            }
+            
+            rhs.numberOfUav                     = node["NUMBER_OF_UAV"].as<int>();
+            rhs.configuration                   = node["CONFIGURATION"].as<std::string>();
+            rhs.grounded                        = node["GROUNDED"].as<bool>();
+            rhs.tetherAeroOn                    = node["TETHER_AERO_ON"].as<bool>();
             rhs.hlcRate                         = node["HLC_RATE"].as<int>();
             rhs.llcRate                         = node["LLC_RATE"].as<int>();
-            rhs.windOn                          = node["WIND_ON"].as<bool>();
-            rhs.tetherAeroOn                    = node["TETHER_AERO_ON"].as<bool>();
             return true;
         }
     };

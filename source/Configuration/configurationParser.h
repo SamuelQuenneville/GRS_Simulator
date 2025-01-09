@@ -27,6 +27,7 @@ public:
     ~ConfigurationParser() = default;
 
     static simulationParameters parseSimulationParameters(YAML::Node& node);
+    static systemConfiguration parseSystemConfiguration(YAML::Node& node);
     static fixedWingProperties parseFixedWingProperties(const std::string& filePath);
     static tetherProperties parseTetherProperties(const std::string& filePath);
     static payloadProperties parsePayloadProperties(const std::string& filePath);

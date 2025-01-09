@@ -1,0 +1,38 @@
+---
+#--------------------------------------------------
+#                  Run Simulation                 #
+#--------------------------------------------------
+# Description:
+#
+#
+SimulationParameters:
+  LOG_FILE_DIRECTORY: 'C:/Users/ques2902/Desktop/LogSim'
+  AIRCRAFT_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/sigCoeffs.yaml'
+  TETHER_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/tetherProperties.yaml'
+  PAYLOAD_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/payloadProperties.yaml'
+  CONTROLLER_GAINS_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/controllerGains.yaml'
+  FIXED_DURATION: false
+  DURATION: 100 # seconds
+  WIND_ON: false
+#
+SystemConfiguration:
+  NUMBER_OF_UAV: 1
+  CONFIGURATION: 'FREE' # FREE / V / Y
+  GROUNDED: false
+  TETHER_AERO_ON: false
+  HLC_RATE: 20  # Hertz
+  LLC_RATE: 400 # Hertz
+#
+InitialStatesAircraft_1:
+  POSITION   : [0.0, 0.0, -20.0] # [x y z]
+  SPEED      : [20.0, 0.0, 0.0] # [vx vy vz]
+  ORIENTATION: [0.0, 0.0, 0.0] # [roll pitch yaw]
+#
+Target:
+  POS_PAYLOAD: [0.0, 0.0, 20.0]
+  GROUNDSPEED: 20.0 # m/s
+  RADIUS: 0.0 # m
+  AIRCRAFT_PITCH: 0.0
+  AIRCRAFT_ROLL: 60.0
+#
+Wind: [0.0, 0.0, 0.0] # [wx wy wz]

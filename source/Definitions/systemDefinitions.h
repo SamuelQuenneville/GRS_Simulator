@@ -12,22 +12,9 @@
 #pragma once
 
 enum systemType {
-    ONE_AIRCRAFT,
-    ONE_AIRCRAFT_GROUNDED,
-    TWO_AIRCRAFT_GROUNDED_V,
-    TWO_AIRCRAFT,
-    TWO_AIRCRAFT_FREE_V,
-    TWO_AIRCRAFT_GROUNDED_Y,
-    TWO_AIRCRAFT_FREE_Y,
-    THREE_AIRCRAFT_FREE_V,
-};
-
-struct systemConfiguration {
-    systemType type;
-    int hlcRate;
-    int llcRate;
-    bool windOn;
-    bool tetherAerodynamicOn;
+    FREE,
+    V,
+    Y,
 };
 
 #endif //GRS_SIMULATOR_SYSTEMDEFINITIONS_H

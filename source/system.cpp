@@ -37,7 +37,7 @@ void System::update(double dt) {
     }
 
     // Call tether update()
-    if (m_systemConfiguration.type != ONE_AIRCRAFT || m_systemConfiguration.type != TWO_AIRCRAFT) {
+    if (m_systemConfiguration.configuration != "FREE") {
         for(const auto& tether : m_links) {
             tether->update(dt);
         }

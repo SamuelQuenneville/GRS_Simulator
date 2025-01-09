@@ -24,13 +24,18 @@ struct simulationParameters {
     std::string tetherPropertiesFileDirectory;
     std::string payloadPropertiesFileDirectory;
     std::string controllerGainsFileDirectory;
-    std::string systemConfiguration;
     bool fixedDuration;
     float duration;
+    bool windOn;
+};
+
+struct systemConfiguration {
+    int numberOfUav;
+    std::string configuration;
+    bool grounded;
+    bool tetherAeroOn;
     int hlcRate;
     int llcRate;
-    bool windOn;
-    bool tetherAeroOn;
 };
 
 struct initialStates {

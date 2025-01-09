@@ -14,6 +14,7 @@
 #include <GLFW/glfw3.h>
 
 #include "timer.h"
+#include "Scenes/oneAircraft.h"
 #include "Scenes/oneAircraftGrounded.h"
 #include "Scenes/twoAircraftV.h"
 #include "Scenes/twoAircraft.h"

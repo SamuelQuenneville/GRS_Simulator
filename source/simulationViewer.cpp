@@ -180,32 +180,53 @@ void SimulationViewer::scrollEvent(double x, double y) {
 
 void SimulationViewer::m_createScene() {
     systemType type = m_world->getSystemType();
-    std::string sceneName{};
+    int numberOfUav = m_world->getSystemNumberOfUav();
 
     switch(type) {
-        case ONE_AIRCRAFT:
-            sceneName = "One Aircraft";
+        case FREE:
+            switch (numberOfUav) {
+                case 1:
+                    m_scene = new OneAircraft(m_world.get());
+                    break;
+                case 2:
+                    m_scene = new TwoAircraft(m_world.get());
+                    break;
+                case 3:
+                    throw std::invalid_argument( "System 3 aircraft free flying not implemented" );
+                default:
+                    throw std::invalid_argument( "Invalid number of UAV" );
+            }
+            m_sceneCreated = true;
+            break;
 
+        case V:
+            switch (numberOfUav) {
+                case 1:
+                    m_scene = new OneAircraftGrounded(m_world.get());
+                    break;
+                case 2:
+                    m_scene = new TwoAircraftV(m_world.get());
+                    break;
+                case 3:
+                    m_scene = new ThreeAircraftV(m_world.get());
+                    break;
+                default:
+                    throw std::invalid_argument( "Invalid number of UAV" );
+            }
             m_sceneCreated = true;
             break;
-        case ONE_AIRCRAFT_GROUNDED:
-            m_scene = new OneAircraftGrounded(m_world.get());
-            m_sceneCreated = true;
-            break;
-        case TWO_AIRCRAFT:
-            m_scene = new TwoAircraft(m_world.get());
-            m_sceneCreated = true;
-            break;
-        case TWO_AIRCRAFT_GROUNDED_V:
-            m_scene = new TwoAircraftV(m_world.get());
-            m_sceneCreated = true;
-            break;
-        case TWO_AIRCRAFT_FREE_V:
-            m_scene = new TwoAircraftV(m_world.get());
-            m_sceneCreated = true;
-            break;
-        case THREE_AIRCRAFT_FREE_V:
-            m_scene = new ThreeAircraftV(m_world.get());
+
+        case Y:
+            switch (numberOfUav) {
+                case 1:
+                    throw std::invalid_argument( "Invalid number of UAV" );
+                case 2:
+                    throw std::invalid_argument( "System 2 aircraft Y tethers not implemented" );
+                case 3:
+                    throw std::invalid_argument( "System 3 aircraft Y tethers not implemented" );
+                default:
+                    throw std::invalid_argument( "Invalid number of UAV" );
+            }
             m_sceneCreated = true;
             break;
     }

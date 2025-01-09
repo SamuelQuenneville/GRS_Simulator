@@ -11,14 +11,9 @@
 World::World() {
 
     systemTypeStringToEnum = {
-            {"ONE_AIRCRAFT", ONE_AIRCRAFT},
-            {"ONE_AIRCRAFT_GROUNDED", ONE_AIRCRAFT_GROUNDED},
-            {"TWO_AIRCRAFT", TWO_AIRCRAFT},
-            {"TWO_AIRCRAFT_GROUNDED_V", TWO_AIRCRAFT_GROUNDED_V},
-            {"TWO_AIRCRAFT_FREE_V", TWO_AIRCRAFT_FREE_V},
-            {"TWO_AIRCRAFT_GROUNDED_Y", TWO_AIRCRAFT_GROUNDED_Y},
-            {"TWO_AIRCRAFT_FREE_Y", TWO_AIRCRAFT_FREE_Y},
-            {"THREE_AIRCRAFT_FREE_V", THREE_AIRCRAFT_FREE_V}
+            {"FREE", FREE},
+            {"V", V},
+            {"Y", Y}
     };
 
 }
@@ -31,28 +26,30 @@ void World::update() {
 void World::readConfigurationFile(const std::string& fileName) {
     YAML::Node nodeConfiguration = YAML::LoadFile(fileName);
     simulationParameters simParams = ConfigurationParser::parseSimulationParameters(nodeConfiguration);
+    m_systemConfiguration = ConfigurationParser::parseSystemConfiguration(nodeConfiguration);
 
     m_logDirectory = simParams.logFilesDirectory;
     m_logger = std::make_unique<Logger>(m_logDirectory);
 
-    std::chrono::duration<double> timeStep(1.0 / simParams.llcRate);
+    std::chrono::duration<double> timeStep(1.0 / m_systemConfiguration.llcRate);
     simulationConfiguration = {simParams.fixedDuration, simParams.duration, timeStep};
-    m_systemConfiguration = {systemTypeStringToEnum.at(simParams.systemConfiguration), simParams.hlcRate, simParams.llcRate, simParams.windOn, simParams.tetherAeroOn};
 
     m_aircraftProperties = ConfigurationParser::parseFixedWingProperties(simParams.aircraftPropertiesFileDirectory);
-    m_tetherProperties = ConfigurationParser::parseTetherProperties(simParams.tetherPropertiesFileDirectory);
-    m_payloadProperties = ConfigurationParser::parsePayloadProperties(simParams.payloadPropertiesFileDirectory);
     m_ctrlGains = ConfigurationParser::parseControllerGains(simParams.controllerGainsFileDirectory);
 
-    int numberAircraftInSystem = getNumberOfAircraftInSystem(m_systemConfiguration.type);
+    if (m_systemConfiguration.configuration != "FREE") {
+        m_tetherProperties = ConfigurationParser::parseTetherProperties(simParams.tetherPropertiesFileDirectory);
 
-    for (int i = 1; i <= numberAircraftInSystem; i++) {
+        m_payloadProperties = ConfigurationParser::parsePayloadProperties(simParams.payloadPropertiesFileDirectory);
+        m_initialPayloadStates = ConfigurationParser::parseInitialStates(nodeConfiguration, "InitialStatesPayload");
+    }
+
+    for (int i = 1; i <= m_systemConfiguration.numberOfUav; i++) {
         std::string nodeName = "InitialStatesAircraft_" + std::to_string(i);
         initialStates states = ConfigurationParser::parseInitialStates(nodeConfiguration, nodeName);
         m_initialAircraftStatesVector.push_back(states);
     }
 
-    m_initialPayloadStates = ConfigurationParser::parseInitialStates(nodeConfiguration, "InitialStatesPayload");
     m_systemTarget = ConfigurationParser::parseSystemTarget(nodeConfiguration);
 
     std::vector<float> wind = ConfigurationParser::parseWind(fileName);
@@ -68,32 +65,50 @@ void World::createSystem() {
     m_system = std::make_unique<System>(worldPhysics, logger(), m_systemConfiguration, m_ctrlGains);
     m_system->setTarget(m_systemTarget);
 
-    systemType type = m_systemConfiguration.type;
-    switch(type) {
-        case ONE_AIRCRAFT:
-            m_system->createSystemOneAircraft(m_aircraftProperties, m_initialAircraftStatesVector.front());
+    switch(getSystemType()) {
+        case FREE:
+            switch (m_systemConfiguration.numberOfUav) {
+                case 1:
+                    m_system->createSystemOneAircraft(m_aircraftProperties, m_initialAircraftStatesVector.front());
+                    break;
+                case 2:
+                    m_system->createSystemTwoAircraft(m_aircraftProperties, m_initialAircraftStatesVector);
+                    break;
+                case 3:
+                    throw std::invalid_argument( "System 3 aircraft free flying not implemented" );
+                default:
+                    throw std::invalid_argument( "Invalid number of UAV" );
+            }
             break;
-        case ONE_AIRCRAFT_GROUNDED:
-            m_system->createSystemOneAircraftGrounded(m_aircraftProperties, m_tetherProperties, m_initialAircraftStatesVector.front());
+
+        case V:
+            switch (m_systemConfiguration.numberOfUav) {
+                case 1:
+                    m_system->createSystemOneAircraftGrounded(m_aircraftProperties, m_tetherProperties, m_initialAircraftStatesVector.front());
+                    break;
+                case 2:
+                    m_system->createSystemTwoAircraftV(m_systemConfiguration.grounded, m_aircraftProperties, m_tetherProperties, m_payloadProperties, m_initialAircraftStatesVector, m_initialPayloadStates);
+                    break;
+                case 3:
+                    m_system->createSystemThreeAircraftV(m_systemConfiguration.grounded, m_aircraftProperties, m_tetherProperties, m_payloadProperties, m_initialAircraftStatesVector, m_initialPayloadStates);
+                    break;
+                default:
+                    throw std::invalid_argument( "Invalid number of UAV" );
+            }
             break;
-        case TWO_AIRCRAFT:
-            m_system->createSystemTwoAircraft(m_aircraftProperties, m_initialAircraftStatesVector);
-            break;
-        case TWO_AIRCRAFT_GROUNDED_V:
-            m_system->createSystemTwoAircraftV(true, m_aircraftProperties, m_tetherProperties, m_payloadProperties, m_initialAircraftStatesVector, m_initialPayloadStates);
-            break;
-        case TWO_AIRCRAFT_FREE_V:
-            m_system->createSystemTwoAircraftV(false, m_aircraftProperties, m_tetherProperties, m_payloadProperties, m_initialAircraftStatesVector, m_initialPayloadStates);
-            break;
-        case THREE_AIRCRAFT_FREE_V:
-            m_system->createSystemThreeAircraftV(false, m_aircraftProperties, m_tetherProperties, m_payloadProperties, m_initialAircraftStatesVector, m_initialPayloadStates);
-            break;
-        case TWO_AIRCRAFT_GROUNDED_Y:
-            m_system->createSystemTwoAircraftY();
-            break;
-        case TWO_AIRCRAFT_FREE_Y:
-            m_system->createSystemTwoAircraftY();
-            break;
+
+        case Y:
+            switch (m_systemConfiguration.numberOfUav) {
+                case 1:
+                    throw std::invalid_argument( "Invalid number of UAV" );
+                case 2:
+                    m_system->createSystemTwoAircraftY();
+                    break;
+                case 3:
+                    throw std::invalid_argument( "System 3 aircraft Y tethers not implemented" );
+                default:
+                    throw std::invalid_argument( "Invalid number of UAV" );
+            }
     }
 }
 
@@ -112,19 +127,12 @@ void World::deleteSystem() {
     m_initialAircraftStatesVector.clear();
 }
 
-int World::getNumberOfAircraftInSystem(systemType type) {
-
-    if (type == ONE_AIRCRAFT || type == ONE_AIRCRAFT_GROUNDED) {
-        return 1;
-    } else if (type == THREE_AIRCRAFT_FREE_V) {
-        return 3;
-    } else {
-        return 2;
-    }
+systemType World::getSystemType() const {
+    return systemTypeStringToEnum.at(m_systemConfiguration.configuration);
 }
 
-systemType World::getSystemType() const {
-    return m_systemConfiguration.type;
+int World::getSystemNumberOfUav() const {
+    return m_systemConfiguration.numberOfUav;
 }
 
 System* World::system() {
@@ -145,3 +153,4 @@ std::string World::getExecutablePath() {
 
     return executablePath;
 }
+

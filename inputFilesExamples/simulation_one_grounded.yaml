@@ -11,13 +11,17 @@ SimulationParameters:
   TETHER_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/tetherProperties.yaml'
   PAYLOAD_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/payloadProperties.yaml'
   CONTROLLER_GAINS_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/controllerGains.yaml'
-  SYSTEM_CONFIGURATION: 'ONE_AIRCRAFT_GROUNDED' # SEE OPTIONS!!!
-  FIXED_DURATION: true
+  FIXED_DURATION: false
   DURATION: 100 # seconds
+  WIND_ON: false
+#
+SystemConfiguration:
+  NUMBER_OF_UAV: 1
+  CONFIGURATION: 'V' # FREE / V / Y
+  GROUNDED: true
+  TETHER_AERO_ON: false
   HLC_RATE: 20  # Hertz
   LLC_RATE: 400 # Hertz
-  WIND_ON: false
-  TETHER_AERO_ON: false
 #
 InitialStatesPayload:
   POSITION   : [0.0, 0.0, 0.0] # [x y z]
@@ -36,4 +40,4 @@ Target:
   AIRCRAFT_PITCH: 0.0
   AIRCRAFT_ROLL: 0.0
 #
-Wind: [12.0, 0.0, 0.0] # [wx wy wz]
+Wind: [0.0, 0.0, 0.0] # [wx wy wz]
