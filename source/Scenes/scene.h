@@ -46,6 +46,8 @@ public:
     void setViewport(int x, int y, int width, int height);
     void setInitialZoom(float zoom);
 
+    void changeView(const Matrix4<double>& viewMatrix);
+
     void setInterpolationFactor(double interpolationFactor);
 
     std::chrono::duration<double> getElapsedTime() const;

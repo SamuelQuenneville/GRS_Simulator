@@ -19,6 +19,10 @@ Gui::Gui(SimulationViewer* app)
         , m_simRunTimeLabel(nullptr)
         , m_hasConfigFile(false)
         , m_isDisplayed(true)
+        , m_groundspeedTargetText(nullptr)
+        , m_altitudeTargetText(nullptr)
+        , m_positionXTargetText(nullptr)
+        , m_positionYTargetText(nullptr)
 {
 
 }
@@ -85,7 +89,7 @@ void Gui::m_createConfigurationPanel() {
     new nanogui::Label(m_configurationPanel, std::string("Select Simulation :"),"sans-bold",20);
     auto* group1 = new nanogui::Widget(m_configurationPanel);
     group1->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical,nanogui::Alignment::Fill, 5, 5));
-    auto* buttonConfig = new nanogui::Button(group1, "Choose Config");
+    auto* buttonConfig = new nanogui::Button(group1, "Choose Configuration/Test");
     buttonConfig->set_callback([&] {
         std::strcpy(m_configFilePath,nanogui::file_dialog({{"yaml", "Config File"}}, false).c_str());
         _splitpath( m_configFilePath, m_drive, m_dir, m_configFileName, m_ext);
@@ -98,37 +102,46 @@ void Gui::m_createConfigurationPanel() {
     // Group 2 Control Buttons
     new nanogui::Label(m_configurationPanel, std::string("Controls :"),"sans-bold",20);
     auto* group2 = new nanogui::Widget(m_configurationPanel);
-    group2->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Fill, 5, 5));
-    auto* buttonPlay = new nanogui::ToolButton(group2, FA_PLAY);
+    group2->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 5, 5));
+
+    auto* subgroup10 = new nanogui::Widget(group2);
+    subgroup10->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Fill, 0, 5));
+
+    auto* buttonPlay = new nanogui::ToolButton(subgroup10, FA_PLAY);
     buttonPlay->set_flags(nanogui::Button::NormalButton);
+    buttonPlay->set_fixed_width(42);
     buttonPlay->set_callback([&] {
         if (m_hasConfigFile) {
             m_viewer->m_playSimulation();
         }
     });
-    auto* buttonPlayStep = new nanogui::ToolButton(group2, FA_STEP_FORWARD);
+    auto* buttonPlayStep = new nanogui::ToolButton(subgroup10, FA_STEP_FORWARD);
     buttonPlayStep->set_flags(nanogui::Button::NormalButton);
+    buttonPlayStep->set_fixed_width(42);
     buttonPlayStep->set_callback([&] {
         if (m_hasConfigFile) {
             m_viewer->m_toggleTakeSingleStep();
         }
     });
-    auto* buttonPause = new nanogui::ToolButton(group2, FA_PAUSE);
+    auto* buttonPause = new nanogui::ToolButton(subgroup10, FA_PAUSE);
     buttonPause->set_flags(nanogui::Button::NormalButton);
+    buttonPause->set_fixed_width(42);
     buttonPause->set_callback([&] {
         if (m_hasConfigFile) {
             m_viewer->m_pauseSimulation();
         }
     });
-    auto* buttonRestart = new nanogui::ToolButton(group2, FA_REDO);
+    auto* buttonRestart = new nanogui::ToolButton(subgroup10, FA_REDO);
     buttonRestart->set_flags(nanogui::Button::NormalButton);
+    buttonRestart->set_fixed_width(42);
     buttonRestart->set_callback([&] {
         if (m_hasConfigFile) {
             m_viewer->m_restartSimulation();
         }
     });
-    auto* buttonStop = new nanogui::ToolButton(group2, FA_STOP);
+    auto* buttonStop = new nanogui::ToolButton(subgroup10, FA_STOP);
     buttonStop->set_flags(nanogui::Button::NormalButton);
+    buttonStop->set_fixed_width(42);
     buttonStop->set_callback([&] {
        if (m_hasConfigFile) {
            m_hasConfigFile = false;
@@ -136,6 +149,49 @@ void Gui::m_createConfigurationPanel() {
            m_configFileName[0] = '\0';
            m_viewer->m_stopSimulation();
        }
+    });
+
+    auto* subgroup11 = new nanogui::Widget(group2);
+    subgroup11->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Fill, 0, 5));
+
+    auto* buttonTopView = new nanogui::Button(subgroup11, "Top View");
+    buttonTopView->set_fixed_width(73);
+    buttonTopView->set_callback([&] {
+
+        Matrix4<double> view
+                {
+                        { 1,  0,  0, 0},
+                        { 0,  0,  1, 0},
+                        { 0, -1,  0, 0},
+                        { 0,  0,  0, 1}
+                };
+
+        m_viewer->m_changeView(view);
+    });
+
+    auto* buttonSideView = new nanogui::Button(subgroup11, "Side View");
+    buttonSideView->set_fixed_width(74);
+    buttonSideView->set_callback([&] {
+        m_viewer->m_changeView(Matrix4<double>::identity());
+    });
+
+    auto* buttonIsometricView = new nanogui::Button(subgroup11, "Iso View");
+    buttonIsometricView->set_fixed_width(73);
+    buttonIsometricView->set_callback([&] {
+
+        double a = std::sqrt(2.0) / 2.0;
+        double b = std::sqrt(2.0) / std::sqrt(3.0);
+        double c = 1.0 / std::sqrt(3.0);
+
+        Matrix4<double> view
+                {
+                        {  a, -b/2.0,  c,  0},
+                        {  0,      b,  c,  0},
+                        { -a, -b/2.0,  c,  0},
+                        {  0,      0,  0,  1}
+                };
+
+        m_viewer->m_changeView(view);
     });
 
     // Group 3 Sim Infos
@@ -159,21 +215,21 @@ void Gui::m_createConfigurationPanel() {
     m_groundspeedTargetText->set_value("0.0");
     m_groundspeedTargetText->set_fixed_width(45);
 
-    auto* buttonGroundspeedPlus = new nanogui::ToolButton(subgroup1, FA_PLUS);
-    buttonGroundspeedPlus->set_flags(nanogui::Button::NormalButton);
-    buttonGroundspeedPlus->set_callback([&] {
-        if (m_hasConfigFile) {
-            m_groundspeedTarget += 0.5;
-            m_groundspeedTargetText->set_value(doubleToString(m_groundspeedTarget,1));
-            m_viewer->m_updateTarget(m_groundspeedTarget, m_payloadTarget);
-        }
-    });
-
     auto* buttonGroundspeedMinus = new nanogui::ToolButton(subgroup1, FA_MINUS);
     buttonGroundspeedMinus->set_flags(nanogui::Button::NormalButton);
     buttonGroundspeedMinus->set_callback([&] {
         if (m_hasConfigFile) {
             m_groundspeedTarget -= 0.5;
+            m_groundspeedTargetText->set_value(doubleToString(m_groundspeedTarget,1));
+            m_viewer->m_updateTarget(m_groundspeedTarget, m_payloadTarget);
+        }
+    });
+
+    auto* buttonGroundspeedPlus = new nanogui::ToolButton(subgroup1, FA_PLUS);
+    buttonGroundspeedPlus->set_flags(nanogui::Button::NormalButton);
+    buttonGroundspeedPlus->set_callback([&] {
+        if (m_hasConfigFile) {
+            m_groundspeedTarget += 0.5;
             m_groundspeedTargetText->set_value(doubleToString(m_groundspeedTarget,1));
             m_viewer->m_updateTarget(m_groundspeedTarget, m_payloadTarget);
         }
@@ -189,21 +245,21 @@ void Gui::m_createConfigurationPanel() {
     m_altitudeTargetText->set_value("0.0");
     m_altitudeTargetText->set_fixed_width(45);
 
-    auto* buttonAltitudePlus = new nanogui::ToolButton(subgroup2, FA_PLUS);
-    buttonAltitudePlus->set_flags(nanogui::Button::NormalButton);
-    buttonAltitudePlus->set_callback([&] {
-        if (m_hasConfigFile) {
-            m_payloadTarget[2] += 0.5;
-            m_altitudeTargetText->set_value(doubleToString(m_payloadTarget[2], 1));
-            m_viewer->m_updateTarget(m_groundspeedTarget, m_payloadTarget);
-        }
-    });
-
     auto* buttonAltitudeMinus = new nanogui::ToolButton(subgroup2, FA_MINUS);
     buttonAltitudeMinus->set_flags(nanogui::Button::NormalButton);
     buttonAltitudeMinus->set_callback([&] {
         if (m_hasConfigFile) {
             m_payloadTarget[2] -= 0.5;
+            m_altitudeTargetText->set_value(doubleToString(m_payloadTarget[2], 1));
+            m_viewer->m_updateTarget(m_groundspeedTarget, m_payloadTarget);
+        }
+    });
+
+    auto* buttonAltitudePlus = new nanogui::ToolButton(subgroup2, FA_PLUS);
+    buttonAltitudePlus->set_flags(nanogui::Button::NormalButton);
+    buttonAltitudePlus->set_callback([&] {
+        if (m_hasConfigFile) {
+            m_payloadTarget[2] += 0.5;
             m_altitudeTargetText->set_value(doubleToString(m_payloadTarget[2], 1));
             m_viewer->m_updateTarget(m_groundspeedTarget, m_payloadTarget);
         }
@@ -219,21 +275,21 @@ void Gui::m_createConfigurationPanel() {
     m_positionXTargetText->set_value("0.0");
     m_positionXTargetText->set_fixed_width(45);
 
-    auto* buttonPositionXPlus = new nanogui::ToolButton(subgroup3, FA_PLUS);
-    buttonPositionXPlus->set_flags(nanogui::Button::NormalButton);
-    buttonPositionXPlus->set_callback([&] {
-        if (m_hasConfigFile) {
-            m_payloadTarget[0] += 0.1;
-            m_positionXTargetText->set_value(doubleToString(m_payloadTarget[0], 1));
-            m_viewer->m_updateTarget(m_groundspeedTarget, m_payloadTarget);
-        }
-    });
-
     auto* buttonPositionXMinus = new nanogui::ToolButton(subgroup3, FA_MINUS);
     buttonPositionXMinus->set_flags(nanogui::Button::NormalButton);
     buttonPositionXMinus->set_callback([&] {
         if (m_hasConfigFile) {
             m_payloadTarget[0] -= 0.1;
+            m_positionXTargetText->set_value(doubleToString(m_payloadTarget[0], 1));
+            m_viewer->m_updateTarget(m_groundspeedTarget, m_payloadTarget);
+        }
+    });
+
+    auto* buttonPositionXPlus = new nanogui::ToolButton(subgroup3, FA_PLUS);
+    buttonPositionXPlus->set_flags(nanogui::Button::NormalButton);
+    buttonPositionXPlus->set_callback([&] {
+        if (m_hasConfigFile) {
+            m_payloadTarget[0] += 0.1;
             m_positionXTargetText->set_value(doubleToString(m_payloadTarget[0], 1));
             m_viewer->m_updateTarget(m_groundspeedTarget, m_payloadTarget);
         }
@@ -249,21 +305,21 @@ void Gui::m_createConfigurationPanel() {
     m_positionYTargetText->set_value("0.0");
     m_positionYTargetText->set_fixed_width(45);
 
-    auto* buttonPositionYPlus = new nanogui::ToolButton(subgroup4, FA_PLUS);
-    buttonPositionYPlus->set_flags(nanogui::Button::NormalButton);
-    buttonPositionYPlus->set_callback([&] {
-        if (m_hasConfigFile) {
-            m_payloadTarget[1] += 0.1;
-            m_positionYTargetText->set_value(doubleToString(m_payloadTarget[1], 1));
-            m_viewer->m_updateTarget(m_groundspeedTarget, m_payloadTarget);
-        }
-    });
-
     auto* buttonPositionYMinus = new nanogui::ToolButton(subgroup4, FA_MINUS);
     buttonPositionYMinus->set_flags(nanogui::Button::NormalButton);
     buttonPositionYMinus->set_callback([&] {
         if (m_hasConfigFile) {
             m_payloadTarget[1] -= 0.1;
+            m_positionYTargetText->set_value(doubleToString(m_payloadTarget[1], 1));
+            m_viewer->m_updateTarget(m_groundspeedTarget, m_payloadTarget);
+        }
+    });
+
+    auto* buttonPositionYPlus = new nanogui::ToolButton(subgroup4, FA_PLUS);
+    buttonPositionYPlus->set_flags(nanogui::Button::NormalButton);
+    buttonPositionYPlus->set_callback([&] {
+        if (m_hasConfigFile) {
+            m_payloadTarget[1] += 0.1;
             m_positionYTargetText->set_value(doubleToString(m_payloadTarget[1], 1));
             m_viewer->m_updateTarget(m_groundspeedTarget, m_payloadTarget);
         }

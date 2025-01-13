@@ -64,6 +64,7 @@ private:
     void m_updateSingleDynamicsStep();
 
     void m_updateTarget(double groundspeed,  std::vector<double> payloadPosition);
+    void m_changeView(const Matrix4<double>& viewMatrix);
 
     void m_render();
 

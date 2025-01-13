@@ -14,8 +14,8 @@ OneAircraft::OneAircraft(World *world)
         , m_ground(nullptr)
 {
     // Set the center of the scene
-    m_setScenePosition({0, 40, 20}, 100);
-    setInitialZoom(1.5);
+    m_setScenePosition({0.0, 0.0, 0.0}, 100.0f);
+    setInitialZoom(1.5f);
     m_resetCameraToViewAll();
 }
 

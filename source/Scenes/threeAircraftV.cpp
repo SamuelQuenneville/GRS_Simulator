@@ -15,7 +15,7 @@ ThreeAircraftV::ThreeAircraftV(World *world)
     , m_payload(nullptr)
 {
     // Set the center of the scene
-    m_setScenePosition({0.0, 40.0, 20.0}, 100.0f);
+    m_setScenePosition({0.0, 0.0, 0.0}, 100.0f);
     setInitialZoom(1.5f);
     m_resetCameraToViewAll();
 }

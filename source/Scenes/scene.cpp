@@ -207,6 +207,7 @@ void Scene::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCamer
 
 void Scene::reset() {
     m_elapsedTime = std::chrono::seconds::zero();
+    changeView(Matrix4<double>::identity());
 }
 
 void Scene::destroy() {
@@ -264,6 +265,11 @@ void Scene::setViewport(int x, int y, int width, int height) {
 
 void Scene::setInitialZoom(float zoom) {
     m_initialZoom = zoom;
+}
+
+void Scene::changeView(const Matrix4<double>& viewMatrix) {
+    m_camera.setTransformMatrix(viewMatrix);
+    m_setScenePosition({0,0,0}, 100);
 }
 
 void Scene::setInterpolationFactor(double interpolationFactor) {

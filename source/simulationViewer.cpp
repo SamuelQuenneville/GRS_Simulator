@@ -398,6 +398,10 @@ void SimulationViewer::m_updateTarget(double groundspeed, std::vector<double> pa
     m_scene->updateTarget(groundspeed, payloadPosition);
 }
 
+void SimulationViewer::m_changeView(const Matrix4<double>& viewMatrix) {
+    m_scene->changeView(viewMatrix);
+}
+
 void SimulationViewer::m_render() {
     int bufferWidth;
     int bufferHeight;
