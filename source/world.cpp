@@ -53,7 +53,7 @@ void World::readConfigurationFile(const std::string& fileName) {
     m_systemTarget = ConfigurationParser::parseSystemTarget(nodeConfiguration);
 
     std::vector<float> wind = ConfigurationParser::parseWind(fileName);
-    worldPhysics.updateWind({wind[0], wind[1], wind[2]});
+    physics.updateWind({wind[0], wind[1], wind[2]});
 }
 
 Logger& World::logger() {
@@ -62,7 +62,7 @@ Logger& World::logger() {
 
 void World::createSystem() {
 
-    m_system = std::make_unique<System>(worldPhysics, logger(), m_systemConfiguration, m_ctrlGains);
+    m_system = std::make_unique<System>(physics, logger(), m_systemConfiguration, m_ctrlGains);
     m_system->setTarget(m_systemTarget);
 
     switch(getSystemType()) {
@@ -139,6 +139,8 @@ System* World::system() {
     return m_system.get();
 }
 
+#if defined(_WIN32) || defined(_WIN64) // Windows-specific implementation
+
 std::string World::getExecutablePath() {
     WCHAR pathChar[MAX_PATH];
     GetModuleFileNameW(nullptr, pathChar, MAX_PATH);
@@ -153,4 +155,25 @@ std::string World::getExecutablePath() {
 
     return executablePath;
 }
+
+#elif defined(__linux__) // Linux-specific implementation
+
+std::string World::getExecutablePath() {
+    char path[PATH_MAX];
+    ssize_t count = readlink("/proc/self/exe", path, PATH_MAX);
+    if (count == -1) {
+        throw std::runtime_error("Failed to get executable path");
+    }
+
+    // Convert to std::string
+    std::string fullPath(path, count);
+    // Extract the directory path
+    std::string executablePath = fullPath.substr(0, fullPath.find_last_of('/'));
+
+    return executablePath;
+}
+
+#else
+#error "Unsupported platform"
+#endif
 

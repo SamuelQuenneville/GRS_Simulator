@@ -9,9 +9,7 @@
 #ifndef GRS_SIMULATOR_SIMULATIONVIEWER_H
 #define GRS_SIMULATOR_SIMULATIONVIEWER_H
 
-#include "gui.h" // need to be before GLFW include
-
-#include <GLFW/glfw3.h>
+#include "gui.h"
 
 #include "timer.h"
 #include "Scenes/oneAircraft.h"

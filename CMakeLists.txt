@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.5)
 project(GRS_Simulator)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -191,15 +191,16 @@ if(NOT yaml-cpp_POPULATED)
 endif()
 
 # OpenGL
+add_subdirectory(source/Extern/nanogui)
+
 set(NANOGUI_BUILD_EXAMPLE OFF CACHE BOOL " " FORCE)
 set(NANOGUI_BUILD_PYTHON  OFF CACHE BOOL " " FORCE)
+set(NANOGUI_USE_GLAD      ON CACHE BOOL "" FORCE)
+set(NANOGUI_BUILD_GLFW    ON CACHE BOOL "" FORCE)
 set(NANOGUI_INSTALL       OFF CACHE BOOL " " FORCE)
 set(NANOGUI_BACKEND       OpenGL CACHE BOOL " " FORCE)
 
 SET(NANOGUI_BUILD_SHARED OFF CACHE BOOL "Build Nanogui with static libraries" FORCE)
-
-
-add_subdirectory(source/Extern/nanogui)
 
 set_property(TARGET glfw glfw_objects nanogui PROPERTY FOLDER "dependencies")
 
@@ -213,6 +214,8 @@ foreach(p ${NANOGUI_EXTRA_INCS})
     target_include_directories(GRS_Simulator PRIVATE $<1:${p}>)
 endforeach()
 
+target_include_directories(GRS_Simulator PRIVATE ${CMAKE_SOURCE_DIR}/source/Extern/nanogui/ext/glad/include)
+target_sources(GRS_Simulator PRIVATE ${CMAKE_SOURCE_DIR}/source/Extern/nanogui/ext/glad/src/glad.c)
 
 # Compile definitions
 target_compile_definitions(GRS_Simulator PRIVATE ${NANOGUI_EXTRA_DEFS})

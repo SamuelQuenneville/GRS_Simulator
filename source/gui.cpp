@@ -6,23 +6,21 @@
  * Createk Innovation Lab
  */
 
-#include "gui.h"
-#include <GLFW/glfw3.h>
 #include "simulationViewer.h"
 
 Gui::Gui(SimulationViewer* app)
         : m_viewer(app)
-        , m_screen(nullptr)
         , m_window(nullptr)
+        , m_screen(nullptr)
         , m_configurationPanel(nullptr)
         , m_fileLabel(nullptr)
         , m_simRunTimeLabel(nullptr)
-        , m_hasConfigFile(false)
-        , m_isDisplayed(true)
         , m_groundspeedTargetText(nullptr)
         , m_altitudeTargetText(nullptr)
         , m_positionXTargetText(nullptr)
         , m_positionYTargetText(nullptr)
+        , m_hasConfigFile(false)
+        , m_isDisplayed(true)
 {
 
 }
@@ -92,7 +90,12 @@ void Gui::m_createConfigurationPanel() {
     auto* buttonConfig = new nanogui::Button(group1, "Choose Configuration/Test");
     buttonConfig->set_callback([&] {
         std::strcpy(m_configFilePath,nanogui::file_dialog({{"yaml", "Config File"}}, false).c_str());
-        _splitpath( m_configFilePath, m_drive, m_dir, m_configFileName, m_ext);
+
+        std::filesystem::path path(m_configFilePath);
+
+        std::strcpy(m_dir, path.parent_path().string().c_str()); // Copy directory
+        std::strcpy(m_configFileName, path.stem().string().c_str()); // Copy filename (without extension)
+        std::strcpy(m_ext, path.extension().string().c_str()); // Copy extension
 
         m_hasConfigFile = true;
     });

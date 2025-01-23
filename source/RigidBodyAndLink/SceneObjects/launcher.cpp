@@ -10,7 +10,7 @@
 
 // Constructor
 Launcher::Launcher(const Vector3<double>& scaling, const std::string& executablePath)
-        : PhysicsObject(executablePath + R"(\source\Meshes\launcher.obj)")
+        : PhysicsObject(executablePath + R"(/source/Meshes/launcher.obj)")
         , m_vertexBufferVertices(GL_ARRAY_BUFFER)
         , m_vertexBufferNormals(GL_ARRAY_BUFFER)
         , m_vertexBufferTextureCoords(GL_ARRAY_BUFFER)

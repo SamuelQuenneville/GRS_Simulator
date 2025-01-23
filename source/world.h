@@ -9,7 +9,12 @@
 #ifndef GRS_SIMULATOR_WORLD_H
 #define GRS_SIMULATOR_WORLD_H
 
+#if defined(_WIN32) || defined(_WIN64) // Windows-specific implementation
 #include <windows.h>
+#elif defined(__linux__) // Linux-specific implementation
+#include <unistd.h>
+#include <limits.h>
+#endif
 
 #include "Configuration/configurationParser.h"
 #include "system.h"
@@ -23,7 +28,7 @@ public:
     void start() {m_isRunning = true;};
     void stop() {m_isRunning = false;};
 
-    worldPhysics worldPhysics;
+    worldPhysics physics;
 
     struct simulationConfiguration {
         bool fixedDuration;

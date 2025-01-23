@@ -6,11 +6,11 @@
 #
 #
 SimulationParameters:
-  LOG_FILE_DIRECTORY: 'C:/Users/ques2902/Desktop/LogSim'
-  AIRCRAFT_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/sigCoeffs.yaml'
-  TETHER_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/tetherProperties.yaml'
-  PAYLOAD_PROPERTIES_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/payloadProperties.yaml'
-  CONTROLLER_GAINS_FILE_NAME: 'C:/Users/ques2902/CLionProjects/GRS-Simulator/inputFilesExamples/controllerGains.yaml'
+  LOG_FILE_DIRECTORY: 'LogSim'
+  AIRCRAFT_PROPERTIES_FILE_NAME: 'inputFilesExamples/sigCoeffs.yaml'
+  TETHER_PROPERTIES_FILE_NAME: 'inputFilesExamples/tetherProperties.yaml'
+  PAYLOAD_PROPERTIES_FILE_NAME: 'inputFilesExamples/payloadProperties.yaml'
+  CONTROLLER_GAINS_FILE_NAME: 'inputFilesExamples/controllerGains.yaml'
   FIXED_DURATION: false
   DURATION: 100 # seconds
   WIND_ON: false

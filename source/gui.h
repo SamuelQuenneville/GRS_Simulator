@@ -9,6 +9,9 @@
 #ifndef GRS_SIMULATOR_GUI_H
 #define GRS_SIMULATOR_GUI_H
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include <nanogui/opengl.h>
 #include <nanogui/nanogui.h>
 #include <sstream>

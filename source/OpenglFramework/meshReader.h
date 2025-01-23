@@ -13,6 +13,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <tuple>
+#include <algorithm>
 #include "mesh.h"
 
 class MeshReader {

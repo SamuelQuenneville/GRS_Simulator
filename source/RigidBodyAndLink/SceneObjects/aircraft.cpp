@@ -10,7 +10,7 @@
 
 // Constructor
 Aircraft::Aircraft(FixedWing* aircraft, const Vector3<double>& scaling, const std::string& executablePath)
-        : PhysicsObject(executablePath + R"(\source\Meshes\aircraft.obj)")
+        : PhysicsObject(executablePath + R"(/source/Meshes/aircraft.obj)")
         , m_vertexBufferVertices(GL_ARRAY_BUFFER)
         , m_vertexBufferNormals(GL_ARRAY_BUFFER)
         , m_vertexBufferTextureCoords(GL_ARRAY_BUFFER)
