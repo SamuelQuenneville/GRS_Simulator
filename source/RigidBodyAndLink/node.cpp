@@ -43,6 +43,14 @@ void Node::setVelocity(const Vector3<double>& newVelocity) {
     m_velocity = newVelocity;
 }
 
+const Vector3<double>& Node::acceleration() const {
+    return m_acceleration;
+}
+
+void Node::setAcceleration(const Vector3<double>& newAcceleration) {
+    m_acceleration = newAcceleration;
+}
+
 const Vector3<double>& Node::force() const {
     return m_force;
 }

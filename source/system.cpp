@@ -8,12 +8,19 @@
 
 #include "system.h"
 
+uint64_t micros() {
+    uint64_t us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::
+                  now().time_since_epoch()).count();
+    return us;
+}
+
 System::System(worldPhysics& worldPhysics, Logger& logger, systemConfiguration& configuration, ctrlGains& gains)
     : m_physics(worldPhysics)
     , m_logger(logger)
     , m_systemConfiguration(configuration)
     , m_ctrlGains(gains)
 {
+    m_communicationManager = std::make_unique<InterfaceJSON>();
     m_timeSinceHlcCall = 0.0;
 }
 
@@ -43,11 +50,23 @@ void System::update(double dt) {
         }
     }
 
+    // Receive JSON SITL
+    std::vector<std::array<uint16_t, 16>> data;
+    data.clear();
+    if (m_communicationManager->receiveData(data)) {
+    }
+
+
     // Call fixedWing update()
     for(const auto& aircraft : m_aircraft) {
         aircraft->setCommands(m_commands[aircraft->getId()]);
         aircraft->update(dt);
+
+        // Send JSON SITL
+        sensorData sensorData = {static_cast<double>(micros()) / 1000000.0, aircraft->getAngularVelocity(), aircraft->centerOfMass->acceleration(), aircraft->centerOfMass->position(), aircraft->getAttitude(), aircraft->centerOfMass->velocity(), aircraft->airspeed()};
+        m_communicationManager->sendData(*m_communicationManager->getSockets().front(), sensorData);
     }
+
 
     // Call payload update()
     if (m_payload != nullptr) {
@@ -68,6 +87,11 @@ void System::createSystemOneAircraft(fixedWingProperties& aircraftProperties, in
 
     // Push back Bodies into list
     m_aircraft.push_back(std::move(aircraft));
+
+    // TODO
+    if (m_communicationManager->addSocket("127.0.0.1", 9002)) {
+        std::cout << "[FDM] Started socket --> " << 9002 << std::endl;
+    }
 
     // Compute first HLC commands
     m_initHlcCommands();

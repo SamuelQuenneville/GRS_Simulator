@@ -24,15 +24,15 @@ SystemConfiguration:
   LLC_RATE: 400 # Hertz
 #
 InitialStatesAircraft_1:
-  POSITION   : [0.0, 0.0, -20.0] # [x y z]
-  SPEED      : [20.0, 0.0, 0.0] # [vx vy vz]
+  POSITION   : [0.0, 0.0, 0.0] # [x y z]
+  SPEED      : [0.0, 0.0, 0.0] # [vx vy vz]
   ORIENTATION: [0.0, 0.0, 0.0] # [roll pitch yaw]
 #
 Target:
-  POS_PAYLOAD: [0.0, 0.0, 20.0]
-  GROUNDSPEED: 20.0 # m/s
+  POS_PAYLOAD: [0.0, 0.0, 0.0]
+  GROUNDSPEED: 0.0 # m/s
   RADIUS: 0.0 # m
   AIRCRAFT_PITCH: 0.0
-  AIRCRAFT_ROLL: 60.0
+  AIRCRAFT_ROLL: 0.0
 #
 Wind: [0.0, 0.0, 0.0] # [wx wy wz]

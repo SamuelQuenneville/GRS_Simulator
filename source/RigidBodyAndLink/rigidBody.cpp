@@ -61,10 +61,19 @@ void RigidBody::setVelocity(const Vector3<double>& newVelocity) const {
     centerOfMass->setVelocity(newVelocity);
 }
 
+void RigidBody::setAttitude(const Vector3<double>& newAttitude) {
+    m_attitude = newAttitude;
+}
+
+
 void RigidBody::setAngularVelocity(const Vector3<double>& newAngularVelocity) {
     m_angularVelocity = newAngularVelocity;
 }
 
-const Vector3<double> &RigidBody::getAngularVelocity() {
+const Vector3<double>& RigidBody::getAttitude() const {
+    return m_attitude;
+}
+
+const Vector3<double>& RigidBody::getAngularVelocity() const {
     return m_angularVelocity;
 }

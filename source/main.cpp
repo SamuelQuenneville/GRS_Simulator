@@ -8,7 +8,7 @@
 
 #include "simulationViewer.h"
 
-int main() {
+int main(const int argc, const char * argv[]) {
 
     SimulationViewer applicationViewer;
     applicationViewer.start();

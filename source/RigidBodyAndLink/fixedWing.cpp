@@ -36,8 +36,9 @@ void FixedWing::update(double dt) {
     Vector3<double> externalForcesEarth = calcExternalForce();
 
     auto&&[airspeed, alphaRadian, betaRadian] = m_angleOfAttackSideSlip();
-    Vector3<double> forcesAeroBody      = m_calcForceAeroBodyFrame(airspeed, alphaRadian, betaRadian);
-    Vector3<double> momentsAeroBody     = m_calcMomentAeroBodyFrame(airspeed, alphaRadian, betaRadian);
+
+    Vector3<double> forcesAeroBody  = m_calcForceAeroBodyFrame(airspeed, alphaRadian, betaRadian);
+    Vector3<double> momentsAeroBody = m_calcMomentAeroBodyFrame(airspeed, alphaRadian, betaRadian);
 
     fixedWingStates derivatives = m_calcStatesDerivatives(forcesAeroBody, momentsAeroBody, externalForcesEarth);
     m_eulerIntegration(derivatives, dt);
@@ -47,6 +48,9 @@ void FixedWing::update(double dt) {
     centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
     centerOfMass->setForce(m_bodyToEarth(forcesAeroBody) + externalForcesEarth);
     centerOfMass->setMoment(m_bodyToEarth(momentsAeroBody));
+
+    setAttitude({m_states.phi, m_states.theta, m_states.psi});
+    setAngularVelocity({m_states.p, m_states.q, m_states.r});
 
     // phi rotated because aircraft mesh is rotated
     setTransform(Transform(centerOfMass->position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi - M_PI/2,m_states.theta,m_states.psi)));
@@ -89,9 +93,14 @@ Vector3<double> FixedWing::m_calcForceAeroBodyFrame(double airspeed, double alph
     double delElevator = m_inputs.deltaElevator - m_properties.trimElevator;
 
     // Forces in body frame
-    double Fx = m_inputs.deltaThrust + qBarSurface * (CX + m_properties.Cx_q * m_properties.wingChord / (2.0 * airspeed) * m_states.q + m_properties.Cx_DELTA_ELE * delElevator);
-    double Fy = qBarSurface * (m_properties.Cy_0 + m_properties.Cy_BETA * betaRadian + m_properties.Cy_p * m_properties.wingSpan / (2.0 * airspeed) * m_states.p + m_properties.Cy_r * m_properties.wingSpan / (2.0 * airspeed) * m_states.r + m_properties.Cy_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cy_DELTA_RUD * m_inputs.deltaRudder);
-    double Fz = qBarSurface * (CZ + m_properties.Cz_q * m_properties.wingChord / (2.0 * airspeed) * m_states.q + m_properties.Cz_DELTA_ELE * delElevator);
+    double Fx = m_inputs.deltaThrust;
+    double Fy = 0.0;
+    double Fz = 0.0;
+    if (qBarSurface > 0.0) {
+        Fx += qBarSurface * (CX + m_properties.Cx_q * m_properties.wingChord / (2.0 * airspeed) * m_states.q + m_properties.Cx_DELTA_ELE * delElevator);
+        Fy += qBarSurface * (m_properties.Cy_0 + m_properties.Cy_BETA * betaRadian + m_properties.Cy_p * m_properties.wingSpan / (2.0 * airspeed) * m_states.p + m_properties.Cy_r * m_properties.wingSpan / (2.0 * airspeed) * m_states.r + m_properties.Cy_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cy_DELTA_RUD * m_inputs.deltaRudder);
+        Fz += qBarSurface * (CZ + m_properties.Cz_q * m_properties.wingChord / (2.0 * airspeed) * m_states.q + m_properties.Cz_DELTA_ELE * delElevator);
+    }
 
     return {Fx,Fy,Fz};
 }
@@ -107,9 +116,14 @@ Vector3<double> FixedWing::m_calcMomentAeroBodyFrame(double airspeed, double alp
     double delElevator = m_inputs.deltaElevator - m_properties.trimElevator;
 
     // Moments in body frame
-    double Mx = qBarSurface * m_properties.wingSpan * (m_properties.Cl_0 + m_properties.Cl_BETA * betaRadian + m_properties.Cl_p * m_properties.wingSpan / (2.0 * airspeed) * m_states.p + m_properties.Cl_r * m_properties.wingSpan / (2.0 * airspeed) * m_states.r + m_properties.Cl_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cl_DELTA_RUD * m_inputs.deltaRudder);
-    double My = qBarSurface * m_properties.wingChord * (m_properties.Cm_0 + m_properties.Cm_ALPHA * delAlpha + m_properties.Cm_q * m_properties.wingChord / (2.0 * airspeed) * m_states.q + m_properties.Cm_DELTA_ELE * delElevator);
-    double Mz = qBarSurface * m_properties.wingSpan * (m_properties.Cn_0 + m_properties.Cn_BETA * betaRadian + m_properties.Cn_p * m_properties.wingSpan / (2.0 * airspeed) * m_states.p + m_properties.Cn_r * m_properties.wingSpan / (2.0 * airspeed) * m_states.r + m_properties.Cn_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cn_DELTA_RUD * m_inputs.deltaRudder);
+    double Mx = 0.0;
+    double My = 0.0;
+    double Mz = 0.0;
+    if (qBarSurface > 0.0) {
+        Mx += qBarSurface * m_properties.wingSpan * (m_properties.Cl_0 + m_properties.Cl_BETA * betaRadian + m_properties.Cl_p * m_properties.wingSpan / (2.0 * airspeed) * m_states.p + m_properties.Cl_r * m_properties.wingSpan / (2.0 * airspeed) * m_states.r + m_properties.Cl_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cl_DELTA_RUD * m_inputs.deltaRudder);
+        My += qBarSurface * m_properties.wingChord * (m_properties.Cm_0 + m_properties.Cm_ALPHA * delAlpha + m_properties.Cm_q * m_properties.wingChord / (2.0 * airspeed) * m_states.q + m_properties.Cm_DELTA_ELE * delElevator);
+        Mz += qBarSurface * m_properties.wingSpan * (m_properties.Cn_0 + m_properties.Cn_BETA * betaRadian + m_properties.Cn_p * m_properties.wingSpan / (2.0 * airspeed) * m_states.p + m_properties.Cn_r * m_properties.wingSpan / (2.0 * airspeed) * m_states.r + m_properties.Cn_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cn_DELTA_RUD * m_inputs.deltaRudder);
+    }
 
     return {Mx,My,Mz};
 }
@@ -156,22 +170,32 @@ fixedWingStates FixedWing::m_calcStatesDerivatives(Vector3<double> forceAeroBody
 }
 
 void FixedWing::m_eulerIntegration(fixedWingStates& derivatives, double dt) {
-    m_states.x     += derivatives.x * dt;
-    m_states.y     += derivatives.y * dt;
-    m_states.z     += derivatives.z * dt;
-    m_states.u     += derivatives.u * dt;
-    m_states.v     += derivatives.v * dt;
-    m_states.w     += derivatives.w * dt;
-    m_states.phi   += derivatives.phi * dt;
-    m_states.theta += derivatives.theta * dt;
-    m_states.psi   += derivatives.psi * dt;
-    m_states.p     += derivatives.p * dt;
-    m_states.q     += derivatives.q * dt;
-    m_states.r     += derivatives.r * dt;
+    m_states.x     += cleanSmallValue(derivatives.x) * dt;
+    m_states.y     += cleanSmallValue(derivatives.y) * dt;
+    m_states.z     += cleanSmallValue(derivatives.z) * dt;
+    m_states.u     += cleanSmallValue(derivatives.u) * dt;
+    m_states.v     += cleanSmallValue(derivatives.v) * dt;
+    m_states.w     += cleanSmallValue(derivatives.w) * dt;
+    m_states.phi   += cleanSmallValue(derivatives.phi) * dt;
+    m_states.theta += cleanSmallValue(derivatives.theta) * dt;
+    m_states.psi   += cleanSmallValue(derivatives.psi) * dt;
+    m_states.p     += cleanSmallValue(derivatives.p) * dt;
+    m_states.q     += cleanSmallValue(derivatives.q) * dt;
+    m_states.r     += cleanSmallValue(derivatives.r) * dt;
 
-    m_states.vx = derivatives.x;
-    m_states.vy = derivatives.y;
-    m_states.vz = derivatives.z;
+    m_states.vx = cleanSmallValue(derivatives.x);
+    m_states.vy = cleanSmallValue(derivatives.y);
+    m_states.vz = cleanSmallValue(derivatives.z);
+
+    centerOfMass->setAcceleration({cleanSmallValue(derivatives.u), cleanSmallValue(derivatives.v), -cleanSmallValue(derivatives.w)});
+
+    // Simulate the ground
+    if (m_states.z >= -0.001 && derivatives.vz >= -0.001) {
+        m_states.z  = 0.0;
+        m_states.vz = 0.0;
+
+        m_states.w = 0.0;
+    }
 }
 
 double FixedWing::airspeed() const {

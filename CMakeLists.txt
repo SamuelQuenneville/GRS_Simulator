@@ -7,9 +7,19 @@ enable_testing()
 include(FetchContent)
 
 # Project files
+set(GRS_COMMUNICATION
+        source/Communication/interfaceJSON.cpp
+        source/Communication/interfaceJSON.h
+        source/Communication/socketUDP.cpp
+        source/Communication/socketUDP.h
+
+)
+
 set(GRS_CONFIGURATION
         source/Configuration/configurationParser.cpp
         source/Configuration/configurationParser.h
+        source/Configuration/shellScript.cpp
+        source/Configuration/shellScript.h
 )
 
 set(GRS_CONTROL
@@ -54,6 +64,7 @@ set(GRS_DEFINITIONS
         source/Definitions/yamlCustomStructure.h
         source/Definitions/payloadDefinitions.h
         source/Definitions/controllerGains.h
+        source/Definitions/jsonInterface.h
 )
 
 set(GRS_LOG
@@ -164,6 +175,7 @@ file(COPY "source/Meshes/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/source/Meshe
 file(COPY "inputFilesExamples/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/inputFilesExamples/")
 
 add_executable(GRS_Simulator
+        ${GRS_COMMUNICATION}
         ${GRS_CONFIGURATION}
         ${GRS_CONTROL}
         ${GRS_DEFINITIONS}

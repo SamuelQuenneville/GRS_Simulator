@@ -45,14 +45,19 @@ public:
 
     void setVelocity(const Vector3<double>& newVelocity) const;
 
+    void setAttitude(const Vector3<double>& newAttitude);
     void setAngularVelocity(const Vector3<double>& newAngularVelocity);
-    [[nodiscard]] const Vector3<double>& getAngularVelocity();
+
+    [[nodiscard]] const Vector3<double>& getAttitude() const;
+    [[nodiscard]] const Vector3<double>& getAngularVelocity() const;
 
     std::unique_ptr<Node> centerOfMass;
     std::vector<Node*> connectedNode;
 
 private:
     Transform m_transform = Transform::identity();
+
+    Vector3<double> m_attitude{0.0, 0.0, 0.0};        // Earth reference frame
     Vector3<double> m_angularVelocity{0.0,0.0,0.0};   // Earth reference frame
 };
 

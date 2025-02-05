@@ -27,6 +27,15 @@
 #endif
 #define M_2PI (M_PI * 2)
 
+#define EPSILON_DOUBLE (1e-8)
+
+static inline double cleanSmallValue(const double value) {
+    if (std::abs(value) < EPSILON_DOUBLE) {
+        return 0.0;
+    }
+    return value;
+}
+
 template<typename A, typename B>
 static inline auto MIN(const A& one, const B& two) -> decltype(one < two ? one : two) {
     return one < two ? one : two;

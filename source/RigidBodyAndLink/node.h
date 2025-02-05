@@ -26,6 +26,9 @@ public:
     [[nodiscard]] const Vector3<double>& velocity() const;
     void setVelocity(const Vector3<double>& newVelocity);
 
+    [[nodiscard]] const Vector3<double>& acceleration() const;
+    void setAcceleration(const Vector3<double>& newAcceleration);
+
     [[nodiscard]] const Vector3<double>& force() const;
     void setForce(const Vector3<double>& newForce);
 
@@ -38,6 +41,7 @@ private:
 
     Vector3<double> m_position{0,0,0};          // Earth reference frame
     Vector3<double> m_velocity{0,0,0};          // Earth reference frame
+    Vector3<double> m_acceleration{0,0,0};      // Earth reference frame
     Vector3<double> m_force{0,0,0};             // Earth reference frame
     Vector3<double> m_moment{0,0,0};            // Earth reference frame
 };

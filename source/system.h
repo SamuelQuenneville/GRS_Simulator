@@ -18,6 +18,7 @@
 #include "Control/llcBaseVersion.h"
 #include "Control/hlcSingleAircraft.h"
 #include "Control/hlcTwinAircraft.h"
+#include "Communication/interfaceJSON.h"
 
 
 class System {
@@ -47,6 +48,8 @@ public:
 private:
     worldPhysics& m_physics;
     Logger& m_logger;
+    std::unique_ptr<InterfaceJSON> m_communicationManager;
+
     systemConfiguration& m_systemConfiguration;
     ctrlGains& m_ctrlGains;
 
