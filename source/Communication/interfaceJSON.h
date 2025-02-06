@@ -17,37 +17,32 @@
 #include "Definitions/jsonInterface.h"
 #include "RigidBodyAndLink/rigidBody.h"
 
-#define CONNECTION_TIMEOUT_COUNT_MAX 10
-
 class InterfaceJSON {
 
 public:
     InterfaceJSON() = default;
     ~InterfaceJSON() = default;
 
-    bool addSocket(const char* fdmAddress, uint16_t fdmPortIn);
-    bool receiveData(std::vector<std::array<uint16_t, MAX_SERVO_CHANNELS>>& data);
-
+    bool addSocket(int uavId, const char* fdmAddress, uint16_t fdmPortIn);
+    bool receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHANNELS>>& data);
     void sendData(const SocketUDP &socket, const sensorData &data);
     void setWindvane(float direction, float speed);
 
-    std::vector<SocketUDP*>& getSockets() {return m_sockets;};
+    std::map<int, SocketUDP*>& getSockets() {return m_sockets;};
 
     bool fcuOnline = false;
 
 private:
-    std::vector<SocketUDP*> m_sockets;
-    const uint16_t m_magic = 18458;
+    std::map<int, SocketUDP*> m_sockets;    // <uavId , *socket>
 
     const char* m_fdmAddress{};
     uint16_t m_fdmPortIn{};
 
-    int m_connectionTimeoutCount = 0;
     std::vector<uint16_t> m_fcuFrameRate;
     std::vector<uint32_t> m_fcuFrameCount;
 
-    float m_windvaneDirection = 0.0;    // Radians clockwise to the front (0 is head to wind)
-    float m_windvaneSpeed = 0.0;        // m/s
+    float m_windvaneDirection = 0.0;        // Radians clockwise to the front (0 is head to wind)
+    float m_windvaneSpeed = 0.0;            // m/s
     bool m_setWindvane = false;
 };
 

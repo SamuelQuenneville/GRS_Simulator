@@ -8,7 +8,9 @@
 
 #include "world.h"
 
-World::World() {
+World::World(programArguments& args)
+    : m_programArgs(args)
+{
 
     systemTypeStringToEnum = {
             {"FREE", FREE},
@@ -19,7 +21,13 @@ World::World() {
 }
 
 void World::update() {
-    m_system->update(simulationConfiguration.dt.count());
+
+    if (m_programArgs.sitlMode) {
+        m_system->updateSitl(simulationConfiguration.dt.count());
+    } else {
+        m_system->update(simulationConfiguration.dt.count());
+    }
+
     logger().loggerClockTick(simulationConfiguration.dt.count());
 }
 
@@ -29,7 +37,7 @@ void World::readConfigurationFile(const std::string& fileName) {
     m_systemConfiguration = ConfigurationParser::parseSystemConfiguration(nodeConfiguration);
 
     m_logDirectory = simParams.logFilesDirectory;
-    m_logger = std::make_unique<Logger>(m_logDirectory);
+    m_logger = std::make_unique<Logger>(m_programArgs.loggingEnabled, m_programArgs.verboseEnabled, m_logDirectory);
 
     std::chrono::duration<double> timeStep(1.0 / m_systemConfiguration.llcRate);
     simulationConfiguration = {simParams.fixedDuration, simParams.duration, timeStep};
@@ -62,7 +70,7 @@ Logger& World::logger() {
 
 void World::createSystem() {
 
-    m_system = std::make_unique<System>(physics, logger(), m_systemConfiguration, m_ctrlGains);
+    m_system = std::make_unique<System>(m_programArgs, physics, logger(), m_systemConfiguration, m_ctrlGains);
     m_system->setTarget(m_systemTarget);
 
     switch(getSystemType()) {
@@ -116,7 +124,7 @@ void World::resetSystem() {
     m_logger.reset();
     m_system.reset();
 
-    m_logger = std::make_unique<Logger>(m_logDirectory);
+    m_logger = std::make_unique<Logger>(m_programArgs.loggingEnabled, m_programArgs.verboseEnabled, m_logDirectory);
     createSystem();
 }
 

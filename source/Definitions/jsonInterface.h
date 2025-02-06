@@ -14,6 +14,9 @@
 
 #define MAX_SERVO_CHANNELS 16
 
+#if (MAX_SERVO_CHANNELS == 16)
+    #define MAGIC_16 18458          // From ardupilot JSON standard (16 pwm channels)
+#endif
 
 // The servo packet received from ArduPilot SITL. Defined in SIM_JSON.h.
 struct servoPacket {

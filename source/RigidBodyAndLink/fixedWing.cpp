@@ -10,14 +10,19 @@
 
 int FixedWing::m_idCounter = 0;
 
-FixedWing::FixedWing(worldPhysics& physics, Logger& logger, fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller)
-        : m_id(++m_idCounter)
-        , m_physics(physics)
-        , m_logger(logger)
-        , m_properties(properties)
-        , m_controller(std::move(controller))
+FixedWing::FixedWing(worldPhysics& physics, Logger& logger, const fixedWingProperties& properties)
+    : m_id(++m_idCounter)
+    , m_physics(physics)
+    , m_logger(logger)
+    , m_properties(properties)
 {
 
+}
+
+FixedWing::FixedWing(worldPhysics& physics, Logger& logger, const fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller)
+        : FixedWing(physics, logger, properties)
+{
+    m_controller = std::move(controller);
 }
 
 FixedWing::~FixedWing() {
@@ -31,6 +36,7 @@ int FixedWing::getId() const {
 void FixedWing::update(double dt) {
 
     fixedWingControlInputs inputs(m_controller->calculateAircraftControlInputs(getId(), getStates(), getCommands()));
+    std::cout << "Aileron: " << inputs.deltaAileron << ", Elevator: " << inputs.deltaElevator << ", Throttle: " << inputs.deltaThrust << ", Rudder: " << inputs.deltaRudder << std::endl;
     setInputs(inputs);
 
     Vector3<double> externalForcesEarth = calcExternalForce();
@@ -58,6 +64,51 @@ void FixedWing::update(double dt) {
     // Log
     m_writeLog(forcesAeroBody, momentsAeroBody, m_earthToBody(externalForcesEarth));
 }
+
+void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16> &pwm) {
+
+    fixedWingControlInputs inputs{
+        m_pwmToAngle("elevator",pwm[1]),
+        m_pwmToAngle("aileron",pwm[0]),
+        m_pwmToAngle("rudder",pwm[3]),
+        m_pwmToAngle("throttle",pwm[2])
+    };
+
+    if (pwm[0] == 0) {
+        inputs = {0.0,0.0,0.0,0.0};
+    }
+
+    if (inputs.deltaThrust > 0.0) {
+      std::cout << "Aileron: " << inputs.deltaAileron << ", Elevator: " << inputs.deltaElevator << ", Throttle: " << inputs.deltaThrust << ", Rudder: " << inputs.deltaRudder << std::endl;
+    }
+    setInputs(inputs);
+
+    Vector3<double> externalForcesEarth = calcExternalForce();
+
+    auto&&[airspeed, alphaRadian, betaRadian] = m_angleOfAttackSideSlip();
+
+    Vector3<double> forcesAeroBody  = m_calcForceAeroBodyFrame(airspeed, alphaRadian, betaRadian);
+    Vector3<double> momentsAeroBody = m_calcMomentAeroBodyFrame(airspeed, alphaRadian, betaRadian);
+
+    fixedWingStates derivatives = m_calcStatesDerivatives(forcesAeroBody, momentsAeroBody, externalForcesEarth);
+    m_eulerIntegration(derivatives, dt);
+
+    // Set new forces/moments to the node of this body
+    centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
+    centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
+    centerOfMass->setForce(m_bodyToEarth(forcesAeroBody) + externalForcesEarth);
+    centerOfMass->setMoment(m_bodyToEarth(momentsAeroBody));
+
+    setAttitude({m_states.phi, m_states.theta, m_states.psi});
+    setAngularVelocity({m_states.p, m_states.q, m_states.r});
+
+    // phi rotated because aircraft mesh is rotated
+    setTransform(Transform(centerOfMass->position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi - M_PI/2,m_states.theta,m_states.psi)));
+
+    // Log
+    m_writeLog(forcesAeroBody, momentsAeroBody, m_earthToBody(externalForcesEarth));
+}
+
 
 std::tuple<double, double, double> FixedWing::m_angleOfAttackSideSlip() const {
     // airspeed (Va)
@@ -241,6 +292,44 @@ void FixedWing::setInitialStates(initialStates& states) {
     centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
 
     setTransform(Transform(centerOfMass->position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi - M_PI/2,m_states.theta,m_states.psi)));
+}
+
+double FixedWing::m_pwmToAngle(const std::string& surface, const uint16_t pwm) const {
+    if (surface == "aileron") {
+        constexpr double trimAileron = 0.0;
+        if (pwm < 1500) {
+            return trimAileron - (1500 - pwm) * ((trimAileron - m_properties.ailMinDeg) / 500.0);
+        } else if (pwm > 1500) {
+            return trimAileron + (pwm - 1500) * ((m_properties.ailMaxDeg - trimAileron) / 500.0);
+        } else {
+            return trimAileron;
+        }
+    } else if (surface == "elevator") {
+        if (pwm < 1500) {
+            return m_properties.trimElevator - (1500 - pwm) * ((m_properties.trimElevator - m_properties.eleMinDeg) / 500.0);
+        } else if (pwm > 1500) {
+            return m_properties.trimElevator + (pwm - 1500) * ((m_properties.eleMaxDeg - m_properties.trimElevator) / 500.0);
+        } else {
+            return 0.0;
+        }
+    } else if (surface == "rudder") {
+        constexpr double trimRudder = 0.0;
+        if (pwm < 1500) {
+            return trimRudder - (1500 - pwm) * ((trimRudder - m_properties.rudMinDeg) / 500.0);
+        } else if (pwm > 1500) {
+            return trimRudder + (pwm - 1500) * ((m_properties.rudMaxDeg - trimRudder) / 500.0);
+        } else {
+            return trimRudder;
+        }
+    } else if (surface == "throttle") {
+        const double thrust = (pwm - 1100) * 0.044;
+        if (thrust < 0.0) {
+            return 0.0;
+        }
+        return thrust;
+    } else {
+        return 0.0;
+    }
 }
 
 void FixedWing::m_writeLog(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> tetherForceBody) {

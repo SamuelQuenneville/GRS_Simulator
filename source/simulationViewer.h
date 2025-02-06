@@ -21,7 +21,7 @@
 class SimulationViewer {
 
 public:
-    SimulationViewer();
+    explicit SimulationViewer(programArguments& args);
     ~SimulationViewer();
 
     void start();
@@ -41,6 +41,8 @@ public:
     friend class Gui;
 
 private:
+    programArguments& m_programArgs;
+
     bool m_isInitialized;
 
     GLFWwindow* m_window;

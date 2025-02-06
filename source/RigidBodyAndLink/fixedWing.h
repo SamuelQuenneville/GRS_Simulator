@@ -16,12 +16,14 @@
 class FixedWing : public RigidBody {
 
 public:
-    FixedWing(worldPhysics& physics, Logger& logger, fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller);
+    FixedWing(worldPhysics& physics, Logger& logger, const fixedWingProperties& properties);
+    FixedWing(worldPhysics& physics, Logger& logger, const fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller);
     ~FixedWing();
 
     [[nodiscard]] int getId() const;
 
     void update(double dt) override;
+    void updateSitl(double dt, const std::array<uint16_t, 16> &pwm);
 
     [[nodiscard]] fixedWingStates getStates() const {return m_states;};
 
@@ -50,7 +52,7 @@ private:
     fixedWingControlInputs m_inputs{};
     fixedWingCommands m_commands{};
 
-    std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> m_controller;
+    std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> m_controller = nullptr;
 
     [[nodiscard]] std::tuple<double, double, double> m_angleOfAttackSideSlip() const;
     [[nodiscard]] Vector3<double> m_calcForceAeroBodyFrame(double airspeed, double alphaRadian, double betaRadian) const;
@@ -61,6 +63,8 @@ private:
 
     fixedWingStates m_calcStatesDerivatives(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> externalForceEarth);
     void m_eulerIntegration(fixedWingStates& derivatives, double dt);
+
+    [[nodiscard]] double m_pwmToAngle(const std::string& surface, uint16_t pwm) const;
 
     void m_writeLog(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> tetherForceBody);
 };

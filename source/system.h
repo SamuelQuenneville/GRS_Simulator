@@ -24,10 +24,11 @@
 class System {
 
 public:
-    explicit System(worldPhysics& worldPhysics, Logger& logger, systemConfiguration& configuration, ctrlGains& gains);
+    explicit System(programArguments& args, worldPhysics& worldPhysics, Logger& logger, systemConfiguration& configuration, ctrlGains& gains);
     ~System();
 
     void update(double dt);
+    void updateSitl(double dt);
     void setTarget(const target& newTarget) {m_target = newTarget;};
     target& getTarget() {return m_target;};
 
@@ -46,6 +47,8 @@ public:
     std::unique_ptr<Payload>& payload() {return m_payload;};
 
 private:
+    programArguments& m_programArgs;
+
     worldPhysics& m_physics;
     Logger& m_logger;
     std::unique_ptr<InterfaceJSON> m_communicationManager;
@@ -62,8 +65,10 @@ private:
     std::map<int, fixedWingCommands> m_commands{};
     std::unique_ptr<HighLevelController<fixedWingCommands, fixedWingStates>> m_controller;
 
-    std::vector<fixedWingStates> m_getAircraftStates();
-    std::vector<int> m_getAircraftIds();
+    std::vector<fixedWingStates> m_getAircraftStates() const;
+    std::vector<int> m_getAircraftIds() const;
+
+    void m_startUdpSocket(int uavId) const;
 
     std::vector<std::unique_ptr<FixedWing>> m_aircraft;
     std::vector<std::unique_ptr<Tether>> m_links;

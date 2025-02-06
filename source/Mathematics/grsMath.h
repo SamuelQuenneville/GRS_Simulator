@@ -13,6 +13,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <array>
 
 #ifdef M_PI
 #undef M_PI

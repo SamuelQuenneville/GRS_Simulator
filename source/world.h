@@ -13,7 +13,7 @@
 #include <windows.h>
 #elif defined(__linux__) // Linux-specific implementation
 #include <unistd.h>
-#include <limits.h>
+#include <climits>
 #endif
 
 #include "Configuration/configurationParser.h"
@@ -22,7 +22,7 @@
 class World {
 
 public:
-    World();
+    explicit World(programArguments& args);
 
     [[nodiscard]] bool isRunning() const {return m_isRunning;};
     void start() {m_isRunning = true;};
@@ -48,12 +48,14 @@ public:
 
     std::map<std::string, systemType> systemTypeStringToEnum;
     [[nodiscard]] systemType getSystemType() const;
-    int getSystemNumberOfUav() const;
+    [[nodiscard]] int getSystemNumberOfUav() const;
     System* system();
 
     static std::string getExecutablePath();
 
 private:
+    programArguments& m_programArgs;
+
     std::unique_ptr<Logger> m_logger;
 
     bool m_isRunning = true;
@@ -67,7 +69,7 @@ private:
 
     std::vector<initialStates> m_initialAircraftStatesVector;
     initialStates m_initialPayloadStates;
-    target m_systemTarget;
+    target m_systemTarget{};
 
     std::unique_ptr<System> m_system;
 };

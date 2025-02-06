@@ -18,6 +18,12 @@
  *   VARIOUS SIMULATION STRUCTURES
  */
 
+struct programArguments {
+    bool sitlMode;
+    bool loggingEnabled;
+    bool verboseEnabled;
+};
+
 struct simulationParameters {
     std::string logFilesDirectory;
     std::string aircraftPropertiesFileDirectory;

@@ -8,20 +8,21 @@
 
 #include "simulationViewer.h"
 
-SimulationViewer::SimulationViewer()
-    : m_isInitialized(false)
-    , m_sceneCreated(false)
+SimulationViewer::SimulationViewer(programArguments& args)
+    : m_programArgs(args)
+    , m_isInitialized(false)
     , m_window(nullptr)
     , m_gui(this)
     , m_scene(nullptr)
-    , m_singlePhysicsStepEnabled(false)
-    , m_singlePhysicsStepDone(false)
     , m_elapsedTime(0.0)
     , m_totalDynamicTime(0.0)
     , m_dynamicStepTime(0.0)
+    , m_sceneCreated(false)
+    , m_singlePhysicsStepEnabled(false)
+    , m_singlePhysicsStepDone(false)
 
 {
-    m_world = std::make_unique<World>();
+    m_world = std::make_unique<World>(m_programArgs);
 
     nanogui::init();
 
@@ -45,7 +46,7 @@ void SimulationViewer::start() {
     m_setGlfwHints();
 
     // Create a GLFW window object
-    std::string title = "CREATEK - GRS Simulator";
+    const std::string title = "CREATEK - GRS Simulator";
     m_window = glfwCreateWindow(m_windowWidth, m_windowHeight, title.c_str(), nullptr, nullptr);
     if (m_window == nullptr) {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -112,7 +113,7 @@ void SimulationViewer::start() {
     glfwTerminate();
 }
 
-bool SimulationViewer::onWindowResized(int width, int height) {
+bool SimulationViewer::onWindowResized(const int width, const int height) {
     if (!m_isInitialized) return false;
 
     m_gui.onWindowResizeEvent(width, height);
@@ -129,7 +130,7 @@ bool SimulationViewer::onWindowResized(int width, int height) {
     return true;
 }
 
-void SimulationViewer::keyboardEvent(int key, int scancode, int action, int modifiers) {
+void SimulationViewer::keyboardEvent(const int key, const int scancode, const int action, const int modifiers) {
     m_gui.onKeyboardEvent(key, scancode, action, modifiers);
 
     // Close application on escape key
@@ -145,14 +146,14 @@ void SimulationViewer::keyboardEvent(int key, int scancode, int action, int modi
     }
 }
 
-void SimulationViewer::mouseButtonEvent(int button, int action, int modifiers) {
+void SimulationViewer::mouseButtonEvent(const int button, const int action, const int modifiers) {
     m_gui.onMouseButtonEvent(button, action, modifiers);
 
     // Get the mouse cursor position
     double x, y;
     glfwGetCursorPos(m_window, &x, &y);
 
-    bool down = action == GLFW_PRESS;
+    const bool down = action == GLFW_PRESS;
 
     if (m_scene) {
         m_scene->mouseButtonEvent(button, down, modifiers, x, y);
@@ -179,8 +180,8 @@ void SimulationViewer::scrollEvent(double x, double y) {
 }
 
 void SimulationViewer::m_createScene() {
-    systemType type = m_world->getSystemType();
-    int numberOfUav = m_world->getSystemNumberOfUav();
+    const systemType type = m_world->getSystemType();
+    const int numberOfUav = m_world->getSystemNumberOfUav();
 
     switch(type) {
         case FREE:

@@ -8,10 +8,15 @@
 
 #include "logger.h"
 
-Logger::Logger(const std::string& logDirectory)
+Logger::Logger(const bool loggingEnabled, bool verbose, const std::string& logDirectory)
     : m_logDirectory(logDirectory)
+    , m_loggingEnable(loggingEnabled)
+    , m_verbose(verbose)
 {
-    m_initDirectory(logDirectory);
+    if (m_loggingEnable) {
+        m_initDirectory(logDirectory);
+    }
+
     m_simulationTime = 0.0;
 }
 
@@ -59,11 +64,16 @@ std::ofstream Logger::startLog(const std::string& fileName) {
 }
 
 void Logger::stopLog(std::ofstream& logHandle) {
-    logHandle.close();
+    if (logHandle.is_open()) {
+       logHandle.close();
+    }
 }
 
 void Logger::writeAircraftMessage(fixedWingLogMessage& message) {
 
+    if (!m_aircraftLog.is_open()) {
+        return;
+    }
     m_aircraftLog << message.uavId            << ","
                   << getLoggerTime()          << ","
                   << message.aileronCommand   << ","
@@ -82,6 +92,9 @@ void Logger::writeAircraftMessage(fixedWingLogMessage& message) {
 
 void Logger::writeTetherMessage(tetherLogMessage& message) {
 
+    if (!m_tethersLog.is_open()) {
+        return;
+    }
     m_tethersLog << message.tetherId            << ","
                  << getLoggerTime()             << ","
                  << message.elongation          << ","
@@ -95,6 +108,9 @@ void Logger::writeTetherMessage(tetherLogMessage& message) {
 
 void Logger::writeHlcMessage(hlcLogMessage& message) {
 
+    if (!m_hlcLog.is_open()) {
+        return;
+    }
     m_hlcLog << "1"                               << ","
              << getLoggerTime()                   << ","
              << message.commands1.altitude        << ","
@@ -165,6 +181,9 @@ void Logger::writeHlcMessage(hlcLogMessage& message) {
 
 void Logger::writeLlcMessage(llcLogMessage& message) {
 
+    if (!m_llcLog.is_open()) {
+        return;
+    }
     m_llcLog << message.aircraftId            << ","
              << getLoggerTime()               << ","
              << message.inputs.deltaAileron   << ","
@@ -204,6 +223,10 @@ void Logger::writeLlcMessage(llcLogMessage& message) {
 }
 
 void Logger::writePayloadMessage(payloadLogMessage& message) {
+
+    if (!m_payloadLog.is_open()) {
+        return;
+    }
     m_payloadLog << getLoggerTime()     << ","
                  << message.nedPosition     << ","
                  << message.earthSpeed      << ",";

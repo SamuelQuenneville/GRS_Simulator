@@ -10,7 +10,33 @@
 
 int main(const int argc, const char * argv[]) {
 
-    SimulationViewer applicationViewer;
+    programArguments arguments{false,false,false};
+
+    // Loop through command-line arguments
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+
+        if (arg == "--sitl") {
+            arguments.sitlMode = true;
+        } else if (arg == "--log") {
+            arguments.loggingEnabled = true;
+        } else if (arg == "--verbose") {
+            arguments.verboseEnabled = true;
+        } else if (arg == "--help") {
+            std::cout << "Usage: " << argv[0] << " [options]\n"
+                      << "Options:\n"
+                      << "  --sitl      Enable SITL mode\n"
+                      << "  --log       Enable logging\n"
+                      << "  --verbose   Enable verbose mode\n"
+                      << "  --help      Show this help message\n";
+            return 0;
+        } else {
+            std::cerr << "Unknown option: " << arg << "\n";
+            return 1;
+        }
+    }
+
+    SimulationViewer applicationViewer(arguments);
     applicationViewer.start();
 
     return 0;

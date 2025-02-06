@@ -8,14 +8,14 @@
 
 #include "interfaceJSON.h"
 
-bool InterfaceJSON::addSocket(const char* fdmAddress, const uint16_t fdmPortIn) {
+bool InterfaceJSON::addSocket(const int uavId, const char* fdmAddress, const uint16_t fdmPortIn) {
     const auto newSocket = new SocketUDP();
     if (!newSocket->bind(fdmAddress, fdmPortIn)) {
         std::cout << "[UDP SERVER] " << "Failed to bind to " << fdmAddress << ":" << fdmPortIn << std::endl;
         delete newSocket;
         return false;
     }
-    m_sockets.push_back(newSocket);
+    m_sockets[uavId] = newSocket;
 
     m_fdmAddress = fdmAddress;
     m_fdmPortIn = fdmPortIn;
@@ -27,7 +27,7 @@ bool InterfaceJSON::addSocket(const char* fdmAddress, const uint16_t fdmPortIn) 
     return true;
 }
 
-bool InterfaceJSON::receiveData(std::vector<std::array<uint16_t, MAX_SERVO_CHANNELS>>& data) {
+bool InterfaceJSON::receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHANNELS>>& data) {
 
     if (m_sockets.empty()) {
         return false;
@@ -37,17 +37,17 @@ bool InterfaceJSON::receiveData(std::vector<std::array<uint16_t, MAX_SERVO_CHANN
 
     bool allReceived = true;
 
-    for (size_t i = 0; i < m_sockets.size(); ++i) {
+    for (int i = 0; i < m_sockets.size(); ++i) {
         servoPacket pkt{};
         std::array<uint16_t, MAX_SERVO_CHANNELS> pwm{};
 
-        ssize_t receiveSize = m_sockets[i]->receive(&pkt, sizeof(servoPacket),10);
+        ssize_t receiveSize = m_sockets[i+1]->receive(&pkt, sizeof(servoPacket),10);
 
         // drain the socket in the case we're backed up
         int counter = 0;
         while (true) {
             servoPacket last_pkt{};
-            const auto recvSize_last = m_sockets[i]->receive(&last_pkt, sizeof(servoPacket), 0ul);
+            const auto recvSize_last = m_sockets[i+1]->receive(&last_pkt, sizeof(servoPacket), 0ul);
             if (recvSize_last == -1) {
                 break;
             }
@@ -65,8 +65,8 @@ bool InterfaceJSON::receiveData(std::vector<std::array<uint16_t, MAX_SERVO_CHANN
             continue;
         }
 
-        if (m_magic != pkt.magic) {
-            std::cout << "[UDP SERVER] Incorrect protocol magic " << pkt.magic << " should be " << m_magic << std::endl;
+        if (MAGIC_16 != pkt.magic) {
+            std::cout << "[UDP SERVER] Incorrect protocol magic " << pkt.magic << " should be " << MAGIC_16 << std::endl;
             allReceived = false;
             continue;
         }
@@ -103,7 +103,9 @@ bool InterfaceJSON::receiveData(std::vector<std::array<uint16_t, MAX_SERVO_CHANN
 
     // If all sockets received at least one message, add to output
     if (allReceived) {
-        data.insert(data.end(), receivedData.begin(), receivedData.end());
+        for (int i = 0; i < receivedData.size(); ++i) {
+           data[i+1] = receivedData.at(i);
+        }
     }
 
     return allReceived;
@@ -130,7 +132,7 @@ void InterfaceJSON::sendData(const SocketUDP& socket, const sensorData& data) {
     const char* fcuAddress{};
     uint16_t fcuPortOut{};
 
-    std::cout << message << std::endl;
+    //std::cout << message << std::endl;
 
     socket.lastReceivedAddress(fcuAddress, fcuPortOut);
     [[maybe_unused]] auto bytesSent = socket.sendTo(message.c_str(), message.size(), fcuAddress, fcuPortOut);

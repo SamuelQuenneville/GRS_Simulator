@@ -9,13 +9,12 @@
 #include "system.h"
 
 uint64_t micros() {
-    uint64_t us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::
-                  now().time_since_epoch()).count();
-    return us;
+    return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 }
 
-System::System(worldPhysics& worldPhysics, Logger& logger, systemConfiguration& configuration, ctrlGains& gains)
-    : m_physics(worldPhysics)
+System::System(programArguments& args, worldPhysics& worldPhysics, Logger& logger, systemConfiguration& configuration, ctrlGains& gains)
+    : m_programArgs(args)
+    , m_physics(worldPhysics)
     , m_logger(logger)
     , m_systemConfiguration(configuration)
     , m_ctrlGains(gains)
@@ -30,7 +29,7 @@ System::~System() {
 
 }
 
-void System::update(double dt) {
+void System::update(const double dt) {
     // keep track of simulation time
     m_timeSinceHlcCall += dt;
 
@@ -50,23 +49,42 @@ void System::update(double dt) {
         }
     }
 
-    // Receive JSON SITL
-    std::vector<std::array<uint16_t, 16>> data;
-    data.clear();
-    if (m_communicationManager->receiveData(data)) {
-    }
-
-
     // Call fixedWing update()
     for(const auto& aircraft : m_aircraft) {
         aircraft->setCommands(m_commands[aircraft->getId()]);
         aircraft->update(dt);
+    }
+
+    // Call payload update()
+    if (m_payload != nullptr) {
+        m_payload->update(dt);
+    }
+}
+
+void System::updateSitl(const double dt) {
+    // keep track of simulation time
+    m_timeSinceHlcCall += dt;
+
+    // Call tether update()
+    if (m_systemConfiguration.configuration != "FREE") {
+        for(const auto& tether : m_links) {
+            tether->update(dt);
+        }
+    }
+
+    // Receive JSON SITL
+    std::map<int, std::array<uint16_t, 16>> data;
+    data.clear();
+    if (m_communicationManager->receiveData(data)) {}
+
+    // Call fixedWing update()
+    for(const auto& aircraft : m_aircraft) {
+        aircraft->updateSitl(dt, data[aircraft->getId()]);
 
         // Send JSON SITL
         sensorData sensorData = {static_cast<double>(micros()) / 1000000.0, aircraft->getAngularVelocity(), aircraft->centerOfMass->acceleration(), aircraft->centerOfMass->position(), aircraft->getAttitude(), aircraft->centerOfMass->velocity(), aircraft->airspeed()};
-        m_communicationManager->sendData(*m_communicationManager->getSockets().front(), sensorData);
+        m_communicationManager->sendData(*m_communicationManager->getSockets()[aircraft->getId()], sensorData);
     }
-
 
     // Call payload update()
     if (m_payload != nullptr) {
@@ -75,26 +93,34 @@ void System::update(double dt) {
 }
 
 void System::createSystemOneAircraft(fixedWingProperties& aircraftProperties, initialStates& aircraftStates) {
-    // Create HLC
-    m_controller = std::make_unique<HlcSingleAircraft>(m_physics, m_logger, m_ctrlGains.hlc, m_systemConfiguration.hlcRate);
 
-    // Create LLC
-    std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_ctrlGains.llc, m_systemConfiguration.llcRate);
+    if (m_programArgs.sitlMode) {
+        // Create aircraft and set initial conditions
+        std::unique_ptr<FixedWing> aircraft = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties);
+        aircraft->setInitialStates(aircraftStates);
 
-    // Create aircraft and set initial conditions
-    std::unique_ptr<FixedWing> aircraft = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController));
-    aircraft->setInitialStates(aircraftStates);
+        m_startUdpSocket(aircraft->getId());
 
-    // Push back Bodies into list
-    m_aircraft.push_back(std::move(aircraft));
+        // Push back Bodies into list
+        m_aircraft.push_back(std::move(aircraft));
 
-    // TODO
-    if (m_communicationManager->addSocket("127.0.0.1", 9002)) {
-        std::cout << "[FDM] Started socket --> " << 9002 << std::endl;
+    } else {
+        // Create HLC
+        m_controller = std::make_unique<HlcSingleAircraft>(m_physics, m_logger, m_ctrlGains.hlc, m_systemConfiguration.hlcRate);
+
+        // Create LLC
+        std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_ctrlGains.llc, m_systemConfiguration.llcRate);
+
+        // Create aircraft and set initial conditions
+        std::unique_ptr<FixedWing> aircraft = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController));
+        aircraft->setInitialStates(aircraftStates);
+
+        // Push back Bodies into list
+        m_aircraft.push_back(std::move(aircraft));
+
+        // Compute first HLC commands
+        m_initHlcCommands();
     }
-
-    // Compute first HLC commands
-    m_initHlcCommands();
 }
 
 void System::createSystemOneAircraftGrounded(fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, initialStates& aircraftStates) {
@@ -257,12 +283,11 @@ void System::createSystemThreeAircraftV(bool isGrounded, fixedWingProperties& ai
     m_initHlcCommands();
 }
 
-std::vector<fixedWingStates> System::m_getAircraftStates() {
+std::vector<fixedWingStates> System::m_getAircraftStates() const {
     std::vector<fixedWingStates> statesVector{};
 
     for(const auto& aircraft : m_aircraft) {
-        fixedWingStates states = aircraft->getStates();
-        statesVector.push_back(states);
+        statesVector.push_back(aircraft->getStates());
     }
     return statesVector;
 }
@@ -276,16 +301,20 @@ bool System::m_shouldCallHlc() {
 }
 
 void System::m_initHlcCommands() {
-    std::vector<fixedWingStates> aircraftStatesVector = m_getAircraftStates();
-    m_commands = m_controller->calculateInputs(m_getAircraftIds(), aircraftStatesVector, m_target);
+    m_commands = m_controller->calculateInputs(m_getAircraftIds(), m_getAircraftStates(), m_target);
 }
 
-std::vector<int> System::m_getAircraftIds() {
+std::vector<int> System::m_getAircraftIds() const {
     std::vector<int> idsList{};
 
     for(const auto& aircraft : m_aircraft) {
-        int id = aircraft->getId();
-        idsList.push_back(id);
+        idsList.push_back(aircraft->getId());
     }
     return idsList;
+}
+
+void System::m_startUdpSocket(const int uavId) const {
+    if (m_communicationManager->addSocket(uavId, "127.0.0.1", 9002 + 10*(uavId-1))) {
+        std::cout << "[FDM] Started socket --> 127.0.0.1:" << 9002 + 10*(uavId-1) << std::endl;
+    }
 }
