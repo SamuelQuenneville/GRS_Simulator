@@ -37,7 +37,7 @@ void World::readConfigurationFile(const std::string& fileName) {
     m_systemConfiguration = ConfigurationParser::parseSystemConfiguration(nodeConfiguration);
 
     m_logDirectory = simParams.logFilesDirectory;
-    m_logger = std::make_unique<Logger>(m_programArgs.loggingEnabled, m_programArgs.verboseEnabled, m_logDirectory);
+    m_logger = std::make_unique<Logger>(m_programArgs.loggingEnabled, m_logDirectory);
 
     std::chrono::duration<double> timeStep(1.0 / m_systemConfiguration.llcRate);
     simulationConfiguration = {simParams.fixedDuration, simParams.duration, timeStep};
@@ -124,7 +124,7 @@ void World::resetSystem() {
     m_logger.reset();
     m_system.reset();
 
-    m_logger = std::make_unique<Logger>(m_programArgs.loggingEnabled, m_programArgs.verboseEnabled, m_logDirectory);
+    m_logger = std::make_unique<Logger>(m_programArgs.loggingEnabled, m_logDirectory);
     createSystem();
 }
 

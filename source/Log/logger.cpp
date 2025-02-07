@@ -8,10 +8,9 @@
 
 #include "logger.h"
 
-Logger::Logger(const bool loggingEnabled, bool verbose, const std::string& logDirectory)
+Logger::Logger(const bool loggingEnabled, const std::string& logDirectory)
     : m_logDirectory(logDirectory)
     , m_loggingEnable(loggingEnabled)
-    , m_verbose(verbose)
 {
     if (m_loggingEnable) {
         m_initDirectory(logDirectory);

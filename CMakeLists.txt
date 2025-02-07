@@ -70,6 +70,8 @@ set(GRS_DEFINITIONS
 set(GRS_LOG
         source/Log/logger.cpp
         source/Log/logger.h
+        source/Log/programLogger.cpp
+        source/Log/programLogger.h
 )
 
 set(GRS_MATHEMATICS

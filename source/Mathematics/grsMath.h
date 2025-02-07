@@ -15,6 +15,8 @@
 #include <cstdint>
 #include <array>
 
+#include "Log/programLogger.h"
+
 #ifdef M_PI
 #undef M_PI
 #endif

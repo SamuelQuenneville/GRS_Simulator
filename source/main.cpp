@@ -10,7 +10,8 @@
 
 int main(const int argc, const char * argv[]) {
 
-    programArguments arguments{false,false,false};
+    programArguments arguments{false,false};
+    PROGRAM_LOGGER.setLogFileName("log.txt");
 
     // Loop through command-line arguments
     for (int i = 1; i < argc; ++i) {
@@ -21,7 +22,7 @@ int main(const int argc, const char * argv[]) {
         } else if (arg == "--log") {
             arguments.loggingEnabled = true;
         } else if (arg == "--verbose") {
-            arguments.verboseEnabled = true;
+            PROGRAM_LOGGER.enableVerbose(true);
         } else if (arg == "--help") {
             std::cout << "Usage: " << argv[0] << " [options]\n"
                       << "Options:\n"
@@ -35,6 +36,8 @@ int main(const int argc, const char * argv[]) {
             return 1;
         }
     }
+
+    LOG_INFO("----- Starting simulation -----");
 
     SimulationViewer applicationViewer(arguments);
     applicationViewer.start();

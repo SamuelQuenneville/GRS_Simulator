@@ -54,7 +54,7 @@ void SimulationViewer::start() {
     }
     glfwMakeContextCurrent(m_window);
 
-    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
+    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
         throw std::runtime_error("Could not initialize GLAD!");
     glGetError(); // pull and ignore unhandled errors like GL_INVALID_ENUM
 

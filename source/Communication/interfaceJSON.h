@@ -30,10 +30,12 @@ public:
 
     std::map<int, SocketUDP*>& getSockets() {return m_sockets;};
 
-    bool fcuOnline = false;
+    [[nodiscard]] bool fcuOnline() const {return m_fcuOnline;};
 
 private:
     std::map<int, SocketUDP*> m_sockets;    // <uavId , *socket>
+
+    bool m_fcuOnline = false;
 
     const char* m_fdmAddress{};
     uint16_t m_fdmPortIn{};

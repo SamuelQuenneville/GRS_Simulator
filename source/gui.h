@@ -18,6 +18,8 @@
 #include <iomanip>
 #include <cstring>
 
+#include "Log/programLogger.h"
+
 class SimulationViewer;
 
 class Gui {

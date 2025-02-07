@@ -11,7 +11,7 @@
 bool InterfaceJSON::addSocket(const int uavId, const char* fdmAddress, const uint16_t fdmPortIn) {
     const auto newSocket = new SocketUDP();
     if (!newSocket->bind(fdmAddress, fdmPortIn)) {
-        std::cout << "[UDP SERVER] " << "Failed to bind to " << fdmAddress << ":" << fdmPortIn << std::endl;
+        LOG_ERROR("Failed to bind socket to " + std::string(fdmAddress) + ":" + std::to_string(fdmPortIn));
         delete newSocket;
         return false;
     }
@@ -23,7 +23,7 @@ bool InterfaceJSON::addSocket(const int uavId, const char* fdmAddress, const uin
     m_fcuFrameRate.push_back(0);
     m_fcuFrameCount.push_back(-1);
 
-    std::cout << "[UDP SERVER] " << "Flight Dynamics Model (FDM) at " << fdmAddress << ":" << fdmPortIn << std::endl;
+    LOG_INFO("Flight Dynamics Model (FDM) at " + std::string(fdmAddress) + ":" + std::to_string(fdmPortIn));
     return true;
 }
 
@@ -41,7 +41,7 @@ bool InterfaceJSON::receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHA
         servoPacket pkt{};
         std::array<uint16_t, MAX_SERVO_CHANNELS> pwm{};
 
-        ssize_t receiveSize = m_sockets[i+1]->receive(&pkt, sizeof(servoPacket),10);
+        ssize_t receiveSize = m_sockets[i+1]->receive(&pkt, sizeof(servoPacket),1);
 
         // drain the socket in the case we're backed up
         int counter = 0;
@@ -57,7 +57,7 @@ bool InterfaceJSON::receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHA
         }
 
         if (counter > 0) {
-            std::cout << "[UDP SERVER] Drained " << counter << " packets from socket " << i << std::endl;
+            LOG_INFO("Drained " + std::to_string(counter) + " packets from socket" + std::to_string(i));
         }
 
         if (receiveSize == -1) {
@@ -66,7 +66,7 @@ bool InterfaceJSON::receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHA
         }
 
         if (MAGIC_16 != pkt.magic) {
-            std::cout << "[UDP SERVER] Incorrect protocol magic " << pkt.magic << " should be " << MAGIC_16 << std::endl;
+            LOG_ERROR("Incorrect magic: " + std::to_string(pkt.magic) + " should be " + std::to_string(MAGIC_16));
             allReceived = false;
             continue;
         }
@@ -74,16 +74,16 @@ bool InterfaceJSON::receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHA
         // check frame rate and frame order
         m_fcuFrameRate.at(i) = pkt.frameRate;
         if (pkt.frameCount < m_fcuFrameCount.at(i)) {
-            std::cout << "[UDP SERVER] ArduPilot controller has reset\n";
+            LOG_INFO("ArduPilot controller has reset");
         }
         else if (pkt.frameCount == m_fcuFrameCount.at(i)) {
             // received duplicate frame, skip
-            std::cout << "[UDP SERVER] Duplicate input frame count" << m_fcuFrameCount.at(i) << "\n";
+            LOG_WARNING("Duplicate input frame count" + std::to_string(m_fcuFrameCount.at(i)));
             continue;
         }
-        else if (pkt.frameCount != m_fcuFrameCount.at(i) + 1 && fcuOnline) {
+        else if (pkt.frameCount != m_fcuFrameCount.at(i) + 1 && m_fcuOnline) {
             // missed frames, warn only
-            std::cout << "[UDP SERVER] Missed " << pkt.frameCount - m_fcuFrameCount.at(i) << " input frames\n";
+            LOG_WARNING("Missed " + std::to_string(pkt.frameCount - m_fcuFrameCount.at(i)) + " input frames");
         }
         m_fcuFrameCount.at(i) = pkt.frameCount;
 
@@ -92,13 +92,11 @@ bool InterfaceJSON::receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHA
             pwm.at(servo) = pkt.pwm[servo];
         }
         receivedData.at(i) = pwm;
-
-        //std::cout << "[UDP SERVER] Received data " << i << " : " << pkt.frameCount << " : " << pkt.frameRate << "\n";
     }
 
-    if (!fcuOnline && allReceived) {
-        fcuOnline = true;
-        std::cout << "[UDP SERVER] Connected to all ArduPilot FCU" << std::endl;
+    if (!m_fcuOnline && allReceived) {
+        m_fcuOnline = true;
+        LOG_INFO("Connected to all ArduPilot FCU");
     }
 
     // If all sockets received at least one message, add to output
@@ -131,8 +129,6 @@ void InterfaceJSON::sendData(const SocketUDP& socket, const sensorData& data) {
 
     const char* fcuAddress{};
     uint16_t fcuPortOut{};
-
-    //std::cout << message << std::endl;
 
     socket.lastReceivedAddress(fcuAddress, fcuPortOut);
     [[maybe_unused]] auto bytesSent = socket.sendTo(message.c_str(), message.size(), fcuAddress, fcuPortOut);

@@ -23,7 +23,7 @@ struct servoPacket {
     uint16_t magic;
     uint16_t frameRate;
     uint32_t frameCount;
-    uint16_t pwm[MAX_SERVO_CHANNELS];
+    uint16_t pwm[MAX_SERVO_CHANNELS]; // pwm [aileron , elevator , throttle , rudder , ...]
 };
 
 struct sensorData {

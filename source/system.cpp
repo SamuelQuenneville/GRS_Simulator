@@ -65,30 +65,32 @@ void System::updateSitl(const double dt) {
     // keep track of simulation time
     m_timeSinceHlcCall += dt;
 
-    // Call tether update()
-    if (m_systemConfiguration.configuration != "FREE") {
-        for(const auto& tether : m_links) {
-            tether->update(dt);
-        }
-    }
-
     // Receive JSON SITL
     std::map<int, std::array<uint16_t, 16>> data;
     data.clear();
     if (m_communicationManager->receiveData(data)) {}
 
-    // Call fixedWing update()
-    for(const auto& aircraft : m_aircraft) {
-        aircraft->updateSitl(dt, data[aircraft->getId()]);
+    if (m_communicationManager->fcuOnline()) {
+        // Call tether update()
+        if (m_systemConfiguration.configuration != "FREE") {
+            for(const auto& tether : m_links) {
+                tether->update(dt);
+            }
+        }
 
-        // Send JSON SITL
-        sensorData sensorData = {static_cast<double>(micros()) / 1000000.0, aircraft->getAngularVelocity(), aircraft->centerOfMass->acceleration(), aircraft->centerOfMass->position(), aircraft->getAttitude(), aircraft->centerOfMass->velocity(), aircraft->airspeed()};
-        m_communicationManager->sendData(*m_communicationManager->getSockets()[aircraft->getId()], sensorData);
-    }
+        // Call fixedWing update()
+        for(const auto& aircraft : m_aircraft) {
+            aircraft->updateSitl(dt, data[aircraft->getId()]);
 
-    // Call payload update()
-    if (m_payload != nullptr) {
-        m_payload->update(dt);
+            // Send JSON SITL
+            sensorData sensorData = {static_cast<double>(micros()) / 1000000.0, aircraft->getAngularVelocity(), aircraft->centerOfMass->acceleration(), aircraft->centerOfMass->position(), aircraft->getAttitude(), aircraft->centerOfMass->velocity(), aircraft->airspeed()};
+            m_communicationManager->sendData(*m_communicationManager->getSockets()[aircraft->getId()], sensorData);
+        }
+
+        // Call payload update()
+        if (m_payload != nullptr) {
+            m_payload->update(dt);
+        }
     }
 }
 
@@ -315,6 +317,6 @@ std::vector<int> System::m_getAircraftIds() const {
 
 void System::m_startUdpSocket(const int uavId) const {
     if (m_communicationManager->addSocket(uavId, "127.0.0.1", 9002 + 10*(uavId-1))) {
-        std::cout << "[FDM] Started socket --> 127.0.0.1:" << 9002 + 10*(uavId-1) << std::endl;
+        LOG_INFO("Started socket --> 127.0.0.1:" + std::to_string(9002 + 10*(uavId-1)));
     }
 }

@@ -21,7 +21,6 @@
 struct programArguments {
     bool sitlMode;
     bool loggingEnabled;
-    bool verboseEnabled;
 };
 
 struct simulationParameters {

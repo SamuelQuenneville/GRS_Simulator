@@ -36,7 +36,6 @@ int FixedWing::getId() const {
 void FixedWing::update(double dt) {
 
     fixedWingControlInputs inputs(m_controller->calculateAircraftControlInputs(getId(), getStates(), getCommands()));
-    std::cout << "Aileron: " << inputs.deltaAileron << ", Elevator: " << inputs.deltaElevator << ", Throttle: " << inputs.deltaThrust << ", Rudder: " << inputs.deltaRudder << std::endl;
     setInputs(inputs);
 
     Vector3<double> externalForcesEarth = calcExternalForce();
@@ -78,9 +77,6 @@ void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16> &pwm)
         inputs = {0.0,0.0,0.0,0.0};
     }
 
-    if (inputs.deltaThrust > 0.0) {
-      std::cout << "Aileron: " << inputs.deltaAileron << ", Elevator: " << inputs.deltaElevator << ", Throttle: " << inputs.deltaThrust << ", Rudder: " << inputs.deltaRudder << std::endl;
-    }
     setInputs(inputs);
 
     Vector3<double> externalForcesEarth = calcExternalForce();

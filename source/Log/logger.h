@@ -20,7 +20,7 @@
 class Logger {
 
 public:
-    explicit Logger(bool loggingEnabled, bool verbose, const std::string& logDirectory);
+    explicit Logger(bool loggingEnabled, const std::string& logDirectory);
     ~Logger();
 
     static std::ofstream startLog(const std::string& fileName);
@@ -40,7 +40,6 @@ private:
     std::string m_logDirectory;
 
     bool m_loggingEnable;
-    bool m_verbose;         // ?? easiest way to propagate through most object TODO put somewhere else
 
     double m_simulationTime;
 
