@@ -36,6 +36,8 @@ Cube::Cube(const Vector3<float>& size, const std::string& executablePath)
 }
 
 Cube::~Cube() {
+    delete m_body;
+
     m_vertexBufferVertices.destroy();
     m_vertexBufferNormals.destroy();
     m_vertexArrayObject.destroy();

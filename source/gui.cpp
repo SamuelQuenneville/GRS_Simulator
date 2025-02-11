@@ -61,19 +61,19 @@ void Gui::drawTearDown() {
     m_screen->draw_teardown();
 }
 
-void Gui::onWindowResizeEvent(int width, int height) {
+void Gui::onWindowResizeEvent(const int width, const int height) {
     m_screen->resize_callback_event(width, height);
 }
 
-void Gui::onMouseMotionEvent(double x, double y) {
+void Gui::onMouseMotionEvent(const double x, const double y) {
     m_screen->cursor_pos_callback_event(x, y);
 }
 
-void Gui::onMouseButtonEvent(int button, int action, int modifiers) {
+void Gui::onMouseButtonEvent(const int button, const int action, const int modifiers) {
     m_screen->mouse_button_callback_event(button, action, modifiers);
 }
 
-void Gui::onKeyboardEvent(int key, int scancode, int action, int modifiers) {
+void Gui::onKeyboardEvent(const int key, const int scancode, const int action, const int modifiers) {
     m_screen->key_callback_event(key, scancode, action, modifiers);
 }
 
@@ -91,7 +91,7 @@ void Gui::m_createConfigurationPanel() {
     buttonConfig->set_callback([&] {
         std::strcpy(m_configFilePath,nanogui::file_dialog({{"yaml", "Config File"}}, false).c_str());
 
-        std::filesystem::path path(m_configFilePath);
+        const std::filesystem::path path(m_configFilePath);
 
         std::strcpy(m_dir, path.parent_path().string().c_str()); // Copy directory
         std::strcpy(m_configFileName, path.stem().string().c_str()); // Copy filename (without extension)
@@ -161,7 +161,7 @@ void Gui::m_createConfigurationPanel() {
     buttonTopView->set_fixed_width(73);
     buttonTopView->set_callback([&] {
 
-        Matrix4<double> view
+        const Matrix4<double> view
                 {
                         { 1,  0,  0, 0},
                         { 0,  0,  1, 0},
@@ -182,11 +182,11 @@ void Gui::m_createConfigurationPanel() {
     buttonIsometricView->set_fixed_width(73);
     buttonIsometricView->set_callback([&] {
 
-        double a = std::sqrt(2.0) / 2.0;
-        double b = std::sqrt(2.0) / std::sqrt(3.0);
-        double c = 1.0 / std::sqrt(3.0);
+        constexpr double a = std::sqrt(2.0) / 2.0;
+        constexpr double b = std::sqrt(2.0) / std::sqrt(3.0);
+        constexpr double c = 1.0 / std::sqrt(3.0);
 
-        Matrix4<double> view
+        const Matrix4<double> view
                 {
                         {  a, -b/2.0,  c,  0},
                         {  0,      b,  c,  0},
@@ -329,13 +329,13 @@ void Gui::m_createConfigurationPanel() {
     });
 }
 
-std::string Gui::doubleToString(double value, int precision) {
+std::string Gui::doubleToString(const double value, const int precision) {
     std::stringstream ss;
     ss << std::fixed << std::setprecision(precision) << value;
     return ss.str();
 }
 
-void Gui::setTargetFromConfig(double groundspeed, std::vector<double> positionTarget) {
+void Gui::setTargetFromConfig(const double groundspeed, const std::vector<double>& positionTarget) {
     m_groundspeedTarget = groundspeed;
     m_groundspeedTargetText->set_value(doubleToString(m_groundspeedTarget,1));
 

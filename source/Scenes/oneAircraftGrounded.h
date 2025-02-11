@@ -15,7 +15,7 @@
 class OneAircraftGrounded : public Scene {
 
 public:
-    explicit OneAircraftGrounded(World* world);
+    explicit OneAircraftGrounded(World& world);
     ~OneAircraftGrounded() override;
 
     void createPhysicsWorld();
@@ -31,10 +31,10 @@ public:
     void renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;
 
 protected:
-    World* m_world;
+    World& m_world;
 
-    Cube* m_ground{};
-    Launcher* m_launcher{};
+    std::shared_ptr<Cube> m_ground;
+    std::shared_ptr<Launcher> m_launcher;
 };
 
 

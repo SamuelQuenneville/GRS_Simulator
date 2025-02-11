@@ -9,10 +9,9 @@
 #include "twoAircraft.h"
 
 
-TwoAircraft::TwoAircraft(World *world)
+TwoAircraft::TwoAircraft(World& world)
         : Scene(World::getExecutablePath())
         , m_world(world)
-        , m_ground(nullptr)
 {
     // Set the center of the scene
     m_setScenePosition({0.0, 0.0, 0.0}, 100.0f);
@@ -21,47 +20,37 @@ TwoAircraft::TwoAircraft(World *world)
 }
 
 TwoAircraft::~TwoAircraft() {
-    destroyPhysicsWorld();
+
 }
 
 void TwoAircraft::createPhysicsWorld() {
 
     // ---------- AIRCRAFT ---------- //
-    for (const auto& aircraft : m_world->system()->aircraft()) {
-        auto* aircraftObject = new Aircraft(aircraft.get(), {2, 2, 2}, World::getExecutablePath());
+    for (const auto& aircraft : m_world.system()->aircraft()) {
+        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), Vector3<double>(2, 2, 2), World::getExecutablePath());
         aircraftObject->setColor(Color::color(aircraft->getId()));
 
-        m_physicsObjects.push_back(aircraftObject);
+        m_physicsObjects.push_back(std::move(aircraftObject));
     }
 
     // ---------- LAUNCHER ---------- //
-    m_launcher1 = new Launcher({1,1,1}, World::getExecutablePath());
+    m_launcher1 = std::make_shared<Launcher>(Vector3<double>(1.0,1.0,1.0), World::getExecutablePath());
     m_launcher1->setColor(Color::backgroundColor());
-    m_launcher2 = new Launcher({1,1,1}, World::getExecutablePath());
+    m_launcher2 = std::make_shared<Launcher>(Vector3<double>(1.0,1.0,1.0), World::getExecutablePath());
     m_launcher2->setColor(Color::backgroundColor());
     m_staticObjects.push_back(m_launcher1);
     m_staticObjects.push_back(m_launcher2);
 
     // ---------- GROUND ---------- //
-    m_ground = new Cube({50, 0.5, 50}, World::getExecutablePath());
+    m_ground = std::make_shared<Cube>(Vector3<float>(50, 0.5, 50), World::getExecutablePath());
     m_ground->setColor(Color::floorColor());
     m_staticObjects.push_back(m_ground);
 }
 
 void TwoAircraft::destroyPhysicsWorld() {
-    if (m_world != nullptr) {
-        // Destroy all the physics objects of the scene
-        for (auto& physicsObject : m_physicsObjects) {
-            delete physicsObject;
-        }
-
-        for (auto& staticObject : m_staticObjects) {
-            delete staticObject;
-        }
-
-        m_physicsObjects.clear();
-        m_staticObjects.clear();
-    }
+    // Destroy all the physics objects of the scene
+    m_physicsObjects.clear();
+    m_staticObjects.clear();
 }
 
 void TwoAircraft::initBodiesPositions() {
@@ -71,14 +60,14 @@ void TwoAircraft::initBodiesPositions() {
 }
 
 void TwoAircraft::updatePhysics() {
-    m_world->update();
+    m_world.update();
 }
 
 void TwoAircraft::updateTarget(double groundspeed, std::vector<double> payloadPosition) {
-    target t = m_world->system()->getTarget();
+    target t = m_world.system()->getTarget();
     t.groundspeed = static_cast<float>(groundspeed);
     t.positionPayload = payloadPosition;
-    m_world->system()->setTarget(t);
+    m_world.system()->setTarget(t);
 }
 
 void TwoAircraft::reset() {

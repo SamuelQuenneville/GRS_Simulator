@@ -45,9 +45,9 @@ private:
 
     bool m_isInitialized;
 
-    GLFWwindow* m_window;
-    int m_windowWidth;
-    int m_windowHeight;
+    std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)> m_window;
+    int m_windowWidth = 0;
+    int m_windowHeight = 0;
 
     std::unique_ptr<World> m_world;
     Timer m_timer;

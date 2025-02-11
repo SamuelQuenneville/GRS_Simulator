@@ -11,7 +11,7 @@
 SimulationViewer::SimulationViewer(programArguments& args)
     : m_programArgs(args)
     , m_isInitialized(false)
-    , m_window(nullptr)
+    , m_window(nullptr, glfwDestroyWindow)
     , m_gui(this)
     , m_scene(nullptr)
     , m_elapsedTime(0.0)
@@ -23,8 +23,15 @@ SimulationViewer::SimulationViewer(programArguments& args)
 
 {
     m_world = std::make_unique<World>(m_programArgs);
+}
 
-    nanogui::init();
+SimulationViewer::~SimulationViewer() {
+    m_destroyScenes();
+}
+
+void SimulationViewer::start() {
+    glfwInit();
+    glfwSetTime(0.0);
 
     // Get the primary monitor
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
@@ -33,26 +40,16 @@ SimulationViewer::SimulationViewer(programArguments& args)
     // Window size
     m_windowWidth  = mode->width;
     m_windowHeight = mode->height;
-}
-
-SimulationViewer::~SimulationViewer(){
-    m_destroyScenes();
-}
-
-void SimulationViewer::start() {
-    glfwInit();
-    glfwSetTime(0.0);
 
     m_setGlfwHints();
 
     // Create a GLFW window object
-    const std::string title = "CREATEK - GRS Simulator";
-    m_window = glfwCreateWindow(m_windowWidth, m_windowHeight, title.c_str(), nullptr, nullptr);
+    m_window.reset(glfwCreateWindow(m_windowWidth, m_windowHeight, "CREATEK - GRS Simulator", nullptr, nullptr));
     if (m_window == nullptr) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
     }
-    glfwMakeContextCurrent(m_window);
+    glfwMakeContextCurrent(m_window.get());
 
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
         throw std::runtime_error("Could not initialize GLAD!");
@@ -61,24 +58,24 @@ void SimulationViewer::start() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    m_gui.init(m_window);
+    m_gui.init(m_window.get());
 
     int width;
     int height;
-    glfwGetFramebufferSize(m_window, &width, &height);
+    glfwGetFramebufferSize(m_window.get(), &width, &height);
     glViewport(0, 0, width, height);
     glfwSwapInterval(0);
-    glfwSwapBuffers(m_window);
+    glfwSwapBuffers(m_window.get());
 
     m_gui.drawAll();
 
     m_enableGlfwDebugOutput();
-    glfwSetWindowUserPointer(m_window, this);
+    glfwSetWindowUserPointer(m_window.get(), this);
     m_setCallback();
     m_isInitialized = true;
 
     // Simulation loop
-    while (!glfwWindowShouldClose(m_window)) {
+    while (!glfwWindowShouldClose(m_window.get())) {
 
         // Check if any events have been activated (key pressed, mouse moved etc.) and call corresponding response functions
         glfwPollEvents();
@@ -135,7 +132,7 @@ void SimulationViewer::keyboardEvent(const int key, const int scancode, const in
 
     // Close application on escape key
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        glfwSetWindowShouldClose(m_window, GL_TRUE);
+        glfwSetWindowShouldClose(m_window.get(), GL_TRUE);
         return;
     }
 
@@ -150,8 +147,9 @@ void SimulationViewer::mouseButtonEvent(const int button, const int action, cons
     m_gui.onMouseButtonEvent(button, action, modifiers);
 
     // Get the mouse cursor position
-    double x, y;
-    glfwGetCursorPos(m_window, &x, &y);
+    double x;
+    double y;
+    glfwGetCursorPos(m_window.get(), &x, &y);
 
     const bool down = action == GLFW_PRESS;
 
@@ -163,10 +161,10 @@ void SimulationViewer::mouseButtonEvent(const int button, const int action, cons
 void SimulationViewer::mouseMotionEvent(double x, double y) {
     m_gui.onMouseMotionEvent(x, y);
 
-    int leftButtonState   = glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_LEFT);
-    int rightButtonState  = glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_RIGHT);
-    int middleButtonState = glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_MIDDLE);
-    int altKeyState       = glfwGetKey(m_window, GLFW_KEY_LEFT_ALT);
+    int leftButtonState   = glfwGetMouseButton(m_window.get(), GLFW_MOUSE_BUTTON_LEFT);
+    int rightButtonState  = glfwGetMouseButton(m_window.get(), GLFW_MOUSE_BUTTON_RIGHT);
+    int middleButtonState = glfwGetMouseButton(m_window.get(), GLFW_MOUSE_BUTTON_MIDDLE);
+    int altKeyState       = glfwGetKey(m_window.get(), GLFW_KEY_LEFT_ALT);
 
     if (m_scene) {
         m_scene->mouseMotionEvent(x, y, leftButtonState, rightButtonState, middleButtonState, altKeyState);
@@ -187,10 +185,10 @@ void SimulationViewer::m_createScene() {
         case FREE:
             switch (numberOfUav) {
                 case 1:
-                    m_scene = new OneAircraft(m_world.get());
+                    m_scene = new OneAircraft(*m_world);
                     break;
                 case 2:
-                    m_scene = new TwoAircraft(m_world.get());
+                    m_scene = new TwoAircraft(*m_world);
                     break;
                 case 3:
                     throw std::invalid_argument( "System 3 aircraft free flying not implemented" );
@@ -203,13 +201,13 @@ void SimulationViewer::m_createScene() {
         case V:
             switch (numberOfUav) {
                 case 1:
-                    m_scene = new OneAircraftGrounded(m_world.get());
+                    m_scene = new OneAircraftGrounded(*m_world);
                     break;
                 case 2:
-                    m_scene = new TwoAircraftV(m_world.get());
+                    m_scene = new TwoAircraftV(*m_world);
                     break;
                 case 3:
-                    m_scene = new ThreeAircraftV(m_world.get());
+                    m_scene = new ThreeAircraftV(*m_world);
                     break;
                 default:
                     throw std::invalid_argument( "Invalid number of UAV" );
@@ -298,31 +296,31 @@ void SimulationViewer::m_setGlfwHints() {
 }
 
 void SimulationViewer::m_setCallback() {
-    glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double x, double y) {
+    glfwSetCursorPosCallback(m_window.get(), [](GLFWwindow* window, double x, double y) {
                                  auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
         app->mouseMotionEvent(x, y);
                              }
     );
 
-    glfwSetMouseButtonCallback(m_window, [](GLFWwindow* window, int button, int action, int modifiers) {
+    glfwSetMouseButtonCallback(m_window.get(), [](GLFWwindow* window, int button, int action, int modifiers) {
                                    auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
         app->mouseButtonEvent(button, action, modifiers);
                                }
     );
 
-    glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+    glfwSetKeyCallback(m_window.get(), [](GLFWwindow* window, int key, int scancode, int action, int mods) {
                            auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
         app->keyboardEvent(key, scancode, action, mods);
                        }
     );
 
-    glfwSetScrollCallback(m_window, [](GLFWwindow* window, double x, double y) {
+    glfwSetScrollCallback(m_window.get(), [](GLFWwindow* window, double x, double y) {
                               auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
         app->scrollEvent(x, y);
                           }
     );
 
-    glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int width, int height) {
+    glfwSetFramebufferSizeCallback(m_window.get(), [](GLFWwindow* window, int width, int height) {
                                        auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
                                        app->onWindowResized(width, height);
                                    }
@@ -406,8 +404,8 @@ void SimulationViewer::m_changeView(const Matrix4<double>& viewMatrix) {
 void SimulationViewer::m_render() {
     int bufferWidth;
     int bufferHeight;
-    glfwMakeContextCurrent(m_window);
-    glfwGetFramebufferSize(m_window, &bufferWidth, &bufferHeight);
+    glfwMakeContextCurrent(m_window.get());
+    glfwGetFramebufferSize(m_window.get(), &bufferWidth, &bufferHeight);
 
     m_scene->setViewport(0, 0, bufferWidth, bufferHeight);
     m_scene->render();

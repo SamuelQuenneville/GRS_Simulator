@@ -8,11 +8,9 @@
 
 #include "threeAircraftV.h"
 
-ThreeAircraftV::ThreeAircraftV(World *world)
+ThreeAircraftV::ThreeAircraftV(World& world)
     : Scene(World::getExecutablePath())
     , m_world(world)
-    , m_ground(nullptr)
-    , m_payload(nullptr)
 {
     // Set the center of the scene
     m_setScenePosition({0.0, 0.0, 0.0}, 100.0f);
@@ -21,70 +19,56 @@ ThreeAircraftV::ThreeAircraftV(World *world)
 }
 
 ThreeAircraftV::~ThreeAircraftV() {
-    destroyPhysicsWorld();
+
 }
 
 void ThreeAircraftV::createPhysicsWorld() {
 
     // ---------- AIRCRAFT ---------- //
-    for (const auto& aircraft : m_world->system()->aircraft()) {
-        auto* aircraftObject = new Aircraft(aircraft.get(), {2.0, 2.0, 2.0}, World::getExecutablePath());
+    for (const auto& aircraft : m_world.system()->aircraft()) {
+        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), Vector3<double>(2.0, 2.0, 2.0), World::getExecutablePath());
         aircraftObject->setColor(Color::color(aircraft->getId()));
 
-        m_physicsObjects.push_back(aircraftObject);
+        m_physicsObjects.push_back(std::move(aircraftObject));
     }
 
     // -----------  PAYLOAD ---------- //
-    m_payload = new PayloadObject(m_world->system()->payload().get(), {0.4,0.4,0.4}, World::getExecutablePath());
-    m_payload->setColor(Color::blue());
-    m_physicsObjects.push_back(m_payload);
+    auto payloadObject = std::make_unique<PayloadObject>(m_world.system()->payload().get(), Vector3<float>(0.4,0.4,0.4), World::getExecutablePath());
+    payloadObject->setColor(Color::blue());
+    m_physicsObjects.push_back(std::move(payloadObject));
 
     // ------------ TETHER ----------- //
-    for (const auto& tether : m_world->system()->tethers()) {
-        auto* tetherObject = new TetherLine(tether.get());
-        m_tethersObjects.push_back(tetherObject);
+    for (const auto& tether : m_world.system()->tethers()) {
+        auto tetherObject = std::make_unique<TetherLine>(tether.get());
+        m_tethersObjects.push_back(std::move(tetherObject));
     }
 
     // ---------- LAUNCHER ---------- //
-    m_launcher1 = new Launcher({1.0,1.0,1.0}, World::getExecutablePath());
+    m_launcher1 = std::make_shared<Launcher>(Vector3<double>(1.0,1.0,1.0), World::getExecutablePath());
     m_launcher1->setColor(Color::backgroundColor());
-    m_launcher2 = new Launcher({1.0,1.0,1.0}, World::getExecutablePath());
+    m_launcher2 = std::make_shared<Launcher>(Vector3<double>(1.0,1.0,1.0), World::getExecutablePath());
     m_launcher2->setColor(Color::backgroundColor());
-    m_launcher3 = new Launcher({1.0,1.0,1.0}, World::getExecutablePath());
+    m_launcher3 = std::make_shared<Launcher>(Vector3<double>(1.0,1.0,1.0), World::getExecutablePath());
     m_launcher3->setColor(Color::backgroundColor());
     m_staticObjects.push_back(m_launcher1);
     m_staticObjects.push_back(m_launcher2);
     m_staticObjects.push_back(m_launcher3);
 
     // ---------- GROUND ---------- //
-    m_ground = new Cube({50.0, 0.5, 50.0}, World::getExecutablePath());
+    m_ground = std::make_shared<Cube>(Vector3<float>(50.0, 0.5, 50.0), World::getExecutablePath());
     m_ground->setColor(Color::floorColor());
     m_staticObjects.push_back(m_ground);
 
-    m_target = new Cube({0.4, 0.4, 0.4}, World::getExecutablePath());
+    m_target = std::make_shared<Cube>(Vector3<float>(0.4, 0.4, 0.4), World::getExecutablePath());
     m_target->setColor({1.0f, 0.0f, 0.0f, 0.6f});
     m_staticObjects.push_back(m_target);
 }
 
 void ThreeAircraftV::destroyPhysicsWorld() {
-    if (m_world != nullptr) {
-        // Destroy all the physics objects of the scene
-        for (auto& physicsObject : m_physicsObjects) {
-            delete physicsObject;
-        }
-
-        for (auto& staticObject : m_staticObjects) {
-            delete staticObject;
-        }
-
-        for (auto& tethersObject : m_tethersObjects) {
-            delete tethersObject;
-        }
-
-        m_physicsObjects.clear();
-        m_tethersObjects.clear();
-        m_staticObjects.clear();
-    }
+    // Destroy all the physics objects of the scene
+    m_physicsObjects.clear();
+    m_tethersObjects.clear();
+    m_staticObjects.clear();
 }
 
 void ThreeAircraftV::initBodiesPositions() {
@@ -97,19 +81,18 @@ void ThreeAircraftV::initBodiesPositions() {
 
     m_ground->setTransform(Transform({0.0, -0.5, 0.0}, Quaternion::identity()));
 
-    m_payload->setTransform(Transform({0.0,0.0,0.0}, Quaternion::identity()));
     m_target->setTransform(Transform({0.0,0.0,0.0}, Quaternion::identity()));
 }
 
 void ThreeAircraftV::updatePhysics() {
-    m_world->update();
+    m_world.update();
 }
 
 void ThreeAircraftV::updateTarget(double groundspeed, std::vector<double> payloadPosition) {
-    target t = m_world->system()->getTarget();
+    target t = m_world.system()->getTarget();
     t.groundspeed = static_cast<float>(groundspeed);
     t.positionPayload = payloadPosition;
-    m_world->system()->setTarget(t);
+    m_world.system()->setTarget(t);
 
     m_target->setTransform(Transform({payloadPosition[0], payloadPosition[2],payloadPosition[1]}, Quaternion::identity()));
 }

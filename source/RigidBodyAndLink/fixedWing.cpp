@@ -64,7 +64,7 @@ void FixedWing::update(double dt) {
     m_writeLog(forcesAeroBody, momentsAeroBody, m_earthToBody(externalForcesEarth));
 }
 
-void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16> &pwm) {
+void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16>& pwm) {
 
     fixedWingControlInputs inputs{
         m_pwmToAngle("elevator",pwm[1]),
@@ -79,6 +79,8 @@ void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16> &pwm)
 
     setInputs(inputs);
 
+    // TODO add launch sequence --> fixed on launcher means all derivatives = 0
+    // if launched {
     Vector3<double> externalForcesEarth = calcExternalForce();
 
     auto&&[airspeed, alphaRadian, betaRadian] = m_angleOfAttackSideSlip();
@@ -88,6 +90,7 @@ void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16> &pwm)
 
     fixedWingStates derivatives = m_calcStatesDerivatives(forcesAeroBody, momentsAeroBody, externalForcesEarth);
     m_eulerIntegration(derivatives, dt);
+    // }
 
     // Set new forces/moments to the node of this body
     centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});

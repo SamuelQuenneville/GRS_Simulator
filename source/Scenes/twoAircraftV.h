@@ -15,7 +15,7 @@
 class TwoAircraftV : public Scene {
 
 public:
-    explicit TwoAircraftV(World* world);
+    explicit TwoAircraftV(World& world);
     ~TwoAircraftV() override;
 
     void createPhysicsWorld();
@@ -31,14 +31,12 @@ public:
     void renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;
 
 protected:
-    World* m_world;
+    World& m_world;
 
-    PayloadObject* m_payload;
-
-    Cube* m_ground{};
-    Cube* m_target{};
-    Launcher* m_launcher1{};
-    Launcher* m_launcher2{};
+    std::shared_ptr<Cube> m_ground;
+    std::shared_ptr<Cube> m_target;
+    std::shared_ptr<Launcher> m_launcher1;
+    std::shared_ptr<Launcher> m_launcher2;
 };
 
 

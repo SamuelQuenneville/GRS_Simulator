@@ -8,10 +8,9 @@
 
 #include "oneAircraftGrounded.h"
 
-OneAircraftGrounded::OneAircraftGrounded(World* world)
+OneAircraftGrounded::OneAircraftGrounded(World& world)
     : Scene(World::getExecutablePath())
     , m_world(world)
-    , m_ground(nullptr)
 {
     // Set the center of the scene
     m_setScenePosition({0.0, 0.0, 0.0}, 100.0f);
@@ -20,54 +19,40 @@ OneAircraftGrounded::OneAircraftGrounded(World* world)
 }
 
 OneAircraftGrounded::~OneAircraftGrounded() {
-    destroyPhysicsWorld();
+
 }
 
 void OneAircraftGrounded::createPhysicsWorld() {
 
     // ---------- AIRCRAFT ---------- //
-    for (const auto& aircraft : m_world->system()->aircraft()) {
-        auto* aircraftObject = new Aircraft(aircraft.get(), {2, 2, 2}, World::getExecutablePath());
+    for (const auto& aircraft : m_world.system()->aircraft()) {
+        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), Vector3<double>(2, 2, 2), World::getExecutablePath());
         aircraftObject->setColor(Color::red());
-        m_physicsObjects.push_back(aircraftObject);
+        m_physicsObjects.push_back(std::move(aircraftObject));
     }
 
     // ------------ TETHER ----------- //
-    for (const auto& tether : m_world->system()->tethers()) {
-        auto* tetherObject = new TetherLine(tether.get());
-        m_tethersObjects.push_back(tetherObject);
+    for (const auto& tether : m_world.system()->tethers()) {
+        auto tetherObject = std::make_unique<TetherLine>(tether.get());
+        m_tethersObjects.push_back(std::move(tetherObject));
     }
 
     // ---------- LAUNCHER ---------- //
-    m_launcher = new Launcher({1,1,1}, World::getExecutablePath());
+    m_launcher = std::make_shared<Launcher>(Vector3<double>(1,1,1), World::getExecutablePath());
     m_launcher->setColor(Color::backgroundColor());
     m_staticObjects.push_back(m_launcher);
 
     // ---------- GROUND ---------- //
-    m_ground = new Cube({50, 0.5, 50}, World::getExecutablePath());
+    m_ground = std::make_shared<Cube>(Vector3<float>(50, 0.5, 50), World::getExecutablePath());
     m_ground->setColor(Color::floorColor());
     m_staticObjects.push_back(m_ground);
 }
 
 void OneAircraftGrounded::destroyPhysicsWorld() {
-    if (m_world != nullptr) {
-        // Destroy all the physics objects of the scene
-        for (auto& physicsObject : m_physicsObjects) {
-            delete physicsObject;
-        }
-
-        for (auto& staticObject : m_staticObjects) {
-            delete staticObject;
-        }
-
-        for (auto& tethersObject : m_tethersObjects) {
-            delete tethersObject;
-        }
-
-        m_physicsObjects.clear();
-        m_tethersObjects.clear();
-        m_staticObjects.clear();
-    }
+    // Destroy all the physics objects of the scene
+    m_physicsObjects.clear();
+    m_tethersObjects.clear();
+    m_staticObjects.clear();
 }
 
 void OneAircraftGrounded::initBodiesPositions() {
@@ -76,14 +61,14 @@ void OneAircraftGrounded::initBodiesPositions() {
 }
 
 void OneAircraftGrounded::updatePhysics() {
-    m_world->update();
+    m_world.update();
 }
 
 void OneAircraftGrounded::updateTarget(double groundspeed, std::vector<double> payloadPosition) {
-    target t = m_world->system()->getTarget();
+    target t = m_world.system()->getTarget();
     t.groundspeed = static_cast<float>(groundspeed);
     t.positionPayload = payloadPosition;
-    m_world->system()->setTarget(t);
+    m_world.system()->setTarget(t);
 }
 
 void OneAircraftGrounded::reset() {

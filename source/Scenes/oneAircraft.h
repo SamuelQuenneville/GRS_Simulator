@@ -14,7 +14,7 @@
 
 class OneAircraft : public Scene {
 public:
-    explicit OneAircraft(World* world);
+    explicit OneAircraft(World& world);
     ~OneAircraft() override;
 
     void createPhysicsWorld();
@@ -30,9 +30,8 @@ public:
     void renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;
 
 protected:
-    World* m_world;
-    Cube* m_ground{};
-
+    World& m_world;
+    std::shared_ptr<Cube> m_ground;
 };
 
 

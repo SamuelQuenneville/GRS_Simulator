@@ -98,7 +98,7 @@ void System::createSystemOneAircraft(fixedWingProperties& aircraftProperties, in
 
     if (m_programArgs.sitlMode) {
         // Create aircraft and set initial conditions
-        std::unique_ptr<FixedWing> aircraft = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties);
+        auto aircraft = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties);
         aircraft->setInitialStates(aircraftStates);
 
         m_startUdpSocket(aircraft->getId());
@@ -114,7 +114,7 @@ void System::createSystemOneAircraft(fixedWingProperties& aircraftProperties, in
         std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_ctrlGains.llc, m_systemConfiguration.llcRate);
 
         // Create aircraft and set initial conditions
-        std::unique_ptr<FixedWing> aircraft = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController));
+        auto aircraft = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController));
         aircraft->setInitialStates(aircraftStates);
 
         // Push back Bodies into list
@@ -126,30 +126,51 @@ void System::createSystemOneAircraft(fixedWingProperties& aircraftProperties, in
 }
 
 void System::createSystemOneAircraftGrounded(fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, initialStates& aircraftStates) {
-    // Create HLC
-    m_controller = std::make_unique<HlcSingleAircraft>(m_physics, m_logger, m_ctrlGains.hlc, m_systemConfiguration.hlcRate);
 
-    // Create LLC
-    std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_ctrlGains.llc, m_systemConfiguration.llcRate);
+    if (m_programArgs.sitlMode) {
+        // Create aircraft and set initial conditions
+        auto aircraft = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties);
+        aircraft->setInitialStates(aircraftStates);
 
-    // Create aircraft and set initial conditions
-    std::unique_ptr<FixedWing> aircraft = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController));
-    aircraft->setInitialStates(aircraftStates);
+        // Create tether and set fix to ground
+        auto tether = std::make_unique<Tether>(m_physics, m_logger, tetherProperties);
+        tether->grounded();
 
-    // Create tether and set fix to ground
-    std::unique_ptr<Tether> tether = std::make_unique<Tether>(m_physics, m_logger, tetherProperties);
-    tether->grounded();
+        // Create connections
+        aircraft->addConnection(tether->endPointNode());
+        tether->addConnection(tether->endPointNode(), aircraft->node());
 
-    // Create connections
-    aircraft->addConnection(tether->endPointNode());
-    tether->addConnection(tether->endPointNode(), aircraft->node());
+        m_startUdpSocket(aircraft->getId());
 
-    // Push back Bodies and Links into lists
-    m_aircraft.push_back(std::move(aircraft));
-    m_links.push_back(std::move(tether));
+        // Push back Bodies and Links into lists
+        m_aircraft.push_back(std::move(aircraft));
+        m_links.push_back(std::move(tether));
+    } else {
+        // Create HLC
+        m_controller = std::make_unique<HlcSingleAircraft>(m_physics, m_logger, m_ctrlGains.hlc, m_systemConfiguration.hlcRate);
 
-    // Compute first HLC commands
-    m_initHlcCommands();
+        // Create LLC
+        std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_ctrlGains.llc, m_systemConfiguration.llcRate);
+
+        // Create aircraft and set initial conditions
+        auto aircraft = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController));
+        aircraft->setInitialStates(aircraftStates);
+
+        // Create tether and set fix to ground
+        auto tether = std::make_unique<Tether>(m_physics, m_logger, tetherProperties);
+        tether->grounded();
+
+        // Create connections
+        aircraft->addConnection(tether->endPointNode());
+        tether->addConnection(tether->endPointNode(), aircraft->node());
+
+        // Push back Bodies and Links into lists
+        m_aircraft.push_back(std::move(aircraft));
+        m_links.push_back(std::move(tether));
+
+        // Compute first HLC commands
+        m_initHlcCommands();
+    }
 }
 
 void System::createSystemTwoAircraft(fixedWingProperties& aircraftProperties, std::vector<initialStates>& aircraftStates) {
@@ -161,10 +182,10 @@ void System::createSystemTwoAircraft(fixedWingProperties& aircraftProperties, st
     std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController2 = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_ctrlGains.llc, m_systemConfiguration.llcRate);
 
     // Create aircraft and set initial conditions
-    std::unique_ptr<FixedWing> aircraft1 = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController1));
+    auto aircraft1 = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController1));
     aircraft1->setInitialStates(aircraftStates.front());
 
-    std::unique_ptr<FixedWing> aircraft2 = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController2));
+    auto aircraft2 = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController2));
     aircraft2->setInitialStates(aircraftStates.back());
 
     // Push back Bodies and Links into lists
@@ -184,10 +205,10 @@ void System::createSystemTwoAircraftV(bool isGrounded, fixedWingProperties& airc
     std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController2 = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_ctrlGains.llc, m_systemConfiguration.llcRate);
 
     // Create aircraft and set initial conditions
-    std::unique_ptr<FixedWing> aircraft1 = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController1));
+    auto aircraft1 = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController1));
     aircraft1->setInitialStates(aircraftStates.front());
 
-    std::unique_ptr<FixedWing> aircraft2 = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController2));
+    auto aircraft2 = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController2));
     aircraft2->setInitialStates(aircraftStates.back());
 
     // Create payload and set initial conditions
@@ -195,8 +216,8 @@ void System::createSystemTwoAircraftV(bool isGrounded, fixedWingProperties& airc
     m_payload->setInitialStates(payloadStates);
 
     // Create tethers and set fix to ground
-    std::unique_ptr<Tether> tether1 = std::make_unique<Tether>(m_physics, m_logger, tetherProperties);
-    std::unique_ptr<Tether> tether2 = std::make_unique<Tether>(m_physics, m_logger, tetherProperties);
+    auto tether1 = std::make_unique<Tether>(m_physics, m_logger, tetherProperties);
+    auto tether2 = std::make_unique<Tether>(m_physics, m_logger, tetherProperties);
 
     // Create connections
     aircraft1->addConnection(tether1->endPointNode());
@@ -236,13 +257,13 @@ void System::createSystemThreeAircraftV(bool isGrounded, fixedWingProperties& ai
     std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController3 = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_ctrlGains.llc, m_systemConfiguration.llcRate);
 
     // Create aircraft and set initial conditions
-    std::unique_ptr<FixedWing> aircraft1 = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController1));
+    auto aircraft1 = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController1));
     aircraft1->setInitialStates(aircraftStates.at(0));
 
-    std::unique_ptr<FixedWing> aircraft2 = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController2));
+    auto aircraft2 = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController2));
     aircraft2->setInitialStates(aircraftStates.at(1));
 
-    std::unique_ptr<FixedWing> aircraft3 = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController3));
+    auto aircraft3 = std::make_unique<FixedWing>(m_physics, m_logger, aircraftProperties, std::move(lowLevelController3));
     aircraft3->setInitialStates(aircraftStates.at(2));
 
     // Create payload and set initial conditions
@@ -250,9 +271,9 @@ void System::createSystemThreeAircraftV(bool isGrounded, fixedWingProperties& ai
     m_payload->setInitialStates(payloadStates);
 
     // Create tethers and set fix to ground
-    std::unique_ptr<Tether> tether1 = std::make_unique<Tether>(m_physics, m_logger, tetherProperties);
-    std::unique_ptr<Tether> tether2 = std::make_unique<Tether>(m_physics, m_logger, tetherProperties);
-    std::unique_ptr<Tether> tether3 = std::make_unique<Tether>(m_physics, m_logger, tetherProperties);
+    auto tether1 = std::make_unique<Tether>(m_physics, m_logger, tetherProperties);
+    auto tether2 = std::make_unique<Tether>(m_physics, m_logger, tetherProperties);
+    auto tether3 = std::make_unique<Tether>(m_physics, m_logger, tetherProperties);
 
     // Create connections
     aircraft1->addConnection(tether1->endPointNode());

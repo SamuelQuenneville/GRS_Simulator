@@ -8,7 +8,7 @@
 
 #include "oneAircraft.h"
 
-OneAircraft::OneAircraft(World *world)
+OneAircraft::OneAircraft(World& world)
         : Scene(World::getExecutablePath())
         , m_world(world)
         , m_ground(nullptr)
@@ -20,39 +20,29 @@ OneAircraft::OneAircraft(World *world)
 }
 
 OneAircraft::~OneAircraft() {
-    destroyPhysicsWorld();
+
 }
 
 void OneAircraft::createPhysicsWorld() {
 
     // ---------- AIRCRAFT ---------- //
-    for (const auto& aircraft : m_world->system()->aircraft()) {
-        auto* aircraftObject = new Aircraft(aircraft.get(), {2, 2, 2}, World::getExecutablePath());
+    for (const auto& aircraft : m_world.system()->aircraft()) {
+        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), Vector3<double>(2, 2, 2), World::getExecutablePath());
         aircraftObject->setColor(Color::color(aircraft->getId()));
 
-        m_physicsObjects.push_back(aircraftObject);
+        m_physicsObjects.push_back(std::move(aircraftObject));
     }
 
     // ---------- GROUND ---------- //
-    m_ground = new Cube({50, 0.5, 50}, World::getExecutablePath());
+    m_ground = std::make_shared<Cube>(Vector3<float>(50, 0.5, 50), World::getExecutablePath());
     m_ground->setColor(Color::floorColor());
     m_staticObjects.push_back(m_ground);
 }
 
 void OneAircraft::destroyPhysicsWorld() {
-    if (m_world != nullptr) {
-        // Destroy all the physics objects of the scene
-        for (auto& physicsObject : m_physicsObjects) {
-            delete physicsObject;
-        }
-
-        for (auto& staticObject : m_staticObjects) {
-            delete staticObject;
-        }
-
-        m_physicsObjects.clear();
-        m_staticObjects.clear();
-    }
+    // Destroy all the physics objects of the scene
+    m_physicsObjects.clear();
+    m_staticObjects.clear();
 }
 
 void OneAircraft::initBodiesPositions() {
@@ -60,14 +50,14 @@ void OneAircraft::initBodiesPositions() {
 }
 
 void OneAircraft::updatePhysics() {
-    m_world->update();
+    m_world.update();
 }
 
 void OneAircraft::updateTarget(double groundspeed, std::vector<double> payloadPosition) {
-    target t = m_world->system()->getTarget();
+    target t = m_world.system()->getTarget();
     t.groundspeed = static_cast<float>(groundspeed);
     t.positionPayload = payloadPosition;
-    m_world->system()->setTarget(t);
+    m_world.system()->setTarget(t);
 }
 
 void OneAircraft::reset() {

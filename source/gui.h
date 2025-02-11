@@ -42,18 +42,18 @@ public:
     void onKeyboardEvent(int key, int scancode, int action, int modifiers);
 
     [[nodiscard]] bool getIsDisplayed() const {return m_isDisplayed;};
-    void setIsDisplayed(bool isDisplayed) {m_isDisplayed = isDisplayed;};
+    void setIsDisplayed(const bool isDisplayed) {m_isDisplayed = isDisplayed;};
 
     [[nodiscard]] bool getHasConfigFile() const {return m_hasConfigFile;};
     [[nodiscard]] std::string configFilePath() const {return m_configFilePath;};
 
-    void setTargetFromConfig(double groundspeed, std::vector<double> positionTarget);
+    void setTargetFromConfig(double groundspeed, const std::vector<double> &positionTarget);
 
 protected:
     SimulationViewer* m_viewer;
 
     GLFWwindow* m_window;
-    nanogui::Screen* m_screen;
+    nanogui::ref<nanogui::Screen> m_screen;
 
     // Configuration panel
     nanogui::Widget* m_configurationPanel;
