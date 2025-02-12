@@ -36,6 +36,8 @@ PayloadObject::PayloadObject(Payload* payload, const Vector3<float>& size, const
 }
 
 PayloadObject::~PayloadObject() {
+    delete m_body;
+
     m_vertexBufferVertices.destroy();
     m_vertexBufferNormals.destroy();
     m_vertexArrayObject.destroy();

@@ -16,7 +16,7 @@
 #include "RigidBodyAndLink/tether.h"
 
 
-class TetherLine : public PhysicsObject {
+class TetherLine final : public PhysicsObject {
 
 public:
     explicit TetherLine(Tether* tether);

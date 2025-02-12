@@ -119,8 +119,8 @@ double Tether::m_calcCrossflowDrag(double normalVelocity) const {
 
 std::tuple<double, double> Tether::m_calcLiftDragCoeff(double Cf, double Cn, double theta) {
 
-    double sinTheta = std::sin(theta);
-    double cosTheta = std::cos(theta);
+    const double sinTheta = std::sin(theta);
+    const double cosTheta = std::cos(theta);
 
     double Cd = Cf + Cn * sinTheta * sinTheta * sinTheta;
     double Cl = Cn * sinTheta * sinTheta * cosTheta;
@@ -142,17 +142,16 @@ void Tether::grounded() {
 }
 
 void Tether::m_writeLog() {
-    tetherLogMessage logMessage{};
 
-    logMessage = {
-            m_id,
-            m_tetherLogInfos.deformation,
-            startPoint->position(),
-            startPoint->velocity(),
-            endPoint->position(),
-            endPoint->velocity(),
-            m_tetherLogInfos.forceSpring,
-            m_tetherLogInfos.forceAero
+    tetherLogMessage logMessage = {
+        m_id,
+        m_tetherLogInfos.deformation,
+        startPoint->position(),
+        startPoint->velocity(),
+        endPoint->position(),
+        endPoint->velocity(),
+        m_tetherLogInfos.forceSpring,
+        m_tetherLogInfos.forceAero
     };
 
     m_logger.writeTetherMessage(logMessage);

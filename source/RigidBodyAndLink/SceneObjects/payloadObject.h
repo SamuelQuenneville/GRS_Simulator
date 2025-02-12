@@ -14,7 +14,7 @@
 #include "OpenglFramework/vertexArrayObject.h"
 #include "RigidBodyAndLink/payload.h"
 
-class PayloadObject : public PhysicsObject {
+class PayloadObject final : public PhysicsObject {
 
 public:
     PayloadObject(Payload* payload, const Vector3<float>& size, const std::string& executablePath);

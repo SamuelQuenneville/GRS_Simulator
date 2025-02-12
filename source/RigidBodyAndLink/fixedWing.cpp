@@ -33,7 +33,7 @@ int FixedWing::getId() const {
     return m_id;
 }
 
-void FixedWing::update(double dt) {
+void FixedWing::update(const double dt) {
 
     fixedWingControlInputs inputs(m_controller->calculateAircraftControlInputs(getId(), getStates(), getCommands()));
     setInputs(inputs);
@@ -178,7 +178,7 @@ Vector3<double> FixedWing::m_calcMomentAeroBodyFrame(double airspeed, double alp
     return {Mx,My,Mz};
 }
 
-fixedWingStates FixedWing::m_calcStatesDerivatives(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> externalForceEarth) {
+fixedWingStates FixedWing::m_calcStatesDerivatives(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, const Vector3<double>& externalForceEarth) {
 
     // Convert external forces in Earth frame to Body frame
     Vector3<double> externalsForcesBody = m_earthToBody(externalForceEarth);
@@ -189,19 +189,19 @@ fixedWingStates FixedWing::m_calcStatesDerivatives(Vector3<double> forceAeroBody
      * |dq| = | 0       cos(phi)            -sin(phi)     | |q|
      * |dr|   | 0  sin(phi)sec(theta)  cos(phi)sec(theta) | |r|
     */
-    double cosPhi   = std::cos(m_states.phi);
-    double sinPhi   = std::sin(m_states.phi);
-    double cosTheta = std::cos(m_states.theta);
-    double sinTheta = std::sin(m_states.theta);
-    double cosPsi   = std::cos(m_states.psi);
-    double sinPsi   = std::sin(m_states.psi);
-    double secTheta = 1.0 / cosTheta;
-    double tanTheta = sinTheta * secTheta;
+    const double cosPhi   = std::cos(m_states.phi);
+    const double sinPhi   = std::sin(m_states.phi);
+    const double cosTheta = std::cos(m_states.theta);
+    const double sinTheta = std::sin(m_states.theta);
+    const double cosPsi   = std::cos(m_states.psi);
+    const double sinPsi   = std::sin(m_states.psi);
+    const double secTheta = 1.0 / cosTheta;
+    const double tanTheta = sinTheta * secTheta;
 
 
     // Calculate the derivatives of the states
     fixedWingStates derivatives{};
-    double oneOverTau = 1.0 / (m_properties.inertiaX * m_properties.inertiaZ - m_properties.inertiaXZ * m_properties.inertiaXZ);
+    const double oneOverTau = 1.0 / (m_properties.inertiaX * m_properties.inertiaZ - m_properties.inertiaXZ * m_properties.inertiaXZ);
 
     derivatives.x     = m_states.u * (cosTheta*cosPsi) + m_states.v * (-cosPhi*sinPsi + sinPhi*sinTheta*cosPsi) + m_states.w * (sinPhi*sinPsi + cosPhi*sinTheta*cosPsi) + m_physics.wind[0];
     derivatives.y     = m_states.u * (cosTheta*sinPsi) + m_states.v * (cosPhi*cosPsi + sinPhi*sinTheta*sinPsi) + m_states.w * (-sinPhi*cosPsi + cosPhi*sinTheta*sinPsi) + m_physics.wind[1];
@@ -219,7 +219,7 @@ fixedWingStates FixedWing::m_calcStatesDerivatives(Vector3<double> forceAeroBody
     return derivatives;
 }
 
-void FixedWing::m_eulerIntegration(fixedWingStates& derivatives, double dt) {
+void FixedWing::m_eulerIntegration(const fixedWingStates& derivatives, const double dt) {
     m_states.x     += cleanSmallValue(derivatives.x) * dt;
     m_states.y     += cleanSmallValue(derivatives.y) * dt;
     m_states.z     += cleanSmallValue(derivatives.z) * dt;
@@ -331,23 +331,22 @@ double FixedWing::m_pwmToAngle(const std::string& surface, const uint16_t pwm) c
     }
 }
 
-void FixedWing::m_writeLog(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> tetherForceBody) {
-    fixedWingLogMessage logMessage{};
+void FixedWing::m_writeLog(const Vector3<double>& forceAeroBody, const Vector3<double>& momentAeroBody, const Vector3<double>& tetherForceBody) {
 
-    logMessage = {
-            m_id,
-            m_inputs.deltaAileron,
-            m_inputs.deltaElevator,
-            m_inputs.deltaRudder,
-            m_inputs.deltaThrust,
-            centerOfMass->position(),
-            centerOfMass->velocity(),
-            {m_states.u, m_states.v, m_states.w},
-            {m_states.phi, m_states.theta, m_states.psi},
-            {m_states.p, m_states.q, m_states.r},
-            forceAeroBody,
-            momentAeroBody,
-            tetherForceBody
+    fixedWingLogMessage logMessage = {
+        m_id,
+        m_inputs.deltaAileron,
+        m_inputs.deltaElevator,
+        m_inputs.deltaRudder,
+        m_inputs.deltaThrust,
+        centerOfMass->position(),
+        centerOfMass->velocity(),
+        {m_states.u, m_states.v, m_states.w},
+        {m_states.phi, m_states.theta, m_states.psi},
+        {m_states.p, m_states.q, m_states.r},
+        forceAeroBody,
+        momentAeroBody,
+        tetherForceBody
     };
 
     m_logger.writeAircraftMessage(logMessage);

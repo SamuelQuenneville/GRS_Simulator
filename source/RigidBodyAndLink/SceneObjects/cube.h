@@ -13,7 +13,7 @@
 #include "OpenglFramework/vertexBufferObject.h"
 #include "OpenglFramework/vertexArrayObject.h"
 
-class Cube : public PhysicsObject {
+class Cube final : public PhysicsObject {
 
 public:
     Cube(const Vector3<float>& size, const std::string& executablePath);

@@ -14,7 +14,7 @@
 #include "OpenglFramework/vertexArrayObject.h"
 #include "RigidBodyAndLink/rigidBody.h"
 
-class Launcher : public PhysicsObject {
+class Launcher final : public PhysicsObject {
 
 public :
     Launcher(const Vector3<double>& scaling, const std::string& executablePath);

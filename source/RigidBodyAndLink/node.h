@@ -18,7 +18,7 @@ public:
 
     [[nodiscard]] int getId() const;
 
-    void update(Vector3<double> newPosition, Vector3<double> newVelocity, Vector3<double> newForce, Vector3<double> newMoment);
+    void update(const Vector3<double>& newPosition, const Vector3<double>& newVelocity, const Vector3<double>& newForce, const Vector3<double>& newMoment);
 
     [[nodiscard]] const Vector3<double>& position() const;
     void setPosition(const Vector3<double>& newPosition);

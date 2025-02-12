@@ -12,7 +12,7 @@
 #include "RigidBodyAndLink/rigidBody.h"
 #include "Definitions/payloadDefinitions.h"
 
-class Payload : public RigidBody {
+class Payload final : public RigidBody {
 
 public:
     Payload(worldPhysics& physics, Logger& logger, payloadProperties& properties, bool isGrounded);
@@ -35,7 +35,7 @@ private:
     Vector3<double> m_calcAeroForces();
 
     [[nodiscard]] payloadStates m_calcStatesDerivatives(Vector3<double> externalForceEarth) const;
-    void m_eulerIntegration(payloadStates& derivatives, double dt);
+    void m_eulerIntegration(const payloadStates& derivatives, double dt);
 
 
     void m_writeLog();

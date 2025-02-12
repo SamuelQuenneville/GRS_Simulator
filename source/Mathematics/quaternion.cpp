@@ -8,7 +8,7 @@
 
 #include "quaternion.h"
 
-void Quaternion::m_initWithEulerAngles(double roll, double pitch, double yaw) {
+void Quaternion::m_initWithEulerAngles(const double roll, const double pitch, const double yaw) {
     double angle = roll * 0.5;
     const double sinRoll = std::sin(angle);
     const double cosRoll = std::cos(angle);
@@ -36,7 +36,7 @@ Quaternion::Quaternion()
 
 }
 
-Quaternion::Quaternion(double newX, double newY, double newZ, double newW)
+Quaternion::Quaternion(const double newX, const double newY, const double newZ, const double newW)
     : x(newX), y(newY), z(newZ), w(newW)
 {
 
@@ -45,7 +45,7 @@ Quaternion::Quaternion(double newX, double newY, double newZ, double newW)
 Quaternion::Quaternion(const Matrix3<double>& matrix) {
 
     // Get the trace of the matrix
-    double trace = matrix.getTrace();
+    const double trace = matrix.getTrace();
 
     double r;
     double s;
@@ -106,7 +106,7 @@ Quaternion::Quaternion(const Matrix3<double>& matrix) {
     }
 }
 
-void Quaternion::setAllValues(double newX, double newY, double newZ, double newW) {
+void Quaternion::setAllValues(const double newX, const double newY, const double newZ, const double newW) {
     x = newX;
     y = newY;
     z = newZ;
@@ -122,7 +122,7 @@ double Quaternion::length() const {
 }
 
 void Quaternion::normalize() {
-    double len = length();
+    const double len = length();
     if (len != 0) {
         x /= len;
         y /= len;
@@ -139,7 +139,7 @@ Quaternion Quaternion::getInverse() const {
 
 Matrix3<double> Quaternion::getMatrix() const {
 
-    double nQ = x*x + y*y + z*z + w*w;
+    const double nQ = x*x + y*y + z*z + w*w;
     double s = 0.0;
 
     if (nQ > 0.0) {
@@ -147,18 +147,18 @@ Matrix3<double> Quaternion::getMatrix() const {
     }
 
     // Computations used for optimization (fewer multiplications)
-    double xs = x*s;
-    double ys = y*s;
-    double zs = z*s;
-    double wxs = w*xs;
-    double wys = w*ys;
-    double wzs = w*zs;
-    double xxs = x*xs;
-    double xys = x*ys;
-    double xzs = x*zs;
-    double yys = y*ys;
-    double yzs = y*zs;
-    double zzs = z*zs;
+    const double xs = x*s;
+    const double ys = y*s;
+    const double zs = z*s;
+    const double wxs = w*xs;
+    const double wys = w*ys;
+    const double wzs = w*zs;
+    const double xxs = x*xs;
+    const double xys = x*ys;
+    const double xzs = x*zs;
+    const double yys = y*ys;
+    const double yzs = y*zs;
+    const double zzs = z*zs;
 
     // Create the matrix corresponding to the quaternion
     return Matrix3<double>{{1.0 - yys - zzs, xys-wzs, xzs + wys},
@@ -170,12 +170,12 @@ Quaternion Quaternion::identity() {
     return {0,0,0,1};
 }
 
-Quaternion Quaternion::fromEulerAngles(double roll, double pitch, double yaw) {
+Quaternion Quaternion::fromEulerAngles(const double roll, const double pitch, const double yaw) {
     Quaternion quaternion;
     quaternion.m_initWithEulerAngles(roll, pitch, yaw);
 
     // NED to y up
-    Quaternion correction(0.707,0.0,0.0,0.707);
+    const Quaternion correction(0.707,0.0,0.0,0.707);
 
     return correction * quaternion;
 }
@@ -184,7 +184,7 @@ double Quaternion::dot(const Quaternion& quaternion) const {
     return (x*quaternion.x + y*quaternion.y + z*quaternion.z + w*quaternion.w);
 }
 
-Quaternion Quaternion::slerp(const Quaternion& quaternion1, const Quaternion& quaternion2, double t) {
+Quaternion Quaternion::slerp(const Quaternion& quaternion1, const Quaternion& quaternion2, const double t) {
     assert(t >= 0.0 && t <= 1.0);
 
     double invert = 1.0;
@@ -201,20 +201,20 @@ Quaternion Quaternion::slerp(const Quaternion& quaternion1, const Quaternion& qu
     // Because of precision, if cos(theta) is nearly 1,
     // therefore theta is nearly 0 and we can write
     // sin((1-t)*theta) as (1-t) and sin(t*theta) as t
-    const double epsilon = 0.00001;
+    constexpr double epsilon = 0.00001;
     if(1-cosineTheta < epsilon) {
         return quaternion1 * (1.0-t) + quaternion2 * (t * invert);
     }
 
     // Compute the theta angle
-    double theta = std::acos(cosineTheta);
+    const double theta = std::acos(cosineTheta);
 
     // Compute sin(theta)
-    double sineTheta = std::sin(theta);
+    const double sineTheta = std::sin(theta);
 
     // Compute the two coefficients that are in the spherical linear interpolation formula
-    double coeff1 = std::sin((1.0-t)*theta) / sineTheta;
-    double coeff2 = std::sin(t*theta) / sineTheta * invert;
+    const double coeff1 = std::sin((1.0-t)*theta) / sineTheta;
+    const double coeff2 = std::sin(t*theta) / sineTheta * invert;
 
     // Compute and return the interpolated quaternion
     return quaternion1 * coeff1 + quaternion2 * coeff2;
@@ -244,7 +244,7 @@ Quaternion& Quaternion::operator-=(const Quaternion& quaternion) {
     return *this;
 }
 
-Quaternion Quaternion::operator*(double rhs) const {
+Quaternion Quaternion::operator*(const double rhs) const {
     return {rhs * x, rhs * y, rhs * z, rhs * w};
 }
 

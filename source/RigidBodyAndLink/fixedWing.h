@@ -13,7 +13,7 @@
 #include "Definitions/fixedWingDefinitions.h"
 #include "Control/lowLevelController.h"
 
-class FixedWing : public RigidBody {
+class FixedWing final : public RigidBody {
 
 public:
     FixedWing(worldPhysics& physics, Logger& logger, const fixedWingProperties& properties);
@@ -61,12 +61,12 @@ private:
     [[nodiscard]] Vector3<double> m_earthToBody(const Vector3<double>& earthVector) const;
     [[nodiscard]] Vector3<double> m_bodyToEarth(const Vector3<double>& bodyVector) const;
 
-    fixedWingStates m_calcStatesDerivatives(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> externalForceEarth);
-    void m_eulerIntegration(fixedWingStates& derivatives, double dt);
+    fixedWingStates m_calcStatesDerivatives(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, const Vector3<double>& externalForceEarth);
+    void m_eulerIntegration(const fixedWingStates& derivatives, double dt);
 
     [[nodiscard]] double m_pwmToAngle(const std::string& surface, uint16_t pwm) const;
 
-    void m_writeLog(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, Vector3<double> tetherForceBody);
+    void m_writeLog(const Vector3<double>& forceAeroBody, const Vector3<double>& momentAeroBody, const Vector3<double>& tetherForceBody);
 };
 
 #endif //GRS_SIMULATOR_FIXEDWING_H

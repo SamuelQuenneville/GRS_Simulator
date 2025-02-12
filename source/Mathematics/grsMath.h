@@ -159,7 +159,7 @@ T unwrap(T prev, T now) {
  */
 template <typename T>
 inline bool isZero(const T fVal1) {
-    static_assert(std::is_floating_point<T>::value || std::is_base_of<T,float>::value,
+    static_assert(std::is_floating_point_v<T> || std::is_base_of_v<T,float>,
                   "Template parameter not of type float");
     return (std::fabs(static_cast<float>(fVal1)) < __FLT_EPSILON__);
 }
@@ -169,7 +169,7 @@ inline bool isZero(const T fVal1) {
  */
 template <typename T>
 inline bool isPositive(const T fVal1) {
-    static_assert(std::is_floating_point<T>::value || std::is_base_of<T,float>::value,
+    static_assert(std::is_floating_point_v<T> || std::is_base_of_v<T,float>,
                   "Template parameter not of type float");
     return (static_cast<float>(fVal1) >= __FLT_EPSILON__);
 }
@@ -179,7 +179,7 @@ inline bool isPositive(const T fVal1) {
  */
 template <typename T>
 inline bool isNegative(const T fVal1) {
-    static_assert(std::is_floating_point<T>::value || std::is_base_of<T,float>::value,
+    static_assert(std::is_floating_point_v<T> || std::is_base_of_v<T,float>,
                   "Template parameter not of type float");
     return (static_cast<float>(fVal1) <= (-1.0 * __FLT_EPSILON__));
 }

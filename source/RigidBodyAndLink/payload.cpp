@@ -17,7 +17,7 @@ Payload::Payload(worldPhysics& physics, Logger& logger, payloadProperties& prope
 
 }
 
-void Payload::update(double dt) {
+void Payload::update(const double dt) {
 
     if (!m_isGrounded) {
         Vector3<double> externalForcesEarth = calcExternalForce() + m_calcAeroForces();
@@ -53,12 +53,11 @@ void Payload::setInitialStates(initialStates& states) {
 }
 
 void Payload::m_writeLog() {
-    payloadLogMessage logMessage{};
 
-    logMessage = {
-            centerOfMass->position(),
-            centerOfMass->velocity(),
-            externalForces()
+    payloadLogMessage logMessage = {
+        centerOfMass->position(),
+        centerOfMass->velocity(),
+        externalForces()
     };
 
     m_logger.writePayloadMessage(logMessage);
@@ -78,7 +77,7 @@ payloadStates Payload::m_calcStatesDerivatives(Vector3<double> externalForceEart
     return derivatives;
 }
 
-void Payload::m_eulerIntegration(payloadStates& derivatives, double dt) {
+void Payload::m_eulerIntegration(const payloadStates& derivatives, const double dt) {
 
     m_states.x += derivatives.x * dt;
     m_states.y += derivatives.y * dt;
@@ -96,13 +95,10 @@ void Payload::m_eulerIntegration(payloadStates& derivatives, double dt) {
 }
 
 Vector3<double> Payload::m_calcAeroForces() {
-    Vector3<double> dragForces = Vector3<double>::zeros();
 
     // Drag = -coeff * ||v_rel|| * v_rel; same as ||v_rel||^2 * v_rel/||v_rel||
     double coeff = 0.5 * m_physics.airDensity * m_properties.cda;
     Vector3<double> v_rel = centerOfMass->velocity() - cast<double>(m_physics.wind);
 
-    dragForces = -coeff * v_rel.length() * v_rel;
-
-    return dragForces;
+    return -coeff * v_rel.length() * v_rel;
 }

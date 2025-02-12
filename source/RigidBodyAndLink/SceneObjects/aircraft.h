@@ -14,7 +14,7 @@
 #include "OpenglFramework/vertexArrayObject.h"
 #include "RigidBodyAndLink/fixedWing.h"
 
-class Aircraft : public PhysicsObject {
+class Aircraft final : public PhysicsObject {
 
 public :
     Aircraft(FixedWing* aircraft, const Vector3<double>& scaling, const std::string& executablePath);

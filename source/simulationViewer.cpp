@@ -158,20 +158,20 @@ void SimulationViewer::mouseButtonEvent(const int button, const int action, cons
     }
 }
 
-void SimulationViewer::mouseMotionEvent(double x, double y) {
+void SimulationViewer::mouseMotionEvent(const double x, const double y) {
     m_gui.onMouseMotionEvent(x, y);
 
-    int leftButtonState   = glfwGetMouseButton(m_window.get(), GLFW_MOUSE_BUTTON_LEFT);
-    int rightButtonState  = glfwGetMouseButton(m_window.get(), GLFW_MOUSE_BUTTON_RIGHT);
-    int middleButtonState = glfwGetMouseButton(m_window.get(), GLFW_MOUSE_BUTTON_MIDDLE);
-    int altKeyState       = glfwGetKey(m_window.get(), GLFW_KEY_LEFT_ALT);
+    const int leftButtonState   = glfwGetMouseButton(m_window.get(), GLFW_MOUSE_BUTTON_LEFT);
+    const int rightButtonState  = glfwGetMouseButton(m_window.get(), GLFW_MOUSE_BUTTON_RIGHT);
+    const int middleButtonState = glfwGetMouseButton(m_window.get(), GLFW_MOUSE_BUTTON_MIDDLE);
+    const int altKeyState       = glfwGetKey(m_window.get(), GLFW_KEY_LEFT_ALT);
 
     if (m_scene) {
         m_scene->mouseMotionEvent(x, y, leftButtonState, rightButtonState, middleButtonState, altKeyState);
     }
 }
 
-void SimulationViewer::scrollEvent(double x, double y) {
+void SimulationViewer::scrollEvent(const double x, const double y) {
     if (m_scene) {
         m_scene->scrollingEvent(x, y, 1.0f);
     }

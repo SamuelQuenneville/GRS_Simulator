@@ -20,7 +20,7 @@ int Node::getId() const {
     return m_id;
 }
 
-void Node::update(Vector3<double> newPosition, Vector3<double> newVelocity, Vector3<double> newForce, Vector3<double> newMoment) {
+void Node::update(const Vector3<double>& newPosition, const Vector3<double>& newVelocity, const Vector3<double>& newForce, const Vector3<double>& newMoment) {
     setPosition(newPosition);
     setVelocity(newVelocity);
     setForce(newForce);

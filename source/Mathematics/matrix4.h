@@ -388,7 +388,7 @@ public:
     }
 
     // Return a 4x4 rotation matrix
-    static Matrix4<T> rotationMatrix(const Vector3<T>& axis, float angle) {
+    static Matrix4<T> rotationMatrix(const Vector3<T>& axis, const float angle) {
 
         T cosA = std::cos(angle);
         T sinA = std::sin(angle);
