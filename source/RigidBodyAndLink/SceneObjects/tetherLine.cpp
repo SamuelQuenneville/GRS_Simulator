@@ -27,12 +27,12 @@ void TetherLine::render(Shader& shader, const Matrix4<double>& worldToCameraMatr
     shader.setMatrix4x4Uniform("worldToCameraMatrix", worldToCameraMatrix);
 
     // Set the vertex color
-    Vector4<double> color(0.0, 0.0, 0.0, 1.0);
+    const Vector4 color(0.0f, 0.0f, 0.0f, 1.0f);
     shader.setIntUniform("isGlobalVertexColorEnabled", 1, false);
     shader.setVector4Uniform("globalVertexColor", color, false);
 
     // Get the location of shader attribute variables
-    GLint vertexPositionLoc = shader.getAttribLocation("vertexPosition");
+    const GLint vertexPositionLoc = shader.getAttribLocation("vertexPosition");
 
     glEnableVertexAttribArray(vertexPositionLoc);
     glVertexAttribPointer(vertexPositionLoc, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
@@ -62,7 +62,7 @@ void TetherLine::updatePosition() {
 void TetherLine::m_createVertexBufferAndArrayObject() {
     m_vertexBufferVertices.create();
     m_vertexBufferVertices.bind();
-    auto sizeVertices = static_cast<GLsizei>(m_linePoints.size() * sizeof(Vector3<float>));
+    const auto sizeVertices = static_cast<GLsizei>(m_linePoints.size() * sizeof(Vector3<float>));
     m_vertexBufferVertices.copyDataIntoVBO(sizeVertices, &m_linePoints[0], GL_STATIC_DRAW);
     m_vertexBufferVertices.unbind();
 

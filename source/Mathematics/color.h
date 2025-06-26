@@ -38,7 +38,7 @@ public:
     static Color backgroundColor() {return {0.298f, 0.298f, 0.32157f, 1.0f};}
     static Color floorColor() {return {0.78f, 0.78f, 0.78f, 1.0f};}
 
-    static inline Color color(int index) {
+    static Color color(const int index) {
         switch (index) {
             case 1: return red();
             case 2: return yellow();

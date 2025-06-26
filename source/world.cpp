@@ -42,14 +42,18 @@ void World::readConfigurationFile(const std::string& fileName) {
     std::chrono::duration<double> timeStep(1.0 / m_systemConfiguration.llcRate);
     simulationConfiguration = {simParams.fixedDuration, simParams.duration, timeStep};
 
-    m_aircraftProperties = ConfigurationParser::parseFixedWingProperties(simParams.aircraftPropertiesFileDirectory);
+    m_systemProperties.fixedWing = ConfigurationParser::parseFixedWingProperties(simParams.aircraftPropertiesFileDirectory);
     m_ctrlGains = ConfigurationParser::parseControllerGains(simParams.controllerGainsFileDirectory);
 
     if (m_systemConfiguration.configuration != "FREE") {
-        m_tetherProperties = ConfigurationParser::parseTetherProperties(simParams.tetherPropertiesFileDirectory);
+        m_systemProperties.tether = ConfigurationParser::parseTetherProperties(simParams.tetherPropertiesFileDirectory);
 
-        m_payloadProperties = ConfigurationParser::parsePayloadProperties(simParams.payloadPropertiesFileDirectory);
+        m_systemProperties.payload = ConfigurationParser::parsePayloadProperties(simParams.payloadPropertiesFileDirectory);
         m_initialPayloadStates = ConfigurationParser::parseInitialStates(nodeConfiguration, "InitialStatesPayload");
+    }
+
+    if (m_systemConfiguration.haveLauncher) {
+        m_systemProperties.launcher = ConfigurationParser::parseLauncherProperties(simParams.launcherPropertiesFileDirectory);
     }
 
     for (int i = 1; i <= m_systemConfiguration.numberOfUav; i++) {
@@ -70,17 +74,17 @@ Logger& World::logger() {
 
 void World::createSystem() {
 
-    m_system = std::make_unique<System>(m_programArgs, physics, logger(), m_systemConfiguration, m_ctrlGains);
+    m_system = std::make_unique<System>(m_programArgs, physics, logger(), m_systemConfiguration, m_systemProperties, m_ctrlGains);
     m_system->setTarget(m_systemTarget);
 
     switch(getSystemType()) {
         case FREE:
             switch (m_systemConfiguration.numberOfUav) {
                 case 1:
-                    m_system->createSystemOneAircraft(m_aircraftProperties, m_initialAircraftStatesVector.front());
+                    m_system->createSystemOneAircraft(m_initialAircraftStatesVector.front());
                     break;
                 case 2:
-                    m_system->createSystemTwoAircraft(m_aircraftProperties, m_initialAircraftStatesVector);
+                    m_system->createSystemTwoAircraft(m_initialAircraftStatesVector);
                     break;
                 case 3:
                     throw std::invalid_argument( "System 3 aircraft free flying not implemented" );
@@ -92,13 +96,13 @@ void World::createSystem() {
         case V:
             switch (m_systemConfiguration.numberOfUav) {
                 case 1:
-                    m_system->createSystemOneAircraftGrounded(m_aircraftProperties, m_tetherProperties, m_initialAircraftStatesVector.front());
+                    m_system->createSystemOneAircraftGrounded(m_initialAircraftStatesVector.front());
                     break;
                 case 2:
-                    m_system->createSystemTwoAircraftV(m_systemConfiguration.grounded, m_aircraftProperties, m_tetherProperties, m_payloadProperties, m_initialAircraftStatesVector, m_initialPayloadStates);
+                    m_system->createSystemTwoAircraftV(m_systemConfiguration.grounded, m_initialAircraftStatesVector, m_initialPayloadStates);
                     break;
                 case 3:
-                    m_system->createSystemThreeAircraftV(m_systemConfiguration.grounded, m_aircraftProperties, m_tetherProperties, m_payloadProperties, m_initialAircraftStatesVector, m_initialPayloadStates);
+                    m_system->createSystemThreeAircraftV(m_systemConfiguration.grounded, m_initialAircraftStatesVector, m_initialPayloadStates);
                     break;
                 default:
                     throw std::invalid_argument( "Invalid number of UAV" );
@@ -168,13 +172,13 @@ std::string World::getExecutablePath() {
 
 std::string World::getExecutablePath() {
     char path[PATH_MAX];
-    ssize_t count = readlink("/proc/self/exe", path, PATH_MAX);
+    const ssize_t count = readlink("/proc/self/exe", path, PATH_MAX);
     if (count == -1) {
         throw std::runtime_error("Failed to get executable path");
     }
 
     // Convert to std::string
-    std::string fullPath(path, count);
+    const std::string fullPath(path, count);
     // Extract the directory path
     std::string executablePath = fullPath.substr(0, fullPath.find_last_of('/'));
 

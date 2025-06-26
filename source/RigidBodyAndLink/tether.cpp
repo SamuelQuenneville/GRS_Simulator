@@ -10,7 +10,7 @@
 
 int Tether::m_idCounter = 0;
 
-Tether::Tether(worldPhysics& physics, Logger& logger, tetherProperties& properties)
+Tether::Tether(const worldPhysics& physics, Logger& logger, const tetherProperties& properties)
     : m_id(++m_idCounter)
     , m_type(Link::RIGID)
     , m_physics(physics)
@@ -30,8 +30,8 @@ Link::linkType Tether::getType() const {
 
 void Tether::update(double dt) {
     // Update node position base on connection if aircraft or payload
-    std::vector<Node*> &startPointConnections = connections[&startPointNode()];
-    std::vector<Node*> &endPointConnections = connections[&endPointNode()];
+    const std::vector<Node*> &startPointConnections = connections[&startPointNode()];
+    const std::vector<Node*> &endPointConnections = connections[&endPointNode()];
 
     // Should be connect to a payload
     // TODO what happen if Y tether config
@@ -52,7 +52,7 @@ void Tether::update(double dt) {
     m_updateRelativeSpeed();
 
     // Calculate the tension force and distribute to the nodes
-    Vector3<double> tensionForce = m_calcTensionForce();
+    const Vector3<double> tensionForce = m_calcTensionForce();
     startPoint->setForce(-tensionForce);
     endPoint->setForce(tensionForce);
 
@@ -70,15 +70,15 @@ void Tether::m_updateRelativeSpeed() {
 
 Vector3<double> Tether::m_calcTensionForce() {
     // Find tether position relative to startPoint
-    double tetherMagnitude = m_relativePosition.length();
-    Vector3<double> tetherNormalize = m_relativePosition.normalize();
+    const double tetherMagnitude = m_relativePosition.length();
+    const Vector3<double> tetherNormalize = m_relativePosition.normalize();
 
     // Calculate tether elongation
-    double tetherDeformation = tetherMagnitude - m_properties.length;
+    const double tetherDeformation = tetherMagnitude - m_properties.length;
 
     Vector3<double> forceSpring = (-m_properties.rigidity * tetherDeformation * tetherNormalize) - (m_properties.damping * m_relativeSpeed.dot(tetherNormalize) * tetherNormalize);
 
-    double tension = -tetherNormalize.dot(forceSpring);
+    const double tension = -tetherNormalize.dot(forceSpring);
     if(tension<0) {
         forceSpring = Vector3<double>::zeros();
     }
@@ -89,10 +89,10 @@ Vector3<double> Tether::m_calcTensionForce() {
     return forceSpring;
 }
 
-double Tether::m_calcSkinFrictionCoeff(double parallelVelocity) const {
+double Tether::m_calcSkinFrictionCoeff(const double parallelVelocity) const {
 
     // Calculate Mach number
-    double parallelMach = parallelVelocity / m_physics.soundSpeed;
+    const double parallelMach = parallelVelocity / m_physics.soundSpeed;
 
     // Calculate Cf
     double Cf;
@@ -105,19 +105,19 @@ double Tether::m_calcSkinFrictionCoeff(double parallelVelocity) const {
     return Cf;
 }
 
-double Tether::m_calcCrossflowDrag(double normalVelocity) const {
+double Tether::m_calcCrossflowDrag(const double normalVelocity) const {
 
     // Calculate Mach number
-    double normalMach = normalVelocity / m_physics.soundSpeed;
-    double normalMachSquare = normalMach * normalMach;
+    const double normalMach = normalVelocity / m_physics.soundSpeed;
+    const double normalMachSquare = normalMach * normalMach;
 
     // Calculate Cn
-    double Cn = 1.17 + normalMach / 40.0 + normalMachSquare / 4.0 + normalMachSquare*normalMach / 1.6;
+    const double Cn = 1.17 + normalMach / 40.0 + normalMachSquare / 4.0 + normalMachSquare*normalMach / 1.6;
 
     return Cn;
 }
 
-std::tuple<double, double> Tether::m_calcLiftDragCoeff(double Cf, double Cn, double theta) {
+std::tuple<double, double> Tether::m_calcLiftDragCoeff(const double Cf, const double Cn, const double theta) {
 
     const double sinTheta = std::sin(theta);
     const double cosTheta = std::cos(theta);
@@ -130,18 +130,18 @@ std::tuple<double, double> Tether::m_calcLiftDragCoeff(double Cf, double Cn, dou
 
 // TODO implement tether aerodynamic and discretization
 Vector3<double> Tether::m_calcTetherAeroForces(Vector3<double> windSpeed) {
-    Vector3<double> forceAero = Vector3<double>::zeros();
+    const Vector3<double> forceAero = Vector3<double>::zeros();
     m_tetherLogInfos.forceAero = forceAero;
 
     return forceAero;
 }
 
-void Tether::grounded() {
+void Tether::grounded() const {
     startPoint->setPosition(Vector3<double>::zeros());
     startPoint->setVelocity(Vector3<double>::zeros());
 }
 
-void Tether::m_writeLog() {
+void Tether::m_writeLog() const {
 
     tetherLogMessage logMessage = {
         m_id,

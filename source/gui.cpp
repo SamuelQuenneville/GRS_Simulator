@@ -197,6 +197,15 @@ void Gui::m_createConfigurationPanel() {
         m_viewer->m_changeView(view);
     });
 
+    auto* subgroup12 = new nanogui::Widget(group2);
+    subgroup12->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Fill, 0, 5));
+
+    auto* buttonLaunch = new nanogui::Button(subgroup12, "Trigger Launch");
+    buttonLaunch->set_fixed_width(230);
+    buttonLaunch->set_callback([&] {
+        m_viewer->m_launchTriggered();
+    });
+
     // Group 3 Sim Infos
     new nanogui::Label(m_configurationPanel, std::string("Simulation Infos :"),"sans-bold",20);
     auto* group3 = new nanogui::Widget(m_configurationPanel);
@@ -222,7 +231,7 @@ void Gui::m_createConfigurationPanel() {
     buttonGroundspeedMinus->set_flags(nanogui::Button::NormalButton);
     buttonGroundspeedMinus->set_callback([&] {
         if (m_hasConfigFile) {
-            m_groundspeedTarget -= 0.5;
+            m_groundspeedTarget -= 0.5f;
             m_groundspeedTargetText->set_value(doubleToString(m_groundspeedTarget,1));
             m_viewer->m_updateTarget(m_groundspeedTarget, m_payloadTarget);
         }
@@ -232,7 +241,7 @@ void Gui::m_createConfigurationPanel() {
     buttonGroundspeedPlus->set_flags(nanogui::Button::NormalButton);
     buttonGroundspeedPlus->set_callback([&] {
         if (m_hasConfigFile) {
-            m_groundspeedTarget += 0.5;
+            m_groundspeedTarget += 0.5f;
             m_groundspeedTargetText->set_value(doubleToString(m_groundspeedTarget,1));
             m_viewer->m_updateTarget(m_groundspeedTarget, m_payloadTarget);
         }
@@ -335,7 +344,7 @@ std::string Gui::doubleToString(const double value, const int precision) {
     return ss.str();
 }
 
-void Gui::setTargetFromConfig(const double groundspeed, const std::vector<double>& positionTarget) {
+void Gui::setTargetFromConfig(const float groundspeed, const std::vector<double>& positionTarget) {
     m_groundspeedTarget = groundspeed;
     m_groundspeedTargetText->set_value(doubleToString(m_groundspeedTarget,1));
 

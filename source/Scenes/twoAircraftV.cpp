@@ -18,9 +18,7 @@ TwoAircraftV::TwoAircraftV(World& world)
     m_resetCameraToViewAll();
 }
 
-TwoAircraftV::~TwoAircraftV() {
-
-}
+TwoAircraftV::~TwoAircraftV() = default;
 
 void TwoAircraftV::createPhysicsWorld() {
 
@@ -68,7 +66,7 @@ void TwoAircraftV::destroyPhysicsWorld() {
     m_staticObjects.clear();
 }
 
-void TwoAircraftV::initBodiesPositions() {
+void TwoAircraftV::initBodiesPositions() const {
     m_launcher1->setTransform(Transform({-0.849, 0.816, 30.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0), 0.0, M_PI/2.0)));
     m_launcher2->setTransform(Transform({0.849, 0.816, -30.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0),0.0, -M_PI/2.0)));
     m_ground->setTransform(Transform({0.0, -0.5, 0.0}, Quaternion::identity()));
@@ -80,9 +78,9 @@ void TwoAircraftV::updatePhysics() {
     m_world.update();
 }
 
-void TwoAircraftV::updateTarget(double groundspeed, std::vector<double> payloadPosition) {
+void TwoAircraftV::updateTarget(const float groundspeed, std::vector<double> payloadPosition) {
     target t = m_world.system()->getTarget();
-    t.groundspeed = static_cast<float>(groundspeed);
+    t.groundspeed = groundspeed;
     t.positionPayload = payloadPosition;
     m_world.system()->setTarget(t);
 
@@ -102,7 +100,7 @@ void TwoAircraftV::destroy() {
 }
 
 void TwoAircraftV::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
-    for (auto& tethersObject : m_tethersObjects) {
+    for (const auto& tethersObject : m_tethersObjects) {
         tethersObject->render(m_colorShader, worldToCameraMatrix);
     }
 
@@ -110,12 +108,12 @@ void TwoAircraftV::renderSinglePass(Shader& shader, const Matrix4<double>& world
     shader.bind();
 
     // Render all the moving physics objects of the scene
-    for (auto& physicsObject : m_physicsObjects) {
+    for (const auto& physicsObject : m_physicsObjects) {
         physicsObject->render(shader, worldToCameraMatrix);
     }
 
     // Render the static objects (floor could be obstacle...)
-    for (auto& staticObject : m_staticObjects) {
+    for (const auto& staticObject : m_staticObjects) {
         staticObject->render(shader, worldToCameraMatrix);
     }
 

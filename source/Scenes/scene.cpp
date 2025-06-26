@@ -18,7 +18,7 @@ Scene::Scene(const std::string& executablePath)
     , m_lastMouseY(0)
     , m_windowWidth(0)
     , m_windowHeight(0)
-    , m_interpolationFactor(0.0f)
+    , m_interpolationFactor(0.0)
     , m_currentCameraVerticalAngle(0.0)
     , m_viewportX(0)
     , m_viewportY(0)
@@ -29,10 +29,10 @@ Scene::Scene(const std::string& executablePath)
     m_light0.translateWorld({30.0f, 80.0f, 30.0f});
     m_light1.translateWorld({30.0f, 80.0f, 30.0f});
 
-    float lightIntensity0 = 0.5f;
-    float lightIntensity1 = 0.2f;
-    Color lightColor0(lightIntensity0 * 1.0f, lightIntensity0 * 1.0f, lightIntensity0 * 1.0f, 1.0f);
-    Color lightColor1(lightIntensity1 * 1.0f, lightIntensity1 * 1.0f, lightIntensity1 * 1.0f, 1.0f);
+    constexpr float lightIntensity0 = 0.5f;
+    constexpr float lightIntensity1 = 0.2f;
+    const Color lightColor0(lightIntensity0 * 1.0f, lightIntensity0 * 1.0f, lightIntensity0 * 1.0f, 1.0f);
+    const Color lightColor1(lightIntensity1 * 1.0f, lightIntensity1 * 1.0f, lightIntensity1 * 1.0f, 1.0f);
 
     m_light0.setDiffuseColor(lightColor0);
     m_light1.setDiffuseColor(lightColor1);
@@ -67,17 +67,17 @@ Scene::~Scene() {
     m_colorShader.destroy();
 }
 
-void Scene::reshape(int width, int height) {
+void Scene::reshape(const int width, const int height) {
     m_camera.setDimensions(width, height);
 }
 
 void Scene::update() {
-    for (auto& physicsObject : m_physicsObjects) {
+    for (const auto& physicsObject : m_physicsObjects) {
         // Update the transform used for the rendering
         physicsObject->updateTransform(m_interpolationFactor);
     }
 
-    for (auto& tetherObject : m_tethersObjects) {
+    for (const auto& tetherObject : m_tethersObjects) {
         tetherObject->updatePosition();
     }
 }
@@ -143,7 +143,7 @@ void Scene::render() {
 
     // Is shadow mapping is enabled
     GLint textureUnits[NB_SHADOW_MAPS];
-    for (const auto & i : m_shadowMapTexture) {
+    for (const auto& i : m_shadowMapTexture) {
         i.bind();
     }
     for (int i = 0; i < NB_SHADOW_MAPS; i++) {
@@ -192,12 +192,12 @@ void Scene::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCamer
     shader.bind();
 
     // Render all the moving physics objects of the scene
-    for (auto & physicsObject : m_physicsObjects) {
+    for (const auto& physicsObject : m_physicsObjects) {
         physicsObject->render(shader, worldToCameraMatrix);
     }
 
     // Render the static objects (floor could be obstacle...)
-    for (auto & staticObject : m_staticObjects) {
+    for (const auto& staticObject : m_staticObjects) {
         staticObject->render(shader, worldToCameraMatrix);
     }
 
@@ -215,7 +215,7 @@ void Scene::destroy() {
 }
 
 
-bool Scene::mouseButtonEvent(int button, bool down, int mods, double mousePosX, double mousePosY) {
+bool Scene::mouseButtonEvent(int button, const bool down, int mods, const double mousePosX, const double mousePosY) {
     if (down) {
         m_lastMouseX = mousePosX;
         m_lastMouseY = mousePosY;
@@ -223,7 +223,7 @@ bool Scene::mouseButtonEvent(int button, bool down, int mods, double mousePosX, 
     return true;
 }
 
-bool Scene::mouseMotionEvent(double xMouse, double yMouse, int leftButtonState, int rightButtonState, int middleButtonState, int altKeyState) {
+bool Scene::mouseMotionEvent(const double xMouse, const double yMouse, const int leftButtonState, const int rightButtonState, const int middleButtonState, const int altKeyState) {
     // Zoom
     if (leftButtonState == GLFW_PRESS && altKeyState == GLFW_PRESS) {
 
@@ -246,33 +246,33 @@ bool Scene::mouseMotionEvent(double xMouse, double yMouse, int leftButtonState, 
     return true;
 }
 
-bool Scene::scrollingEvent(double xAxis, double yAxis, double scrollSensitivity) {
+bool Scene::scrollingEvent(const double xAxis,const double yAxis, const double scrollSensitivity) {
     m_zoom(yAxis * scrollSensitivity);
     return true;
 }
 
-void Scene::setWindowDimension(int width, int height) {
+void Scene::setWindowDimension(const int width, const int height) {
     m_windowWidth = width;
     m_windowHeight = height;
 }
 
-void Scene::setViewport(int x, int y, int width, int height) {
+void Scene::setViewport(const int x, const int y, const int width, const int height) {
     m_viewportX = x;
     m_viewportY = y;
     m_viewportWidth = width;
     m_viewportHeight = height;
 }
 
-void Scene::setInitialZoom(float zoom) {
+void Scene::setInitialZoom(const float zoom) {
     m_initialZoom = zoom;
 }
 
 void Scene::changeView(const Matrix4<double>& viewMatrix) {
     m_camera.setTransformMatrix(viewMatrix);
-    m_setScenePosition({0,0,0}, 100);
+    m_setScenePosition(Vector3<double>::zeros(), 100.0f);
 }
 
-void Scene::setInterpolationFactor(double interpolationFactor) {
+void Scene::setInterpolationFactor(const double interpolationFactor) {
     m_interpolationFactor = interpolationFactor;
 }
 
@@ -280,7 +280,7 @@ std::chrono::duration<double> Scene::getElapsedTime() const {
     return m_elapsedTime;
 }
 
-void Scene::setElapsedTime(std::chrono::duration<double> elapsedTime) {
+void Scene::setElapsedTime(const std::chrono::duration<double> elapsedTime) {
     m_elapsedTime = elapsedTime;
 }
 
@@ -296,7 +296,7 @@ void Scene::m_createShadowMapFrameBufferObjectAndTexture() {
 
         // Make sure that texture lookups outside the texture coords range will not treat as being in shadow
         glBindTexture(GL_TEXTURE_2D, m_shadowMapTexture[i].getID());
-        GLfloat border[] = {1.0f, 0.0f, 0.0f, 0.0f};
+        constexpr GLfloat border[4] = {1.0f, 0.0f, 0.0f, 0.0f};
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border);
         glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -313,7 +313,7 @@ void Scene::m_createShadowMapFrameBufferObjectAndTexture() {
     }
 }
 
-void Scene::m_setScenePosition(const Vector3<double>& position, float sceneRadius) {
+void Scene::m_setScenePosition(const Vector3<double>& position, const float sceneRadius) {
     // Set the position and radius of the scene
     m_centerOfScene = position;
     m_camera.setSceneRadius(sceneRadius);
@@ -333,19 +333,19 @@ void Scene::m_resetCameraToViewAll() {
     m_camera.setZoom(m_initialZoom);
 }
 
-void Scene::m_zoom(double zoomDiff) {
+void Scene::m_zoom(const double zoomDiff) {
     m_camera.setZoom(zoomDiff);
 }
 
-void Scene::m_translate(int xMouse, int yMouse) {
-    auto dx = static_cast<float>(xMouse - m_lastMouseX);
-    auto dy = static_cast<float>(yMouse - m_lastMouseY);
+void Scene::m_translate(const int xMouse, const int yMouse) {
+    const auto dx = static_cast<float>(xMouse - m_lastMouseX);
+    const auto dy = static_cast<float>(yMouse - m_lastMouseY);
 
     // Translate the camera
     m_camera.translateCamera(-dx / static_cast<float>(m_camera.getWidth()),-dy / static_cast<float>(m_camera.getHeight()), m_centerOfScene);
 }
 
-void Scene::m_rotate(int xMouse, int yMouse) {
+void Scene::m_rotate(const int xMouse, const int yMouse) {
     float deltaHorizRotationAngle = static_cast<float>(m_lastMouseX - xMouse) / static_cast<float>(m_windowWidth) * M_PI;
     float deltaVertRotationAngle  = static_cast<float>(m_lastMouseY - yMouse) / static_cast<float>(m_windowHeight) * M_PI;
 
@@ -356,8 +356,8 @@ void Scene::m_rotate(int xMouse, int yMouse) {
         deltaVertRotationAngle = 0.0;
     }
 
-    Vector3 localVertAxis = m_camera.getTransformMatrix().getUpperLeft3x3Matrix().getInverse() * Vector3<double>(0.0, 1.0, 0.0);
-    m_camera.rotateAroundLocalPoint(Vector3<double>(1.0, 0.0, 0.0), deltaVertRotationAngle, m_centerOfScene);
+    const Vector3 localVertAxis = m_camera.getTransformMatrix().getUpperLeft3x3Matrix().getInverse() * Vector3(0.0, 1.0, 0.0);
+    m_camera.rotateAroundLocalPoint(Vector3(1.0, 0.0, 0.0), deltaVertRotationAngle, m_centerOfScene);
     m_camera.rotateAroundLocalPoint(localVertAxis, deltaHorizRotationAngle, m_centerOfScene);
 
     m_currentCameraVerticalAngle += deltaVertRotationAngle;

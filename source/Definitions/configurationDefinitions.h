@@ -28,6 +28,7 @@ struct simulationParameters {
     std::string aircraftPropertiesFileDirectory;
     std::string tetherPropertiesFileDirectory;
     std::string payloadPropertiesFileDirectory;
+    std::string launcherPropertiesFileDirectory;
     std::string controllerGainsFileDirectory;
     bool fixedDuration;
     float duration;
@@ -38,6 +39,7 @@ struct systemConfiguration {
     int numberOfUav;
     std::string configuration;
     bool grounded;
+    bool haveLauncher;
     bool tetherAeroOn;
     int hlcRate;
     int llcRate;

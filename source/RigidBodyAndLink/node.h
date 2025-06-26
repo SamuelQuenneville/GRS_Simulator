@@ -15,6 +15,7 @@ class Node {
 
 public:
     Node();
+    ~Node() = default;
 
     [[nodiscard]] int getId() const;
 
@@ -39,11 +40,11 @@ private:
     int m_id;
     static int m_idCounter;
 
-    Vector3<double> m_position{0,0,0};          // Earth reference frame
-    Vector3<double> m_velocity{0,0,0};          // Earth reference frame
-    Vector3<double> m_acceleration{0,0,0};      // Earth reference frame
-    Vector3<double> m_force{0,0,0};             // Earth reference frame
-    Vector3<double> m_moment{0,0,0};            // Earth reference frame
+    Vector3<double> m_position = Vector3<double>::zeros();        // Earth reference frame
+    Vector3<double> m_velocity = Vector3<double>::zeros();        // Earth reference frame
+    Vector3<double> m_acceleration = Vector3<double>::zeros();    // Earth reference frame
+    Vector3<double> m_force = Vector3<double>::zeros();           // Earth reference frame
+    Vector3<double> m_moment = Vector3<double>::zeros();          // Earth reference frame
 };
 
 #endif //GRS_SIMULATOR_NODE_H

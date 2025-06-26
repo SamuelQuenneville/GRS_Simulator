@@ -31,6 +31,11 @@ payloadProperties ConfigurationParser::parsePayloadProperties(const std::string&
     return node["PayloadProperties"].as<payloadProperties>();
 }
 
+launcherProperties ConfigurationParser::parseLauncherProperties(const std::string& filePath) {
+    YAML::Node node = YAML::LoadFile(filePath);
+    return node["LauncherProperties"].as<launcherProperties>();
+}
+
 ctrlGains ConfigurationParser::parseControllerGains(const std::string& filePath) {
     YAML::Node node = YAML::LoadFile(filePath);
 

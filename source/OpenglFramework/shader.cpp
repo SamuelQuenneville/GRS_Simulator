@@ -226,11 +226,11 @@ void Shader::setVector3Uniform(const std::string& variableName, const Vector3<do
     }
 }
 
-void Shader::setVector4Uniform(const std::string& variableName, const Vector4<double>& v, bool errorIfMissing) const {
+void Shader::setVector4Uniform(const std::string& variableName, const Vector4<float>& v, const bool errorIfMissing) const {
     assert(m_programObjectId != 0);
     GLint location = getUniformLocation(variableName, errorIfMissing);
     if (location != -1) {
-        glUniform4f(location, static_cast<GLfloat>(v.x()), static_cast<GLfloat>(v.y()), static_cast<GLfloat>(v.z()), static_cast<GLfloat>(v.w()));
+        glUniform4f(location, v.x(), v.y(), v.z(), v.w());
     }
 }
 

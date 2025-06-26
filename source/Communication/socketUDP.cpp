@@ -31,42 +31,6 @@ bool SocketUDP::bind(const char* address, const uint16_t port) const {
     return result == 0;
 }
 
-ssize_t SocketUDP::sendTo(const void* packet, const size_t size, const char* address, const uint16_t port) const {
-    sockaddr_in destinationAddress{};
-    m_makeSocketAddress(address, port, destinationAddress);
-    return ::sendto(m_fileDescriptor, packet, size, 0, reinterpret_cast<sockaddr *>(&destinationAddress), sizeof(destinationAddress));
-}
-
-ssize_t SocketUDP::receive(void* packet, const size_t size, const uint32_t timeoutMilliSeconds) {
-    if (!pollIn(timeoutMilliSeconds)) {
-        return -1;
-    }
-
-    socklen_t addressLength = sizeof(m_lastReceiveAddress);
-    const ssize_t receiveLength = ::recvfrom(m_fileDescriptor, packet, size, MSG_DONTWAIT, reinterpret_cast<sockaddr *>(&m_lastReceiveAddress), &addressLength);
-    return receiveLength;
-}
-
-void SocketUDP::lastReceivedAddress(const char*& ipAddress, uint16_t& port) const {
-    ipAddress = inet_ntoa(m_lastReceiveAddress.sin_addr);
-    port = ntohs(m_lastReceiveAddress.sin_port);
-}
-
-bool SocketUDP::pollIn(const uint32_t timeoutMilliSeconds) const {
-    fd_set readFileDescriptors;
-    timeval timeout{};
-    FD_ZERO(&readFileDescriptors);
-    FD_SET(m_fileDescriptor, &readFileDescriptors);
-
-    timeout.tv_sec = timeoutMilliSeconds / 1000;
-    timeout.tv_usec = (timeoutMilliSeconds % 1000) * 1000;
-
-    if (select(m_fileDescriptor + 1, &readFileDescriptors, nullptr, nullptr, &timeout) != 1) {
-        return false;
-    }
-    return true;
-}
-
 void SocketUDP::m_makeSocketAddress(const char* address, const uint16_t port, sockaddr_in& socketAddress) {
     memset(&socketAddress, 0, sizeof(socketAddress));
     socketAddress.sin_family = AF_INET;

@@ -28,10 +28,7 @@ public:
     ~SocketUDP();
 
     bool bind(const char* address, uint16_t port) const;
-    ssize_t sendTo(const void* packet, size_t size, const char* address, uint16_t port) const;
-    ssize_t receive(void* packet, size_t size, uint32_t timeoutMilliSeconds);
-    void lastReceivedAddress(const char*& ipAddress, uint16_t& port) const;
-    [[nodiscard]] bool pollIn(uint32_t timeoutMilliSeconds) const;
+    [[nodiscard]] int getFileDescriptor() const {return m_fileDescriptor;};
 
 private:
     int m_fileDescriptor;

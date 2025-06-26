@@ -30,7 +30,7 @@ public:
 
     // Update the physics world (take a simulation step) can be called several times per frame
     virtual void updatePhysics() = 0;
-    virtual void updateTarget(double groundspeed,  std::vector<double> payloadPosition) = 0;
+    virtual void updateTarget(float groundspeed,  std::vector<double> payloadPosition) = 0;
 
     virtual void update();
     virtual void render();
@@ -50,12 +50,12 @@ public:
 
     void setInterpolationFactor(double interpolationFactor);
 
-    std::chrono::duration<double> getElapsedTime() const;
+    [[nodiscard]] std::chrono::duration<double> getElapsedTime() const;
     void setElapsedTime(std::chrono::duration<double> elapsedTime);
 
 protected:
-    const int SHADOWMAP_WIDTH = 2048;
-    const int SHADOWMAP_HEIGHT = 2048;
+    const GLsizei SHADOWMAP_WIDTH  = 2048;
+    const GLsizei SHADOWMAP_HEIGHT = 2048;
 
     static constexpr int NB_SHADOW_MAPS = 1;
 

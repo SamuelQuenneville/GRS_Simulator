@@ -33,7 +33,7 @@ public:
     void keyboardEvent(int key, int scancode, int action, int modifiers);
     void mouseButtonEvent(int button, int action, int modifiers);
     void mouseMotionEvent(double x, double y);
-    void scrollEvent(double x, double y);
+    void scrollEvent(double x, double y) const;
 
     // Called when an OpenGL Error occurs
     static void GLAPIENTRY onOpenGLError(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam );
@@ -63,10 +63,11 @@ private:
     void m_updateDynamics();
     void m_updateSingleDynamicsStep();
 
-    void m_updateTarget(double groundspeed,  std::vector<double> payloadPosition);
-    void m_changeView(const Matrix4<double>& viewMatrix);
+    void m_updateTarget(float groundspeed, const std::vector<double> &payloadPosition) const;
+    void m_changeView(const Matrix4<double>& viewMatrix) const;
+    void m_launchTriggered() const;
 
-    void m_render();
+    void m_render() const;
 
     bool m_sceneCreated;
     void m_createScene();
@@ -82,7 +83,7 @@ private:
     bool m_singlePhysicsStepDone;
 
     static void m_setGlfwHints();
-    void m_setCallback();
+    void m_setCallback() const;
     static void m_enableGlfwDebugOutput();
 };
 

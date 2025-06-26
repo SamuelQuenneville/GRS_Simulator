@@ -140,11 +140,11 @@ public:
     // R_AB = | 0    cos(theta)    sin(theta) |
     //        | 0   -sin(theta)    cos(theta) |
     //
-    static Matrix3<T> makeXRotation(const T& angle) {
+    static Matrix3 makeXRotation(const T& angle) {
         const T cosAngle = std::cos(angle);
         const T sinAngle = std::sin(angle);
 
-        Matrix3<T> result
+        Matrix3 result
                 {
                         {1,         0,        0},
                         {0,  cosAngle, sinAngle},
@@ -160,12 +160,12 @@ public:
     // R_AB = |          0    1            0  |
     //        |  sin(theta)   0    cos(theta) |
     //
-    static Matrix3<T> makeYRotation(const T& angle) {
+    static Matrix3 makeYRotation(const T& angle) {
 
         const T cosAngle = std::cos(angle);
         const T sinAngle = std::sin(angle);
 
-        Matrix3<T> result
+        Matrix3 result
                 {
                         { cosAngle, 0, -sinAngle},
                         {        0, 1,         0},
@@ -181,12 +181,12 @@ public:
     // R_AB = | -sin(theta)   cos(theta)   0 |
     //        |          0            0    1 |
     //
-    static Matrix3<T> makeZRotation(const T& angle) {
+    static Matrix3 makeZRotation(const T& angle) {
 
         const T cosAngle = std::cos(angle);
         const T sinAngle = std::sin(angle);
 
-        Matrix3<T> result
+        Matrix3 result
                 {
                         { cosAngle,  sinAngle, 0},
                         {-sinAngle,  cosAngle, 0},
@@ -197,9 +197,9 @@ public:
     }
 
     // Create identity matrix
-    static Matrix3<T> eye() {
+    static Matrix3 eye() {
 
-        Matrix3<T> result
+        Matrix3 result
                 {
                         {1, 0, 0},
                         {0, 1, 0},
@@ -210,9 +210,9 @@ public:
     }
 
     // Create zeros matrix
-    static Matrix3<T> zeros() {
+    static Matrix3 zeros() {
 
-        Matrix3<T> result
+        Matrix3 result
                 {
                         {0, 0, 0},
                         {0, 0, 0},
@@ -233,7 +233,7 @@ public:
     }
 
     // Addition of two matrices
-    Matrix3<T> operator+(const Matrix3<T>& rhs) {
+    Matrix3 operator+(const Matrix3<T>& rhs) {
         Matrix3 result = zeros();
 
         for (unsigned i=0; i<3; i++) {
@@ -246,7 +246,7 @@ public:
     }
 
     // Cumulative addition of this matrix and another
-    Matrix3<T>& operator+=(const Matrix3<T>& rhs) {
+    Matrix3& operator+=(const Matrix3<T>& rhs) {
         for (unsigned i=0; i<3; i++) {
             for (unsigned j=0; j<3; j++) {
                 this->m_data[i][j] += rhs(i,j);
@@ -257,7 +257,7 @@ public:
     }
 
     // Subtraction of this matrix and another
-    Matrix3<T> operator-(const Matrix3<T>& rhs) {
+    Matrix3 operator-(const Matrix3<T>& rhs) {
         Matrix3 result = zeros();
 
         for (unsigned i=0; i<3; i++) {
@@ -270,7 +270,7 @@ public:
     }
 
     // Cumulative subtraction of this matrix and another
-    Matrix3<T>& operator-=(const Matrix3<T>& rhs) {
+    Matrix3& operator-=(const Matrix3<T>& rhs) {
         for (unsigned i=0; i<3; i++) {
             for (unsigned j=0; j<3; j++) {
                 this->m_data[i][j] -= rhs(i,j);
@@ -281,7 +281,7 @@ public:
     }
 
     // Left multiplication of this matrix and another
-    Matrix3<T> operator*(const Matrix3<T>& rhs) {
+    Matrix3 operator*(const Matrix3<T>& rhs) {
         Matrix3 result = zeros();
 
         for (unsigned i=0; i<3; i++) {
@@ -296,14 +296,14 @@ public:
     }
 
     // Cumulative left multiplication of this matrix and another
-    Matrix3<T>& operator*=(const Matrix3<T>& rhs) {
+    Matrix3& operator*=(const Matrix3<T>& rhs) {
         Matrix3 result = (*this) * rhs;
         (*this) = result;
         return *this;
     }
 
     // Calculate a transpose of this matrix
-    Matrix3<T> transpose() {
+    Matrix3 transpose() {
         Matrix3 result = zeros();
 
         for (unsigned i=0; i<3; i++) {
@@ -328,7 +328,7 @@ public:
     }
 
     // Matrix/scalar addition
-    Matrix3<T> operator+(const T& rhs) {
+    Matrix3 operator+(const T& rhs) {
         Matrix3 result = zeros();
 
         for (unsigned i=0; i<3; i++) {
@@ -341,7 +341,7 @@ public:
     }
 
     // Matrix/scalar subtraction
-    Matrix3<T> operator-(const T& rhs) {
+    Matrix3 operator-(const T& rhs) {
         Matrix3 result = zeros();
 
         for (unsigned i=0; i<3; i++) {
@@ -354,7 +354,7 @@ public:
     }
 
     // Matrix/scalar multiplication
-    Matrix3<T> operator*(const T& rhs) {
+    Matrix3 operator*(const T& rhs) {
         Matrix3 result = zeros();
 
         for (unsigned i=0; i<3; i++) {
@@ -367,7 +367,7 @@ public:
     }
 
     // Matrix/scalar division
-    Matrix3<T> operator/(const T& rhs) {
+    Matrix3 operator/(const T& rhs) {
         Matrix3 result = zeros();
 
         for (unsigned i=0; i<3; i++) {
@@ -392,7 +392,7 @@ public:
         return result;
     }
 
-    Matrix3<T> getInverse() const {
+    Matrix3 getInverse() const {
         // Compute the determinant of the matrix
         T det = determinant();
 

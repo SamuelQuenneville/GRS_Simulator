@@ -16,7 +16,11 @@
 
 #if (MAX_SERVO_CHANNELS == 16)
     #define MAGIC_16 18458          // From ardupilot JSON standard (16 pwm channels)
+    #define MAGIC_32 29569          // From ardupilot JSON standard (32 pwm channels)
 #endif
+
+constexpr int TIMEOUT_MS = 10;
+constexpr int MAX_WAIT_MS = 50;
 
 // The servo packet received from ArduPilot SITL. Defined in SIM_JSON.h.
 struct servoPacket {
@@ -34,6 +38,17 @@ struct sensorData {
     Vector3<double> attitude;
     Vector3<double> velocity;
     double airspeed{};
+    double rpm{};
+};
+
+struct instanceState {
+    int id;
+    int socket_fd;
+    sockaddr_in remote_addr;
+    std::chrono::steady_clock::time_point last_msg_time;
+    servoPacket last_json_msg;
+    bool received_this_step = false;
+    std::unique_ptr<SocketUDP> socket;
 };
 
 #endif //JSONINTERFACE_H

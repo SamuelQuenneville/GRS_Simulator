@@ -24,7 +24,7 @@
 class System {
 
 public:
-    explicit System(programArguments& args, worldPhysics& worldPhysics, Logger& logger, systemConfiguration& configuration, ctrlGains& gains);
+    explicit System(programArguments& args, worldPhysics& worldPhysics, Logger& logger, systemConfiguration& configuration, systemProperties& properties, ctrlGains& gains);
     ~System();
 
     void update(double dt);
@@ -35,16 +35,18 @@ public:
     void setControllerGains(const ctrlGains& newGains) {m_ctrlGains = newGains;};
 
     // Create the different configuration of system
-    void createSystemOneAircraft(fixedWingProperties& aircraftProperties, initialStates& aircraftStates);
-    void createSystemOneAircraftGrounded(fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, initialStates& aircraftStates);
-    void createSystemTwoAircraft(fixedWingProperties& aircraftProperties, std::vector<initialStates>& aircraftStates);
-    void createSystemTwoAircraftV(bool isGrounded, fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, payloadProperties& payloadProperties, std::vector<initialStates>& aircraftStates, initialStates& payloadStates);
+    void createSystemOneAircraft(initialStates& aircraftStates);
+    void createSystemOneAircraftGrounded(initialStates& aircraftStates);
+    void createSystemTwoAircraft(std::vector<initialStates>& aircraftStates);
+    void createSystemTwoAircraftV(bool isGrounded, std::vector<initialStates>& aircraftStates, initialStates& payloadStates);
     void createSystemTwoAircraftY();
-    void createSystemThreeAircraftV(bool isGrounded, fixedWingProperties& aircraftProperties, tetherProperties& tetherProperties, payloadProperties& payloadProperties, std::vector<initialStates>& aircraftStates, initialStates& payloadStates);
+    void createSystemThreeAircraftV(bool isGrounded, std::vector<initialStates>& aircraftStates, initialStates& payloadStates);
 
     std::vector<std::unique_ptr<FixedWing>>& aircraft() {return m_aircraft;};
     std::vector<std::unique_ptr<Tether>>& tethers() {return m_links;};
     std::unique_ptr<Payload>& payload() {return m_payload;};
+
+    void setLaunchTriggered(const bool launchTriggered) {m_launchTriggered = launchTriggered;};
 
 private:
     programArguments& m_programArgs;
@@ -54,9 +56,15 @@ private:
     std::unique_ptr<InterfaceJSON> m_communicationManager;
 
     systemConfiguration& m_systemConfiguration;
+    systemProperties& m_systemProperties;
     ctrlGains& m_ctrlGains;
 
+    bool m_launchTriggered = false;
+    double m_launchStartMillis = 0;
+
     double m_timeSinceHlcCall;
+    double m_timeSinceLaunch;
+
     bool m_shouldCallHlc();
 
     void m_initHlcCommands();

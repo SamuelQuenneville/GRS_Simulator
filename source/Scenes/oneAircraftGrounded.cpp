@@ -18,15 +18,13 @@ OneAircraftGrounded::OneAircraftGrounded(World& world)
     m_resetCameraToViewAll();
 }
 
-OneAircraftGrounded::~OneAircraftGrounded() {
-
-}
+OneAircraftGrounded::~OneAircraftGrounded() = default;
 
 void OneAircraftGrounded::createPhysicsWorld() {
 
     // ---------- AIRCRAFT ---------- //
     for (const auto& aircraft : m_world.system()->aircraft()) {
-        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), Vector3<double>(2, 2, 2), World::getExecutablePath());
+        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), Vector3<double>(1, 1, 1), World::getExecutablePath());
         aircraftObject->setColor(Color::red());
         m_physicsObjects.push_back(std::move(aircraftObject));
     }
@@ -55,8 +53,8 @@ void OneAircraftGrounded::destroyPhysicsWorld() {
     m_staticObjects.clear();
 }
 
-void OneAircraftGrounded::initBodiesPositions() {
-    m_launcher->setTransform(Transform({-0.849, 0.816, 30.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0), 0.0, M_PI/2.0)));
+void OneAircraftGrounded::initBodiesPositions() const {
+    m_launcher->setTransform(Transform({0.8, 0.816, 30.0}, Quaternion::fromEulerAngles(M_PI + radians(18.0), 0.0, M_PI/2.0)));
     m_ground->setTransform(Transform({0.0, -0.5, 0.0}, Quaternion::identity()));
 }
 
@@ -64,9 +62,9 @@ void OneAircraftGrounded::updatePhysics() {
     m_world.update();
 }
 
-void OneAircraftGrounded::updateTarget(double groundspeed, std::vector<double> payloadPosition) {
+void OneAircraftGrounded::updateTarget(const float groundspeed, const std::vector<double> payloadPosition) {
     target t = m_world.system()->getTarget();
-    t.groundspeed = static_cast<float>(groundspeed);
+    t.groundspeed = groundspeed;
     t.positionPayload = payloadPosition;
     m_world.system()->setTarget(t);
 }
@@ -85,7 +83,7 @@ void OneAircraftGrounded::destroy() {
 
 void OneAircraftGrounded::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
 
-    for (auto& tethersObject : m_tethersObjects) {
+    for (const auto& tethersObject : m_tethersObjects) {
         tethersObject->render(m_colorShader, worldToCameraMatrix);
     }
 
@@ -93,12 +91,12 @@ void OneAircraftGrounded::renderSinglePass(Shader& shader, const Matrix4<double>
     shader.bind();
 
     // Render all the moving physics objects of the scene
-    for (auto& physicsObject : m_physicsObjects) {
+    for (const auto& physicsObject : m_physicsObjects) {
         physicsObject->render(shader, worldToCameraMatrix);
     }
 
     // Render the static objects (floor could be obstacle...)
-    for (auto& staticObject : m_staticObjects) {
+    for (const auto& staticObject : m_staticObjects) {
         staticObject->render(shader, worldToCameraMatrix);
     }
 

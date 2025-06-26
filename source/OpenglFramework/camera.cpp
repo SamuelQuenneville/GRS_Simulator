@@ -26,45 +26,45 @@ const Matrix4<double>& Camera::getProjectionMatrix() const {
     return m_projectionMatrix;
 }
 
-void Camera::setDimensions(uint32_t width, uint32_t height) {
+void Camera::setDimensions(const uint32_t width, const uint32_t height) {
     m_width = width;
     m_height = height;
     m_updateProjectionMatrix();
 }
 
-void Camera::setSceneRadius(float radius) {
+void Camera::setSceneRadius(const float radius) {
     m_sceneRadius = radius;
     setClippingPlanes(0.01f * radius, 10.0f * radius);
 }
 
-void Camera::setClippingPlanes(float nearDistance, float farDistance) {
+void Camera::setClippingPlanes(const float nearDistance, const float farDistance) {
     m_nearPlane = nearDistance;
     m_farPlane = farDistance;
     m_updateProjectionMatrix();
 }
 
-void Camera::setFieldOfView(float fov) {
+void Camera::setFieldOfView(const float fov) {
     m_fieldOfView = fov;
     m_updateProjectionMatrix();
 }
 
-void Camera::setZoom(double fraction) {
-    Vector3<double> zoomVector(0.0, 0.0, m_sceneRadius * fraction);
+void Camera::setZoom(const double fraction) {
+    const Vector3<double> zoomVector(0.0, 0.0, m_sceneRadius * fraction);
     translateLocal(zoomVector);
 }
 
-void Camera::translateCamera(float dx, float dy, const Vector3<double>& worldPoint) {
+void Camera::translateCamera(const float dx, const float dy, const Vector3<double>& worldPoint) {
     // Transform the world point into camera coordinates
-    Vector3<double> pointCamera = m_transformMatrix.getInverse() * worldPoint;
+    const Vector3<double> pointCamera = m_transformMatrix.getInverse() * worldPoint;
 
     // Get the depth
-    double z = -pointCamera.z();
+    const double z = -pointCamera.z();
 
     // Find the scaling of dx and dy from windows coordinates to near plane coordinates
     // and from there to camera coordinates at the object's depth
-    double aspect = static_cast<double>(m_width) / static_cast<double>(m_height);
-    double top = m_nearPlane * std::tan(m_fieldOfView * M_PI / 360.0);
-    double right = top * aspect;
+    const double aspect = static_cast<double>(m_width) / static_cast<double>(m_height);
+    const double top = m_nearPlane * std::tan(m_fieldOfView * M_PI / 360.0);
+    const double right = top * aspect;
 
     // Translate the camera
     translateLocal({2.0 * dx * right / m_nearPlane * z,-2.0 * dy * top / m_nearPlane * z,0.0});
@@ -80,12 +80,12 @@ uint32_t Camera::getHeight() const {
 
 void Camera::m_updateProjectionMatrix() {
     // Compute the aspect ratio
-    double aspect = double(m_width) / double(m_height);
+    const double aspect = static_cast<double>(m_width) / static_cast<double>(m_height);
 
-    double top = m_nearPlane * std::tan(m_fieldOfView  * M_PI / 360.0);
-    double bottom = -top;
-    double left = bottom * aspect;
-    double right = top * aspect;
+    const double top = m_nearPlane * std::tan(m_fieldOfView  * M_PI / 360.0);
+    const double bottom = -top;
+    const double left = bottom * aspect;
+    const double right = top * aspect;
 
     double fx = 2.0 * m_nearPlane / (right - left);
     double fy = 2.0 * m_nearPlane / (top - bottom);

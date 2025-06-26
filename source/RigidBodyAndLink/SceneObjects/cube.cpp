@@ -57,15 +57,15 @@ void Cube::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
     shader.setMatrix3x3Uniform("normalMatrix", normalMatrix, false);
 
     // Set the vertex color
-    Vector4<double> color(m_color.r, m_color.g, m_color.b, m_color.a);
+    const Vector4 color(m_color.r, m_color.g, m_color.b, m_color.a);
     shader.setVector4Uniform("globalVertexColor", color, false);
 
     m_vertexArrayObject.bind();
     m_vertexBufferVertices.bind();
 
     // Get the location of shader attribute variables
-    GLint vertexPositionLoc = shader.getAttribLocation("vertexPosition");
-    GLint vertexNormalLoc = shader.getAttribLocation("vertexNormal", false);
+    const GLint vertexPositionLoc = shader.getAttribLocation("vertexPosition");
+    const GLint vertexNormalLoc = shader.getAttribLocation("vertexNormal", false);
 
     glEnableVertexAttribArray(vertexPositionLoc);
     glVertexAttribPointer(vertexPositionLoc, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
@@ -90,7 +90,7 @@ void Cube::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
     shader.unbind();
 }
 
-void Cube::updateTransform(double interpolationFactor) {
+void Cube::updateTransform(const double interpolationFactor) {
     m_transformMatrix = m_calculateTransform(interpolationFactor, m_scalingMatrix);
 }
 
@@ -98,14 +98,14 @@ void Cube::m_createVertexBufferAndArrayObject() {
     // Create the VBO for the vertices data
     m_vertexBufferVertices.create();
     m_vertexBufferVertices.bind();
-    auto sizeVertices = static_cast<GLsizei>(m_vertices.size() * sizeof(Vector3<float>));
+    const auto sizeVertices = static_cast<GLsizei>(m_vertices.size() * sizeof(Vector3<float>));
     m_vertexBufferVertices.copyDataIntoVBO(sizeVertices, getVerticesPointer(), GL_STATIC_DRAW);
     m_vertexBufferVertices.unbind();
 
     // Create the VBO for the normals data
     m_vertexBufferNormals.create();
     m_vertexBufferNormals.bind();
-    auto sizeNormals = static_cast<GLsizei>(m_normals.size() * sizeof(Vector3<float>));
+    const auto sizeNormals = static_cast<GLsizei>(m_normals.size() * sizeof(Vector3<float>));
     m_vertexBufferNormals.copyDataIntoVBO(sizeNormals, getNormalsPointer(), GL_STATIC_DRAW);
     m_vertexBufferNormals.unbind();
 
@@ -113,7 +113,7 @@ void Cube::m_createVertexBufferAndArrayObject() {
         // Create the VBO for the texture co data
         m_vertexBufferTextureCoords.create();
         m_vertexBufferTextureCoords.bind();
-        auto sizeTextureCoords = static_cast<GLsizei>(m_uvs.size() * sizeof(Vector2<float>));
+        const auto sizeTextureCoords = static_cast<GLsizei>(m_uvs.size() * sizeof(Vector2<float>));
         m_vertexBufferTextureCoords.copyDataIntoVBO(sizeTextureCoords, getUVTextureCoordinatesPointer(), GL_STATIC_DRAW);
         m_vertexBufferTextureCoords.unbind();
     }
@@ -121,7 +121,7 @@ void Cube::m_createVertexBufferAndArrayObject() {
     // Create the VBO for the indices data
     m_vertexBufferIndices.create();
     m_vertexBufferIndices.bind();
-    auto sizeIndices = static_cast<GLsizei>(m_indices[0].size() * sizeof(unsigned int));
+    const auto sizeIndices = static_cast<GLsizei>(m_indices[0].size() * sizeof(unsigned int));
     m_vertexBufferIndices.copyDataIntoVBO(sizeIndices, getIndicesPointer(), GL_STATIC_DRAW);
     m_vertexBufferIndices.unbind();
 

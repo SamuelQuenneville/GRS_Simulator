@@ -30,16 +30,16 @@ public:
     [[nodiscard]] unsigned int getNumbersParts() const;
 
     [[nodiscard]] const std::vector<Vector3<float>>& getVertices() const;
-    void setVertices(std::vector<Vector3<float>>& vertices);
+    void setVertices(const std::vector<Vector3<float>>& vertices);
 
     [[nodiscard]] const std::vector<Vector3<float>>& getNormals() const;
-    void setNormals(std::vector<Vector3<float>>& normals);
+    void setNormals(const std::vector<Vector3<float>>& normals);
 
     [[nodiscard]] const std::vector<Vector2<float>>& getUVs() const;
-    void setUVs(std::vector<Vector2<float>>& uvs);
+    void setUVs(const std::vector<Vector2<float>>& uvs);
 
     [[nodiscard]] const std::vector<uint32_t>& getIndices(unsigned int part = 0) const;
-    void setIndices(std::vector<std::vector<unsigned int>>& indices);
+    void setIndices(const std::vector<std::vector<unsigned int>>& indices);
 
     [[nodiscard]] const Vector3<float>& getVertex(unsigned int i) const;
 

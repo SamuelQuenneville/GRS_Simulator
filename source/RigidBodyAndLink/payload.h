@@ -15,7 +15,7 @@
 class Payload final : public RigidBody {
 
 public:
-    Payload(worldPhysics& physics, Logger& logger, payloadProperties& properties, bool isGrounded);
+    Payload(const worldPhysics& physics, Logger& logger, const payloadProperties& properties, bool isGrounded);
 
     void update(double dt) override;
 
@@ -32,7 +32,7 @@ private:
 
     bool m_isGrounded; // static body
 
-    Vector3<double> m_calcAeroForces();
+    Vector3<double> m_calcAeroForces() const;
 
     [[nodiscard]] payloadStates m_calcStatesDerivatives(Vector3<double> externalForceEarth) const;
     void m_eulerIntegration(const payloadStates& derivatives, double dt);

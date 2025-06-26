@@ -171,7 +171,7 @@ void SimulationViewer::mouseMotionEvent(const double x, const double y) {
     }
 }
 
-void SimulationViewer::scrollEvent(const double x, const double y) {
+void SimulationViewer::scrollEvent(const double x, const double y) const {
     if (m_scene) {
         m_scene->scrollingEvent(x, y, 1.0f);
     }
@@ -295,39 +295,39 @@ void SimulationViewer::m_setGlfwHints() {
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 }
 
-void SimulationViewer::m_setCallback() {
-    glfwSetCursorPosCallback(m_window.get(), [](GLFWwindow* window, double x, double y) {
+void SimulationViewer::m_setCallback() const {
+    glfwSetCursorPosCallback(m_window.get(), [](GLFWwindow* window, const double x, const double y) {
                                  auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
         app->mouseMotionEvent(x, y);
                              }
     );
 
-    glfwSetMouseButtonCallback(m_window.get(), [](GLFWwindow* window, int button, int action, int modifiers) {
+    glfwSetMouseButtonCallback(m_window.get(), [](GLFWwindow* window, const int button, const int action, const int modifiers) {
                                    auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
         app->mouseButtonEvent(button, action, modifiers);
                                }
     );
 
-    glfwSetKeyCallback(m_window.get(), [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+    glfwSetKeyCallback(m_window.get(), [](GLFWwindow* window, const int key, const int scancode, const int action, const int mods) {
                            auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
         app->keyboardEvent(key, scancode, action, mods);
                        }
     );
 
-    glfwSetScrollCallback(m_window.get(), [](GLFWwindow* window, double x, double y) {
+    glfwSetScrollCallback(m_window.get(), [](GLFWwindow* window, const double x, const double y) {
                               auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
         app->scrollEvent(x, y);
                           }
     );
 
-    glfwSetFramebufferSizeCallback(m_window.get(), [](GLFWwindow* window, int width, int height) {
+    glfwSetFramebufferSizeCallback(m_window.get(), [](GLFWwindow* window, const int width, const int height) {
                                        auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
                                        app->onWindowResized(width, height);
                                    }
     );
 }
 
-void GLAPIENTRY SimulationViewer::onOpenGLError(GLenum source, GLenum type, GLuint /*id*/, GLenum severity, GLsizei /*length*/, const GLchar* message, const void* /*userParam*/ ) {
+void GLAPIENTRY SimulationViewer::onOpenGLError(const GLenum source, const GLenum type, GLuint /*id*/, const GLenum severity, GLsizei /*length*/, const GLchar* message, const void* /*userParam*/ ) {
 #ifdef GL_DEBUG_OUTPUT
     if (type == GL_DEBUG_TYPE_ERROR) {
         fprintf( stderr, "GL CALLBACK: %s source = 0x%x, type = 0x%x, severity = 0x%x, message = %s\n",
@@ -347,7 +347,7 @@ void SimulationViewer::m_updateDynamics() {
         // While the time accumulator is not empty
         while(m_timer.isPossibleToTakeStep(m_world->simulationConfiguration.dt)) {
 
-            double currentTime = glfwGetTime();
+            const double currentTime = glfwGetTime();
 
             // Take a physics simulation step
             m_scene->updatePhysics();
@@ -368,7 +368,7 @@ void SimulationViewer::m_updateSingleDynamicsStep() {
 }
 
 void SimulationViewer::m_update() {
-    double currentTime = glfwGetTime();
+    const double currentTime = glfwGetTime();
 
     // Update the physics
     if (m_singlePhysicsStepEnabled && !m_singlePhysicsStepDone) {
@@ -383,7 +383,7 @@ void SimulationViewer::m_update() {
     m_totalDynamicTime = glfwGetTime() - currentTime;
 
     // Compute the interpolation factor
-    double factor = m_timer.computeInterpolationFactor(m_world->simulationConfiguration.dt);
+    const double factor = m_timer.computeInterpolationFactor(m_world->simulationConfiguration.dt);
     assert(factor >= 0.0 && factor <= 1.0);
 
     // Notify the scene about the interpolation factor
@@ -393,15 +393,20 @@ void SimulationViewer::m_update() {
     m_scene->update();
 }
 
-void SimulationViewer::m_updateTarget(double groundspeed, std::vector<double> payloadPosition) {
+void SimulationViewer::m_updateTarget(const float groundspeed, const std::vector<double>& payloadPosition) const {
     m_scene->updateTarget(groundspeed, payloadPosition);
 }
 
-void SimulationViewer::m_changeView(const Matrix4<double>& viewMatrix) {
+void SimulationViewer::m_changeView(const Matrix4<double>& viewMatrix) const {
     m_scene->changeView(viewMatrix);
 }
 
-void SimulationViewer::m_render() {
+void SimulationViewer::m_launchTriggered() const {
+    m_world->system()->setLaunchTriggered(true);
+}
+
+
+void SimulationViewer::m_render() const {
     int bufferWidth;
     int bufferHeight;
     glfwMakeContextCurrent(m_window.get());

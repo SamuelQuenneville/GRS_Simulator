@@ -9,7 +9,7 @@
 #include "timer.h"
 
 Timer::Timer()
-    : m_accumulator(0)
+    : m_accumulator(0.0)
     , m_isRunning(false)
 {
 
@@ -41,10 +41,10 @@ void Timer::reset() {
 
 void Timer::update() {
     // Get the current system time
-    std::chrono::time_point<clock> currentTime = clock::now();
+    const std::chrono::time_point<clock> currentTime = clock::now();
 
     // Compute the delta display time between two display frames
-    std::chrono::duration<double> deltaTime = currentTime - m_lastUpdateTime;
+    const std::chrono::duration<double> deltaTime = currentTime - m_lastUpdateTime;
 
     // Update the current display time
     m_lastUpdateTime = currentTime;
@@ -57,17 +57,17 @@ bool Timer::isRunning() const {
     return m_isRunning;
 }
 
-bool Timer::isPossibleToTakeStep(std::chrono::duration<double> timeStep) const {
+bool Timer::isPossibleToTakeStep(const std::chrono::duration<double> timeStep) const {
     return (m_accumulator >= timeStep);
 }
 
-void Timer::nextStep(std::chrono::duration<double> timeStep) {
+void Timer::nextStep(const std::chrono::duration<double> timeStep) {
     assert(m_isRunning);
 
     // Update the accumulator value
     m_accumulator -= timeStep;
 }
 
-double Timer::computeInterpolationFactor(std::chrono::duration<double> timeStep) {
+double Timer::computeInterpolationFactor(const std::chrono::duration<double> timeStep) {
     return m_accumulator.count() / timeStep.count();
 }

@@ -47,7 +47,7 @@ public:
     [[nodiscard]] bool getHasConfigFile() const {return m_hasConfigFile;};
     [[nodiscard]] std::string configFilePath() const {return m_configFilePath;};
 
-    void setTargetFromConfig(double groundspeed, const std::vector<double> &positionTarget);
+    void setTargetFromConfig(float groundspeed, const std::vector<double> &positionTarget);
 
 protected:
     SimulationViewer* m_viewer;
@@ -61,7 +61,7 @@ protected:
     nanogui::Label* m_simRunTimeLabel;
 
     nanogui::TextBox* m_groundspeedTargetText;
-    double m_groundspeedTarget = 0.0;
+    float m_groundspeedTarget = 0.0;
 
     nanogui::TextBox* m_altitudeTargetText;
     nanogui::TextBox* m_positionXTargetText;

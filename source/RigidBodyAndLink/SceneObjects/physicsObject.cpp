@@ -13,7 +13,7 @@ PhysicsObject::PhysicsObject()
 {
     m_body = nullptr;
     m_link = nullptr;
-    m_color = Color(1.0f,1.0f,1.0f,1.0f);
+    m_color = Color::white();
 }
 
 PhysicsObject::PhysicsObject(const std::string& meshFilePath)
@@ -41,21 +41,21 @@ void PhysicsObject::setTransform(const Transform& transform) {
     updateTransform(1.0);
 }
 
-Matrix4<double> PhysicsObject::m_calculateTransform(double interpolationFactor, const Matrix4<double>& scalingMatrix) {
+Matrix4<double> PhysicsObject::m_calculateTransform(const double interpolationFactor, const Matrix4<double>& scalingMatrix) {
     // Get the transform of the rigid body
-    Transform transform = m_body->transform();
+    const Transform transform = m_body->transform();
 
     // Interpolate the transform between the previous one and the new one
-    Transform interpolatedTransform = Transform::interpolateTransforms(m_previousTransform,transform, interpolationFactor);
+    const Transform interpolatedTransform = Transform::interpolateTransforms(m_previousTransform,transform, interpolationFactor);
     m_previousTransform = transform;
 
     // Compute the transform used for rendering the box
     double matrix[16];
     interpolatedTransform.getOpenGLMatrix(matrix);
-    Matrix4<double> newMatrix = {{matrix[0], matrix[4], matrix[8], matrix[12]},
-                                 {matrix[1], matrix[5], matrix[9], matrix[13]},
-                                 {matrix[2], matrix[6], matrix[10], matrix[14]},
-                                 {matrix[3], matrix[7], matrix[11], matrix[15]}};
+    const Matrix4 newMatrix = {{matrix[0], matrix[4], matrix[8], matrix[12]},
+                              {matrix[1], matrix[5], matrix[9], matrix[13]},
+                              {matrix[2], matrix[6], matrix[10], matrix[14]},
+                              {matrix[3], matrix[7], matrix[11], matrix[15]}};
 
     // Apply the scaling matrix to have the correct box dimensions
     return newMatrix * scalingMatrix;

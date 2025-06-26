@@ -17,14 +17,14 @@ class Texture2D {
 
 public:
     Texture2D();
-    Texture2D(unsigned int width, unsigned int height, unsigned int internalFormat, unsigned int format, unsigned int type);
+    Texture2D(GLsizei width, GLsizei height, GLint internalFormat, GLenum format, GLenum type);
     ~Texture2D();
 
     // Create the texture
-    void create(unsigned int width, unsigned int height, unsigned int internalFormat, unsigned int format, unsigned int type, void* data = nullptr);
+    void create(GLsizei width, GLsizei height, GLint internalFormat, GLenum format, GLenum type, const void* data = nullptr);
 
-    void create(unsigned int width, unsigned int height, unsigned int internalFormat, unsigned int format, unsigned int type,
-                unsigned int minFilter, unsigned int maxFilter, unsigned int wrapS, unsigned int wrapT, void* data);
+    void create(GLsizei width, GLsizei height, GLint internalFormat, GLenum format, GLenum type,
+                GLint minFilter, GLint maxFilter, GLint wrapS, GLint wrapT, const void *data);
 
     void destroy();
 
@@ -41,8 +41,8 @@ private:
     GLuint m_id;
     GLuint m_unit;
 
-    unsigned int m_width;
-    unsigned int m_height;
+    GLsizei m_width;
+    GLsizei m_height;
 };
 
 

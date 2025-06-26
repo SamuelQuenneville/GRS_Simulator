@@ -16,6 +16,7 @@
 #include "tetherDefinitions.h"
 #include "fixedWingDefinitions.h"
 #include "payloadDefinitions.h"
+#include "launcherDefinitions.h"
 #include "configurationDefinitions.h"
 #include "controllerGains.h"
 
@@ -36,6 +37,7 @@ namespace YAML {
             rhs.aircraftPropertiesFileDirectory = node["AIRCRAFT_PROPERTIES_FILE_NAME"].as<std::string>();
             rhs.tetherPropertiesFileDirectory   = node["TETHER_PROPERTIES_FILE_NAME"].as<std::string>();
             rhs.payloadPropertiesFileDirectory  = node["PAYLOAD_PROPERTIES_FILE_NAME"].as<std::string>();
+            rhs.launcherPropertiesFileDirectory = node["LAUNCHER_PROPERTIES_FILE_NAME"].as<std::string>();
             rhs.controllerGainsFileDirectory    = node["CONTROLLER_GAINS_FILE_NAME"].as<std::string>();
             rhs.fixedDuration                   = node["FIXED_DURATION"].as<bool>();
             rhs.duration                        = node["DURATION"].as<float>();
@@ -54,6 +56,7 @@ namespace YAML {
             rhs.numberOfUav                     = node["NUMBER_OF_UAV"].as<int>();
             rhs.configuration                   = node["CONFIGURATION"].as<std::string>();
             rhs.grounded                        = node["GROUNDED"].as<bool>();
+            rhs.haveLauncher                    = node["HAVE_LAUNCHER"].as<bool>();
             rhs.tetherAeroOn                    = node["TETHER_AERO_ON"].as<bool>();
             rhs.hlcRate                         = node["HLC_RATE"].as<int>();
             rhs.llcRate                         = node["LLC_RATE"].as<int>();
@@ -234,6 +237,19 @@ namespace YAML {
             rhs.mass      = node["MASS"].as<float>();
             rhs.dimension = node["DIMENSION"].as<std::vector<float>>();
             rhs.cda       = node["CDA"].as<float>();
+            return true;
+        }
+    };
+
+    template<>
+    struct convert<launcherProperties> {
+        static bool decode(const Node& node, launcherProperties& rhs) {
+            if(!node.IsMap()) {
+                return false;
+            }
+
+            rhs.launcherAccel      = node["LAUNCHER_ACCEL"].as<float>();
+            rhs.launchDuration     = node["LAUNCH_DURATION"].as<double>();
             return true;
         }
     };

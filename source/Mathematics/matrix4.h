@@ -73,9 +73,9 @@ public:
     }
 
     // Create zeros matrix
-    static Matrix4<T> zeros() {
+    static Matrix4 zeros() {
 
-        Matrix4<T> result
+        Matrix4 result
                 {
                         {0, 0, 0, 0},
                         {0, 0, 0, 0},
@@ -87,7 +87,7 @@ public:
     }
 
     // + operator
-    Matrix4<T> operator+(const Matrix4<T>& rhs) const {
+    Matrix4 operator+(const Matrix4& rhs) const {
         Matrix4 result = zeros();
 
         for (unsigned i=0; i<4; i++) {
@@ -111,7 +111,7 @@ public:
     }
 
     // - operator
-    Matrix4<T> operator-(const Matrix4<T>& rhs) const {
+    Matrix4 operator-(const Matrix4& rhs) const {
         Matrix4 result = zeros();
 
         for (unsigned i=0; i<4; i++) {
@@ -135,7 +135,7 @@ public:
     }
 
     // = operator
-    Matrix4<T>& operator=(const Matrix4<T>& matrix) {
+    Matrix4& operator=(const Matrix4& matrix) {
         if (&matrix != this) {
             setAllValues(matrix.m_data[0][0], matrix.m_data[0][1], matrix.m_data[0][2], matrix.m_data[0][3],
                          matrix.m_data[1][0], matrix.m_data[1][1], matrix.m_data[1][2], matrix.m_data[1][3],
@@ -146,7 +146,7 @@ public:
     }
 
     // == operator
-    bool operator==(const Matrix4<T>& rhs) const {
+    bool operator==(const Matrix4& rhs) const {
         return m_data[0][0]==rhs.m_data[0][0] && m_data[0][1]==rhs.m_data[0][1] && m_data[0][2]==rhs.m_data[0][2] && m_data[0][3]==rhs.m_data[0][3] &&
                m_data[1][0]==rhs.m_data[1][0] && m_data[1][1]==rhs.m_data[1][1] && m_data[1][2]==rhs.m_data[1][2] && m_data[1][3]==rhs.m_data[1][3] &&
                m_data[2][0]==rhs.m_data[2][0] && m_data[2][1]==rhs.m_data[2][1] && m_data[2][2]==rhs.m_data[2][2] && m_data[2][3]==rhs.m_data[2][3] &&
@@ -154,8 +154,8 @@ public:
     }
 
     // * operator
-    Matrix4<T> operator*(const Matrix4<T>& rhs) const {
-        Matrix4<T> result = zeros();
+    Matrix4 operator*(const Matrix4& rhs) const {
+        Matrix4 result = zeros();
 
         for (unsigned i=0; i<4; i++) {
             for (unsigned j=0; j<4; j++) {
@@ -190,8 +190,8 @@ public:
     }
 
     // * operator
-    Matrix4<T> operator*(T& rhs) const {
-        Matrix4<T> result = zeros();
+    Matrix4 operator*(T& rhs) const {
+        Matrix4 result = zeros();
 
         for (unsigned i=0; i<4; i++) {
             for (unsigned j=0; j<4; j++) {
@@ -203,7 +203,7 @@ public:
     }
 
     // * operator
-    Matrix4<T>& operator*=(T rhs) {
+    Matrix4& operator*=(T rhs) {
         for (unsigned i=0; i<4; i++) {
             for (unsigned j=0; j<4; j++) {
                 this->m_data[i][j] *= rhs(i,j);
@@ -214,16 +214,16 @@ public:
     }
 
     // / operator
-    Matrix4<T> operator/(T rhs) const {
+    Matrix4 operator/(T rhs) const {
         assert(rhs!=0);
-        return Matrix4<T>(m_data[0][0]/rhs, m_data[0][1]/rhs, m_data[0][2]/rhs,  m_data[0][3]/rhs,
-                          m_data[1][0]/rhs, m_data[1][1]/rhs, m_data[1][2]/rhs,  m_data[1][3]/rhs,
-                          m_data[2][0]/rhs, m_data[2][1]/rhs, m_data[2][2]/rhs,  m_data[2][3]/rhs,
-                          m_data[3][0]/rhs, m_data[3][1]/rhs, m_data[3][2]/rhs,  m_data[3][3]/rhs);
+        return Matrix4(m_data[0][0]/rhs, m_data[0][1]/rhs, m_data[0][2]/rhs,  m_data[0][3]/rhs,
+                       m_data[1][0]/rhs, m_data[1][1]/rhs, m_data[1][2]/rhs,  m_data[1][3]/rhs,
+                       m_data[2][0]/rhs, m_data[2][1]/rhs, m_data[2][2]/rhs,  m_data[2][3]/rhs,
+                       m_data[3][0]/rhs, m_data[3][1]/rhs, m_data[3][2]/rhs,  m_data[3][3]/rhs);
     }
 
     // /= operator
-    Matrix4<T> &operator/=(T rhs) {
+    Matrix4 &operator/=(T rhs) {
         assert(rhs!=0);
         for (unsigned i=0; i<4; i++) {
             for (unsigned j=0; j<4; j++) {
@@ -235,19 +235,19 @@ public:
     }
 
     // - operator
-    Matrix4<T> operator-() const {
-        return Matrix4<T>(-m_data[0][0], -m_data[0][1], -m_data[0][2],  -m_data[0][3],
-                          -m_data[1][0], -m_data[1][1], -m_data[1][2],  -m_data[1][3],
-                          -m_data[2][0], -m_data[2][1], -m_data[2][2],  -m_data[2][3],
-                          -m_data[3][0], -m_data[3][1], -m_data[3][2],  -m_data[3][3]);
+    Matrix4 operator-() const {
+        return Matrix4(-m_data[0][0], -m_data[0][1], -m_data[0][2],  -m_data[0][3],
+                       -m_data[1][0], -m_data[1][1], -m_data[1][2],  -m_data[1][3],
+                       -m_data[2][0], -m_data[2][1], -m_data[2][2],  -m_data[2][3],
+                       -m_data[3][0], -m_data[3][1], -m_data[3][2],  -m_data[3][3]);
     }
 
     // Return the transpose matrix
-    Matrix4<T> getTranspose() const {
-        return Matrix4<T>(m_data[0][0], m_data[1][0], m_data[2][0], m_data[3][0],
-                          m_data[0][1], m_data[1][1], m_data[2][1], m_data[3][1],
-                          m_data[0][2], m_data[1][2], m_data[2][2], m_data[3][2],
-                          m_data[0][3], m_data[1][3], m_data[2][3], m_data[3][3]);
+    Matrix4 getTranspose() const {
+        return Matrix4(m_data[0][0], m_data[1][0], m_data[2][0], m_data[3][0],
+                       m_data[0][1], m_data[1][1], m_data[2][1], m_data[3][1],
+                       m_data[0][2], m_data[1][2], m_data[2][2], m_data[3][2],
+                       m_data[0][3], m_data[1][3], m_data[2][3], m_data[3][3]);
     }
 
     // Return the 3x3 upper-left matrix
@@ -258,7 +258,7 @@ public:
     }
 
     // Return the inversed matrix
-    Matrix4<T> getInverse() const {
+    Matrix4 getInverse() const {
         int indxc[4], indxr[4];
         int ipiv[4] = { 0, 0, 0, 0 };
         T minv[4][4];
@@ -333,7 +333,7 @@ public:
             }
         }
 
-        Matrix4<T> result = zeros();
+        Matrix4 result = zeros();
         for (unsigned i=0; i<4; i++) {
             for (unsigned j=0; j<4; j++) {
                 result.m_data[i][j] = minv[i][j];
@@ -355,7 +355,7 @@ public:
     }
 
     // Set the matrix to the identity matrix
-    Matrix4<T> setToIdentity() {
+    Matrix4 setToIdentity() {
         m_data[0][0] = 1.0; m_data[0][1] = 0.0; m_data[0][2] = 0.0;  m_data[0][3] = 0.0;
         m_data[1][0] = 0.0; m_data[1][1] = 1.0; m_data[1][2] = 0.0;  m_data[1][3] = 0.0;
         m_data[2][0] = 0.0; m_data[2][1] = 0.0; m_data[2][2] = 1.0;  m_data[2][3] = 0.0;
@@ -380,7 +380,7 @@ public:
     }
 
     // Return a 4x4 translation matrix
-    static Matrix4<T> translationMatrix(const Vector3<T>& v) {
+    static Matrix4 translationMatrix(const Vector3<T>& v) {
         return {{1, 0, 0, v.x()},
                 {0, 1, 0, v.y()},
                 {0, 0, 1, v.z()},
@@ -388,11 +388,11 @@ public:
     }
 
     // Return a 4x4 rotation matrix
-    static Matrix4<T> rotationMatrix(const Vector3<T>& axis, const float angle) {
+    static Matrix4 rotationMatrix(const Vector3<T>& axis, const float angle) {
 
         T cosA = std::cos(angle);
         T sinA = std::sin(angle);
-        Matrix4<T> rotationMatrix = identity();
+        Matrix4 rotationMatrix = identity();
 
         rotationMatrix.m_data[0][0] = cosA + (1-cosA) * axis.x() * axis.x();
         rotationMatrix.m_data[0][1] = (1-cosA) * axis.x() * axis.y() - axis.z() * sinA;
@@ -418,7 +418,7 @@ public:
     }
 
     // Return the identity matrix
-    static Matrix4<T> identity() {
+    static Matrix4 identity() {
         return {
                 {1, 0, 0, 0},
                 {0, 1, 0, 0},

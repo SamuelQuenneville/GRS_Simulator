@@ -12,7 +12,7 @@
 #include "scene.h"
 #include "world.h"
 
-class TwoAircraftV : public Scene {
+class TwoAircraftV final : public Scene {
 
 public:
     explicit TwoAircraftV(World& world);
@@ -21,10 +21,10 @@ public:
     void createPhysicsWorld();
     void destroyPhysicsWorld();
 
-    void initBodiesPositions();
+    void initBodiesPositions() const;
 
     void updatePhysics() override;
-    void updateTarget(double groundspeed,  std::vector<double> payloadPosition) override;
+    void updateTarget(float groundspeed,  std::vector<double> payloadPosition) override;
     void reset() override;
     void destroy() override;
 

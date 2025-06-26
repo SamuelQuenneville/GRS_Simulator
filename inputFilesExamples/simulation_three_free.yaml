@@ -10,6 +10,7 @@ SimulationParameters:
   AIRCRAFT_PROPERTIES_FILE_NAME: 'inputFilesExamples/sigCoeffs.yaml'
   TETHER_PROPERTIES_FILE_NAME: 'inputFilesExamples/tetherProperties.yaml'
   PAYLOAD_PROPERTIES_FILE_NAME: 'inputFilesExamples/payloadProperties.yaml'
+  LAUNCHER_PROPERTIES_FILE_NAME: 'inputFilesExamples/launcherProperties.yaml'
   CONTROLLER_GAINS_FILE_NAME: 'inputFilesExamples/controllerGains.yaml'
   FIXED_DURATION: false
   DURATION: 100 # seconds
@@ -19,6 +20,7 @@ SystemConfiguration:
   NUMBER_OF_UAV: 3
   CONFIGURATION: 'V' # FREE / V / Y
   GROUNDED: false
+  HAVE_LAUNCHER: true
   TETHER_AERO_ON: false
   HLC_RATE: 20  # Hertz
   LLC_RATE: 400 # Hertz

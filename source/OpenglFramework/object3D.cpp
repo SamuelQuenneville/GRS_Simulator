@@ -36,23 +36,23 @@ void Object3D::translateLocal(const Vector3<double>& vector) {
     m_transformMatrix = m_transformMatrix * Matrix4<double>::translationMatrix(vector);
 }
 
-void Object3D::rotateWorld(const Vector3<double>& axis, float angle) {
+void Object3D::rotateWorld(const Vector3<double>& axis, const float angle) {
     m_transformMatrix = Matrix4<double>::rotationMatrix(axis, angle) * m_transformMatrix;
 }
 
-void Object3D::rotateLocal(const Vector3<double>& axis, float angle) {
+void Object3D::rotateLocal(const Vector3<double>& axis, const float angle) {
     m_transformMatrix = m_transformMatrix * Matrix4<double>::rotationMatrix(axis, angle);
 }
 
-void Object3D::rotateAroundWorldPoint(const Vector3<double>& axis, float angle, const Vector3<double>& point) {
+void Object3D::rotateAroundWorldPoint(const Vector3<double>& axis, const float angle, const Vector3<double>& point) {
     m_transformMatrix = Matrix4<double>::translationMatrix(point) * Matrix4<double>::rotationMatrix(axis, angle)
                        * Matrix4<double>::translationMatrix(-point) * m_transformMatrix;
 }
 
-void Object3D::rotateAroundLocalPoint(const Vector3<double>& axis, float angle, const Vector3<double>& worldPoint) {
+void Object3D::rotateAroundLocalPoint(const Vector3<double>& axis, const float angle, const Vector3<double>& worldPoint) {
 
     // Convert the world point into the local coordinate system
-    Vector3 localPoint = m_transformMatrix.getInverse() * worldPoint;
+    const Vector3 localPoint = m_transformMatrix.getInverse() * worldPoint;
 
     m_transformMatrix = m_transformMatrix * Matrix4<double>::translationMatrix(localPoint)
                        * Matrix4<double>::rotationMatrix(axis, angle)

@@ -56,10 +56,10 @@ public:
         return std::sqrt(m_elements[0] * m_elements[0] + m_elements[1] * m_elements[1] + m_elements[2] * m_elements[2] + m_elements[3] * m_elements[3]);
     }
 
-    Vector4<T> normalize() const {
+    Vector4 normalize() const {
         T len = length();
         if (len != 0) {
-            return Vector4<T>(m_elements[0] / len, m_elements[1] / len, m_elements[2] / len, m_elements[3] / len);
+            return Vector4(m_elements[0] / len, m_elements[1] / len, m_elements[2] / len, m_elements[3] / len);
         } else {
             throw std::invalid_argument("Can't normalize zero vector"+std::string(__FILE__)+" line: "+std::to_string(__LINE__));
         }
@@ -85,11 +85,11 @@ public:
         return Vector4(-m_elements[0], -m_elements[1], -m_elements[2], -m_elements[3]);
     }
 
-    constexpr friend inline Vector4 operator*(const T& scalar, Vector4 vector) {
+    constexpr friend Vector4 operator*(const T& scalar, Vector4 vector) {
         return Vector4(vector.m_elements[0] * scalar, vector.m_elements[1] * scalar, vector.m_elements[2] * scalar , vector.m_elements[3] * scalar);
     }
 
-    constexpr friend inline Vector4 operator*(Vector4 vector, const T& scalar) {
+    constexpr friend Vector4 operator*(Vector4 vector, const T& scalar) {
         return Vector4(vector.m_elements[0] * scalar, vector.m_elements[1] * scalar, vector.m_elements[2] * scalar , vector.m_elements[3] * scalar);
     }
 

@@ -19,9 +19,7 @@ TwoAircraft::TwoAircraft(World& world)
     m_resetCameraToViewAll();
 }
 
-TwoAircraft::~TwoAircraft() {
-
-}
+TwoAircraft::~TwoAircraft() = default;
 
 void TwoAircraft::createPhysicsWorld() {
 
@@ -53,7 +51,7 @@ void TwoAircraft::destroyPhysicsWorld() {
     m_staticObjects.clear();
 }
 
-void TwoAircraft::initBodiesPositions() {
+void TwoAircraft::initBodiesPositions() const {
     m_launcher1->setTransform(Transform({-0.849, 0.816, 100.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0), 0.0, M_PI/2.0)));
     m_launcher2->setTransform(Transform({0.849, 0.816, -100.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0),0.0, -M_PI/2.0)));
     m_ground->setTransform(Transform({0.0, -0.5, 0.0}, Quaternion::identity()));
@@ -63,9 +61,9 @@ void TwoAircraft::updatePhysics() {
     m_world.update();
 }
 
-void TwoAircraft::updateTarget(double groundspeed, std::vector<double> payloadPosition) {
+void TwoAircraft::updateTarget(const float groundspeed, std::vector<double> payloadPosition) {
     target t = m_world.system()->getTarget();
-    t.groundspeed = static_cast<float>(groundspeed);
+    t.groundspeed = groundspeed;
     t.positionPayload = payloadPosition;
     m_world.system()->setTarget(t);
 }
@@ -87,12 +85,12 @@ void TwoAircraft::renderSinglePass(Shader& shader, const Matrix4<double>& worldT
     shader.bind();
 
     // Render all the moving physics objects of the scene
-    for (auto& physicsObject : m_physicsObjects) {
+    for (const auto& physicsObject : m_physicsObjects) {
         physicsObject->render(shader, worldToCameraMatrix);
     }
 
     // Render the static objects (floor could be obstacle...)
-    for (auto& staticObject : m_staticObjects) {
+    for (const auto& staticObject : m_staticObjects) {
         staticObject->render(shader, worldToCameraMatrix);
     }
 

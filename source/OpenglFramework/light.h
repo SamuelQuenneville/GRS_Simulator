@@ -12,7 +12,7 @@
 #include "object3D.h"
 #include "Mathematics/color.h"
 
-class Light : public Object3D {
+class Light final : public Object3D {
 
 public:
     Light();

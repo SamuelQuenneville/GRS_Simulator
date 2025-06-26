@@ -8,7 +8,7 @@
 
 #include "payload.h"
 
-Payload::Payload(worldPhysics& physics, Logger& logger, payloadProperties& properties, bool isGrounded)
+Payload::Payload(const worldPhysics& physics, Logger& logger, const payloadProperties& properties, const bool isGrounded)
     : m_physics(physics)
     , m_logger(logger)
     , m_properties(properties)
@@ -20,9 +20,9 @@ Payload::Payload(worldPhysics& physics, Logger& logger, payloadProperties& prope
 void Payload::update(const double dt) {
 
     if (!m_isGrounded) {
-        Vector3<double> externalForcesEarth = calcExternalForce() + m_calcAeroForces();
+        const Vector3<double> externalForcesEarth = calcExternalForce() + m_calcAeroForces();
 
-        payloadStates derivatives   = m_calcStatesDerivatives(externalForcesEarth);
+        const payloadStates derivatives   = m_calcStatesDerivatives(externalForcesEarth);
         m_eulerIntegration(derivatives, dt);
 
         // Set new forces/moments to the node of this body
@@ -38,13 +38,13 @@ void Payload::update(const double dt) {
 }
 
 void Payload::setInitialStates(initialStates& states) {
-    m_states.x = states.position.at(0);
-    m_states.y = states.position.at(1);
-    m_states.z = states.position.at(2);
+    m_states.x = states.position[0];
+    m_states.y = states.position[1];
+    m_states.z = states.position[2];
 
-    m_states.vx = states.position.at(0);
-    m_states.vy = states.position.at(1);
-    m_states.vz = states.position.at(2);
+    m_states.vx = states.position[0];
+    m_states.vy = states.position[1];
+    m_states.vz = states.position[2];
 
     centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
     centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
@@ -94,7 +94,7 @@ void Payload::m_eulerIntegration(const payloadStates& derivatives, const double 
     }
 }
 
-Vector3<double> Payload::m_calcAeroForces() {
+Vector3<double> Payload::m_calcAeroForces() const {
 
     // Drag = -coeff * ||v_rel|| * v_rel; same as ||v_rel||^2 * v_rel/||v_rel||
     double coeff = 0.5 * m_physics.airDensity * m_properties.cda;

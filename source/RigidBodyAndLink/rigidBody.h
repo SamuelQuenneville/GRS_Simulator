@@ -57,8 +57,8 @@ public:
 private:
     Transform m_transform = Transform::identity();
 
-    Vector3<double> m_attitude{0.0, 0.0, 0.0};        // Earth reference frame
-    Vector3<double> m_angularVelocity{0.0,0.0,0.0};   // Earth reference frame
+    Vector3<double> m_attitude = Vector3<double>::zeros();          // Earth reference frame
+    Vector3<double> m_angularVelocity = Vector3<double>::zeros();   // Earth reference frame
 };
 
 

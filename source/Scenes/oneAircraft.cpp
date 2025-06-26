@@ -19,9 +19,7 @@ OneAircraft::OneAircraft(World& world)
     m_resetCameraToViewAll();
 }
 
-OneAircraft::~OneAircraft() {
-
-}
+OneAircraft::~OneAircraft() = default;
 
 void OneAircraft::createPhysicsWorld() {
 
@@ -45,7 +43,7 @@ void OneAircraft::destroyPhysicsWorld() {
     m_staticObjects.clear();
 }
 
-void OneAircraft::initBodiesPositions() {
+void OneAircraft::initBodiesPositions() const {
     m_ground->setTransform(Transform({0.0, -0.5, 0.0}, Quaternion::identity()));
 }
 
@@ -53,9 +51,9 @@ void OneAircraft::updatePhysics() {
     m_world.update();
 }
 
-void OneAircraft::updateTarget(double groundspeed, std::vector<double> payloadPosition) {
+void OneAircraft::updateTarget(const float groundspeed, const std::vector<double> payloadPosition) {
     target t = m_world.system()->getTarget();
-    t.groundspeed = static_cast<float>(groundspeed);
+    t.groundspeed = groundspeed;
     t.positionPayload = payloadPosition;
     m_world.system()->setTarget(t);
 }
@@ -77,12 +75,12 @@ void OneAircraft::renderSinglePass(Shader& shader, const Matrix4<double>& worldT
     shader.bind();
 
     // Render all the moving physics objects of the scene
-    for (auto& physicsObject : m_physicsObjects) {
+    for (const auto& physicsObject : m_physicsObjects) {
         physicsObject->render(shader, worldToCameraMatrix);
     }
 
     // Render the static objects (floor could be obstacle...)
-    for (auto& staticObject : m_staticObjects) {
+    for (const auto& staticObject : m_staticObjects) {
         staticObject->render(shader, worldToCameraMatrix);
     }
 

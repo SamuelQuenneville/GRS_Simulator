@@ -13,16 +13,16 @@
 #include "Definitions/worldPhysics.h"
 #include "Definitions/tetherDefinitions.h"
 
-class Tether : public Link {
+class Tether final : public Link {
 
 public:
-    Tether(worldPhysics& physics, Logger& logger, tetherProperties& properties);
+    Tether(const worldPhysics& physics, Logger& logger, const tetherProperties& properties);
 
     [[nodiscard]] int getId() const;
     [[nodiscard]] linkType getType() const;
 
     void update(double dt) override;
-    void grounded();
+    void grounded() const;
 
 private:
     int m_id;
@@ -51,7 +51,7 @@ private:
     static std::tuple<double, double> m_calcLiftDragCoeff(double Cf, double Cn, double theta);
     Vector3<double> m_calcTetherAeroForces(Vector3<double> windSpeed);
 
-    void m_writeLog();
+    void m_writeLog() const;
 };
 
 

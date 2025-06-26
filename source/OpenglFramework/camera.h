@@ -11,7 +11,7 @@
 
 #include "object3D.h"
 
-class Camera : public Object3D {
+class Camera final : public Object3D {
 
 public:
     Camera();

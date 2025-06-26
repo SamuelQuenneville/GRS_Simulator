@@ -12,6 +12,8 @@
 #include <iostream>
 #include <string>
 #include <array>
+#include <poll.h>
+#include <thread>
 
 #include "socketUDP.h"
 #include "Definitions/jsonInterface.h"
@@ -24,21 +26,21 @@ public:
     ~InterfaceJSON() = default;
 
     bool addSocket(int uavId, const char* fdmAddress, uint16_t fdmPortIn);
-    bool receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHANNELS>>& data);
-    void sendData(const SocketUDP &socket, const sensorData &data);
+    void receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHANNELS>>& data);
+    void sendData(int uavId, const sensorData &data);
     void setWindvane(float direction, float speed);
 
-    std::map<int, SocketUDP*>& getSockets() {return m_sockets;};
+    static bool allReceived(std::vector<instanceState>& instances);
+    void resetSyncFlags();
+    static bool isStale(const instanceState& instance, std::chrono::steady_clock::time_point now);
 
     [[nodiscard]] bool fcuOnline() const {return m_fcuOnline;};
 
 private:
-    std::map<int, SocketUDP*> m_sockets;    // <uavId , *socket>
+    std::vector<instanceState> m_instances;
+    std::vector<std::unique_ptr<SocketUDP>> m_sockets;
 
     bool m_fcuOnline = false;
-
-    const char* m_fdmAddress{};
-    uint16_t m_fdmPortIn{};
 
     std::vector<uint16_t> m_fcuFrameRate;
     std::vector<uint32_t> m_fcuFrameCount;

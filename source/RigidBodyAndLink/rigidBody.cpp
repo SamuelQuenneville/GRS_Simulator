@@ -41,7 +41,13 @@ void RigidBody::addConnection(Node& node) {
 }
 
 void RigidBody::deleteConnection(Node& node) {
-    connectedNode.erase(std::remove_if(connectedNode.begin(), connectedNode.end(), [node](Node* n){return node.getId() == n->getId();}), connectedNode.end());
+    connectedNode.erase(
+        std::remove_if(
+            connectedNode.begin(), connectedNode.end(),
+            [&node](const Node* n) {
+                return n != nullptr && node.getId() == n->getId();
+            }),
+        connectedNode.end());
 }
 
 void RigidBody::setTransform(const Transform& newTransform) {

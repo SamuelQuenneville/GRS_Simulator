@@ -19,7 +19,7 @@ FrameBufferObject::~FrameBufferObject() {
     destroy();
 }
 
-bool FrameBufferObject::create(unsigned int width, unsigned int height, bool needRenderBuffer) {
+bool FrameBufferObject::create(const unsigned int width, const unsigned int height, const bool needRenderBuffer) {
     // Destroy the current FBO
     destroy();
 
@@ -43,7 +43,7 @@ bool FrameBufferObject::create(unsigned int width, unsigned int height, bool nee
     }
 
     // Check the FBO status
-    GLenum statusFBO = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    const GLenum statusFBO = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if(statusFBO != GL_FRAMEBUFFER_COMPLETE) {
         std::cerr << "Error : An error occurred while creating the Frame Buffer Object !" << std::endl;
         assert(false);
@@ -53,7 +53,7 @@ bool FrameBufferObject::create(unsigned int width, unsigned int height, bool nee
     return true;
 }
 
-void FrameBufferObject::attachTexture(unsigned int position, unsigned int textureId) const {
+void FrameBufferObject::attachTexture(const unsigned int position, const unsigned int textureId) const {
     assert(m_frameBufferId);
 
     // Bind the current FBO

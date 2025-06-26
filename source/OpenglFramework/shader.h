@@ -49,7 +49,7 @@ public:
 
     // Set a vector 4 uniform value to this shader (be careful if the uniform is not
     // used in the shader, the compiler will remove it, then when you will try to set it, an assert will occur)
-    void setVector4Uniform(const std::string& variableName, const Vector4<double>& v, bool errorIfMissing = true) const;
+    void setVector4Uniform(const std::string& variableName, const Vector4<float>& v, bool errorIfMissing = true) const;
 
     // Set a 3x3 matrix uniform value to this shader (be careful if the uniform is not
     // used in the shader, the compiler will remove it, then when you will try to set it, an assert will occur)

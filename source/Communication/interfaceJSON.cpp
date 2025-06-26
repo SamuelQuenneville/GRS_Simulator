@@ -9,112 +9,95 @@
 #include "interfaceJSON.h"
 
 bool InterfaceJSON::addSocket(const int uavId, const char* fdmAddress, const uint16_t fdmPortIn) {
-    const auto newSocket = new SocketUDP();
+    auto newSocket = std::make_unique<SocketUDP>();
     if (!newSocket->bind(fdmAddress, fdmPortIn)) {
         LOG_ERROR("Failed to bind socket to " + std::string(fdmAddress) + ":" + std::to_string(fdmPortIn));
-        delete newSocket;
         return false;
     }
-    m_sockets[uavId] = newSocket;
-
-    m_fdmAddress = fdmAddress;
-    m_fdmPortIn = fdmPortIn;
-
     m_fcuFrameRate.push_back(0);
     m_fcuFrameCount.push_back(-1);
+
+    instanceState inst;
+    inst.id = uavId;
+    inst.socket_fd = newSocket->getFileDescriptor();
+    inst.last_msg_time = std::chrono::steady_clock::now();
+    inst.socket = std::move(newSocket);
+
+    m_instances.push_back(std::move(inst));
 
     LOG_INFO("Flight Dynamics Model (FDM) at " + std::string(fdmAddress) + ":" + std::to_string(fdmPortIn));
     return true;
 }
 
-bool InterfaceJSON::receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHANNELS>>& data) {
+void InterfaceJSON::receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHANNELS>>& data) {
 
-    if (m_sockets.empty()) {
-        return false;
-    }
+    std::vector<std::array<uint16_t, MAX_SERVO_CHANNELS>> receivedData(m_instances.size());
+    std::vector<pollfd> poll_fds(m_instances.size());
 
-    std::vector<std::array<uint16_t, MAX_SERVO_CHANNELS>> receivedData(m_sockets.size());
+    bool flag = true;
+    while (flag) {
+        for (size_t i = 0; i < m_instances.size(); ++i) {
+            poll_fds[i].fd = m_instances[i].socket_fd;
+            poll_fds[i].events = POLLIN;
+        }
 
-    bool allReceived = true;
+        const int ret = poll(poll_fds.data(), poll_fds.size(), TIMEOUT_MS);
+        if (ret < 0) {
+            perror("poll");
+            break;
+        }
 
-    for (int i = 0; i < m_sockets.size(); ++i) {
-        servoPacket pkt{};
-        std::array<uint16_t, MAX_SERVO_CHANNELS> pwm{};
+        std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+        for (size_t i = 0; i < poll_fds.size(); ++i) {
+            if (poll_fds[i].revents & POLLIN) {
+                servoPacket last_pkt{};
+                std::array<uint16_t, MAX_SERVO_CHANNELS> pwm{};
 
-        ssize_t receiveSize = m_sockets[i+1]->receive(&pkt, sizeof(servoPacket),1);
+                sockaddr_in src_addr{};
+                socklen_t addr_len = sizeof(src_addr);
 
-        // drain the socket in the case we're backed up
-        int counter = 0;
-        while (true) {
-            servoPacket last_pkt{};
-            const auto recvSize_last = m_sockets[i+1]->receive(&last_pkt, sizeof(servoPacket), 0ul);
-            if (recvSize_last == -1) {
-                break;
+                const int nbytes = recvfrom(poll_fds[i].fd, &last_pkt, sizeof(servoPacket), 0, reinterpret_cast<sockaddr*>(&src_addr), &addr_len);
+                if (nbytes > 0) {
+                    m_instances[i].last_json_msg = last_pkt;
+                    m_instances[i].last_msg_time = now;
+                    m_instances[i].remote_addr = src_addr;
+                    m_instances[i].received_this_step = true;
+
+                    // Store valid servo data
+                    for (int servo = 0; servo < MAX_SERVO_CHANNELS; servo++) {
+                        pwm[servo] = last_pkt.pwm[servo];
+                    }
+                    receivedData[i] = pwm;
+                }
             }
-            counter++;
-            pkt = last_pkt;
-            receiveSize = recvSize_last;
         }
 
-        if (counter > 0) {
-            LOG_INFO("Drained " + std::to_string(counter) + " packets from socket" + std::to_string(i));
+        if (allReceived(m_instances) || std::any_of(m_instances.begin(), m_instances.end(),
+            [&](const auto& inst) { return isStale(inst, now); })) {
+            for (int i = 0; i < receivedData.size(); ++i) {
+                data[i+1] = receivedData[i];
+            }
+
+            flag = false;
+            m_fcuOnline = true;
         }
 
-        if (receiveSize == -1) {
-            allReceived = false; // Mark as failed if any socket did not receive data
-            continue;
-        }
-
-        if (MAGIC_16 != pkt.magic) {
-            LOG_ERROR("Incorrect magic: " + std::to_string(pkt.magic) + " should be " + std::to_string(MAGIC_16));
-            allReceived = false;
-            continue;
-        }
-
-        // check frame rate and frame order
-        m_fcuFrameRate.at(i) = pkt.frameRate;
-        if (pkt.frameCount < m_fcuFrameCount.at(i)) {
-            LOG_INFO("ArduPilot controller has reset");
-        }
-        else if (pkt.frameCount == m_fcuFrameCount.at(i)) {
-            // received duplicate frame, skip
-            LOG_WARNING("Duplicate input frame count" + std::to_string(m_fcuFrameCount.at(i)));
-            continue;
-        }
-        else if (pkt.frameCount != m_fcuFrameCount.at(i) + 1 && m_fcuOnline) {
-            // missed frames, warn only
-            LOG_WARNING("Missed " + std::to_string(pkt.frameCount - m_fcuFrameCount.at(i)) + " input frames");
-        }
-        m_fcuFrameCount.at(i) = pkt.frameCount;
-
-        // Store valid servo data
-        for (int servo = 0; servo < MAX_SERVO_CHANNELS; servo++) {
-            pwm.at(servo) = pkt.pwm[servo];
-        }
-        receivedData.at(i) = pwm;
     }
-
-    if (!m_fcuOnline && allReceived) {
-        m_fcuOnline = true;
-        LOG_INFO("Connected to all ArduPilot FCU");
-    }
-
-    // If all sockets received at least one message, add to output
-    if (allReceived) {
-        for (int i = 0; i < receivedData.size(); ++i) {
-           data[i+1] = receivedData.at(i);
-        }
-    }
-
-    return allReceived;
 }
 
-void InterfaceJSON::sendData(const SocketUDP& socket, const sensorData& data) {
+void InterfaceJSON::sendData(const int uavId, const sensorData& data) {
     const auto gyro = data.angularVelocity;
     const auto acceleration = data.acceleration;
     const auto position = data.position;
     const auto attitude = data.attitude;
     const auto velocity = data.velocity;
+
+    /*
+    printf("Roll   : %f, Pitch : %f, Yaw   : %f\n", data.attitude.x(), data.attitude.y(), data.attitude.z());
+    printf("Ax     : %f, Ay    : %f, Az    : %f\n", data.acceleration.x(), data.acceleration.y(), data.acceleration.z());
+    printf("North  : %f, East  : %f, Down  : %f\n", position.x(), position.y(), position.z());
+    printf("V North: %f, V East: %f, V Down: %f\n", velocity.x(), velocity.y(), velocity.z());
+    */
 
     // Form the string
     const std::string message = "\n{\"timestamp\":" + std::to_string(data.timeStampSecond) +
@@ -125,17 +108,33 @@ void InterfaceJSON::sendData(const SocketUDP& socket, const sensorData& data) {
                                 ",\"position\":[" + std::to_string(position.x()) + "," + std::to_string(position.y()) + "," + std::to_string(position.z()) + "]" +
                                 ",\"attitude\":[" + std::to_string(attitude.x()) + "," + std::to_string(attitude.y()) + "," + std::to_string(attitude.z()) + "]" +
                                 ",\"velocity\":[" + std::to_string(velocity.x()) + "," + std::to_string(velocity.y()) + "," + std::to_string(velocity.z()) + "]" +
-                                ",\"airspeed\":"  + std::to_string(data.airspeed) + "}\n";
+                                ",\"airspeed\":"  + std::to_string(data.airspeed) +
+                                ",\"rpm\":" + std::to_string(data.rpm) + "}\n";
 
-    const char* fcuAddress{};
-    uint16_t fcuPortOut{};
 
-    socket.lastReceivedAddress(fcuAddress, fcuPortOut);
-    [[maybe_unused]] auto bytesSent = socket.sendTo(message.c_str(), message.size(), fcuAddress, fcuPortOut);
+
+    sendto(m_instances[uavId-1].socket_fd, message.data(), message.size(), 0,
+       reinterpret_cast<sockaddr*>(&m_instances[uavId-1].remote_addr),
+       sizeof(m_instances[uavId-1].remote_addr));
 }
 
 void InterfaceJSON::setWindvane(const float direction, const float speed) {
     m_windvaneDirection = direction;
     m_windvaneSpeed = speed;
     m_setWindvane = true;
+}
+
+bool InterfaceJSON::allReceived(std::vector<instanceState>& instances) {
+    return std::all_of(instances.begin(), instances.end(),
+                       [](const instanceState& inst) { return inst.received_this_step; });
+}
+
+void InterfaceJSON::resetSyncFlags() {
+    for (auto& inst : m_instances) {
+        inst.received_this_step = false;
+    }
+}
+
+bool InterfaceJSON::isStale(const instanceState& instance, const std::chrono::steady_clock::time_point now) {
+    return (now - instance.last_msg_time) > std::chrono::milliseconds(MAX_WAIT_MS);
 }

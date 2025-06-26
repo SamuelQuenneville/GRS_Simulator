@@ -65,6 +65,7 @@ set(GRS_DEFINITIONS
         source/Definitions/payloadDefinitions.h
         source/Definitions/controllerGains.h
         source/Definitions/jsonInterface.h
+        source/Definitions/launcherDefinitions.h
 )
 
 set(GRS_LOG
@@ -136,6 +137,8 @@ set(GRS_RIGID_BODIES_AND_LINK
         source/RigidBodyAndLink/payload.h
         source/RigidBodyAndLink/SceneObjects/payloadObject.cpp
         source/RigidBodyAndLink/SceneObjects/payloadObject.h
+        source/RigidBodyAndLink/powertrain.h
+        source/RigidBodyAndLink/powertrain.cpp
 )
 
 set(GRS_SCENES
@@ -205,6 +208,7 @@ if(NOT yaml-cpp_POPULATED)
 endif()
 
 # OpenGL
+find_package(OpenGL REQUIRED)
 add_subdirectory(source/Extern/nanogui)
 
 set(NANOGUI_BUILD_EXAMPLE OFF CACHE BOOL " " FORCE)
@@ -238,7 +242,7 @@ target_compile_definitions(GRS_Simulator PRIVATE ${NANOGUI_EXTRA_DEFS})
 target_compile_features(GRS_Simulator PUBLIC cxx_std_17)
 set_target_properties(GRS_Simulator PROPERTIES CXX_EXTENSIONS OFF)
 
-target_link_libraries(GRS_Simulator yaml-cpp::yaml-cpp nanogui ${NANOGUI_EXTRA_LIBS})
+target_link_libraries(GRS_Simulator yaml-cpp::yaml-cpp nanogui ${NANOGUI_EXTRA_LIBS} OpenGL::GL)
 
 # GOOGLE TESTS
 FetchContent_Declare(

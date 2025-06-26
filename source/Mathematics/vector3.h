@@ -61,17 +61,17 @@ public:
         return std::sqrt(m_elements[0] * m_elements[0] + m_elements[1] * m_elements[1] + m_elements[2] * m_elements[2]);
     }
 
-    Vector3<T> normalize() const {
+    Vector3 normalize() const {
         T len = length();
         if (len != 0) {
-            return Vector3<T>(m_elements[0] / len, m_elements[1] / len, m_elements[2] / len);
+            return Vector3(m_elements[0] / len, m_elements[1] / len, m_elements[2] / len);
         } else {
             throw std::invalid_argument("Can't normalize zero vector"+std::string(__FILE__)+" line: "+std::to_string(__LINE__));
         }
     }
 
-    Vector3<T> toOpenglRef() const {
-        return Vector3<T>(m_elements[0], -m_elements[2], m_elements[1]);
+    Vector3 toOpenglRef() const {
+        return Vector3(m_elements[0], -m_elements[2], m_elements[1]);
     }
 
     [[nodiscard]] bool isFinite() const {
@@ -101,11 +101,11 @@ public:
         return Vector3(-m_elements[0], -m_elements[1], -m_elements[2]);
     }
 
-    constexpr friend inline Vector3 operator*(const T& scalar, Vector3 vector) {
+    constexpr friend Vector3 operator*(const T& scalar, Vector3 vector) {
         return Vector3(vector.m_elements[0] * scalar, vector.m_elements[1] * scalar, vector.m_elements[2] * scalar);
     }
 
-    constexpr friend inline Vector3 operator*(Vector3 vector, const T& scalar) {
+    constexpr friend Vector3 operator*(Vector3 vector, const T& scalar) {
         return Vector3(vector.m_elements[0] * scalar, vector.m_elements[1] * scalar, vector.m_elements[2] * scalar);
     }
 
@@ -124,8 +124,8 @@ public:
                        m_elements[0] * other.m_elements[1] - m_elements[1] * other.m_elements[0]);
     }
 
-    static Vector3<T> zeros() {
-        return Vector3<T> {0, 0, 0};
+    static Vector3 zeros() {
+        return Vector3 {0, 0, 0};
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Vector3& vec) {

@@ -21,6 +21,7 @@ class Link {
 
 public:
     Link();
+    virtual ~Link() = default;
 
     enum linkType {
         RIGID,

@@ -62,9 +62,7 @@ private:
     std::string m_logDirectory;
 
     systemConfiguration m_systemConfiguration{};
-    fixedWingProperties m_aircraftProperties{};
-    tetherProperties m_tetherProperties{};
-    payloadProperties m_payloadProperties{};
+    systemProperties m_systemProperties{};
     ctrlGains m_ctrlGains{};
 
     std::vector<initialStates> m_initialAircraftStatesVector;
