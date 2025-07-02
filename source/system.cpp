@@ -71,9 +71,24 @@ void System::update(const double dt) {
 void System::updateSitl(const double dt) {
 
     // Receive JSON SITL
-    std::map<int, std::array<uint16_t, 16>> data;
-    data.clear();
-    m_communicationManager->receiveData(data);
+    std::map<int, std::array<uint16_t, 16>> pwms;
+    std::map<int, flags> flags;
+    pwms.clear();
+    m_communicationManager->receiveData(pwms, flags);
+
+    // If all forced command for all UAV provide a endSim = true we stop the update??
+    bool shouldEndSimulation = true;
+
+    for (const auto& [key, f] : flags) {
+        if (!f.endSimulation) {
+            shouldEndSimulation = false;
+            break;
+        }
+    }
+
+    if (shouldEndSimulation) {
+        return;
+    }
 
     if (m_communicationManager->fcuOnline()) {
         // Call tether update()
@@ -104,7 +119,7 @@ void System::updateSitl(const double dt) {
                 }
             }
 
-            aircraft->updateSitl(dt, data[aircraft->getId()]);
+            aircraft->updateSitl(dt, pwms[aircraft->getId()], flags[aircraft->getId()].shouldMove);
 
             // Send JSON SITL
             sensorData sensorData = {static_cast<double>(nowMicros()) / 1000000.0, aircraft->getAngularVelocity(), aircraft->centerOfMass->acceleration(), aircraft->centerOfMass->position(), aircraft->getAttitude(), aircraft->centerOfMass->velocity(), aircraft->airspeed(), aircraft->getRpm()};

@@ -29,9 +29,10 @@ bool InterfaceJSON::addSocket(const int uavId, const char* fdmAddress, const uin
     return true;
 }
 
-void InterfaceJSON::receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHANNELS>>& data) {
+void InterfaceJSON::receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHANNELS>>& pwms, std::map<int, flags>& flagsList) {
 
-    std::vector<std::array<uint16_t, MAX_SERVO_CHANNELS>> receivedData(m_instances.size());
+    std::vector<std::array<uint16_t, MAX_SERVO_CHANNELS>> receivedPWM(m_instances.size());
+    std::vector<flags> receivedFlags(m_instances.size());
     std::vector<pollfd> poll_fds(m_instances.size());
 
     bool flag = true;
@@ -56,7 +57,7 @@ void InterfaceJSON::receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHA
                 sockaddr_in src_addr{};
                 socklen_t addr_len = sizeof(src_addr);
 
-                const int nbytes = recvfrom(poll_fds[i].fd, &last_pkt, sizeof(servoPacket), 0, reinterpret_cast<sockaddr*>(&src_addr), &addr_len);
+                const size_t nbytes = recvfrom(poll_fds[i].fd, &last_pkt, sizeof(servoPacket), 0, reinterpret_cast<sockaddr*>(&src_addr), &addr_len);
                 if (nbytes > 0) {
                     m_instances[i].last_json_msg = last_pkt;
                     m_instances[i].last_msg_time = now;
@@ -67,15 +68,20 @@ void InterfaceJSON::receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHA
                     for (int servo = 0; servo < MAX_SERVO_CHANNELS; servo++) {
                         pwm[servo] = last_pkt.pwm[servo];
                     }
-                    receivedData[i] = pwm;
+                    receivedPWM[i] = pwm;
+
+                    receivedFlags[i].shouldMove    = last_pkt.shouldMove;
+                    receivedFlags[i].endSimulation = last_pkt.endSimulation;
                 }
             }
         }
 
         if (allReceived(m_instances) || std::any_of(m_instances.begin(), m_instances.end(),
             [&](const auto& inst) { return isStale(inst, now); })) {
-            for (int i = 0; i < receivedData.size(); ++i) {
-                data[i+1] = receivedData[i];
+            for (int i = 0; i < receivedPWM.size(); ++i) {
+                pwms[i+1] = receivedPWM[i];
+                flagsList[i+1].shouldMove = receivedFlags[i].shouldMove;
+                flagsList[i+1].endSimulation = receivedFlags[i].endSimulation;
             }
 
             flag = false;

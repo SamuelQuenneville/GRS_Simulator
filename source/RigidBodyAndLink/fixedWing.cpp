@@ -69,12 +69,16 @@ void FixedWing::update(const double dt) {
     m_writeLog(forcesAeroBody, momentsAeroBody, m_earthToBody(externalForcesEarth));
 }
 
-void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16>& pwm) {
+void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16>& pwm, const bool shouldMove) {
 
     // Detect SITL mode once
     if (!m_sitl) {
         m_sitl = true;
     }
+
+    // Read from .csv(GCS pass through pixhawk) if we should move (launch triggered)
+    m_flightLaunchTriggered = shouldMove;
+    std::cout << "ShouldMove: " << std::boolalpha << m_flightLaunchTriggered << std::endl;
 
     // Convert PWM to normalized control inputs
     fixedWingControlInputs inputs{

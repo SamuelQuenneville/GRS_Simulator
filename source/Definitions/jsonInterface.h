@@ -22,11 +22,19 @@
 constexpr int TIMEOUT_MS = 10;
 constexpr int MAX_WAIT_MS = 50;
 
+// The flags received from ArduPilot SITL (that come from the GCS)
+struct flags {
+    bool shouldMove;
+    bool endSimulation;
+};
+
 // The servo packet received from ArduPilot SITL. Defined in SIM_JSON.h.
 struct servoPacket {
     uint16_t magic;
     uint16_t frameRate;
     uint32_t frameCount;
+    bool     shouldMove;
+    bool     endSimulation;
     uint16_t pwm[MAX_SERVO_CHANNELS]; // pwm [aileron , elevator , throttle , rudder , ...]
 };
 

@@ -24,7 +24,7 @@ public:
     [[nodiscard]] int getId() const;
 
     void update(double dt) override;
-    void updateSitl(double dt, const std::array<uint16_t, 16> &pwm);
+    void updateSitl(double dt, const std::array<uint16_t, 16>& pwm, bool shouldMove);
 
     [[nodiscard]] fixedWingStates getStates() const {return m_states;};
 
@@ -73,6 +73,9 @@ private:
     bool m_launchTriggered = false;
     bool m_inLaunch = false;
     float m_launcherAccel = 0.0;
+
+    bool m_flightLaunchTriggered = false;
+    bool m_inFlightLaunch = false;
 
     double m_rpm = 0.0;
     double m_rpmTau = 0.12;
