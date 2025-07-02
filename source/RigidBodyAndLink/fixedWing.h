@@ -40,6 +40,8 @@ public:
     void setInLaunch(const bool inLaunch) {m_inLaunch = inLaunch;};
     void setLauncherAccel(const float newAccel) {m_launcherAccel = newAccel;};
 
+    void setInFlightLaunch() {m_inFlightLaunch = true;};
+
     [[nodiscard]] double getRpm() const {return m_rpm;};
 
     [[nodiscard]] double airspeed() const;

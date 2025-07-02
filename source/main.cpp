@@ -20,7 +20,9 @@ int main(const int argc, const char * argv[]) {
 
         if (arg == "--sitl") {
             arguments.sitlMode = true;
-        } else if (arg == "--log") {
+        } else if (arg == "--csv") {
+            arguments.inFlightLaunch = true;
+        }else if (arg == "--log") {
             arguments.loggingEnabled = true;
         } else if (arg == "--verbose") {
             PROGRAM_LOGGER.enableVerbose(true);
@@ -28,6 +30,7 @@ int main(const int argc, const char * argv[]) {
             std::cout << "Usage: " << argv[0] << " [options]\n"
                       << "Options:\n"
                       << "  --sitl      Enable SITL mode\n"
+                      << "  --csv       Use with sitl to enable commands from .csv"
                       << "  --log       Enable logging\n"
                       << "  --verbose   Enable verbose mode\n"
                       << "  --help      Show this help message\n";

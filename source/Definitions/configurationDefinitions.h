@@ -20,6 +20,7 @@
 
 struct programArguments {
     bool sitlMode;
+    bool inFlightLaunch;
     bool loggingEnabled;
 };
 

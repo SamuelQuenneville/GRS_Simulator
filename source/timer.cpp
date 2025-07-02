@@ -62,9 +62,6 @@ bool Timer::isPossibleToTakeStep(const std::chrono::duration<double> timeStep) c
 }
 
 void Timer::nextStep(const std::chrono::duration<double> timeStep) {
-    //assert(m_isRunning);
-
-    // Update the accumulator value
     m_accumulator -= timeStep;
 }
 

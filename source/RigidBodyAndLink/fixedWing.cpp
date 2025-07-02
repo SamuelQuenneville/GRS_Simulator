@@ -179,7 +179,7 @@ Vector3<double> FixedWing::m_calcForceAeroBodyFrame(const double airspeed, const
         Fx += m_properties.mass * m_launcherAccel;
     }
 
-    if (m_launchTriggered || !m_sitl) {
+    if (m_launchTriggered || !m_sitl || m_inFlightLaunch) {
         return {Fx,Fy,Fz};
     }
 
@@ -209,7 +209,7 @@ Vector3<double> FixedWing::m_calcMomentAeroBodyFrame(const double airspeed, cons
         Mz += qBarSurface * m_properties.wingSpan * (m_properties.Cn_0 + m_properties.Cn_BETA * betaRadian + m_properties.Cn_p * m_properties.wingSpan * oneOverTwoVa * m_states.p + m_properties.Cn_r * m_properties.wingSpan * oneOverTwoVa * m_states.r + m_properties.Cn_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cn_DELTA_RUD * m_inputs.deltaRudder);
     }
 
-    if (m_launchTriggered || !m_sitl) {
+    if (m_launchTriggered || !m_sitl || m_inFlightLaunch) {
         return {Mx,My,Mz};
     }
 
@@ -258,22 +258,29 @@ fixedWingStates FixedWing::m_calcStatesDerivatives(Vector3<double> forceAeroBody
     centerOfMass->setAcceleration({derivatives.u, derivatives.v, -derivatives.w});
 
     if (m_sitl) {
-        if (!m_launchTriggered) {
-            derivatives.x = 0.0;
-            derivatives.y = 0.0;
-            derivatives.z = 0.0;
-            derivatives.u = 0.0;
-            derivatives.v = 0.0;
-            derivatives.w = 0.0;
-        }
+        if (!m_inFlightLaunch) {
+            if (!m_launchTriggered) {
+                derivatives.x = 0.0;
+                derivatives.y = 0.0;
+                derivatives.z = 0.0;
+                derivatives.u = 0.0;
+                derivatives.v = 0.0;
+                derivatives.w = 0.0;
+            }
 
-        if (m_inLaunch) {
-            derivatives.p = 0.0;
-            derivatives.q = 0.0;
-            derivatives.r = 0.0;
+            if (m_inLaunch) {
+                derivatives.p = 0.0;
+                derivatives.q = 0.0;
+                derivatives.r = 0.0;
+            }
+        } else {
+            if (!m_flightLaunchTriggered) {
+                derivatives.x = 0.0;
+                derivatives.y = 0.0;
+                derivatives.z = 0.0;
+            }
         }
     }
-
 
     return derivatives;
 }

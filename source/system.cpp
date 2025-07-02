@@ -151,6 +151,10 @@ void System::createSystemOneAircraft(initialStates& aircraftStates) {
         aircraft->setInitialStates(aircraftStates);
         aircraft->setLauncherAccel(m_systemProperties.launcher.launcherAccel);
 
+        if (m_programArgs.inFlightLaunch) {
+            aircraft->setInFlightLaunch();
+        }
+
         m_startUdpSocket(aircraft->getId());
 
         // Push back Bodies into list
@@ -182,6 +186,10 @@ void System::createSystemOneAircraftGrounded(initialStates& aircraftStates) {
         auto aircraft = std::make_unique<FixedWing>(m_physics, m_logger, m_systemProperties.fixedWing);
         aircraft->setInitialStates(aircraftStates);
         aircraft->setLauncherAccel(m_systemProperties.launcher.launcherAccel);
+
+        if (m_programArgs.inFlightLaunch) {
+            aircraft->setInFlightLaunch();
+        }
 
         // Create tether and set fix to ground
         auto tether = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether);
@@ -237,6 +245,11 @@ void System::createSystemTwoAircraft(std::vector<initialStates>& aircraftStates)
         aircraft2->setInitialStates(aircraftStates.back());
         aircraft2->setLauncherAccel(m_systemProperties.launcher.launcherAccel);
 
+        if (m_programArgs.inFlightLaunch) {
+            aircraft1->setInFlightLaunch();
+            aircraft2->setInFlightLaunch();
+        }
+
         // Push back Bodies and Links into lists
         m_aircraft.push_back(std::move(aircraft1));
         m_aircraft.push_back(std::move(aircraft2));
@@ -276,6 +289,11 @@ void System::createSystemTwoAircraftV(bool isGrounded, std::vector<initialStates
         auto aircraft2 = std::make_unique<FixedWing>(m_physics, m_logger, m_systemProperties.fixedWing);
         aircraft2->setInitialStates(aircraftStates.back());
         aircraft2->setLauncherAccel(m_systemProperties.launcher.launcherAccel);
+
+        if (m_programArgs.inFlightLaunch) {
+            aircraft1->setInFlightLaunch();
+            aircraft2->setInFlightLaunch();
+        }
 
         // Create payload and set initial conditions
         m_payload = std::make_unique<Payload>(m_physics, m_logger, m_systemProperties.payload, isGrounded);
@@ -370,6 +388,12 @@ void System::createSystemThreeAircraftV(bool isGrounded, std::vector<initialStat
 
         auto aircraft3 = std::make_unique<FixedWing>(m_physics, m_logger, m_systemProperties.fixedWing);
         aircraft3->setInitialStates(aircraftStates.at(2));
+
+        if (m_programArgs.inFlightLaunch) {
+            aircraft1->setInFlightLaunch();
+            aircraft2->setInFlightLaunch();
+            aircraft3->setInFlightLaunch();
+        }
 
         // Create payload and set initial conditions
         m_payload = std::make_unique<Payload>(m_physics, m_logger, m_systemProperties.payload, isGrounded);
