@@ -29,6 +29,8 @@ public:
 
     void renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;
 
+    void setPauseTimerCallback(std::function<void()> callback);
+
 protected:
     World& m_world;
     std::shared_ptr<Cube> m_ground;

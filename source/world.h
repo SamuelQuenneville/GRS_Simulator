@@ -16,6 +16,8 @@
 #include <climits>
 #endif
 
+#include <functional>
+
 #include "Configuration/configurationParser.h"
 #include "system.h"
 
@@ -45,6 +47,8 @@ public:
     void createSystem();
     void resetSystem();
     void deleteSystem();
+
+    void setPauseTimerCallback(std::function<void()> callback);
 
     std::map<std::string, systemType> systemTypeStringToEnum;
     [[nodiscard]] systemType getSystemType() const;

@@ -128,3 +128,7 @@ void ThreeAircraftV::renderSinglePass(Shader &shader, const Matrix4<double> &wor
     // Unbind the shader
     shader.unbind();
 }
+
+void ThreeAircraftV::setPauseTimerCallback(std::function<void()> callback) {
+    m_world.setPauseTimerCallback(std::move(callback));
+}

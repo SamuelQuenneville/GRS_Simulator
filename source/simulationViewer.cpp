@@ -85,6 +85,12 @@ void SimulationViewer::start() {
             m_world->createSystem();
             m_createScene();
 
+            // callback binding, enable to stop timer from system
+            m_scene->setPauseTimerCallback([this]() {
+                m_pauseSimulation();
+                LOG_INFO("Reach end of trajectory!");
+            });
+
             m_gui.setTargetFromConfig(m_world->system()->getTarget().groundspeed, m_world->system()->getTarget().positionPayload);
 
             m_scene->reshape(m_windowWidth, m_windowHeight);

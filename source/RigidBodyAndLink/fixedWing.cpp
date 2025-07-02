@@ -78,7 +78,6 @@ void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16>& pwm,
 
     // Read from .csv(GCS pass through pixhawk) if we should move (launch triggered)
     m_flightLaunchTriggered = shouldMove;
-    std::cout << "ShouldMove: " << std::boolalpha << m_flightLaunchTriggered << std::endl;
 
     // Convert PWM to normalized control inputs
     fixedWingControlInputs inputs{

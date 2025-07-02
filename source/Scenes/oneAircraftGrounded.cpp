@@ -103,3 +103,7 @@ void OneAircraftGrounded::renderSinglePass(Shader& shader, const Matrix4<double>
     // Unbind the shader
     shader.unbind();
 }
+
+void OneAircraftGrounded::setPauseTimerCallback(std::function<void()> callback) {
+    m_world.setPauseTimerCallback(std::move(callback));
+}

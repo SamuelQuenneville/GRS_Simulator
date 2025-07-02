@@ -139,6 +139,10 @@ void World::deleteSystem() {
     m_initialAircraftStatesVector.clear();
 }
 
+void World::setPauseTimerCallback(std::function<void()> callback) {
+    m_system->setPauseTimerCallback(std::move(callback));
+}
+
 systemType World::getSystemType() const {
     return systemTypeStringToEnum.at(m_systemConfiguration.configuration);
 }

@@ -76,7 +76,7 @@ void System::updateSitl(const double dt) {
     pwms.clear();
     m_communicationManager->receiveData(pwms, flags);
 
-    // If all forced command for all UAV provide a endSim = true we stop the update??
+    // If all forced command for all UAV provide a endSim = true we stop the update
     bool shouldEndSimulation = true;
 
     for (const auto& [key, f] : flags) {
@@ -87,7 +87,7 @@ void System::updateSitl(const double dt) {
     }
 
     if (shouldEndSimulation) {
-        return;
+        if (m_pauseTimer) m_pauseTimer();
     }
 
     if (m_communicationManager->fcuOnline()) {
@@ -137,6 +137,10 @@ void System::updateSitl(const double dt) {
             m_payload->update(dt);
         }
     }
+}
+
+void System::setPauseTimerCallback(std::function<void()> callback) {
+    m_pauseTimer = std::move(callback);
 }
 
 void System::createSystemOneAircraft(initialStates& aircraftStates) {

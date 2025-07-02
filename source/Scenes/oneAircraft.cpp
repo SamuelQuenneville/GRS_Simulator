@@ -87,3 +87,7 @@ void OneAircraft::renderSinglePass(Shader& shader, const Matrix4<double>& worldT
     // Unbind the shader
     shader.unbind();
 }
+
+void OneAircraft::setPauseTimerCallback(std::function<void()> callback) {
+    m_world.setPauseTimerCallback(std::move(callback));
+}

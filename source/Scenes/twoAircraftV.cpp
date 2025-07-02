@@ -120,3 +120,7 @@ void TwoAircraftV::renderSinglePass(Shader& shader, const Matrix4<double>& world
     // Unbind the shader
     shader.unbind();
 }
+
+void TwoAircraftV::setPauseTimerCallback(std::function<void()> callback) {
+    m_world.setPauseTimerCallback(std::move(callback));
+}

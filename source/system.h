@@ -9,6 +9,8 @@
 #ifndef GRS_SIMULATOR_SYSTEM_H
 #define GRS_SIMULATOR_SYSTEM_H
 
+#include <functional>
+
 #include "RigidBodyAndLink//fixedWing.h"
 #include "RigidBodyAndLink/tether.h"
 #include "RigidBodyAndLink/payload.h"
@@ -33,6 +35,8 @@ public:
     target& getTarget() {return m_target;};
 
     void setControllerGains(const ctrlGains& newGains) {m_ctrlGains = newGains;};
+
+    void setPauseTimerCallback(std::function<void()> callback);
 
     // Create the different configuration of system
     void createSystemOneAircraft(initialStates& aircraftStates);
@@ -66,8 +70,9 @@ private:
     double m_timeSinceLaunch;
 
     bool m_shouldCallHlc();
-
     void m_initHlcCommands();
+
+    std::function<void()> m_pauseTimer;
 
     target m_target{};
     std::map<int, fixedWingCommands> m_commands{};

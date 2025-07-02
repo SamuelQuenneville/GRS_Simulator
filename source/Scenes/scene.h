@@ -42,6 +42,8 @@ public:
     virtual bool mouseMotionEvent(double xMouse, double yMouse, int leftButtonState, int rightButtonState, int middleButtonState, int altKeyState);
     virtual bool scrollingEvent(double xAxis, double yAxis, double scrollSensitivity);
 
+    virtual void setPauseTimerCallback(std::function<void()> callback) = 0;
+
     void setWindowDimension(int width, int height);
     void setViewport(int x, int y, int width, int height);
     void setInitialZoom(float zoom);
