@@ -8,8 +8,6 @@
 
 #include "fixedWing.h"
 
-#include <nanogui/vector.h>
-
 int FixedWing::m_idCounter = 0;
 
 FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWingProperties& properties)
@@ -75,7 +73,6 @@ void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16>& pwm,
 
     // Read from .csv(GCS pass through pixhawk) if we should move (launch triggered)
     m_flightLaunchTriggered = shouldMove;
-    m_initialization = false;
 
     // Convert PWM to normalized control inputs
     fixedWingControlInputs inputs{
@@ -112,8 +109,6 @@ void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16>& pwm,
     // Set new forces/moments to the node of this body
     centerOfMass->setForce(m_bodyToEarth(forcesAeroBody) + externalForcesEarth);
     centerOfMass->setMoment(m_bodyToEarth(momentsAeroBody));
-
-    std::cout << "Ail/Roll:" << pwm[0] << " / " << m_states.phi << " , " << "Ele/Pitch:" << pwm[1] << " / " << m_states.theta << " , " << "Throttle:" << pwm[2] << " , " << "Rud/Yaw:" << pwm[3] << " / " << m_states.psi << std::endl;
 
     // phi rotated because aircraft mesh is rotated
     setTransform(Transform(centerOfMass->position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi - M_PI/2.0,m_states.theta,m_states.psi)));

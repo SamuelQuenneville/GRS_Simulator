@@ -79,8 +79,6 @@ private:
     bool m_flightLaunchTriggered = false;
     bool m_inFlightLaunch = false;
 
-    bool m_initialization = false;
-
     double m_rpm = 0.0;
     double m_rpmTau = 0.12;
 
