@@ -8,6 +8,8 @@
 
 #include "fixedWing.h"
 
+#include <nanogui/vector.h>
+
 int FixedWing::m_idCounter = 0;
 
 FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWingProperties& properties)
@@ -54,13 +56,8 @@ void FixedWing::update(const double dt) {
     m_eulerIntegration(derivatives, dt);
 
     // Set new forces/moments to the node of this body
-    centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
-    centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
     centerOfMass->setForce(m_bodyToEarth(forcesAeroBody) + externalForcesEarth);
     centerOfMass->setMoment(m_bodyToEarth(momentsAeroBody));
-
-    setAttitude({m_states.phi, m_states.theta, m_states.psi});
-    setAngularVelocity({m_states.p, m_states.q, m_states.r});
 
     // phi rotated because aircraft mesh is rotated
     setTransform(Transform(centerOfMass->position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi - M_PI/2.0,m_states.theta,m_states.psi)));
@@ -78,6 +75,7 @@ void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16>& pwm,
 
     // Read from .csv(GCS pass through pixhawk) if we should move (launch triggered)
     m_flightLaunchTriggered = shouldMove;
+    m_initialization = false;
 
     // Convert PWM to normalized control inputs
     fixedWingControlInputs inputs{
@@ -88,7 +86,7 @@ void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16>& pwm,
     };
 
     // All-zero input guard (fail-safe or inactive)
-    if (pwm[0] == 0) {
+    if (pwm[0] == 0 || inputs.deltaThrust == 0) {
         inputs = {0.0,0.0,0.0,0.0};
     }
 
@@ -112,13 +110,10 @@ void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16>& pwm,
     m_eulerIntegration(derivatives, dt);
 
     // Set new forces/moments to the node of this body
-    centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
-    centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
     centerOfMass->setForce(m_bodyToEarth(forcesAeroBody) + externalForcesEarth);
     centerOfMass->setMoment(m_bodyToEarth(momentsAeroBody));
 
-    setAttitude({m_states.phi, m_states.theta, m_states.psi});
-    setAngularVelocity({m_states.p, m_states.q, m_states.r});
+    std::cout << "Ail/Roll:" << pwm[0] << " / " << m_states.phi << " , " << "Ele/Pitch:" << pwm[1] << " / " << m_states.theta << " , " << "Throttle:" << pwm[2] << " , " << "Rud/Yaw:" << pwm[3] << " / " << m_states.psi << std::endl;
 
     // phi rotated because aircraft mesh is rotated
     setTransform(Transform(centerOfMass->position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi - M_PI/2.0,m_states.theta,m_states.psi)));
@@ -254,9 +249,6 @@ fixedWingStates FixedWing::m_calcStatesDerivatives(Vector3<double> forceAeroBody
     derivatives.q     = 1.0 / m_properties.inertiaY * (m_states.p * m_states.r * (m_properties.inertiaZ - m_properties.inertiaX) - (m_states.p * m_states.p - m_states.r * m_states.r) * m_properties.inertiaXZ) + 1.0 / m_properties.inertiaY * (momentAeroBody[1]);
     derivatives.r     = oneOverTau * (m_states.q * m_states.p * (m_properties.inertiaX * (m_properties.inertiaX - m_properties.inertiaY) + m_properties.inertiaXZ * m_properties.inertiaXZ) - m_states.q * m_states.r * (m_properties.inertiaXZ * (m_properties.inertiaZ - m_properties.inertiaY + m_properties.inertiaX))) + oneOverTau * (m_properties.inertiaXZ * momentAeroBody[0] + m_properties.inertiaX * momentAeroBody[2]);
 
-    // Required by SITL PixHawk (always need to see gravity)
-    centerOfMass->setAcceleration({derivatives.u, derivatives.v, -derivatives.w});
-
     if (m_sitl) {
         if (!m_inFlightLaunch) {
             if (!m_launchTriggered) {
@@ -278,6 +270,8 @@ fixedWingStates FixedWing::m_calcStatesDerivatives(Vector3<double> forceAeroBody
                 derivatives.x = 0.0;
                 derivatives.y = 0.0;
                 derivatives.z = 0.0;
+
+                derivatives.psi   = 0.0;
             }
         }
     }
@@ -311,6 +305,20 @@ void FixedWing::m_eulerIntegration(const fixedWingStates& derivatives, const dou
 
         m_states.w = 0.0;
     }
+
+    // Required by SITL PixHawk (always need to see gravity)
+    centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
+    centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
+    centerOfMass->setAcceleration({derivatives.u, derivatives.v, -derivatives.w});
+
+    setAttitude({m_states.phi, m_states.theta, m_states.psi});
+
+    if (!m_flightLaunchTriggered && m_sitl) {
+        setAngularVelocity({m_states.p, m_states.q, m_physics.gravity*std::tan(m_states.phi) / airspeed()});
+    } else {
+        setAngularVelocity({m_states.p, m_states.q, m_states.r});
+    }
+
 }
 
 double FixedWing::airspeed() const {
