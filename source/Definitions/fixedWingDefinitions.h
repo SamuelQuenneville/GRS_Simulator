@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "Mathematics/vector3.h"
+
 /*
  *   FIXED-WING STRUCTURES
  */
@@ -55,6 +57,13 @@ struct fixedWingProperties {
     double wingSpan;       // m
     double aspectRatio;
     double oswaldEfficiency;
+
+    struct geometry {
+        Vector3<double> cgPosition;
+        Vector3<double> aeroRefPosition;
+        Vector3<double> propulsionPosition;
+        Vector3<double> tetherAttachPosition;
+    } geom;
 
     // INERTIA MATRIX
     double inertiaX;  // kg*m^2

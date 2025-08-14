@@ -11,6 +11,11 @@ AircraftProperties:
   ASPECT_RATIO: 4.924242
   OSWALD_EFF  : 0.920800
   #
+  CG_POSITION            : [0.0, 0.0, 0.0] # m
+  AERO_REF_POSITION      : [0.0, 0.0, 0.0] # m
+  PROPULSION_POSITION    : [0.0, 0.0, 0.0] # m
+  TETHER_ATTACH_POSITION : [0.0, 0.0, 0.0] # m
+  #
   INERTIA_X : 0.187100 # kg*m^2
   INERTIA_Y : 0.333500 # kg*m^2
   INERTIA_Z : 0.482700 # kg*m^2

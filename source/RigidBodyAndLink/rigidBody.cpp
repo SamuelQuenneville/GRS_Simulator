@@ -8,7 +8,8 @@
 
 #include "rigidBody.h"
 
-RigidBody::RigidBody() {
+RigidBody::RigidBody()
+{
     centerOfMass = std::make_unique<Node>();
 }
 

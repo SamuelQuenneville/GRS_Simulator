@@ -18,7 +18,7 @@
 #include "Mathematics/grsMath.h"
 #include "Mathematics/matrix3.h"
 #include "Mathematics/transform.h"
-#include "node.h"
+#include "frame.h"
 
 #include "Log/logger.h"
 
@@ -51,11 +51,15 @@ public:
     [[nodiscard]] const Vector3<double>& getAttitude() const;
     [[nodiscard]] const Vector3<double>& getAngularVelocity() const;
 
+    std::shared_ptr<Frame> bodyOriginFrame() const {return m_bodyOriginFrame;}
+
     std::unique_ptr<Node> centerOfMass;
     std::vector<Node*> connectedNode;
 
 private:
     Transform m_transform = Transform::identity();
+
+    std::shared_ptr<Frame> m_bodyOriginFrame;
 
     Vector3<double> m_attitude = Vector3<double>::zeros();          // Earth reference frame
     Vector3<double> m_angularVelocity = Vector3<double>::zeros();   // Earth reference frame

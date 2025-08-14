@@ -268,6 +268,18 @@ namespace YAML {
             rhs.aspectRatio         = node["ASPECT_RATIO"].as<double>();
             rhs.oswaldEfficiency    = node["OSWALD_EFF"].as<double>();
 
+            auto temp = node["CG_POSITION"].as<std::vector<double>>();
+            rhs.geom.cgPosition = {temp[0], temp[1], temp[2]};
+
+            temp = node["AERO_REF_POSITION"].as<std::vector<double>>();
+            rhs.geom.aeroRefPosition = {temp[0], temp[1], temp[2]};
+
+            temp = node["PROPULSION_POSITION"].as<std::vector<double>>();
+            rhs.geom.propulsionPosition = {temp[0], temp[1], temp[2]};
+
+            temp = node["TETHER_ATTACH_POSITION"].as<std::vector<double>>();
+            rhs.geom.tetherAttachPosition = {temp[0], temp[1], temp[2]};
+
             // INERTIA MATRIX
             rhs.inertiaX  = node["INERTIA_X"].as<double>();
             rhs.inertiaY  = node["INERTIA_Y"].as<double>();

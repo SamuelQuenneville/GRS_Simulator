@@ -70,6 +70,11 @@ private:
     fixedWingControlInputs m_inputs{};
     fixedWingCommands m_commands{};
 
+    std::shared_ptr<Frame> m_centerOfMass;
+    std::shared_ptr<Frame> m_aeroReference;
+    std::shared_ptr<Frame> m_propulsionReference;
+    std::shared_ptr<Frame> m_tetherAttach;
+
     bool m_sitl = false;
 
     bool m_launchTriggered = false;

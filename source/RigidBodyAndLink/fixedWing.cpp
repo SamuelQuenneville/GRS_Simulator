@@ -16,7 +16,10 @@ FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWin
     , m_logger(logger)
     , m_properties(properties)
 {
-
+    m_centerOfMass        = std::make_shared<Frame>(this->bodyOriginFrame().get(), properties.geom.cgPosition);
+    m_aeroReference       = std::make_shared<Frame>(this->bodyOriginFrame().get(), properties.geom.aeroRefPosition);
+    m_propulsionReference = std::make_shared<Frame>(this->bodyOriginFrame().get(), properties.geom.propulsionPosition);
+    m_tetherAttach        = std::make_shared<Frame>(this->bodyOriginFrame().get(), properties.geom.tetherAttachPosition);
 }
 
 FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller)
