@@ -8,12 +8,28 @@
 
 #include "frame.h"
 
-Frame::Frame(const Frame* reference, const Vector3<double>& position, const Vector3<double>& orientation)
+#include <utility>
+
+Frame::Frame(const std::string& name, const Frame* reference, const Vector3<double>& position, const Vector3<double>& orientation)
     : m_localPosition(position)
     , m_localOrientation(orientation)
-    , m_reference(reference)
+    , m_referenceOriginFrame(reference)
+    , m_name(name)
 {
-    m_origin = std::make_shared<Node>();
+    m_origin = std::make_unique<Node>();
+}
+
+void Frame::setLoadCallback(std::function<void(Frame &)> callback) {
+    m_loadCallback = std::move(callback);
+}
+
+void Frame::computeLoad() {
+    if (m_loadCallback) {
+        m_loadCallback(*this);
+    } else {
+        setForce(Vector3<double>(0, 0, 0));
+        setMoment(Vector3<double>(0, 0, 0));
+    }
 }
 
 const Vector3<double>& Frame::getLocalPosition() const {
@@ -24,7 +40,7 @@ const Vector3<double>& Frame::getLocalOrientation() const {
     return m_localOrientation;
 }
 
-const std::shared_ptr<Node>& Frame::origin() const {
-    return m_origin;
+Node& Frame::originNode() const {
+    return *m_origin;
 }
 

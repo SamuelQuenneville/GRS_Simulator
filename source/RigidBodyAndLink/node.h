@@ -40,11 +40,12 @@ private:
     int m_id;
     static int m_idCounter;
 
-    Vector3<double> m_position = Vector3<double>::zeros();        // Earth reference frame
-    Vector3<double> m_velocity = Vector3<double>::zeros();        // Earth reference frame
-    Vector3<double> m_acceleration = Vector3<double>::zeros();    // Earth reference frame
-    Vector3<double> m_force = Vector3<double>::zeros();           // Earth reference frame
-    Vector3<double> m_moment = Vector3<double>::zeros();          // Earth reference frame
+    Vector3<double> m_position     = Vector3<double>::zeros();        // Own reference frame
+    Vector3<double> m_velocity     = Vector3<double>::zeros();        // Own reference frame
+    Vector3<double> m_acceleration = Vector3<double>::zeros();        // Own reference frame
+
+    Vector3<double> m_force        = Vector3<double>::zeros();        // Own reference frame
+    Vector3<double> m_moment       = Vector3<double>::zeros();        // Own reference frame
 };
 
 #endif //GRS_SIMULATOR_NODE_H

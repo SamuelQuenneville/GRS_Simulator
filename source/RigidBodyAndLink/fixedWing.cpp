@@ -16,10 +16,26 @@ FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWin
     , m_logger(logger)
     , m_properties(properties)
 {
-    m_centerOfMass        = std::make_shared<Frame>(this->bodyOriginFrame().get(), properties.geom.cgPosition);
-    m_aeroReference       = std::make_shared<Frame>(this->bodyOriginFrame().get(), properties.geom.aeroRefPosition);
-    m_propulsionReference = std::make_shared<Frame>(this->bodyOriginFrame().get(), properties.geom.propulsionPosition);
-    m_tetherAttach        = std::make_shared<Frame>(this->bodyOriginFrame().get(), properties.geom.tetherAttachPosition);
+    // Create a cg Frame
+    Frame& cg = addFrame("centerOfMass", this->bodyOriginFrame(), properties.geom.cgPosition, {0,0,0});
+    setCenterOfMassFrame(cg);
+
+    // Create other Frames and assign function
+    Frame& aeroReference       = addFrame("aeroRef", this->bodyOriginFrame(), properties.geom.aeroRefPosition, {0,0,0});
+    Frame& propulsionReference = addFrame("propulsionRef", this->bodyOriginFrame(), properties.geom.propulsionPosition, {0,0,0});
+    Frame& tetherAttach        = addFrame("tetherAttach", this->bodyOriginFrame(), properties.geom.tetherAttachPosition, {0,0,0});
+
+    aeroReference.setLoadCallback([this](const Frame& f) {
+        const auto [airspeed, alphaRadian, betaRadian] = m_angleOfAttackSideSlip();
+
+        // Calculate forces and moments
+        const Vector3<double> forcesAeroBody  = m_calcForceAeroBodyFrame(airspeed, alphaRadian, betaRadian);
+        const Vector3<double> momentsAeroBody = m_calcMomentAeroBodyFrame(airspeed, alphaRadian, betaRadian);
+
+        f.setForce(forcesAeroBody);
+        f.setMoment(momentsAeroBody);
+    });
+
 }
 
 FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller)
@@ -57,11 +73,11 @@ void FixedWing::update(const double dt) {
     m_eulerIntegration(derivatives, dt);
 
     // Set new forces/moments to the node of this body
-    centerOfMass->setForce(m_bodyToEarth(forcesAeroBody) + externalForcesEarth);
-    centerOfMass->setMoment(m_bodyToEarth(momentsAeroBody));
+    centerOfMass().setForce(m_bodyToEarth(forcesAeroBody) + externalForcesEarth);
+    centerOfMass().setMoment(m_bodyToEarth(momentsAeroBody));
 
     // phi rotated because aircraft mesh is rotated
-    setTransform(Transform(centerOfMass->position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi - M_PI/2.0,m_states.theta,m_states.psi)));
+    setTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi - M_PI/2.0,m_states.theta,m_states.psi)));
 
     // Log
     m_writeLog(forcesAeroBody, momentsAeroBody, m_earthToBody(externalForcesEarth));
@@ -110,11 +126,11 @@ void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16>& pwm,
     m_eulerIntegration(derivatives, dt);
 
     // Set new forces/moments to the node of this body
-    centerOfMass->setForce(m_bodyToEarth(forcesAeroBody) + externalForcesEarth);
-    centerOfMass->setMoment(m_bodyToEarth(momentsAeroBody));
+    centerOfMass().setForce(m_bodyToEarth(forcesAeroBody) + externalForcesEarth);
+    centerOfMass().setMoment(m_bodyToEarth(momentsAeroBody));
 
     // phi rotated because aircraft mesh is rotated
-    setTransform(Transform(centerOfMass->position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi - M_PI/2.0,m_states.theta,m_states.psi)));
+    setTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi - M_PI/2.0,m_states.theta,m_states.psi)));
 
     // Log
     m_writeLog(forcesAeroBody, momentsAeroBody, m_earthToBody(externalForcesEarth));
@@ -305,9 +321,7 @@ void FixedWing::m_eulerIntegration(const fixedWingStates& derivatives, const dou
     }
 
     // Required by SITL PixHawk (always need to see gravity)
-    centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
-    centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
-    centerOfMass->setAcceleration({derivatives.u, derivatives.v, -derivatives.w});
+    updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {derivatives.u, derivatives.v, -derivatives.w});
 
     setAttitude({m_states.phi, m_states.theta, m_states.psi});
 
@@ -358,10 +372,8 @@ void FixedWing::setInitialStates(initialStates& states) {
     m_states.theta = states.orientation[1];
     m_states.psi   = states.orientation[2];
 
-    centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
-    centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
-
-    setTransform(Transform(centerOfMass->position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi - M_PI/2.0,m_states.theta,m_states.psi)));
+    updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0,0,0});
+    setTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi - M_PI/2.0,m_states.theta,m_states.psi)));
 }
 
 double FixedWing::m_pwmToControl(const controlAxe control, const uint16_t pwm) const {
@@ -439,8 +451,8 @@ void FixedWing::m_writeLog(const Vector3<double>& forceAeroBody, const Vector3<d
         m_inputs.deltaElevator,
         m_inputs.deltaRudder,
         m_inputs.deltaThrust,
-        centerOfMass->position(),
-        centerOfMass->velocity(),
+        centerOfMass().position(),
+        centerOfMass().velocity(),
         {m_states.u, m_states.v, m_states.w},
         {m_states.phi, m_states.theta, m_states.psi},
         {m_states.p, m_states.q, m_states.r},

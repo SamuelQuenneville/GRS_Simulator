@@ -14,7 +14,9 @@ Payload::Payload(const worldPhysics& physics, Logger& logger, const payloadPrope
     , m_properties(properties)
     , m_isGrounded(isGrounded)
 {
-
+    // Create a cg Frame
+    Frame& cg = addFrame("centerOfMass", this->bodyOriginFrame(), {0,0,0}, {0,0,0});
+    setCenterOfMassFrame(cg);
 }
 
 void Payload::update(const double dt) {
@@ -26,11 +28,10 @@ void Payload::update(const double dt) {
         m_eulerIntegration(derivatives, dt);
 
         // Set new forces/moments to the node of this body
-        centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
-        centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
-        centerOfMass->setForce(externalForcesEarth);
+        updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0,0,0});
+        setTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::identity()));
 
-        setTransform(Transform(centerOfMass->position().toOpenglRef(), Quaternion::identity()));
+        centerOfMass().setForce(externalForcesEarth);
     }
 
     // Log
@@ -46,17 +47,15 @@ void Payload::setInitialStates(initialStates& states) {
     m_states.vy = states.position[1];
     m_states.vz = states.position[2];
 
-    centerOfMass->setPosition({m_states.x, m_states.y, m_states.z});
-    centerOfMass->setVelocity({m_states.vx, m_states.vy, m_states.vz});
-
-    setTransform(Transform(centerOfMass->position().toOpenglRef(), Quaternion::fromEulerAngles(states.orientation[0],states.orientation[1],states.orientation[2])));
+    updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0,0,0});
+    setTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(states.orientation[0],states.orientation[1],states.orientation[2])));
 }
 
 void Payload::m_writeLog() {
 
     payloadLogMessage logMessage = {
-        centerOfMass->position(),
-        centerOfMass->velocity(),
+        centerOfMass().position(),
+        centerOfMass().velocity(),
         externalForces()
     };
 
@@ -98,7 +97,7 @@ Vector3<double> Payload::m_calcAeroForces() const {
 
     // Drag = -coeff * ||v_rel|| * v_rel; same as ||v_rel||^2 * v_rel/||v_rel||
     double coeff = 0.5 * m_physics.airDensity * m_properties.cda;
-    Vector3<double> v_rel = centerOfMass->velocity() - cast<double>(m_physics.wind);
+    Vector3<double> v_rel = centerOfMass().velocity() - cast<double>(m_physics.wind);
 
     return -coeff * v_rel.length() * v_rel;
 }
