@@ -29,11 +29,11 @@ public:
     void loggerClockTick(double dt);
     double getLoggerTime() const;
 
-    void writeAircraftMessage(fixedWingLogMessage& message);
-    void writeTetherMessage(tetherLogMessage& message);
-    void writeHlcMessage(hlcLogMessage& message);
-    void writeLlcMessage(llcLogMessage& message);
-    void writePayloadMessage(payloadLogMessage& message);
+    void writeAircraftMessage(const fixedWingLogMessage& message);
+    void writeTetherMessage(const tetherLogMessage& message);
+    void writeHlcMessage(const hlcLogMessage& message);
+    void writeLlcMessage(const llcLogMessage& message);
+    void writePayloadMessage(const payloadLogMessage& message);
 
 private:
     void m_initDirectory(const std::string& logDirectory);

@@ -29,15 +29,16 @@ public:
     virtual ~RigidBody() = default;
 
     virtual void update(double dt) {};
-    virtual Vector3<double> calcExternalForce();
+
     virtual std::map<int, Vector3<double>> externalForces();
 
     virtual void setInitialStates(initialStates& states) {};
 
-    virtual void addConnection(Node& node);
-    virtual void deleteConnection(Node& node);
+    virtual void addConnection(Node& frameNode, Node& node);
+    virtual void deleteConnection(Node& frameNode, Node& node);
 
-    void updateWorldInfos(const Vector3<double>& position, const Vector3<double>& velocity, const Vector3<double>& acceleration) const;
+    void updateForcesOnBody();
+    void updateWorldInfos(const Vector3<double>& position, const Vector3<double>& velocity, const Vector3<double>& acceleration);
 
     void setTransform(const Transform& newTransform);
     void setTransform(const Vector3<double>& newPosition, const Quaternion& newOrientation);
@@ -45,9 +46,13 @@ public:
 
     void setAttitude(const Vector3<double>& newAttitude);
     void setAngularVelocity(const Vector3<double>& newAngularVelocity);
+    void setAngularAcceleration(const Vector3<double>& newAngularAcceleration);
+    void setRotationMatrixCBodyEarth(const Matrix3<double>& newRotationMatrix);
 
     [[nodiscard]] const Vector3<double>& getAttitude() const;
     [[nodiscard]] const Vector3<double>& getAngularVelocity() const;
+    [[nodiscard]] const Vector3<double>& getAngularAcceleration() const;
+    [[nodiscard]] const Matrix3<double>& getRotationMatrixCBodyEarth() const;
 
     [[nodiscard]] Frame* bodyOriginFrame() const {return m_bodyOriginFrame.get();}
 
@@ -58,7 +63,7 @@ public:
     Frame& addFrame(const std::string& name, const Frame* reference, const Vector3<double>& position, const Vector3<double>& orientation);
     [[nodiscard]] Frame* getFrame(const std::string& name) const;
 
-    std::vector<Node*> connectedNode;
+    std::map<Node*, std::vector<Node*>> connections;
 
 private:
     Transform m_transform = Transform::identity();
@@ -66,8 +71,11 @@ private:
     std::unique_ptr<Frame> m_bodyOriginFrame;       // Origin of the body
     std::vector<std::unique_ptr<Frame>> m_frames;
 
-    Vector3<double> m_attitude = Vector3<double>::zeros();          // Earth reference frame
-    Vector3<double> m_angularVelocity = Vector3<double>::zeros();   // Earth reference frame
+    Vector3<double> m_attitude = Vector3<double>::zeros();
+    Vector3<double> m_angularVelocity = Vector3<double>::zeros();
+    Vector3<double> m_angularAcceleration = Vector3<double>::zeros();
+
+    Matrix3<double> m_rotationMatrixCBodyEarth = Matrix3<double>::eye();
 };
 
 

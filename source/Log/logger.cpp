@@ -27,7 +27,7 @@ Logger::~Logger() {
     stopLog(m_llcLog);
 }
 
-void Logger::loggerClockTick(double dt) {
+void Logger::loggerClockTick(const double dt) {
     m_simulationTime += dt;
 }
 
@@ -39,14 +39,13 @@ void Logger::m_initDirectory(const std::string& logDirectory) {
     std::filesystem::create_directories(logDirectory);
 
     time_t rawTime;
-    struct tm* timeInfo;
     char buffer[80];
 
     time(&rawTime);
-    timeInfo = localtime(&rawTime);
+    const struct tm *timeInfo = localtime(&rawTime);
 
     strftime(buffer,sizeof(buffer),"/%Y-%m-%d_%H-%M-%S",timeInfo);
-    std::string date(buffer);
+    const std::string date(buffer);
 
     m_aircraftLog = startLog(logDirectory + date + "_aircraft.csv");
     m_tethersLog = startLog(logDirectory + date + "_tethers.csv");
@@ -68,7 +67,7 @@ void Logger::stopLog(std::ofstream& logHandle) {
     }
 }
 
-void Logger::writeAircraftMessage(fixedWingLogMessage& message) {
+void Logger::writeAircraftMessage(const fixedWingLogMessage& message) {
 
     if (!m_aircraftLog.is_open()) {
         return;
@@ -86,10 +85,11 @@ void Logger::writeAircraftMessage(fixedWingLogMessage& message) {
                   << message.angularSpeed     << ","
                   << message.bodyForcesAero   << ","
                   << message.bodyMomentsAero  << ","
-                  << message.bodyForcesTether << std::endl;
+                  << message.bodyForcesTether << ","
+                  << message.bodyMomentsTether<< std::endl;
 }
 
-void Logger::writeTetherMessage(tetherLogMessage& message) {
+void Logger::writeTetherMessage(const tetherLogMessage& message) {
 
     if (!m_tethersLog.is_open()) {
         return;
@@ -105,7 +105,7 @@ void Logger::writeTetherMessage(tetherLogMessage& message) {
                  << message.earthForcesAero     << std::endl;
 }
 
-void Logger::writeHlcMessage(hlcLogMessage& message) {
+void Logger::writeHlcMessage(const hlcLogMessage& message) {
 
     if (!m_hlcLog.is_open()) {
         return;
@@ -178,7 +178,7 @@ void Logger::writeHlcMessage(hlcLogMessage& message) {
 
 }
 
-void Logger::writeLlcMessage(llcLogMessage& message) {
+void Logger::writeLlcMessage(const llcLogMessage& message) {
 
     if (!m_llcLog.is_open()) {
         return;
@@ -221,18 +221,18 @@ void Logger::writeLlcMessage(llcLogMessage& message) {
              << message.altitudePid.limit     << std::endl;
 }
 
-void Logger::writePayloadMessage(payloadLogMessage& message) {
+void Logger::writePayloadMessage(const payloadLogMessage& message) {
 
     if (!m_payloadLog.is_open()) {
         return;
     }
     m_payloadLog << getLoggerTime()     << ","
-                 << message.nedPosition     << ","
-                 << message.earthSpeed      << ",";
+                 << message.nedPosition << ","
+                 << message.earthSpeed  << ",";
 
-    for (const auto& force : message.earthForcesTethers) {
-        m_payloadLog << force.first  << ","
-                     << force.second << ",";
+    for (const auto&[nodeNumber, forces] : message.earthForcesTethers) {
+        m_payloadLog << nodeNumber  << ","
+                     << forces      << ",";
     }
 
     m_payloadLog << std::endl;

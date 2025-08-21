@@ -5,10 +5,9 @@
  * Université de Sherbrooke
  * Createk Innovation Lab
  */
+#include <utility>
 
 #include "frame.h"
-
-#include <utility>
 
 Frame::Frame(const std::string& name, const Frame* reference, const Vector3<double>& position, const Vector3<double>& orientation)
     : m_localPosition(position)
@@ -17,6 +16,7 @@ Frame::Frame(const std::string& name, const Frame* reference, const Vector3<doub
     , m_name(name)
 {
     m_origin = std::make_unique<Node>();
+    m_frameToBody = Matrix3<double>::fromEulerAngles(m_localOrientation);
 }
 
 void Frame::setLoadCallback(std::function<void(Frame &)> callback) {

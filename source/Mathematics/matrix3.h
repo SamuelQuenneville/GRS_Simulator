@@ -196,6 +196,10 @@ public:
         return result;
     }
 
+    static Matrix3 fromEulerAngles(const Vector3<T>& eulerAngles) {
+        return makeZRotation(eulerAngles[2])*makeYRotation(eulerAngles[1])*makeXRotation(eulerAngles[0]);
+    }
+
     // Create identity matrix
     static Matrix3 eye() {
 
@@ -380,7 +384,7 @@ public:
     }
 
     // Multiply a matrix with a vector
-    Vector3<T> operator*(const Vector3<T>& rhs) {
+    Vector3<T> operator*(const Vector3<T>& rhs) const {
         Vector3<T> result;
 
         for (unsigned i=0; i<3; i++) {

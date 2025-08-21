@@ -82,24 +82,23 @@ private:
     double m_rpm = 0.0;
     double m_rpmTau = 0.12;
 
-    Matrix3<double> m_rotationMatrixCBodyEarth = Matrix3<double>::eye();
-
     std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> m_controller = nullptr;
 
     [[nodiscard]] std::tuple<double, double, double> m_angleOfAttackSideSlip() const;
     [[nodiscard]] Vector3<double> m_calcForceAeroBodyFrame(double airspeed, double alphaRadian, double betaRadian) const;
     [[nodiscard]] Vector3<double> m_calcMomentAeroBodyFrame(double airspeed, double alphaRadian, double betaRadian) const;
 
-    [[nodiscard]] Vector3<double> m_earthToBody(const Vector3<double>& earthVector);
-    [[nodiscard]] Vector3<double> m_bodyToEarth(const Vector3<double>& bodyVector);
+    [[nodiscard]] Vector3<double> m_earthToBody(const Vector3<double>& earthVector) const;
+    [[nodiscard]] Vector3<double> m_bodyToEarth(const Vector3<double>& bodyVector) const;
 
-    fixedWingStates m_calcStatesDerivatives(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, const Vector3<double>& externalForceEarth);
+    //fixedWingStates m_calcStatesDerivatives(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, const Vector3<double>& externalForceEarth);
+    fixedWingStates m_calcStatesDerivatives();
     void m_eulerIntegration(const fixedWingStates& derivatives, double dt);
 
     [[nodiscard]] double m_pwmToControl(controlAxe control, uint16_t pwm) const;
     void m_updateRpmSensor(double dt, double throttleInput);
 
-    void m_writeLog(const Vector3<double>& forceAeroBody, const Vector3<double>& momentAeroBody, const Vector3<double>& tetherForceBody);
+    void m_writeLog();
 };
 
 #endif //GRS_SIMULATOR_FIXEDWING_H

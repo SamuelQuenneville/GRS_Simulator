@@ -14,53 +14,69 @@ RigidBody::RigidBody()
 
 }
 
-Vector3<double> RigidBody::calcExternalForce() {
-    Vector3<double> sumExternalForce = Vector3<double>::zeros();
-
-    for(const Node* node : connectedNode) {
-        sumExternalForce += node->force();
-    }
-
-    return sumExternalForce;
-}
-
 std::map<int, Vector3<double>> RigidBody::externalForces() {
     std::map<int, Vector3<double>> forces;
 
-    for(const Node* node : connectedNode) {
-        forces.emplace(node->getId(), node->force());
+    for (auto& [key, neighbors] : connections) {
+        for (const Node* node : neighbors) {
+            forces.emplace(node->getId(), node->force());
+        }
     }
 
     return forces;
 }
 
-void RigidBody::addConnection(Node& node) {
-    connectedNode.push_back(&node);
+void RigidBody::addConnection(Node& frameNode, Node& node) {
+    connections[&frameNode].push_back(&node);
 }
 
-void RigidBody::deleteConnection(Node& node) {
-    connectedNode.erase(
+void RigidBody::deleteConnection(Node& frameNode, Node& node) {
+    std::vector<Node*>& linkEndConnections = connections[&frameNode];
+    linkEndConnections.erase(
         std::remove_if(
-            connectedNode.begin(), connectedNode.end(),
-            [&node](const Node* n) {
-                return n != nullptr && node.getId() == n->getId();
+            linkEndConnections.begin(), linkEndConnections.end(),
+            [&node](const Node *n) {
+                return node.getId() == n->getId();
             }),
-        connectedNode.end());
+        linkEndConnections.end());
 }
 
-void RigidBody::updateWorldInfos(const Vector3<double>& position, const Vector3<double>& velocity, const Vector3<double>& acceleration) const {
+void RigidBody::updateForcesOnBody() {
+    Vector3<double> totalForce = Vector3<double>::zeros();
+    Vector3<double> totalMoment = Vector3<double>::zeros();
+
+    for (const auto& frame : m_frames) {
+        frame->computeLoad();
+
+        Vector3<double> r = frame->getLocalPosition() - centerOfMassFrame()->getLocalPosition();
+
+        totalForce += frame->forceBody();
+        totalMoment += frame->momentBody() + r.cross(frame->forceBody());
+    }
+
+    centerOfMass().setForce(totalForce);
+    centerOfMass().setMoment(totalMoment);
+}
+
+void RigidBody::updateWorldInfos(const Vector3<double>& position, const Vector3<double>& velocity, const Vector3<double>& acceleration) {
     centerOfMass().setPosition(position);
     centerOfMass().setVelocity(velocity);
     centerOfMass().setAcceleration(acceleration);
 
     for (const auto& f : m_frames) {
         if (!f->isCenterOfMass) {
-            f->originNode().setPosition(position);
-            f->originNode().setVelocity(velocity);
-            f->originNode().setAcceleration(acceleration);
+
+            Vector3<double> pos_local = f->getLocalPosition() - centerOfMassFrame()->getLocalPosition();
+            Vector3<double> pos_world = m_rotationMatrixCBodyEarth.transpose() * pos_local;
+
+            Vector3<double> vel_frame = velocity + m_angularVelocity.cross(pos_world);
+            Vector3<double> acc_frame = acceleration + m_angularAcceleration.cross(pos_world) + m_angularVelocity.cross(m_angularVelocity.cross(pos_world));
+
+            f->originNode().setPosition(position + pos_world);
+            f->originNode().setVelocity(vel_frame);
+            f->originNode().setAcceleration(acc_frame);
         }
     }
-
 }
 
 void RigidBody::setTransform(const Transform& newTransform) {
@@ -84,12 +100,28 @@ void RigidBody::setAngularVelocity(const Vector3<double>& newAngularVelocity) {
     m_angularVelocity = newAngularVelocity;
 }
 
+void RigidBody::setAngularAcceleration(const Vector3<double>& newAngularAcceleration) {
+    m_angularAcceleration = newAngularAcceleration;
+}
+
+void RigidBody::setRotationMatrixCBodyEarth(const Matrix3<double>& newRotationMatrix) {
+    m_rotationMatrixCBodyEarth = newRotationMatrix;
+}
+
 const Vector3<double>& RigidBody::getAttitude() const {
     return m_attitude;
 }
 
 const Vector3<double>& RigidBody::getAngularVelocity() const {
     return m_angularVelocity;
+}
+
+const Vector3<double>& RigidBody::getAngularAcceleration() const {
+    return m_angularAcceleration;
+}
+
+const Matrix3<double>& RigidBody::getRotationMatrixCBodyEarth() const {
+    return m_rotationMatrixCBodyEarth;
 }
 
 Frame* RigidBody::centerOfMassFrame() const {

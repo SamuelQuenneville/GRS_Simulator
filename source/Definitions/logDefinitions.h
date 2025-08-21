@@ -33,6 +33,7 @@ struct fixedWingLogMessage {
     Vector3<double> bodyForcesAero;
     Vector3<double> bodyMomentsAero;
     Vector3<double> bodyForcesTether;
+    Vector3<double> bodyMomentsTether;
 };
 
 struct payloadLogMessage {

@@ -13,6 +13,7 @@
 #include <memory>
 
 #include "node.h"
+#include "Mathematics/matrix3.h"
 
 class Frame {
 
@@ -35,6 +36,9 @@ public:
     [[nodiscard]] Node& originNode() const;
     [[nodiscard]] std::string getName() const {return m_name;};
 
+    [[nodiscard]] Vector3<double> forceBody() const { return m_frameToBody * originNode().force();}
+    [[nodiscard]] Vector3<double> momentBody() const { return m_frameToBody * originNode().moment();}
+
     bool isCenterOfMass = false;
 
 private:
@@ -44,6 +48,8 @@ private:
 
     Vector3<double> m_localPosition    = Vector3<double>::zeros();
     Vector3<double> m_localOrientation = Vector3<double>::zeros();
+
+    Matrix3<double> m_frameToBody;
 
     const Frame* m_referenceOriginFrame;
     std::string m_name;

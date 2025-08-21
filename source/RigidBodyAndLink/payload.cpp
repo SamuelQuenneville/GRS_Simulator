@@ -17,21 +17,40 @@ Payload::Payload(const worldPhysics& physics, Logger& logger, const payloadPrope
     // Create a cg Frame
     Frame& cg = addFrame("centerOfMass", this->bodyOriginFrame(), {0,0,0}, {0,0,0});
     setCenterOfMassFrame(cg);
+
+    // Create other Frames and assign function
+    Frame& aeroReference = addFrame("aeroRef", this->bodyOriginFrame(), {0,0,0}, {0,0,0});
+    Frame& tetherAttach  = addFrame("tetherAttach", this->bodyOriginFrame(), {0,0,0}, {0,0,0});
+
+    aeroReference.setLoadCallback([this](const Frame& f) {
+        f.setForce(m_calcAeroForces());
+        f.setMoment({0,0,0});
+    });
+
+    tetherAttach.setLoadCallback([this](const Frame& f) {
+        Vector3<double> tetherForces = Vector3<double>::zeros();
+
+        const auto connectedNode = connections[&f.originNode()];
+        for(const Node* node : connectedNode) {
+            tetherForces += node->force();
+        }
+
+        f.setForce(tetherForces);
+        f.setMoment({0,0,0});
+    });
 }
 
 void Payload::update(const double dt) {
 
     if (!m_isGrounded) {
-        const Vector3<double> externalForcesEarth = calcExternalForce() + m_calcAeroForces();
+        updateForcesOnBody();
 
-        const payloadStates derivatives   = m_calcStatesDerivatives(externalForcesEarth);
+        const payloadStates derivatives   = m_calcStatesDerivatives();
         m_eulerIntegration(derivatives, dt);
 
         // Set new forces/moments to the node of this body
         updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0,0,0});
         setTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::identity()));
-
-        centerOfMass().setForce(externalForcesEarth);
     }
 
     // Log
@@ -62,16 +81,18 @@ void Payload::m_writeLog() {
     m_logger.writePayloadMessage(logMessage);
 }
 
-payloadStates Payload::m_calcStatesDerivatives(Vector3<double> externalForceEarth) const {
+payloadStates Payload::m_calcStatesDerivatives() const {
     payloadStates derivatives{};
 
     derivatives.x = m_states.vx;
     derivatives.y = m_states.vy;
     derivatives.z = m_states.vz;
 
-    derivatives.vx  = externalForceEarth[0] / m_properties.mass;
-    derivatives.vy  = externalForceEarth[1] / m_properties.mass;
-    derivatives.vz  = (externalForceEarth[2] + m_properties.mass * m_physics.gravity) / m_properties.mass;
+    auto forces = centerOfMass().force();
+
+    derivatives.vx  = forces[0] / m_properties.mass;
+    derivatives.vy  = forces[1] / m_properties.mass;
+    derivatives.vz  = (forces[2] + m_properties.mass * m_physics.gravity) / m_properties.mass;
 
     return derivatives;
 }
