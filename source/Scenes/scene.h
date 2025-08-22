@@ -15,6 +15,7 @@
 #include "RigidBodyAndLink/SceneObjects/aircraft.h"
 #include "RigidBodyAndLink/SceneObjects/launcher.h"
 #include "RigidBodyAndLink/SceneObjects/tetherLine.h"
+#include "RigidBodyAndLink/SceneObjects/frameAxis.h"
 #include "RigidBodyAndLink/SceneObjects/payloadObject.h"
 #include "OpenglFramework/light.h"
 #include "OpenglFramework/camera.h"
@@ -67,6 +68,7 @@ protected:
     std::vector<std::unique_ptr<PhysicsObject>> m_physicsObjects;
     std::vector<std::unique_ptr<PhysicsObject>> m_tethersObjects;
     std::vector<std::shared_ptr<PhysicsObject>> m_staticObjects;
+    std::vector<std::shared_ptr<PhysicsObject>> m_visualObjects;
 
     Shader m_depthShader;
     Shader m_phongShader;

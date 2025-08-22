@@ -57,6 +57,10 @@ void TwoAircraftV::createPhysicsWorld() {
     m_target = std::make_shared<Cube>(Vector3<float>(0.4, 0.4, 0.4), World::getExecutablePath());
     m_target->setColor({1.0f, 0.0f, 0.0f, 0.6f});
     m_staticObjects.push_back(m_target);
+
+    //
+    auto frameObject = std::make_unique<FrameAxis>();
+    m_visualObjects.push_back(std::move(frameObject));
 }
 
 void TwoAircraftV::destroyPhysicsWorld() {
@@ -102,6 +106,10 @@ void TwoAircraftV::destroy() {
 void TwoAircraftV::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
     for (const auto& tethersObject : m_tethersObjects) {
         tethersObject->render(m_colorShader, worldToCameraMatrix);
+    }
+
+    for (const auto& visualObject : m_visualObjects) {
+        visualObject->render(m_colorShader, worldToCameraMatrix);
     }
 
     // Bind the shader

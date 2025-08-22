@@ -141,6 +141,8 @@ set(GRS_RIGID_BODIES_AND_LINK
         source/RigidBodyAndLink/powertrain.cpp
         source/RigidBodyAndLink/frame.cpp
         source/RigidBodyAndLink/frame.h
+        source/RigidBodyAndLink/SceneObjects/frameAxis.cpp
+        source/RigidBodyAndLink/SceneObjects/frameAxis.h
 )
 
 set(GRS_SCENES

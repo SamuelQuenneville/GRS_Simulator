@@ -58,6 +58,17 @@ public:
         }
         return *this;
     }
+
+    enum class HexColor {
+        RED     = 0xff0000,
+        GREEN   = 0x00ff00,
+        BLUE    = 0x0000ff,
+        BLACK   = 0x000000,
+        WHITE   = 0xffffff,
+        YELLOW  = 0xffff00,
+        MAGENTA = 0xff00ff,
+        CYAN    = 0x00ffff,
+    };
 };
 
 #endif //GRS_SIMULATOR_COLOR_H
