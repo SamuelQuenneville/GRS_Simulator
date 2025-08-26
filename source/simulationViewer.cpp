@@ -179,7 +179,7 @@ void SimulationViewer::mouseMotionEvent(const double x, const double y) {
 
 void SimulationViewer::scrollEvent(const double x, const double y) const {
     if (m_scene) {
-        m_scene->scrollingEvent(x, y, 1.0f);
+        m_scene->scrollingEvent(x, y, 0.05f);
     }
 }
 

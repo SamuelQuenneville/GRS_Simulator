@@ -57,6 +57,7 @@ protected:
 
     // Configuration panel
     nanogui::Widget* m_configurationPanel;
+    nanogui::Widget* m_debugPanel;
     nanogui::Label* m_fileLabel;
     nanogui::Label* m_simRunTimeLabel;
 
@@ -81,6 +82,7 @@ protected:
     bool m_isDisplayed;
 
     void m_createConfigurationPanel();
+    void m_createDebugPanel();
     static std::string doubleToString(double value, int precision);
 };
 

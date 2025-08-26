@@ -18,12 +18,13 @@
 class FrameAxis final : public PhysicsObject {
 
 public:
-    explicit FrameAxis(float length = 2.0f);
-    ~FrameAxis() override = default;
+    explicit FrameAxis(RigidBody* body, float length = 2.0f);
+    ~FrameAxis() override;
 
     void updatePosition() override {};
 
     void render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;
+    void updateTransform(double interpolationFactor) override;
 
     struct FrameLine {
         // Constructor

@@ -13,6 +13,7 @@ Gui::Gui(SimulationViewer* app)
         , m_window(nullptr)
         , m_screen(nullptr)
         , m_configurationPanel(nullptr)
+        , m_debugPanel(nullptr)
         , m_fileLabel(nullptr)
         , m_simRunTimeLabel(nullptr)
         , m_groundspeedTargetText(nullptr)
@@ -32,6 +33,7 @@ void Gui::init(GLFWwindow* window) {
     m_screen->initialize(window, true);
 
     m_createConfigurationPanel();
+    m_createDebugPanel();
 
     m_screen->set_visible(true);
     m_screen->perform_layout();
@@ -336,6 +338,38 @@ void Gui::m_createConfigurationPanel() {
             m_viewer->m_updateTarget(m_groundspeedTarget, m_payloadTarget);
         }
     });
+}
+
+void Gui::m_createDebugPanel() {
+    m_debugPanel = new nanogui::Window(m_screen, "Debug Options");
+    m_debugPanel->set_position(nanogui::Vector2i(15, 525));
+    m_debugPanel->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 10, 5));
+    m_debugPanel->set_fixed_width(260);
+
+    // Group 1 Visual Objects
+    new nanogui::Label(m_debugPanel, std::string("Visual Objects :"),"sans-bold",20);
+    auto* group1 = new nanogui::Widget(m_debugPanel);
+    group1->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical,nanogui::Alignment::Fill, 5, 5));
+    auto* buttonFrames = new nanogui::Button(group1, "Show Reference Frames");
+    buttonFrames->set_callback([&] {
+
+    });
+
+    auto* buttonForces = new nanogui::Button(group1, "Show Forces");
+    buttonForces->set_callback([&] {
+
+    });
+
+    auto* buttonTraj = new nanogui::Button(group1, "Show Trajectories");
+    buttonTraj->set_callback([&] {
+
+    });
+
+
+    // Group 2 Numeric Infos
+    new nanogui::Label(m_debugPanel, std::string("Numeric Infos :"),"sans-bold",20);
+    auto* group2 = new nanogui::Widget(m_debugPanel);
+
 }
 
 std::string Gui::doubleToString(const double value, const int precision) {

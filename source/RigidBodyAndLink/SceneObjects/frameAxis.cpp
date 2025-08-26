@@ -8,23 +8,34 @@
 
 #include "frameAxis.h"
 
-FrameAxis::FrameAxis(const float length)
+FrameAxis::FrameAxis(RigidBody* body, const float length)
     : m_vertexBufferVertices(GL_ARRAY_BUFFER)
     , m_length(length)
 {
-
-}
-
-void FrameAxis::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
+    m_previousTransform = Transform::identity();
+    m_body = body;
 
     m_createVertexBufferAndArrayObject();
+}
+
+FrameAxis::~FrameAxis() {
+    destroy();
+
+    m_body = nullptr;
+
+    // Destroy the VBOs and VAO
+    m_vertexBufferVertices.destroy();
+}
+
+
+void FrameAxis::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
 
     m_vertexArrayObject.bind();
     shader.bind();
     m_vertexBufferVertices.bind();
 
     // Set the model to camera matrix
-    shader.setMatrix4x4Uniform("localToWorldMatrix", Matrix4<double>::identity());
+    shader.setMatrix4x4Uniform("localToWorldMatrix", m_transformMatrix);
     shader.setMatrix4x4Uniform("worldToCameraMatrix", worldToCameraMatrix);
 
     // Set the vertex color
@@ -51,11 +62,11 @@ void FrameAxis::render(Shader& shader, const Matrix4<double>& worldToCameraMatri
 
 void FrameAxis::m_createVertexBufferAndArrayObject() {
 
-    auto a = FrameLine(Vector3<float>(0, 0, 0), Vector3<float>(m_length, 0, 0), static_cast<uint32_t>(Color::HexColor::RED));
-    auto b = FrameLine(Vector3<float>(0, 0, 0), Vector3<float>(0, m_length, 0), static_cast<uint32_t>(Color::HexColor::GREEN));
-    auto c = FrameLine(Vector3<float>(0, 0, 0), Vector3<float>(0, 0, m_length), static_cast<uint32_t>(Color::HexColor::BLUE));
+    const auto x = FrameLine(Vector3<float>(0, 0, 0), Vector3<float>(m_length, 0, 0).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::RED));
+    const auto y = FrameLine(Vector3<float>(0, 0, 0), Vector3<float>(0, m_length, 0).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::BLUE));
+    const auto z = FrameLine(Vector3<float>(0, 0, 0), Vector3<float>(0, 0, m_length).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::GREEN));
 
-    const std::vector<FrameLine> vertices = {a,b,c};
+    const std::vector<FrameLine> vertices = {x,y,z};
 
     m_vertexBufferVertices.create();
     m_vertexBufferVertices.bind();
@@ -67,4 +78,10 @@ void FrameAxis::m_createVertexBufferAndArrayObject() {
     m_vertexArrayObject.bind();
     m_vertexBufferVertices.bind();
     m_vertexArrayObject.unbind();
+}
+
+// Update the transform matrix of the object
+void FrameAxis::updateTransform(const double interpolationFactor) {
+    const auto scaling = Matrix4<double>::identity();
+    m_transformMatrix = m_calculateTransform(interpolationFactor, scaling);
 }
