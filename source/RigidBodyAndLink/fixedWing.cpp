@@ -87,7 +87,7 @@ void FixedWing::update(const double dt) {
 
     // phi rotated because aircraft mesh is rotated
     constexpr double meshRollOffset = -M_PI / 2.0;
-    setTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi + meshRollOffset,m_states.theta,m_states.psi)));
+    setCenterOfMassTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi + meshRollOffset,m_states.theta,m_states.psi)));
 
     m_writeLog();
 }
@@ -131,7 +131,7 @@ void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16>& pwm,
 
     // phi rotated because aircraft mesh is rotated
     constexpr double meshRollOffset = -M_PI / 2.0;
-    setTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi + meshRollOffset,m_states.theta,m_states.psi)));
+    setCenterOfMassTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi + meshRollOffset,m_states.theta,m_states.psi)));
 
     m_writeLog();
 }
@@ -383,7 +383,7 @@ void FixedWing::setInitialStates(initialStates& states) {
     updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0,0,0});
 
     constexpr double meshRollOffset = -M_PI / 2.0;
-    setTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi + meshRollOffset,m_states.theta,m_states.psi)));
+    setCenterOfMassTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi + meshRollOffset,m_states.theta,m_states.psi)));
 }
 
 double FixedWing::m_pwmToControl(const controlAxe control, const uint16_t pwm) const {

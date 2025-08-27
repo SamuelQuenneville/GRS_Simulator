@@ -29,10 +29,14 @@ PayloadObject::PayloadObject(Payload* payload, const Vector3<float>& size, const
     m_previousTransform = Transform::identity();
 
     m_body = payload;
+
+    // Create Frames
+    m_createVisualObject();
+
     // Create the VBOs and VAO
     m_createVertexBufferAndArrayObject();
 
-    m_transformMatrix = m_transformMatrix * m_scalingMatrix;
+    setTransformMatrix(getTransformMatrix() * m_scalingMatrix);
 }
 
 PayloadObject::~PayloadObject() {
@@ -48,11 +52,11 @@ void PayloadObject::render(Shader& shader, const Matrix4<double>& worldToCameraM
     shader.bind();
 
     // Set the model to camera matrix
-    shader.setMatrix4x4Uniform("localToWorldMatrix", m_transformMatrix);
+    shader.setMatrix4x4Uniform("localToWorldMatrix", getTransformMatrix());
     shader.setMatrix4x4Uniform("worldToCameraMatrix", worldToCameraMatrix);
 
     // Set the normal matrix (inverse transpose of the 3x3 upper-left sub matrix of the model-view matrix)
-    const Matrix4<double> localToCameraMatrix = worldToCameraMatrix * m_transformMatrix;
+    const Matrix4<double> localToCameraMatrix = worldToCameraMatrix * getTransformMatrix();
     const Matrix3<double> normalMatrix = localToCameraMatrix.getUpperLeft3x3Matrix().getInverse().transpose();
     shader.setMatrix3x3Uniform("normalMatrix", normalMatrix, false);
 
@@ -91,7 +95,11 @@ void PayloadObject::render(Shader& shader, const Matrix4<double>& worldToCameraM
 }
 
 void PayloadObject::updateTransform(const double interpolationFactor) {
-    m_transformMatrix = m_calculateTransform(interpolationFactor, m_scalingMatrix);
+    setTransformMatrix(m_calculateTransform(interpolationFactor, m_scalingMatrix));
+
+    for (const auto& visualObject : m_visualObjects) {
+        visualObject->updateTransform(interpolationFactor);
+    }
 }
 
 void PayloadObject::m_createVertexBufferAndArrayObject() {

@@ -77,11 +77,6 @@ void Scene::update() {
         physicsObject->updateTransform(m_interpolationFactor);
     }
 
-    for (const auto& visualObject : m_visualObjects) {
-        // Update the transform used for the rendering
-        visualObject->updateTransform(m_interpolationFactor);
-    }
-
     for (const auto& tetherObject : m_tethersObjects) {
         tetherObject->updatePosition();
     }
@@ -208,6 +203,10 @@ void Scene::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCamer
 
     // Unbind the shader
     shader.unbind();
+}
+
+void Scene::drawReferenceFrame(const bool shouldDraw) {
+    m_shouldDrawReferenceFrame = shouldDraw;
 }
 
 void Scene::reset() {

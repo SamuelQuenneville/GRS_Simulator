@@ -14,6 +14,7 @@
 
 #include "node.h"
 #include "Mathematics/matrix3.h"
+#include "Mathematics/transform.h"
 
 class Frame {
 
@@ -39,10 +40,17 @@ public:
     [[nodiscard]] Vector3<double> forceBody() const { return m_frameToBody * originNode().force();}
     [[nodiscard]] Vector3<double> momentBody() const { return m_frameToBody * originNode().moment();}
 
-    bool isCenterOfMass = false;
+    void setTransform(const Transform& newTransform);
+    void setTransform(const Vector3<double>& newPosition, const Quaternion& newOrientation);
+    [[nodiscard]] const Transform& transform() const;
+
+    void setIsCenterOfMass(const bool isCenterOfMass) {m_isCenterOfMass = isCenterOfMass;};
+    [[nodiscard]] bool isCenterOfMass() const {return m_isCenterOfMass;}
+
 
 private:
     std::unique_ptr<Node> m_origin;
+    Transform m_transform = Transform::identity();
 
     std::function<void(Frame&)> m_loadCallback;
 
@@ -53,6 +61,8 @@ private:
 
     const Frame* m_referenceOriginFrame;
     std::string m_name;
+
+    bool m_isCenterOfMass = false;
 };
 
 #endif //GRS_SIMULATOR_FRAME_H

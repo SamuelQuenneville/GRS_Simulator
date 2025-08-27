@@ -9,6 +9,7 @@
 #ifndef GRS_SIMULATOR_PHYSICSOBJECT_H
 #define GRS_SIMULATOR_PHYSICSOBJECT_H
 
+#include "RigidBodyAndLink/SceneObjects/frameAxis.h"
 #include "OpenglFramework/meshReader.h"
 #include "OpenglFramework/shader.h"
 #include "Mathematics/color.h"
@@ -21,10 +22,10 @@ public:
     PhysicsObject();
     explicit PhysicsObject(const std::string& meshFilePath);
 
-    virtual void updateTransform(double interpolationFactor) {};
     virtual void updatePosition() {};
 
     virtual void render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) = 0;
+    virtual void renderVisualObject(Shader& shader, const Matrix4<double>& worldToCameraMatrix);
 
     void setColor(const Color& color);
 
@@ -35,9 +36,13 @@ protected:
     RigidBody* m_body;
     Link* m_link;
 
+    std::vector<std::shared_ptr<FrameAxis>> m_visualObjects;
+
     Transform m_previousTransform;
 
     Color m_color;
+
+    void m_createVisualObject();
 
     Matrix4<double> m_calculateTransform(double interpolationFactor, const Matrix4<double>& scalingMatrix);
 };

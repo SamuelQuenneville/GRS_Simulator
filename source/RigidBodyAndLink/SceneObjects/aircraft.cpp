@@ -25,10 +25,13 @@ Aircraft::Aircraft(FixedWing* aircraft, const Vector3<double>& scaling, const st
 
     m_body = aircraft;
 
+    // Create Frames
+    m_createVisualObject();
+
     // Create the VBOs and VAO
     m_createVertexBufferAndArrayObject();
 
-    m_transformMatrix = m_transformMatrix * m_scalingMatrix;
+    setTransformMatrix(getTransformMatrix() * m_scalingMatrix);
 }
 
 // Destructor
@@ -52,11 +55,11 @@ void Aircraft::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix
     shader.bind();
 
     // Set the model to camera matrix
-    shader.setMatrix4x4Uniform("localToWorldMatrix", m_transformMatrix);
+    shader.setMatrix4x4Uniform("localToWorldMatrix", getTransformMatrix());
     shader.setMatrix4x4Uniform("worldToCameraMatrix", worldToCameraMatrix);
 
     // Set the normal matrix (inverse transpose of the 3x3 upper-left sub matrix of the model-view matrix)
-    const Matrix4<double> localToCameraMatrix = worldToCameraMatrix * m_transformMatrix;
+    const Matrix4<double> localToCameraMatrix = worldToCameraMatrix * getTransformMatrix();
     const Matrix3<double> normalMatrix = localToCameraMatrix.getUpperLeft3x3Matrix().getInverse().transpose();
     shader.setMatrix3x3Uniform("normalMatrix", normalMatrix, false);
 
@@ -97,6 +100,15 @@ void Aircraft::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix
 
     // Unbind the shader
     shader.unbind();
+}
+
+// Update the transform matrix of the object
+void Aircraft::updateTransform(const double interpolationFactor) {
+    setTransformMatrix(m_calculateTransform(interpolationFactor, m_scalingMatrix));
+
+    for (const auto& visualObject : m_visualObjects) {
+        visualObject->updateTransform(interpolationFactor);
+    }
 }
 
 // Create the Vertex Buffer Objects used to render with OpenGL.
@@ -147,9 +159,4 @@ void Aircraft::m_createVertexBufferAndArrayObject() {
 
     m_vertexBufferIndices.bind();
     m_vertexArrayObject.unbind();
-}
-
-// Update the transform matrix of the object
-void Aircraft::updateTransform(const double interpolationFactor) {
-    m_transformMatrix = m_calculateTransform(interpolationFactor, m_scalingMatrix);
 }

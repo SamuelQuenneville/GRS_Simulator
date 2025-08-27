@@ -61,6 +61,8 @@ protected:
     nanogui::Label* m_fileLabel;
     nanogui::Label* m_simRunTimeLabel;
 
+    bool m_shouldDrawReferenceFrame = false;
+
     nanogui::TextBox* m_groundspeedTargetText;
     float m_groundspeedTarget = 0.0;
 

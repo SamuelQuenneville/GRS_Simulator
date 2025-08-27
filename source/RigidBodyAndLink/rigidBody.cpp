@@ -11,7 +11,7 @@
 RigidBody::RigidBody()
     : m_bodyOriginFrame(std::make_unique<Frame>())
 {
-
+    m_bodyOriginFrame->setIsCenterOfMass(true);
 }
 
 std::map<int, Vector3<double>> RigidBody::externalForces() {
@@ -64,7 +64,7 @@ void RigidBody::updateWorldInfos(const Vector3<double>& position, const Vector3<
     centerOfMass().setAcceleration(acceleration);
 
     for (const auto& f : m_frames) {
-        if (!f->isCenterOfMass) {
+        if (!f->isCenterOfMass()) {
 
             Vector3<double> pos_local = f->getLocalPosition() - centerOfMassFrame()->getLocalPosition();
             Vector3<double> pos_world = m_rotationMatrixCBodyEarth.transpose() * pos_local;
@@ -79,17 +79,32 @@ void RigidBody::updateWorldInfos(const Vector3<double>& position, const Vector3<
     }
 }
 
-void RigidBody::setTransform(const Transform& newTransform) {
-    m_transform = newTransform;
+void RigidBody::setCenterOfMassTransform(const Transform& newTransform) const {
+    centerOfMassFrame()->setTransform(newTransform);
+
+    for (const auto& f : m_frames) {
+        if (!f->isCenterOfMass()) {
+            auto euler = f->getLocalOrientation();
+
+            constexpr double meshRollOffset = -M_PI / 2.0;
+            auto cgToFrame = Transform(f->getLocalPosition().toOpenglRef(), Quaternion::fromEulerAngles(euler.x() + meshRollOffset, euler.y(), euler.z()));
+
+            auto earthToFrame = newTransform * cgToFrame;
+            f->setTransform(earthToFrame);
+        }
+    }
 }
 
-void RigidBody::setTransform(const Vector3<double>& newPosition, const Quaternion& newOrientation) {
-    m_transform.setPosition(newPosition);
-    m_transform.setOrientation(newOrientation);
+void RigidBody::setTransform(const Transform& newTransform) const {
+    centerOfMassFrame()->setTransform(newTransform);
+}
+
+void RigidBody::setTransform(const Vector3<double>& newPosition, const Quaternion& newOrientation) const {
+    centerOfMassFrame()->setTransform(newPosition, newOrientation);
 }
 
 const Transform& RigidBody::transform() const {
-    return m_transform;
+    return centerOfMassFrame()->transform();
 }
 
 void RigidBody::setAttitude(const Vector3<double>& newAttitude) {
@@ -126,11 +141,11 @@ const Matrix3<double>& RigidBody::getRotationMatrixCBodyEarth() const {
 
 Frame* RigidBody::centerOfMassFrame() const {
     for (const auto& f : m_frames) {
-        if (f->isCenterOfMass == true) {
+        if (f->isCenterOfMass()) {
             return f.get();
         }
     }
-    return nullptr;
+    return m_bodyOriginFrame.get();
 }
 
 Node& RigidBody::centerOfMass() const {
@@ -138,6 +153,11 @@ Node& RigidBody::centerOfMass() const {
         return centerOfMassFrame()->originNode();
     }
     return m_bodyOriginFrame->originNode();
+}
+
+void RigidBody::setCenterOfMassFrame(Frame& frame) const {
+    m_bodyOriginFrame->setIsCenterOfMass(false);
+    frame.setIsCenterOfMass(true);
 }
 
 Frame& RigidBody::addFrame(const std::string& name, const Frame* reference, const Vector3<double>& position, const Vector3<double>& orientation) {
@@ -153,4 +173,13 @@ Frame* RigidBody::getFrame(const std::string& name) const {
         }
     }
     return nullptr;
+}
+
+std::vector<Frame*> RigidBody::frames() const {
+    std::vector<Frame*> result;
+    result.reserve(m_frames.size());
+    for (auto& f : m_frames) {
+        result.push_back(f.get());
+    }
+    return result;
 }

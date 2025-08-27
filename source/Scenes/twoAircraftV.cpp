@@ -27,9 +27,6 @@ void TwoAircraftV::createPhysicsWorld() {
         auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), Vector3<double>(2.0, 2.0, 2.0), World::getExecutablePath());
         aircraftObject->setColor(Color::color(aircraft->getId()));
 
-        auto aircraftVisualObject = std::make_unique<FrameAxis>(aircraft.get());
-
-        m_visualObjects.push_back(std::move(aircraftVisualObject));
         m_physicsObjects.push_back(std::move(aircraftObject));
     }
 
@@ -61,9 +58,6 @@ void TwoAircraftV::createPhysicsWorld() {
     m_target->setColor({1.0f, 0.0f, 0.0f, 0.6f});
     m_staticObjects.push_back(m_target);
 
-    //
-    auto frameObject = std::make_unique<FrameAxis>(m_world.system()->payload().get());
-    m_visualObjects.push_back(std::move(frameObject));
 }
 
 void TwoAircraftV::destroyPhysicsWorld() {
@@ -111,16 +105,16 @@ void TwoAircraftV::renderSinglePass(Shader& shader, const Matrix4<double>& world
         tethersObject->render(m_colorShader, worldToCameraMatrix);
     }
 
-    for (const auto& visualObject : m_visualObjects) {
-        visualObject->render(m_colorShader, worldToCameraMatrix);
-    }
-
     // Bind the shader
     shader.bind();
 
     // Render all the moving physics objects of the scene
     for (const auto& physicsObject : m_physicsObjects) {
         physicsObject->render(shader, worldToCameraMatrix);
+
+        if (shouldDrawReferenceFrame()) {
+            physicsObject->renderVisualObject(m_colorShader, worldToCameraMatrix);
+        }
     }
 
     // Render the static objects (floor could be obstacle...)

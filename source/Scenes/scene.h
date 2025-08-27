@@ -15,7 +15,6 @@
 #include "RigidBodyAndLink/SceneObjects/aircraft.h"
 #include "RigidBodyAndLink/SceneObjects/launcher.h"
 #include "RigidBodyAndLink/SceneObjects/tetherLine.h"
-#include "RigidBodyAndLink/SceneObjects/frameAxis.h"
 #include "RigidBodyAndLink/SceneObjects/payloadObject.h"
 #include "OpenglFramework/light.h"
 #include "OpenglFramework/camera.h"
@@ -36,6 +35,7 @@ public:
     virtual void update();
     virtual void render();
     virtual void renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix);
+    virtual void drawReferenceFrame(bool shouldDraw);
     virtual void reset();
     virtual void destroy();
 
@@ -48,6 +48,8 @@ public:
     void setWindowDimension(int width, int height);
     void setViewport(int x, int y, int width, int height);
     void setInitialZoom(float zoom);
+
+    [[nodiscard]] bool shouldDrawReferenceFrame() const {return m_shouldDrawReferenceFrame;};
 
     void changeView(const Matrix4<double>& viewMatrix);
 
@@ -64,11 +66,9 @@ protected:
 
     std::chrono::duration<double> m_elapsedTime;   // Elapsed time (in seconds)
 
-    //std::vector<PhysicsObject*> m_physicsObjects;
     std::vector<std::unique_ptr<PhysicsObject>> m_physicsObjects;
     std::vector<std::unique_ptr<PhysicsObject>> m_tethersObjects;
     std::vector<std::shared_ptr<PhysicsObject>> m_staticObjects;
-    std::vector<std::shared_ptr<PhysicsObject>> m_visualObjects;
 
     Shader m_depthShader;
     Shader m_phongShader;
@@ -87,6 +87,8 @@ protected:
     Camera m_camera;
 
     Vector3<double> m_centerOfScene;
+
+    bool m_shouldDrawReferenceFrame = false;
 
     // Last mouse coordinates on the windows
     double m_lastMouseX;

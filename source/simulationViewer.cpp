@@ -411,6 +411,9 @@ void SimulationViewer::m_launchTriggered() const {
     m_world->system()->setLaunchTriggered(true);
 }
 
+void SimulationViewer::m_drawReferenceFrame(const bool shouldDraw) const {
+    m_scene->drawReferenceFrame(shouldDraw);
+}
 
 void SimulationViewer::m_render() const {
     int bufferWidth;

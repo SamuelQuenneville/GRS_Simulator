@@ -352,7 +352,8 @@ void Gui::m_createDebugPanel() {
     group1->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical,nanogui::Alignment::Fill, 5, 5));
     auto* buttonFrames = new nanogui::Button(group1, "Show Reference Frames");
     buttonFrames->set_callback([&] {
-
+        m_shouldDrawReferenceFrame = !m_shouldDrawReferenceFrame;
+        m_viewer->m_drawReferenceFrame(m_shouldDrawReferenceFrame);
     });
 
     auto* buttonForces = new nanogui::Button(group1, "Show Forces");

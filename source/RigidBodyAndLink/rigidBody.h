@@ -40,8 +40,9 @@ public:
     void updateForcesOnBody();
     void updateWorldInfos(const Vector3<double>& position, const Vector3<double>& velocity, const Vector3<double>& acceleration);
 
-    void setTransform(const Transform& newTransform);
-    void setTransform(const Vector3<double>& newPosition, const Quaternion& newOrientation);
+    void setCenterOfMassTransform(const Transform& newTransform) const;
+    void setTransform(const Transform& newTransform) const;
+    void setTransform(const Vector3<double>& newPosition, const Quaternion& newOrientation) const;
     [[nodiscard]] const Transform& transform() const;
 
     void setAttitude(const Vector3<double>& newAttitude);
@@ -58,16 +59,15 @@ public:
 
     [[nodiscard]] Frame* centerOfMassFrame() const;
     [[nodiscard]] Node& centerOfMass() const;
-    static void setCenterOfMassFrame(Frame& frame) {frame.isCenterOfMass = true;}
+    void setCenterOfMassFrame(Frame& frame) const;
 
     Frame& addFrame(const std::string& name, const Frame* reference, const Vector3<double>& position, const Vector3<double>& orientation);
     [[nodiscard]] Frame* getFrame(const std::string& name) const;
+    [[nodiscard]] std::vector<Frame*> frames() const;
 
     std::map<Node*, std::vector<Node*>> connections;
 
 private:
-    Transform m_transform = Transform::identity();
-
     std::unique_ptr<Frame> m_bodyOriginFrame;       // Origin of the body
     std::vector<std::unique_ptr<Frame>> m_frames;
 

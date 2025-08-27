@@ -24,6 +24,7 @@ public:
 
     // Set the transform matrix
     void setTransformMatrix(const Matrix4<double>& matrix);
+    virtual void updateTransform(double interpolationFactor) {};
 
     // Set to the identity transform
     void setToIdentity();

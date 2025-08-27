@@ -50,7 +50,7 @@ void Payload::update(const double dt) {
 
         // Set new forces/moments to the node of this body
         updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0,0,0});
-        setTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::identity()));
+        setCenterOfMassTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::identity()));
     }
 
     // Log
@@ -67,7 +67,7 @@ void Payload::setInitialStates(initialStates& states) {
     m_states.vz = states.position[2];
 
     updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0,0,0});
-    setTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(states.orientation[0],states.orientation[1],states.orientation[2])));
+    setCenterOfMassTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(states.orientation[0],states.orientation[1],states.orientation[2])));
 }
 
 void Payload::m_writeLog() {

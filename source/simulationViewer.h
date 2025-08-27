@@ -67,6 +67,8 @@ private:
     void m_changeView(const Matrix4<double>& viewMatrix) const;
     void m_launchTriggered() const;
 
+    void m_drawReferenceFrame(bool shouldDraw) const;
+
     void m_render() const;
 
     bool m_sceneCreated;

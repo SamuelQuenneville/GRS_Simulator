@@ -9,21 +9,21 @@
 #ifndef GRS_SIMULATOR_FRAMEAXIS_H
 #define GRS_SIMULATOR_FRAMEAXIS_H
 
-#include "physicsObject.h"
 #include "OpenglFramework/shader.h"
 #include "OpenglFramework/vertexBufferObject.h"
 #include "OpenglFramework/vertexArrayObject.h"
+#include "RigidBodyAndLink/frame.h"
+#include "OpenglFramework/object3D.h"
+#include "Mathematics/color.h"
 
 
-class FrameAxis final : public PhysicsObject {
+class FrameAxis final : public Object3D {
 
 public:
-    explicit FrameAxis(RigidBody* body, float length = 2.0f);
+    explicit FrameAxis(Frame* frame, float length = 2.0f);
     ~FrameAxis() override;
 
-    void updatePosition() override {};
-
-    void render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;
+    void render(const Shader& shader, const Matrix4<double>& worldToCameraMatrix) const;
     void updateTransform(double interpolationFactor) override;
 
     struct FrameLine {
@@ -43,6 +43,9 @@ public:
     };
 
 private:
+    Frame* m_frame;
+    Transform m_previousTransform;
+
     VertexBufferObject m_vertexBufferVertices;
     VertexArrayObject m_vertexArrayObject;
 

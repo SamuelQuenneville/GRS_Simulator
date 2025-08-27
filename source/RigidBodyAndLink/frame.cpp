@@ -44,3 +44,16 @@ Node& Frame::originNode() const {
     return *m_origin;
 }
 
+void Frame::setTransform(const Transform& newTransform) {
+    m_transform = newTransform;
+}
+
+void Frame::setTransform(const Vector3<double>& newPosition, const Quaternion& newOrientation) {
+    m_transform.setPosition(newPosition);
+    m_transform.setOrientation(newOrientation);
+}
+
+const Transform& Frame::transform() const {
+    return m_transform;
+}
+

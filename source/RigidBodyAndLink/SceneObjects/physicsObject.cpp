@@ -28,6 +28,12 @@ PhysicsObject::PhysicsObject(const std::string& meshFilePath)
     }
 }
 
+void PhysicsObject::renderVisualObject(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
+    for (const auto& visualObject : m_visualObjects) {
+        visualObject->render(shader, worldToCameraMatrix);
+    }
+}
+
 void PhysicsObject::setColor(const Color& color) {
     m_color = color;
 }
@@ -39,6 +45,19 @@ const Transform& PhysicsObject::getTransform() const {
 void PhysicsObject::setTransform(const Transform& transform) {
     m_body->setTransform(transform);
     updateTransform(1.0);
+}
+
+void PhysicsObject::m_createVisualObject() {
+    if (m_body->frames().empty()) {
+        auto visualObject = std::make_unique<FrameAxis>(m_body->bodyOriginFrame());
+        m_visualObjects.push_back(std::move(visualObject));
+    } else {
+
+        for (auto& f : m_body->frames()) {
+            auto visualObject = std::make_unique<FrameAxis>(f);
+            m_visualObjects.push_back(std::move(visualObject));
+        }
+    }
 }
 
 Matrix4<double> PhysicsObject::m_calculateTransform(const double interpolationFactor, const Matrix4<double>& scalingMatrix) {

@@ -8,27 +8,23 @@
 
 #include "frameAxis.h"
 
-FrameAxis::FrameAxis(RigidBody* body, const float length)
-    : m_vertexBufferVertices(GL_ARRAY_BUFFER)
+FrameAxis::FrameAxis(Frame* frame, const float length)
+    : m_frame(frame)
+    , m_vertexBufferVertices(GL_ARRAY_BUFFER)
     , m_length(length)
 {
     m_previousTransform = Transform::identity();
-    m_body = body;
 
     m_createVertexBufferAndArrayObject();
 }
 
 FrameAxis::~FrameAxis() {
-    destroy();
-
-    m_body = nullptr;
-
     // Destroy the VBOs and VAO
     m_vertexBufferVertices.destroy();
 }
 
 
-void FrameAxis::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
+void FrameAxis::render(const Shader& shader, const Matrix4<double>& worldToCameraMatrix) const {
 
     m_vertexArrayObject.bind();
     shader.bind();
@@ -60,6 +56,27 @@ void FrameAxis::render(Shader& shader, const Matrix4<double>& worldToCameraMatri
     shader.unbind();
 };
 
+// Update the transform matrix of the object
+void FrameAxis::updateTransform(const double interpolationFactor) {
+    // Get the transform of the rigid body
+    const Transform transform = m_frame->transform();
+
+    // Interpolate the transform between the previous one and the new one
+    const Transform interpolatedTransform = Transform::interpolateTransforms(m_previousTransform,transform, interpolationFactor);
+    m_previousTransform = transform;
+
+    // Compute the transform used for rendering the box
+    double matrix[16];
+    interpolatedTransform.getOpenGLMatrix(matrix);
+    const Matrix4 newMatrix = {{matrix[0], matrix[4], matrix[8], matrix[12]},
+                              {matrix[1], matrix[5], matrix[9], matrix[13]},
+                              {matrix[2], matrix[6], matrix[10], matrix[14]},
+                              {matrix[3], matrix[7], matrix[11], matrix[15]}};
+
+    // Apply the scaling matrix to have the correct box dimensions
+    setTransformMatrix(newMatrix);
+}
+
 void FrameAxis::m_createVertexBufferAndArrayObject() {
 
     const auto x = FrameLine(Vector3<float>(0, 0, 0), Vector3<float>(m_length, 0, 0).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::RED));
@@ -78,10 +95,4 @@ void FrameAxis::m_createVertexBufferAndArrayObject() {
     m_vertexArrayObject.bind();
     m_vertexBufferVertices.bind();
     m_vertexArrayObject.unbind();
-}
-
-// Update the transform matrix of the object
-void FrameAxis::updateTransform(const double interpolationFactor) {
-    const auto scaling = Matrix4<double>::identity();
-    m_transformMatrix = m_calculateTransform(interpolationFactor, scaling);
 }
