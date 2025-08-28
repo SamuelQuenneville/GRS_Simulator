@@ -79,9 +79,9 @@ void FrameAxis::updateTransform(const double interpolationFactor) {
 
 void FrameAxis::m_createVertexBufferAndArrayObject() {
 
-    const auto x = FrameLine(Vector3<float>(0, 0, 0), Vector3<float>(m_length, 0, 0).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::RED));
-    const auto y = FrameLine(Vector3<float>(0, 0, 0), Vector3<float>(0, m_length, 0).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::BLUE));
-    const auto z = FrameLine(Vector3<float>(0, 0, 0), Vector3<float>(0, 0, m_length).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::GREEN));
+    const auto x = FrameLine(Vector3<float>::zeros(), Vector3<float>(m_length, 0, 0).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::RED));
+    const auto y = FrameLine(Vector3<float>::zeros(), Vector3<float>(0, m_length, 0).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::BLUE));
+    const auto z = FrameLine(Vector3<float>::zeros(), Vector3<float>(0, 0, m_length).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::GREEN));
 
     const std::vector<FrameLine> vertices = {x,y,z};
 

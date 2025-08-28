@@ -58,7 +58,7 @@ public:
 
     Vector4 normalize() const {
         T len = length();
-        if (len != 0) {
+        if (len > std::numeric_limits<T>::epsilon()) {
             return Vector4(m_elements[0] / len, m_elements[1] / len, m_elements[2] / len, m_elements[3] / len);
         } else {
             throw std::invalid_argument("Can't normalize zero vector"+std::string(__FILE__)+" line: "+std::to_string(__LINE__));
@@ -94,7 +94,7 @@ public:
     }
 
     Vector4 operator/(const T& scalar) const {
-        if (scalar == 0) throw std::invalid_argument("Division by zero"+std::string(__FILE__)+" line: "+std::to_string(__LINE__));
+        if (std::abs(scalar) < std::numeric_limits<T>::epsilon()) throw std::invalid_argument("Division by zero"+std::string(__FILE__)+" line: "+std::to_string(__LINE__));
         return Vector4(m_elements[0] / scalar, m_elements[1] / scalar, m_elements[2] / scalar , m_elements[3] / scalar);
     }
 

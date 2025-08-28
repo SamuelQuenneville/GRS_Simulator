@@ -17,13 +17,13 @@ FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWin
     , m_properties(properties)
 {
     // Create a cg Frame
-    Frame& cg = addFrame("centerOfMass", this->bodyOriginFrame(), properties.geom.cgPosition, {0,0,0});
+    Frame& cg = addFrame("centerOfMass", this->bodyOriginFrame(), properties.geom.cgPosition, properties.geom.cgOrientation);
     setCenterOfMassFrame(cg);
 
     // Create other Frames and assign function
-    Frame& aeroReference       = addFrame("aeroRef", this->bodyOriginFrame(), properties.geom.aeroRefPosition, {0,0,0});
-    Frame& propulsionReference = addFrame("propulsionRef", this->bodyOriginFrame(), properties.geom.propulsionPosition, {0,0,0});
-    Frame& tetherAttach        = addFrame("tetherAttach", this->bodyOriginFrame(), properties.geom.tetherAttachPosition, {0,0,0});
+    Frame& aeroReference       = addFrame("aeroRef", this->bodyOriginFrame(), properties.geom.aeroRefPosition, properties.geom.aeroRefOrientation);
+    Frame& propulsionReference = addFrame("propulsionRef", this->bodyOriginFrame(), properties.geom.propulsionPosition, properties.geom.propulsionOrientation);
+    Frame& tetherAttach        = addFrame("tetherAttach", this->bodyOriginFrame(), properties.geom.tetherAttachPosition, properties.geom.tetherAttachOrientation);
 
     aeroReference.setLoadCallback([this](const Frame& f) {
         const auto [airspeed, alphaRadian, betaRadian] = m_angleOfAttackSideSlip();

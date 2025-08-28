@@ -10,7 +10,6 @@
 #define GRS_SIMULATOR_TETHERLINE_H
 
 #include "physicsObject.h"
-#include "OpenglFramework/shader.h"
 #include "OpenglFramework/vertexBufferObject.h"
 #include "OpenglFramework/vertexArrayObject.h"
 #include "RigidBodyAndLink/tether.h"

@@ -28,7 +28,7 @@ Launcher::Launcher(const Vector3<double>& scaling, const std::string& executable
     // Create the VBOs and VAO
     m_createVertexBufferAndArrayObject();
 
-    m_transformMatrix = m_transformMatrix * m_scalingMatrix;
+    setTransformMatrix(getTransformMatrix() * m_scalingMatrix);
 }
 
 // Destructor
@@ -50,11 +50,11 @@ void Launcher::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix
     shader.bind();
 
     // Set the model to camera matrix
-    shader.setMatrix4x4Uniform("localToWorldMatrix", m_transformMatrix);
+    shader.setMatrix4x4Uniform("localToWorldMatrix", getTransformMatrix());
     shader.setMatrix4x4Uniform("worldToCameraMatrix", worldToCameraMatrix);
 
     // Set the normal matrix (inverse transpose of the 3x3 upper-left sub matrix of the model-view matrix)
-    const Matrix4<double> localToCameraMatrix = worldToCameraMatrix * m_transformMatrix;
+    const Matrix4<double> localToCameraMatrix = worldToCameraMatrix * getTransformMatrix();
     const Matrix3<double> normalMatrix = localToCameraMatrix.getUpperLeft3x3Matrix().getInverse().transpose();
     shader.setMatrix3x3Uniform("normalMatrix", normalMatrix, false);
 
@@ -95,6 +95,11 @@ void Launcher::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix
 
     // Unbind the shader
     shader.unbind();
+}
+
+// Update the transform matrix of the object
+void Launcher::updateTransform(const double interpolationFactor) {
+    setTransformMatrix(m_calculateTransform(interpolationFactor, m_scalingMatrix));
 }
 
 // Create the Vertex Buffer Objects used to render with OpenGL.
@@ -145,9 +150,4 @@ void Launcher::m_createVertexBufferAndArrayObject() {
 
     m_vertexBufferIndices.bind();
     m_vertexArrayObject.unbind();
-}
-
-// Update the transform matrix of the object
-void Launcher::updateTransform(const double interpolationFactor) {
-    m_transformMatrix = m_calculateTransform(interpolationFactor, m_scalingMatrix);
 }

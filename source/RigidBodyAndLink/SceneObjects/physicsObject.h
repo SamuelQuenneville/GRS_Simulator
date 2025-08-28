@@ -9,10 +9,8 @@
 #ifndef GRS_SIMULATOR_PHYSICSOBJECT_H
 #define GRS_SIMULATOR_PHYSICSOBJECT_H
 
-#include "RigidBodyAndLink/SceneObjects/frameAxis.h"
 #include "OpenglFramework/meshReader.h"
-#include "OpenglFramework/shader.h"
-#include "Mathematics/color.h"
+#include "RigidBodyAndLink/SceneObjects/frameAxis.h"
 #include "RigidBodyAndLink/rigidBody.h"
 #include "RigidBodyAndLink/link.h"
 

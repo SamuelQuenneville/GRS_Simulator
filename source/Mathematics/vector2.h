@@ -49,7 +49,7 @@ public:
 
     Vector2 normalize() const {
         T len = length();
-        if (len != 0) {
+        if (len > std::numeric_limits<T>::epsilon()) {
             return Vector2(m_elements[0] / len, m_elements[1] / len);
         } else {
             throw std::invalid_argument("Can't normalize zero vector"+std::string(__FILE__)+" line: "+std::to_string(__LINE__));

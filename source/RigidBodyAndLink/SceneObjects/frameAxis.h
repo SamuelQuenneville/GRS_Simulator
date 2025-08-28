@@ -9,11 +9,11 @@
 #ifndef GRS_SIMULATOR_FRAMEAXIS_H
 #define GRS_SIMULATOR_FRAMEAXIS_H
 
+#include "OpenglFramework/object3D.h"
 #include "OpenglFramework/shader.h"
 #include "OpenglFramework/vertexBufferObject.h"
 #include "OpenglFramework/vertexArrayObject.h"
 #include "RigidBodyAndLink/frame.h"
-#include "OpenglFramework/object3D.h"
 #include "Mathematics/color.h"
 
 

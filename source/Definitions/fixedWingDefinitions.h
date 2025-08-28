@@ -60,9 +60,13 @@ struct fixedWingProperties {
 
     struct geometry {
         Vector3<double> cgPosition;
+        Vector3<double> cgOrientation;
         Vector3<double> aeroRefPosition;
+        Vector3<double> aeroRefOrientation;
         Vector3<double> propulsionPosition;
+        Vector3<double> propulsionOrientation;
         Vector3<double> tetherAttachPosition;
+        Vector3<double> tetherAttachOrientation;
     } geom;
 
     // INERTIA MATRIX

@@ -19,7 +19,7 @@ Frame::Frame(const std::string& name, const Frame* reference, const Vector3<doub
     m_frameToBody = Matrix3<double>::fromEulerAngles(m_localOrientation);
 }
 
-void Frame::setLoadCallback(std::function<void(Frame &)> callback) {
+void Frame::setLoadCallback(std::function<void(Frame&)> callback) {
     m_loadCallback = std::move(callback);
 }
 
@@ -27,8 +27,8 @@ void Frame::computeLoad() {
     if (m_loadCallback) {
         m_loadCallback(*this);
     } else {
-        setForce(Vector3<double>(0, 0, 0));
-        setMoment(Vector3<double>(0, 0, 0));
+        setForce(Vector3<double>::zeros());
+        setMoment(Vector3<double>::zeros());
     }
 }
 

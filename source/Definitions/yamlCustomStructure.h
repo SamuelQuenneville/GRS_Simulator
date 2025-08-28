@@ -269,16 +269,20 @@ namespace YAML {
             rhs.oswaldEfficiency    = node["OSWALD_EFF"].as<double>();
 
             auto temp = node["CG_POSITION"].as<std::vector<double>>();
-            rhs.geom.cgPosition = {temp[0], temp[1], temp[2]};
+            rhs.geom.cgPosition    = {temp[0], temp[1], temp[2]};
+            rhs.geom.cgOrientation = {temp[3], temp[4], temp[5]};
 
             temp = node["AERO_REF_POSITION"].as<std::vector<double>>();
-            rhs.geom.aeroRefPosition = {temp[0], temp[1], temp[2]};
+            rhs.geom.aeroRefPosition    = {temp[0], temp[1], temp[2]};
+            rhs.geom.aeroRefOrientation = {temp[3], temp[4], temp[5]};
 
             temp = node["PROPULSION_POSITION"].as<std::vector<double>>();
-            rhs.geom.propulsionPosition = {temp[0], temp[1], temp[2]};
+            rhs.geom.propulsionPosition    = {temp[0], temp[1], temp[2]};
+            rhs.geom.propulsionOrientation = {temp[3], temp[4], temp[5]};
 
             temp = node["TETHER_ATTACH_POSITION"].as<std::vector<double>>();
-            rhs.geom.tetherAttachPosition = {temp[0], temp[1], temp[2]};
+            rhs.geom.tetherAttachPosition    = {temp[0], temp[1], temp[2]};
+            rhs.geom.tetherAttachOrientation = {temp[3], temp[4], temp[5]};
 
             // INERTIA MATRIX
             rhs.inertiaX  = node["INERTIA_X"].as<double>();
