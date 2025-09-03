@@ -43,12 +43,13 @@ public:
     void createSystemOneAircraftGrounded(initialStates& aircraftStates);
     void createSystemTwoAircraft(std::vector<initialStates>& aircraftStates);
     void createSystemTwoAircraftV(bool isGrounded, std::vector<initialStates>& aircraftStates, initialStates& payloadStates);
-    void createSystemTwoAircraftY();
+    void createSystemTwoAircraftY(bool isGrounded, std::vector<initialStates>& aircraftStates, initialStates& payloadStates);
     void createSystemThreeAircraftV(bool isGrounded, std::vector<initialStates>& aircraftStates, initialStates& payloadStates);
 
     std::vector<std::unique_ptr<FixedWing>>& aircraft() {return m_aircraft;};
     std::vector<std::unique_ptr<Tether>>& tethers() {return m_links;};
     std::unique_ptr<Payload>& payload() {return m_payload;};
+    std::unique_ptr<Payload>& tetherNode() {return m_tetherNode;};
 
     void setLaunchTriggered(const bool launchTriggered) {m_launchTriggered = launchTriggered;};
 
@@ -78,14 +79,15 @@ private:
     std::map<int, fixedWingCommands> m_commands{};
     std::unique_ptr<HighLevelController<fixedWingCommands, fixedWingStates>> m_controller;
 
-    std::vector<fixedWingStates> m_getAircraftStates() const;
-    std::vector<int> m_getAircraftIds() const;
+    [[nodiscard]] std::vector<fixedWingStates> m_getAircraftStates() const;
+    [[nodiscard]] std::vector<int> m_getAircraftIds() const;
 
     void m_startUdpSocket(int uavId) const;
 
     std::vector<std::unique_ptr<FixedWing>> m_aircraft;
     std::vector<std::unique_ptr<Tether>> m_links;
     std::unique_ptr<Payload> m_payload;
+    std::unique_ptr<Payload> m_tetherNode;
 };
 
 

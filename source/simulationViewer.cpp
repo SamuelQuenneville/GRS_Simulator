@@ -8,6 +8,8 @@
 
 #include "simulationViewer.h"
 
+#include "Scenes/twoAircraftY.h"
+
 SimulationViewer::SimulationViewer(programArguments& args)
     : m_programArgs(args)
     , m_isInitialized(false)
@@ -226,7 +228,8 @@ void SimulationViewer::m_createScene() {
                 case 1:
                     throw std::invalid_argument( "Invalid number of UAV" );
                 case 2:
-                    throw std::invalid_argument( "System 2 aircraft Y tethers not implemented" );
+                    m_scene = new TwoAircraftY(*m_world);
+                    break;
                 case 3:
                     throw std::invalid_argument( "System 3 aircraft Y tethers not implemented" );
                 default:

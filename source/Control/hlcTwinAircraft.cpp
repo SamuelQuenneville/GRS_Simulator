@@ -23,7 +23,7 @@ HlcTwinAircraft::HlcTwinAircraft(worldPhysics& physics, Logger& logger, hlcGains
     m_phaseController2 = std::make_unique<PhaseController>(m_physics, m_gains.phaseCtrlGains, m_rate);
 }
 
-std::map<int, fixedWingCommands> HlcTwinAircraft::calculateInputs(const std::vector<int> &ids, const std::vector<fixedWingStates> &currentStates, const target &target) {
+std::map<int, fixedWingCommands> HlcTwinAircraft::calculateInputs(const std::vector<int>& ids, const std::vector<fixedWingStates>& currentStates, const target& target) {
     // Set states
     m_groundspeedController1->setAircraftStates(currentStates[0]);
     m_groundspeedController2->setAircraftStates(currentStates[1]);
@@ -40,7 +40,7 @@ std::map<int, fixedWingCommands> HlcTwinAircraft::calculateInputs(const std::vec
     float requiredThrustSpeed2 = m_groundspeedController2->getThrustOut(target.groundspeed, false);
 
     // Altitude --> y = y_payload + sqrt(L0^2 - R^2)
-    double altTarget = target.positionPayload[2] + std::sqrt(m_tetherLength*m_tetherLength - target.radius*target.radius);
+    double altTarget = target.altOffsetY + target.positionPayload[2] + std::sqrt(m_tetherLength*m_tetherLength - target.radius*target.radius);
 
     // Create commands struct
     fixedWingCommands commandsInputs1{};
@@ -86,7 +86,7 @@ std::map<int, fixedWingCommands> HlcTwinAircraft::calculateInputs(const std::vec
     float requiredThrustPhase2 = m_phaseController2->getThrustOut(m_phaseDesired2, payloadStates);
 
     // Altitude --> y = y_payload + sqrt(L0^2 - R^2)
-    double altTarget = target.positionPayload[2] + std::sqrt(m_tetherLength*m_tetherLength - target.radius*target.radius);
+    double altTarget = target.altOffsetY + target.positionPayload[2] + std::sqrt(m_tetherLength*m_tetherLength - target.radius*target.radius);
 
     // Create commands struct
     fixedWingCommands commandsInputs1{};

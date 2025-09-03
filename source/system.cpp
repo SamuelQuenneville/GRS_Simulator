@@ -63,6 +63,11 @@ void System::update(const double dt) {
     }
 
     // Call payload update()
+    if (m_tetherNode != nullptr) {
+        m_tetherNode->update(dt);
+    }
+
+    // Call payload update()
     if (m_payload != nullptr) {
         m_payload->update(dt);
     }
@@ -192,7 +197,7 @@ void System::createSystemOneAircraftGrounded(initialStates& aircraftStates) {
         }
 
         // Create tether and set fix to ground
-        auto tether = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether);
+        auto tether = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether.byName("Leg1"));
         tether->grounded();
 
         // Create connections
@@ -217,7 +222,7 @@ void System::createSystemOneAircraftGrounded(initialStates& aircraftStates) {
         aircraft->setInitialStates(aircraftStates);
 
         // Create tether and set fix to ground
-        auto tether = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether);
+        auto tether = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether.byName("Leg1"));
         tether->grounded();
 
         // Create connections
@@ -256,7 +261,7 @@ void System::createSystemTwoAircraft(std::vector<initialStates>& aircraftStates)
 
     } else {
         // Create HLC
-        m_controller = std::make_unique<HlcTwinAircraft>(m_physics, m_logger, m_ctrlGains.hlc, m_systemConfiguration.hlcRate, m_systemProperties.tether.length);
+        m_controller = std::make_unique<HlcTwinAircraft>(m_physics, m_logger, m_ctrlGains.hlc, m_systemConfiguration.hlcRate, m_systemProperties.tether.byName("Leg1").length);
 
         // Create LLC
         std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController1 = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_ctrlGains.llc, m_systemConfiguration.llcRate);
@@ -300,8 +305,8 @@ void System::createSystemTwoAircraftV(bool isGrounded, std::vector<initialStates
         m_payload->setInitialStates(payloadStates);
 
         // Create tethers
-        auto tether1 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether);
-        auto tether2 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether);
+        auto tether1 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether.byName("Leg1"));
+        auto tether2 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether.byName("Leg2"));
 
         // Create connections
         aircraft1->addConnection(aircraft1->getFrame("tetherAttach")->originNode(), tether1->endPointNode());
@@ -327,7 +332,7 @@ void System::createSystemTwoAircraftV(bool isGrounded, std::vector<initialStates
 
     } else {
         // Create HLC
-        m_controller = std::make_unique<HlcTwinAircraft>(m_physics, m_logger, m_ctrlGains.hlc, m_systemConfiguration.hlcRate, m_systemProperties.tether.length);
+        m_controller = std::make_unique<HlcTwinAircraft>(m_physics, m_logger, m_ctrlGains.hlc, m_systemConfiguration.hlcRate, m_systemProperties.tether.byName("Leg1").length);
 
         // Create LLC
         std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController1 = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_ctrlGains.llc, m_systemConfiguration.llcRate);
@@ -345,8 +350,8 @@ void System::createSystemTwoAircraftV(bool isGrounded, std::vector<initialStates
         m_payload->setInitialStates(payloadStates);
 
         // Create tethers and set fix to ground
-        auto tether1 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether);
-        auto tether2 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether);
+        auto tether1 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether.byName("Leg1"));
+        auto tether2 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether.byName("Leg2"));
         //
         // Create connections
         aircraft1->addConnection(aircraft1->getFrame("tetherAttach")->originNode(), tether1->endPointNode());
@@ -372,7 +377,69 @@ void System::createSystemTwoAircraftV(bool isGrounded, std::vector<initialStates
     }
 }
 
-void System::createSystemTwoAircraftY() {
+void System::createSystemTwoAircraftY(bool isGrounded, std::vector<initialStates>& aircraftStates, initialStates& payloadStates) {
+
+    if (m_programArgs.sitlMode) {
+
+    } else {
+        // Create HLC
+        m_controller = std::make_unique<HlcTwinAircraft>(m_physics, m_logger, m_ctrlGains.hlc, m_systemConfiguration.hlcRate, m_systemProperties.tether.byName("Leg1").length);
+
+        // Create LLC
+        std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController1 = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_ctrlGains.llc, m_systemConfiguration.llcRate);
+        std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController2 = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_ctrlGains.llc, m_systemConfiguration.llcRate);
+
+        // Create aircraft and set initial conditions
+        auto aircraft1 = std::make_unique<FixedWing>(m_physics, m_logger, m_systemProperties.fixedWing, std::move(lowLevelController1));
+        aircraft1->setInitialStates(aircraftStates.front());
+
+        auto aircraft2 = std::make_unique<FixedWing>(m_physics, m_logger, m_systemProperties.fixedWing, std::move(lowLevelController2));
+        aircraft2->setInitialStates(aircraftStates.back());
+
+        // Create payload and set initial conditions
+        m_payload = std::make_unique<Payload>(m_physics, m_logger, m_systemProperties.payload, isGrounded);
+        m_payload->setInitialStates(payloadStates);
+
+        // Create a tetherNode and set initial conditions
+        m_tetherNode = std::make_unique<Payload>(m_physics, m_logger, m_systemProperties.tetherNode, isGrounded);
+        initialStates nodeStates = {{0,0,-0.05}, {0,0,0}, {0,0,0}};
+        m_tetherNode->setInitialStates(nodeStates);
+
+        // Create tethers
+        auto tether1 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether.byName("Leg1"));
+        auto tether2 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether.byName("Leg2"));
+        auto tether3 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether.byName("Vertical"));
+
+        // Create connections
+        aircraft1->addConnection(aircraft1->getFrame("tetherAttach")->originNode(), tether1->endPointNode());
+        tether1->addConnection(tether1->endPointNode(), aircraft1->getFrame("tetherAttach")->originNode());
+
+        aircraft2->addConnection(aircraft2->getFrame("tetherAttach")->originNode(), tether2->endPointNode());
+        tether2->addConnection(tether2->endPointNode(), aircraft2->getFrame("tetherAttach")->originNode());
+
+        m_tetherNode->addConnection(m_tetherNode->getFrame("tetherAttach")->originNode(), tether1->startPointNode());
+        tether1->addConnection(tether1->startPointNode(), m_tetherNode->getFrame("tetherAttach")->originNode());
+
+        m_tetherNode->addConnection(m_tetherNode->getFrame("tetherAttach")->originNode(), tether2->startPointNode());
+        tether2->addConnection(tether2->startPointNode(), m_tetherNode->getFrame("tetherAttach")->originNode());
+
+        m_tetherNode->addConnection(m_tetherNode->getFrame("tetherAttach")->originNode(), tether3->startPointNode());
+        tether3->addConnection(tether3->startPointNode(), m_tetherNode->getFrame("tetherAttach")->originNode());
+
+        m_payload->addConnection(m_payload->getFrame("tetherAttach")->originNode(), tether3->endPointNode());
+        tether3->addConnection(tether3->endPointNode(), m_payload->getFrame("tetherAttach")->originNode());
+
+
+        // Push back Bodies and Links into lists
+        m_aircraft.push_back(std::move(aircraft1));
+        m_aircraft.push_back(std::move(aircraft2));
+        m_links.push_back(std::move(tether1));
+        m_links.push_back(std::move(tether2));
+        m_links.push_back(std::move(tether3));
+
+        // Compute first HLC commands
+        m_initHlcCommands();
+    }
 
 }
 
@@ -400,9 +467,9 @@ void System::createSystemThreeAircraftV(bool isGrounded, std::vector<initialStat
         m_payload->setInitialStates(payloadStates);
 
         // Create tethers and set fix to ground
-        auto tether1 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether);
-        auto tether2 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether);
-        auto tether3 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether);
+        auto tether1 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether.byName("Leg1"));
+        auto tether2 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether.byName("Leg2"));
+        auto tether3 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether.byName("Leg3"));
 
         // Create connections
         aircraft1->addConnection(aircraft1->getFrame("tetherAttach")->originNode(), tether1->endPointNode());
@@ -434,7 +501,7 @@ void System::createSystemThreeAircraftV(bool isGrounded, std::vector<initialStat
     } else {
         // Create HLC
         // TODO not a controller for 3 aircraft
-        m_controller = std::make_unique<HlcTwinAircraft>(m_physics, m_logger, m_ctrlGains.hlc, m_systemConfiguration.hlcRate, m_systemProperties.tether.length);
+        m_controller = std::make_unique<HlcTwinAircraft>(m_physics, m_logger, m_ctrlGains.hlc, m_systemConfiguration.hlcRate, m_systemProperties.tether.byName("Leg1").length);
 
         // Create LLC
         std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> lowLevelController1 = std::make_unique<LlcBaseVersion>(m_physics, m_logger, m_ctrlGains.llc, m_systemConfiguration.llcRate);
@@ -456,9 +523,9 @@ void System::createSystemThreeAircraftV(bool isGrounded, std::vector<initialStat
         m_payload->setInitialStates(payloadStates);
 
         // Create tethers and set fix to ground
-        auto tether1 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether);
-        auto tether2 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether);
-        auto tether3 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether);
+        auto tether1 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether.byName("Leg1"));
+        auto tether2 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether.byName("Leg2"));
+        auto tether3 = std::make_unique<Tether>(m_physics, m_logger, m_systemProperties.tether.byName("Leg3"));
 
         // Create connections
         aircraft1->addConnection(aircraft1->getFrame("tetherAttach")->originNode(), tether1->endPointNode());

@@ -49,6 +49,7 @@ void World::readConfigurationFile(const std::string& fileName) {
         m_systemProperties.tether = ConfigurationParser::parseTetherProperties(simParams.tetherPropertiesFileDirectory);
 
         m_systemProperties.payload = ConfigurationParser::parsePayloadProperties(simParams.payloadPropertiesFileDirectory);
+        m_systemProperties.tetherNode = ConfigurationParser::parseNodeProperties(simParams.payloadPropertiesFileDirectory);
         m_initialPayloadStates = ConfigurationParser::parseInitialStates(nodeConfiguration, "InitialStatesPayload");
     }
 
@@ -63,6 +64,9 @@ void World::readConfigurationFile(const std::string& fileName) {
     }
 
     m_systemTarget = ConfigurationParser::parseSystemTarget(nodeConfiguration);
+    if (getSystemType() == Y) {
+        m_systemTarget.altOffsetY = m_systemProperties.tether.byName("Vertical").length;
+    }
 
     std::vector<float> wind = ConfigurationParser::parseWind(fileName);
     physics.updateWind({wind[0], wind[1], wind[2]});
@@ -114,7 +118,7 @@ void World::createSystem() {
                 case 1:
                     throw std::invalid_argument( "Invalid number of UAV" );
                 case 2:
-                    m_system->createSystemTwoAircraftY();
+                    m_system->createSystemTwoAircraftY(m_systemConfiguration.grounded, m_initialAircraftStatesVector, m_initialPayloadStates);
                     break;
                 case 3:
                     throw std::invalid_argument( "System 3 aircraft Y tethers not implemented" );

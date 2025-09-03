@@ -312,8 +312,8 @@ void FixedWing::m_eulerIntegration(const fixedWingStates& derivatives, const dou
     m_states.vy = derivatives.y;
     m_states.vz = derivatives.z;
 
-    // Simulate the ground
-    if (m_states.z >= -0.001 && derivatives.vz >= -0.001) {
+    // Simulate the ground plane at z = 0
+    if (m_states.z >= 0.0 && m_states.vz > 0.0) { // penetrating and moving further down
         m_states.z  = 0.0;
         m_states.vz = 0.0;
 

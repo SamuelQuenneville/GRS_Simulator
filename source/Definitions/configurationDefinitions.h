@@ -58,6 +58,7 @@ struct target {
     float radius;                           // m
     float aircraftPitch;                    // degrees
     float aircraftRoll;                     // degrees
+    float altOffsetY;                       // altitude target offset for Y tether config
 };
 
 

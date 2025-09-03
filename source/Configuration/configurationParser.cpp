@@ -21,14 +21,19 @@ fixedWingProperties ConfigurationParser::parseFixedWingProperties(const std::str
     return node["AircraftProperties"].as<fixedWingProperties>();
 }
 
-tetherProperties ConfigurationParser::parseTetherProperties(const std::string& filePath) {
+tethersProperties ConfigurationParser::parseTetherProperties(const std::string& filePath) {
     YAML::Node node = YAML::LoadFile(filePath);
-    return node["TetherProperties"].as<tetherProperties>();
+    return node["TethersProperties"].as<tethersProperties>();
 }
 
 payloadProperties ConfigurationParser::parsePayloadProperties(const std::string& filePath) {
     YAML::Node node = YAML::LoadFile(filePath);
     return node["PayloadProperties"].as<payloadProperties>();
+}
+
+payloadProperties ConfigurationParser::parseNodeProperties(const std::string& filePath) {
+    YAML::Node node = YAML::LoadFile(filePath);
+    return node["NodeProperties"].as<payloadProperties>();
 }
 
 launcherProperties ConfigurationParser::parseLauncherProperties(const std::string& filePath) {

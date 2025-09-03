@@ -24,8 +24,9 @@ public:
     static simulationParameters parseSimulationParameters(YAML::Node& node);
     static systemConfiguration parseSystemConfiguration(YAML::Node& node);
     static fixedWingProperties parseFixedWingProperties(const std::string& filePath);
-    static tetherProperties parseTetherProperties(const std::string& filePath);
+    static tethersProperties parseTetherProperties(const std::string& filePath);
     static payloadProperties parsePayloadProperties(const std::string& filePath);
+    static payloadProperties parseNodeProperties(const std::string& filePath);
     static launcherProperties parseLauncherProperties(const std::string& filePath);
     static ctrlGains parseControllerGains(const std::string& filePath);
     static initialStates parseInitialStates(YAML::Node& node, const std::string& nodeName);

@@ -206,17 +206,19 @@ namespace YAML {
             rhs.radius          = node["RADIUS"].as<float>();
             rhs.aircraftPitch   = node["AIRCRAFT_PITCH"].as<float>();
             rhs.aircraftRoll    = node["AIRCRAFT_ROLL"].as<float>();
+            rhs.altOffsetY      = 0.0f;
             return true;
         }
     };
 
     template<>
-    struct convert<tetherProperties> {
-        static bool decode(const Node& node, tetherProperties& rhs) {
+    struct convert<segmentProperties> {
+        static bool decode(const Node& node, segmentProperties& rhs) {
             if(!node.IsMap()) {
                 return false;
             }
 
+            rhs.name         = node["NAME"].as<std::string>();
             rhs.linearMass   = node["LINEAR_MASS"].as<float>();
             rhs.length       = node["LENGTH"].as<float>();
             rhs.diameter     = node["DIAMETER"].as<float>();
@@ -226,6 +228,21 @@ namespace YAML {
             return true;
         }
     };
+
+    template<>
+    struct convert<tethersProperties> {
+        static bool decode(const Node& node, tethersProperties& rhs) {
+            if(!node.IsMap()) return false;
+
+            const Node segments = node["SEGMENTS"];
+            if(!segments.IsSequence()) return false;
+
+            for(const auto& s : segments) {
+                rhs.segments.push_back(s.as<segmentProperties>());
+            }
+            return true;
+        }
+        };
 
     template<>
     struct convert<payloadProperties> {

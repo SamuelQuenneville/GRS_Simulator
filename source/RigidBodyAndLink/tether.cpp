@@ -10,7 +10,7 @@
 
 int Tether::m_idCounter = 0;
 
-Tether::Tether(const worldPhysics& physics, Logger& logger, const tetherProperties& properties)
+Tether::Tether(const worldPhysics& physics, Logger& logger, const segmentProperties& properties)
     : m_id(++m_idCounter)
     , m_type(Link::RIGID)
     , m_physics(physics)
@@ -33,15 +33,13 @@ void Tether::update(double dt) {
     const std::vector<Node*> &startPointConnections = connections[&startPointNode()];
     const std::vector<Node*> &endPointConnections = connections[&endPointNode()];
 
-    // Should be connect to a payload
-    // TODO what happen if Y tether config
+    // Should be connected to a payload
     if (startPointConnections.size() == 1) {
         startPoint->setPosition(startPointConnections.at(0)->position());
         startPoint->setVelocity(startPointConnections.at(0)->velocity());
     }
 
     // Should be an aircraft position or a Y tether node
-    // TODO change if Y tether config
     if (endPointConnections.size() == 1) {
         endPoint->setPosition(endPointConnections.at(0)->position());
         endPoint->setVelocity(endPointConnections.at(0)->velocity());
@@ -53,8 +51,8 @@ void Tether::update(double dt) {
 
     // Calculate the tension force and distribute to the nodes
     const Vector3<double> tensionForce = m_calcTensionForce();
-    startPoint->setForce(-tensionForce);
-    endPoint->setForce(tensionForce);
+    startPoint->setForce(tensionForce);
+    endPoint->setForce(-tensionForce);
 
     // Log
     m_writeLog();
@@ -76,9 +74,9 @@ Vector3<double> Tether::m_calcTensionForce() {
     // Calculate tether elongation
     const double tetherDeformation = tetherMagnitude - m_properties.length;
 
-    Vector3<double> forceSpring = (-m_properties.rigidity * tetherDeformation * tetherNormalize) - (m_properties.damping * m_relativeSpeed.dot(tetherNormalize) * tetherNormalize);
+    Vector3<double> forceSpring = (m_properties.rigidity * tetherDeformation * tetherNormalize) + (m_properties.damping * m_relativeSpeed.dot(tetherNormalize) * tetherNormalize);
 
-    const double tension = -tetherNormalize.dot(forceSpring);
+    const double tension = tetherNormalize.dot(forceSpring);
     if(tension<0) {
         forceSpring = Vector3<double>::zeros();
     }

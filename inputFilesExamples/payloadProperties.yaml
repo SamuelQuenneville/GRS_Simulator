@@ -4,6 +4,11 @@
 #--------------------------------------------------
 
 PayloadProperties:
-  MASS      : 20.0  # kg/m
+  MASS      : 20.0  # kg
   DIMENSION : [0.4, 0.4, 0.4] # [x y z]
   CDA       : 0.5
+
+NodeProperties:
+  MASS: 0.5  # kg
+  DIMENSION: [ 0.1, 0.1, 0.1 ] # [x y z]
+  CDA: 0.5

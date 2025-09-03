@@ -24,9 +24,10 @@ enum systemType {
 
 struct systemProperties {
     fixedWingProperties fixedWing{};
-    tetherProperties tether{};
-    payloadProperties payload{};
-    launcherProperties launcher{};
+    tethersProperties   tether{};
+    payloadProperties   payload{};
+    payloadProperties   tetherNode{};
+    launcherProperties  launcher{};
 };
 
 #endif //GRS_SIMULATOR_SYSTEMDEFINITIONS_H

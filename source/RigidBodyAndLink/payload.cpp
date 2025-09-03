@@ -107,8 +107,8 @@ void Payload::m_eulerIntegration(const payloadStates& derivatives, const double 
     m_states.vy += derivatives.vy * dt;
     m_states.vz += derivatives.vz * dt;
 
-    // Simulate the ground
-    if (m_states.z >= -0.001 && derivatives.vz >= -0.001) {
+    // Simulate the ground plane at z = 0
+    if (m_states.z >= 0.0 && m_states.vz > 0.0) { // penetrating and moving further down
         m_states.z  = 0.0;
         m_states.vz = 0.0;
     }

@@ -16,7 +16,7 @@
 class Tether final : public Link {
 
 public:
-    Tether(const worldPhysics& physics, Logger& logger, const tetherProperties& properties);
+    Tether(const worldPhysics& physics, Logger& logger, const segmentProperties& properties);
 
     [[nodiscard]] int getId() const;
     [[nodiscard]] linkType getType() const;
@@ -31,7 +31,7 @@ private:
 
     worldPhysics m_physics;
     Logger& m_logger;
-    tetherProperties m_properties;
+    segmentProperties m_properties;
 
     tetherLogInfos m_tetherLogInfos{};
 
