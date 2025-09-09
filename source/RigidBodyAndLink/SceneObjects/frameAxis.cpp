@@ -11,24 +11,25 @@
 FrameAxis::FrameAxis(Frame* frame, const float length)
     : m_frame(frame)
     , m_vertexBufferVertices(GL_ARRAY_BUFFER)
+    , m_vertexBufferForce(GL_ARRAY_BUFFER)
     , m_length(length)
 {
     m_previousTransform = Transform::identity();
 
     m_createVertexBufferAndArrayObject();
+    m_createForceBufferAndArrayObject();
 }
 
 FrameAxis::~FrameAxis() {
     // Destroy the VBOs and VAO
     m_vertexBufferVertices.destroy();
+    m_vertexBufferForce.destroy();
 }
 
 
-void FrameAxis::render(const Shader& shader, const Matrix4<double>& worldToCameraMatrix) const {
+void FrameAxis::render(const Shader& shader, const Matrix4<double>& worldToCameraMatrix, const bool drawFrames, const bool drawForces) const {
 
-    m_vertexArrayObject.bind();
     shader.bind();
-    m_vertexBufferVertices.bind();
 
     // Set the model to camera matrix
     shader.setMatrix4x4Uniform("localToWorldMatrix", m_transformMatrix);
@@ -41,18 +42,47 @@ void FrameAxis::render(const Shader& shader, const Matrix4<double>& worldToCamer
     const GLint vertexPositionLoc = shader.getAttribLocation("vertexPosition");
     const GLint vertexColorLoc = shader.getAttribLocation("vertexColor");
 
-    // Position attribute
-    glVertexAttribPointer(vertexPositionLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3<float>) + sizeof(uint32_t), nullptr);
-    glEnableVertexAttribArray(vertexPositionLoc);
 
-    // Color attribute
-    glVertexAttribIPointer(vertexColorLoc, 3, GL_UNSIGNED_INT,  sizeof(Vector3<float>) + sizeof(uint32_t), reinterpret_cast<void *>(sizeof(Vector3<float>)));
-    glEnableVertexAttribArray(vertexColorLoc);
+    if (drawFrames) {
+        m_vertexArrayObject.bind();
+        m_vertexBufferVertices.bind();
 
-    glDrawArrays(GL_LINES, 0, 6); // 3 arrows = 6 vertices
+        // Position attribute
+        glVertexAttribPointer(vertexPositionLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3<float>) + sizeof(uint32_t), nullptr);
+        glEnableVertexAttribArray(vertexPositionLoc);
 
-    m_vertexBufferVertices.unbind();
-    m_vertexArrayObject.unbind();
+        // Color attribute
+        glVertexAttribIPointer(vertexColorLoc, 3, GL_UNSIGNED_INT,  sizeof(Vector3<float>) + sizeof(uint32_t), reinterpret_cast<void *>(sizeof(Vector3<float>)));
+        glEnableVertexAttribArray(vertexColorLoc);
+
+        glDrawArrays(GL_LINES, 0, 6); // 3 arrows = 6 vertices
+
+        m_vertexBufferVertices.unbind();
+        m_vertexArrayObject.unbind();
+    }
+
+
+    if (drawForces) {
+        m_vertexArrayObjectForce.bind();
+        m_vertexBufferForce.bind();
+
+        // Position attribute
+        glVertexAttribPointer(vertexPositionLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3<float>) + sizeof(uint32_t), nullptr);
+        glEnableVertexAttribArray(vertexPositionLoc);
+
+        // Color attribute
+        glVertexAttribIPointer(vertexColorLoc, 3, GL_UNSIGNED_INT, sizeof(Vector3<float>) + sizeof(uint32_t), reinterpret_cast<void*>(sizeof(Vector3<float>)));
+        glEnableVertexAttribArray(vertexColorLoc);
+
+        // glDepthFunc ensure force is render on top of tethers, frames axis and ground
+        glDepthFunc(GL_ALWAYS);
+        glDrawArrays(GL_LINES, 0, 2);
+        glDepthFunc(GL_LESS); // restore default
+
+        m_vertexBufferForce.unbind();
+        m_vertexArrayObjectForce.unbind();
+    }
+
     shader.unbind();
 };
 
@@ -77,6 +107,23 @@ void FrameAxis::updateTransform(const double interpolationFactor) {
     setTransformMatrix(newMatrix);
 }
 
+void FrameAxis::updateForceVector() const {
+    auto force = m_frame->originNode().force();
+
+    if (force.length() > 1e-6f) {
+        force = force.normalize();
+    }
+
+    // Scale to length for visualization
+    force = force * m_length;
+
+    const FrameLine line(Vector3<float>::zeros(), cast<float>(force.toOpenglRef()), static_cast<uint32_t>(m_frame->getForceColor()));
+
+    m_vertexBufferForce.bind();
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(FrameLine), &line);
+    m_vertexBufferForce.unbind();
+}
+
 void FrameAxis::m_createVertexBufferAndArrayObject() {
 
     const auto x = FrameLine(Vector3<float>::zeros(), Vector3<float>(m_length, 0, 0).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::RED));
@@ -95,4 +142,20 @@ void FrameAxis::m_createVertexBufferAndArrayObject() {
     m_vertexArrayObject.bind();
     m_vertexBufferVertices.bind();
     m_vertexArrayObject.unbind();
+}
+
+void FrameAxis::m_createForceBufferAndArrayObject() {
+
+    // Two vertices: origin and end of force vector
+    const FrameLine line(Vector3<float>::zeros(), Vector3<float>(0.0f, 0.0f, 0.0f).toOpenglRef(), static_cast<uint32_t>(m_frame->getForceColor()));
+
+    m_vertexBufferForce.create();
+    m_vertexBufferForce.bind();
+    m_vertexBufferForce.copyDataIntoVBO(sizeof(FrameLine), &line, GL_DYNAMIC_DRAW);
+    m_vertexBufferForce.unbind();
+
+    m_vertexArrayObjectForce.create();
+    m_vertexArrayObjectForce.bind();
+    m_vertexBufferForce.bind();
+    m_vertexArrayObjectForce.unbind();
 }

@@ -108,6 +108,7 @@ void Aircraft::updateTransform(const double interpolationFactor) {
 
     for (const auto& visualObject : m_visualObjects) {
         visualObject->updateTransform(interpolationFactor);
+        visualObject->updateForceVector();
     }
 }
 

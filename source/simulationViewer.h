@@ -68,6 +68,7 @@ private:
     void m_launchTriggered() const;
 
     void m_drawReferenceFrame(bool shouldDraw) const;
+    void m_drawForcesVector(bool shouldDraw) const;
 
     void m_render() const;
 

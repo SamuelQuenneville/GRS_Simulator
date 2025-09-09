@@ -61,7 +61,7 @@ public:
     [[nodiscard]] Node& centerOfMass() const;
     void setCenterOfMassFrame(Frame& frame) const;
 
-    Frame& addFrame(const std::string& name, const Frame* reference, const Vector3<double>& position, const Vector3<double>& orientation);
+    Frame& addFrame(const std::string& name, const Frame* reference, const Vector3<double>& position, const Vector3<double>& orientation, Color::HexColor color);
     [[nodiscard]] Frame* getFrame(const std::string& name) const;
     [[nodiscard]] std::vector<Frame*> frames() const;
 

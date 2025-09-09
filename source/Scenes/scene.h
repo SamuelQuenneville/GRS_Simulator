@@ -36,6 +36,7 @@ public:
     virtual void render();
     virtual void renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix);
     virtual void drawReferenceFrame(bool shouldDraw);
+    virtual void drawForcesVector(bool shouldDraw);
     virtual void reset();
     virtual void destroy();
 
@@ -50,6 +51,7 @@ public:
     void setInitialZoom(float zoom);
 
     [[nodiscard]] bool shouldDrawReferenceFrame() const {return m_shouldDrawReferenceFrame;};
+    [[nodiscard]] bool shouldDrawForcesVector() const {return m_shouldDrawForcesVector;};
 
     void changeView(const Matrix4<double>& viewMatrix);
 
@@ -89,6 +91,7 @@ protected:
     Vector3<double> m_centerOfScene;
 
     bool m_shouldDrawReferenceFrame = false;
+    bool m_shouldDrawForcesVector = false;
 
     // Last mouse coordinates on the windows
     double m_lastMouseX;

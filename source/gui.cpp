@@ -358,7 +358,8 @@ void Gui::m_createDebugPanel() {
 
     auto* buttonForces = new nanogui::Button(group1, "Show Forces");
     buttonForces->set_callback([&] {
-
+        m_shouldDrawForcesVector = !m_shouldDrawForcesVector;
+        m_viewer->m_drawForcesVector(m_shouldDrawForcesVector);
     });
 
     auto* buttonTraj = new nanogui::Button(group1, "Show Trajectories");

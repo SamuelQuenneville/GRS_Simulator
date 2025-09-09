@@ -209,6 +209,10 @@ void Scene::drawReferenceFrame(const bool shouldDraw) {
     m_shouldDrawReferenceFrame = shouldDraw;
 }
 
+void Scene::drawForcesVector(const bool shouldDraw) {
+    m_shouldDrawForcesVector = shouldDraw;
+}
+
 void Scene::reset() {
     m_elapsedTime = std::chrono::seconds::zero();
     changeView(Matrix4<double>::identity());

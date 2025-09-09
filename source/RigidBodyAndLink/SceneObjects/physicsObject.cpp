@@ -28,9 +28,9 @@ PhysicsObject::PhysicsObject(const std::string& meshFilePath)
     }
 }
 
-void PhysicsObject::renderVisualObject(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
+void PhysicsObject::renderVisualObject(Shader& shader, const Matrix4<double>& worldToCameraMatrix, const bool drawFrames, const bool drawForces) {
     for (const auto& visualObject : m_visualObjects) {
-        visualObject->render(shader, worldToCameraMatrix);
+        visualObject->render(shader, worldToCameraMatrix, drawFrames, drawForces);
     }
 }
 

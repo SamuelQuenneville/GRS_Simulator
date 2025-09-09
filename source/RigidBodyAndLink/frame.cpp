@@ -9,11 +9,12 @@
 
 #include "frame.h"
 
-Frame::Frame(const std::string& name, const Frame* reference, const Vector3<double>& position, const Vector3<double>& orientation)
+Frame::Frame(const std::string& name, const Frame* reference, const Vector3<double>& position, const Vector3<double>& orientation, const Color::HexColor forceColor)
     : m_localPosition(position)
     , m_localOrientation(orientation)
     , m_referenceOriginFrame(reference)
     , m_name(name)
+    , m_forceColor(forceColor)
 {
     m_origin = std::make_unique<Node>();
     m_frameToBody = Matrix3<double>::fromEulerAngles(m_localOrientation);

@@ -23,8 +23,9 @@ public:
     explicit FrameAxis(Frame* frame, float length = 2.0f);
     ~FrameAxis() override;
 
-    void render(const Shader& shader, const Matrix4<double>& worldToCameraMatrix) const;
+    void render(const Shader& shader, const Matrix4<double>& worldToCameraMatrix, bool drawFrames, bool drawForces) const;
     void updateTransform(double interpolationFactor) override;
+    void updateForceVector() const;
 
     struct FrameLine {
         // Constructor
@@ -49,9 +50,13 @@ private:
     VertexBufferObject m_vertexBufferVertices;
     VertexArrayObject m_vertexArrayObject;
 
+    VertexBufferObject m_vertexBufferForce;
+    VertexArrayObject m_vertexArrayObjectForce;
+
     float m_length;
 
     void m_createVertexBufferAndArrayObject();
+    void m_createForceBufferAndArrayObject();
 };
 
 #endif //GRS_SIMULATOR_FRAMEAXIS_H

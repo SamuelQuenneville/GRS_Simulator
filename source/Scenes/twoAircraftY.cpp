@@ -116,10 +116,7 @@ void TwoAircraftY::renderSinglePass(Shader& shader, const Matrix4<double>& world
     // Render all the moving physics objects of the scene
     for (const auto& physicsObject : m_physicsObjects) {
         physicsObject->render(shader, worldToCameraMatrix);
-
-        if (shouldDrawReferenceFrame()) {
-            physicsObject->renderVisualObject(m_colorShader, worldToCameraMatrix);
-        }
+        physicsObject->renderVisualObject(m_colorShader, worldToCameraMatrix, shouldDrawReferenceFrame(), shouldDrawForcesVector());
     }
 
     // Render the static objects (floor could be obstacle...)

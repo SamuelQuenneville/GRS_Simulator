@@ -23,7 +23,7 @@ public:
     virtual void updatePosition() {};
 
     virtual void render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) = 0;
-    virtual void renderVisualObject(Shader& shader, const Matrix4<double>& worldToCameraMatrix);
+    virtual void renderVisualObject(Shader& shader, const Matrix4<double>& worldToCameraMatrix, bool drawFrames, bool drawForces);
 
     void setColor(const Color& color);
 

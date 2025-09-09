@@ -15,12 +15,12 @@ Payload::Payload(const worldPhysics& physics, Logger& logger, const payloadPrope
     , m_isGrounded(isGrounded)
 {
     // Create a cg Frame
-    Frame& cg = addFrame("centerOfMass", this->bodyOriginFrame(), {0,0,0}, {0,0,0});
+    Frame& cg = addFrame("centerOfMass", this->bodyOriginFrame(), {0,0,0}, {0,0,0}, Color::HexColor::WHITE);
     setCenterOfMassFrame(cg);
 
     // Create other Frames and assign function
-    Frame& aeroReference = addFrame("aeroRef", this->bodyOriginFrame(), {0,0,0}, {0,0,0});
-    Frame& tetherAttach  = addFrame("tetherAttach", this->bodyOriginFrame(), {0,0,0}, {0,0,0});
+    Frame& aeroReference = addFrame("aeroRef", this->bodyOriginFrame(), {0,0,0}, {0,0,0}, Color::HexColor::CYAN);
+    Frame& tetherAttach  = addFrame("tetherAttach", this->bodyOriginFrame(), {0,0,0}, {0,0,0}, Color::HexColor::YELLOW);
 
     aeroReference.setLoadCallback([this](const Frame& f) {
         f.setForce(m_calcAeroForces());

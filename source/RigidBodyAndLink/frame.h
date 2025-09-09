@@ -13,13 +13,14 @@
 #include <memory>
 
 #include "node.h"
+#include "Mathematics/color.h"
 #include "Mathematics/matrix3.h"
 #include "Mathematics/transform.h"
 
 class Frame {
 
 public:
-    explicit Frame(const std::string& name = "", const Frame* reference = nullptr, const Vector3<double>& position = Vector3<double>::zeros(), const Vector3<double>& orientation = Vector3<double>::zeros());
+    explicit Frame(const std::string& name = "", const Frame* reference = nullptr, const Vector3<double>& position = Vector3<double>::zeros(), const Vector3<double>& orientation = Vector3<double>::zeros(), Color::HexColor forceColor = Color::HexColor::YELLOW);
     ~Frame() = default;
 
     void setLoadCallback(std::function<void(Frame&)> callback);
@@ -47,6 +48,8 @@ public:
     void setIsCenterOfMass(const bool isCenterOfMass) {m_isCenterOfMass = isCenterOfMass;};
     [[nodiscard]] bool isCenterOfMass() const {return m_isCenterOfMass;}
 
+    [[nodiscard]] Color::HexColor getForceColor() const {return m_forceColor;}
+
 
 private:
     std::unique_ptr<Node> m_origin;
@@ -61,6 +64,7 @@ private:
 
     const Frame* m_referenceOriginFrame;
     std::string m_name;
+    Color::HexColor m_forceColor;
 
     bool m_isCenterOfMass = false;
 };

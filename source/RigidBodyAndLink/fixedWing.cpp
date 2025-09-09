@@ -17,13 +17,13 @@ FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWin
     , m_properties(properties)
 {
     // Create a cg Frame
-    Frame& cg = addFrame("centerOfMass", this->bodyOriginFrame(), properties.geom.cgPosition, properties.geom.cgOrientation);
+    Frame& cg = addFrame("centerOfMass", this->bodyOriginFrame(), properties.geom.cgPosition, properties.geom.cgOrientation, Color::HexColor::BLACK);
     setCenterOfMassFrame(cg);
 
     // Create other Frames and assign function
-    Frame& aeroReference       = addFrame("aeroRef", this->bodyOriginFrame(), properties.geom.aeroRefPosition, properties.geom.aeroRefOrientation);
-    Frame& propulsionReference = addFrame("propulsionRef", this->bodyOriginFrame(), properties.geom.propulsionPosition, properties.geom.propulsionOrientation);
-    Frame& tetherAttach        = addFrame("tetherAttach", this->bodyOriginFrame(), properties.geom.tetherAttachPosition, properties.geom.tetherAttachOrientation);
+    Frame& aeroReference       = addFrame("aeroRef", this->bodyOriginFrame(), properties.geom.aeroRefPosition, properties.geom.aeroRefOrientation, Color::HexColor::CYAN);
+    Frame& propulsionReference = addFrame("propulsionRef", this->bodyOriginFrame(), properties.geom.propulsionPosition, properties.geom.propulsionOrientation, Color::HexColor::WHITE);
+    Frame& tetherAttach        = addFrame("tetherAttach", this->bodyOriginFrame(), properties.geom.tetherAttachPosition, properties.geom.tetherAttachOrientation, Color::HexColor::YELLOW);
 
     aeroReference.setLoadCallback([this](const Frame& f) {
         const auto [airspeed, alphaRadian, betaRadian] = m_angleOfAttackSideSlip();

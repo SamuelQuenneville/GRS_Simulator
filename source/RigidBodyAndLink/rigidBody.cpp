@@ -160,8 +160,8 @@ void RigidBody::setCenterOfMassFrame(Frame& frame) const {
     frame.setIsCenterOfMass(true);
 }
 
-Frame& RigidBody::addFrame(const std::string& name, const Frame* reference, const Vector3<double>& position, const Vector3<double>& orientation) {
-    auto frame = std::make_unique<Frame>(name, reference, position, orientation);
+Frame& RigidBody::addFrame(const std::string& name, const Frame* reference, const Vector3<double>& position, const Vector3<double>& orientation, Color::HexColor color) {
+    auto frame = std::make_unique<Frame>(name, reference, position, orientation, color);
     m_frames.push_back(std::move(frame));
     return *m_frames.back();
 }
