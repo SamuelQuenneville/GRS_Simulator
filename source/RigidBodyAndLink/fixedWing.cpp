@@ -16,14 +16,16 @@ FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWin
     , m_logger(logger)
     , m_properties(properties)
 {
+    const std::string idString = "uav" + std::to_string(m_id);
+
     // Create a cg Frame
-    Frame& cg = addFrame("centerOfMass", this->bodyOriginFrame(), properties.geom.cgPosition, properties.geom.cgOrientation, Color::HexColor::BLACK);
+    Frame& cg = addFrame(idString + "_centerOfMass", this->bodyOriginFrame(), properties.geom.cgPosition, properties.geom.cgOrientation, Color::HexColor::BLACK);
     setCenterOfMassFrame(cg);
 
     // Create other Frames and assign function
-    Frame& aeroReference       = addFrame("aeroRef", this->bodyOriginFrame(), properties.geom.aeroRefPosition, properties.geom.aeroRefOrientation, Color::HexColor::CYAN);
-    Frame& propulsionReference = addFrame("propulsionRef", this->bodyOriginFrame(), properties.geom.propulsionPosition, properties.geom.propulsionOrientation, Color::HexColor::WHITE);
-    Frame& tetherAttach        = addFrame("tetherAttach", this->bodyOriginFrame(), properties.geom.tetherAttachPosition, properties.geom.tetherAttachOrientation, Color::HexColor::YELLOW);
+    Frame& aeroReference       = addFrame(idString + "_aeroRef", this->bodyOriginFrame(), properties.geom.aeroRefPosition, properties.geom.aeroRefOrientation, Color::HexColor::CYAN);
+    Frame& propulsionReference = addFrame(idString + "_propulsionRef", this->bodyOriginFrame(), properties.geom.propulsionPosition, properties.geom.propulsionOrientation, Color::HexColor::WHITE);
+    Frame& tetherAttach        = addFrame(idString + "_tetherAttach", this->bodyOriginFrame(), properties.geom.tetherAttachPosition, properties.geom.tetherAttachOrientation, Color::HexColor::YELLOW);
 
     aeroReference.setLoadCallback([this](const Frame& f) {
         const auto [airspeed, alphaRadian, betaRadian] = m_angleOfAttackSideSlip();
@@ -466,10 +468,10 @@ void FixedWing::m_writeLog() {
         {m_states.u, m_states.v, m_states.w},
         {m_states.phi, m_states.theta, m_states.psi},
         {m_states.p, m_states.q, m_states.r},
-        getFrame("aeroRef")->originNode().force(),
-        getFrame("aeroRef")->originNode().moment(),
-        m_earthToBody(getFrame("tetherAttach")->originNode().force()),
-        m_earthToBody(getFrame("tetherAttach")->originNode().moment())
+        getFrame("uav" + std::to_string(m_id) + "_aeroRef")->originNode().force(),
+        getFrame("uav" + std::to_string(m_id) + "_aeroRef")->originNode().moment(),
+        m_earthToBody(getFrame("uav" + std::to_string(m_id) + "_tetherAttach")->originNode().force()),
+        m_earthToBody(getFrame("uav" + std::to_string(m_id) + "_tetherAttach")->originNode().moment())
     };
 
     m_logger.writeAircraftMessage(logMessage);

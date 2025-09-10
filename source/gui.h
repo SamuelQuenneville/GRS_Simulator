@@ -19,6 +19,7 @@
 #include <cstring>
 
 #include "Log/programLogger.h"
+#include "RigidBodyAndLink/frame.h"
 
 class SimulationViewer;
 
@@ -47,7 +48,8 @@ public:
     [[nodiscard]] bool getHasConfigFile() const {return m_hasConfigFile;};
     [[nodiscard]] std::string configFilePath() const {return m_configFilePath;};
 
-    void setTargetFromConfig(float groundspeed, const std::vector<double> &positionTarget);
+    void setTargetFromConfig(float groundspeed, const std::vector<double>& positionTarget);
+    void setFrames(const std::vector<Frame*>& frames);
 
 protected:
     SimulationViewer* m_viewer;
@@ -71,6 +73,16 @@ protected:
     nanogui::TextBox* m_positionXTargetText;
     nanogui::TextBox* m_positionYTargetText;
     std::vector<double> m_payloadTarget = {0.0, 0.0, 0.0};
+
+    nanogui::Label* m_framePositionDisplayed;
+    nanogui::Label* m_frameVelocityDisplayed;
+    nanogui::Label* m_frameOrientationDisplayed;
+    nanogui::Label* m_frameForcesDisplayed;
+
+    nanogui::ComboBox* m_comboBoxFrames = nullptr;
+
+    std::vector<Frame*> m_frames{};
+    Frame* m_currentFrameDisplayed{};
 
     //
     char m_configFilePath[256] = {};

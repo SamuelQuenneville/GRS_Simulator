@@ -143,6 +143,23 @@ void World::deleteSystem() {
     m_initialAircraftStatesVector.clear();
 }
 
+std::vector<Frame*> World::collectFrames() const {
+    std::vector<Frame*> frames;
+
+    for (auto&& aircraft : m_system->aircraft()) {
+        auto f = aircraft->frames();
+        frames.insert(frames.end(), f.begin(), f.end());
+    }
+
+    auto f = m_system->tetherNode()->frames();
+    frames.insert(frames.end(), f.begin(), f.end());
+
+    f = m_system->payload()->frames();
+    frames.insert(frames.end(), f.begin(), f.end());
+
+    return frames;
+}
+
 void World::setPauseTimerCallback(std::function<void()> callback) {
     m_system->setPauseTimerCallback(std::move(callback));
 }

@@ -48,6 +48,8 @@ public:
     void resetSystem();
     void deleteSystem();
 
+    [[nodiscard]] std::vector<Frame*> collectFrames() const;
+
     void setPauseTimerCallback(std::function<void()> callback);
 
     std::map<std::string, systemType> systemTypeStringToEnum;

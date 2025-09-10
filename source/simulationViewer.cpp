@@ -94,6 +94,7 @@ void SimulationViewer::start() {
             });
 
             m_gui.setTargetFromConfig(m_world->system()->getTarget().groundspeed, m_world->system()->getTarget().positionPayload);
+            m_gui.setFrames(m_world->collectFrames());
 
             m_scene->reshape(m_windowWidth, m_windowHeight);
             m_scene->setWindowDimension(m_windowWidth, m_windowHeight);

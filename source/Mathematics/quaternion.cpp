@@ -180,6 +180,30 @@ Quaternion Quaternion::fromEulerAngles(const double roll, const double pitch, co
     return correction * quaternion;
 }
 
+Vector3<double> Quaternion::eulerAngles() const {
+    Vector3<double> angles;
+
+    // roll (x-axis rotation)
+    double sinr_cosp = 2.0 * (w * x + y * z);
+    double cosr_cosp = 1.0 - 2.0 * (x * x + y * y);
+    angles.setX(std::atan2(sinr_cosp, cosr_cosp));
+
+    // pitch (y-axis rotation)
+    double sinp = 2.0 * (w * y - z * x);
+    if (std::fabs(sinp) >= 1.0)
+        angles.setY(std::copysign(M_PI / 2.0, sinp)); // use 90 degrees if out of range
+    else
+        angles.setY(std::asin(sinp));
+
+    // yaw (z-axis rotation)
+    double siny_cosp = 2.0 * (w * z + x * y);
+    double cosy_cosp = 1.0 - 2.0 * (y * y + z * z);
+    angles.setZ(std::atan2(siny_cosp, cosy_cosp));
+
+    return angles;
+}
+
+
 double Quaternion::dot(const Quaternion& quaternion) const {
     return (x*quaternion.x + y*quaternion.y + z*quaternion.z + w*quaternion.w);
 }

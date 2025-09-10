@@ -50,6 +50,8 @@ public:
     // Return a quaternion constructed from Euler angles (in radians)
     static Quaternion fromEulerAngles(double roll, double pitch, double yaw);
 
+    Vector3<double> eulerAngles() const;
+
     // Dot product between two quaternions
     [[nodiscard]] double dot(const Quaternion& quaternion) const;
 

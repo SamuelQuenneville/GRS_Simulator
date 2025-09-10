@@ -8,20 +8,37 @@
 
 #include "simulationViewer.h"
 
+auto formatVec3 = [](const char* label, const Vector3<double>& v) {
+    std::ostringstream oss;
+    constexpr int numWidth = 7;
+
+    // left align label, right align numbers
+    oss << std::left << std::setw(18) << label << ": [ "
+        << std::fixed << std::showpos << std::right << std::setw(numWidth) << std::setprecision(2) << v.x() << " "
+        << std::fixed << std::showpos << std::right << std::setw(numWidth) << std::setprecision(2) << v.y() << " "
+        << std::fixed << std::showpos << std::right << std::setw(numWidth) << std::setprecision(2) << v.z() << " ]";
+
+    return oss.str();
+};
+
 Gui::Gui(SimulationViewer* app)
-        : m_viewer(app)
-        , m_window(nullptr)
-        , m_screen(nullptr)
-        , m_configurationPanel(nullptr)
-        , m_debugPanel(nullptr)
-        , m_fileLabel(nullptr)
-        , m_simRunTimeLabel(nullptr)
-        , m_groundspeedTargetText(nullptr)
-        , m_altitudeTargetText(nullptr)
-        , m_positionXTargetText(nullptr)
-        , m_positionYTargetText(nullptr)
-        , m_hasConfigFile(false)
-        , m_isDisplayed(true)
+    : m_viewer(app)
+    , m_window(nullptr)
+    , m_screen(nullptr)
+    , m_configurationPanel(nullptr)
+    , m_debugPanel(nullptr)
+    , m_fileLabel(nullptr)
+    , m_simRunTimeLabel(nullptr)
+    , m_groundspeedTargetText(nullptr)
+    , m_altitudeTargetText(nullptr)
+    , m_positionXTargetText(nullptr)
+    , m_positionYTargetText(nullptr)
+    , m_framePositionDisplayed(nullptr)
+    , m_frameVelocityDisplayed(nullptr)
+    , m_frameOrientationDisplayed(nullptr)
+    , m_frameForcesDisplayed(nullptr)
+    , m_hasConfigFile(false)
+    , m_isDisplayed(true)
 {
 
 }
@@ -42,6 +59,19 @@ void Gui::init(GLFWwindow* window) {
 void Gui::update() {
     m_fileLabel->set_caption(std::string("File : ") + m_configFileName);
     m_simRunTimeLabel->set_caption(std::string("Run Time : ") + doubleToString(m_viewer->getElapsedTime(),2));
+
+    if (m_currentFrameDisplayed != nullptr) {
+        const auto pos = m_currentFrameDisplayed->originNode().position();
+        const auto vel = m_currentFrameDisplayed->originNode().velocity();
+        const auto ori = m_currentFrameDisplayed->transform().getOrientation().eulerAngles() * RAD_TO_DEG;
+        const auto force = m_currentFrameDisplayed->originNode().force();
+
+        m_framePositionDisplayed->set_caption(formatVec3("Position    (m)", pos));
+        m_frameVelocityDisplayed->set_caption(formatVec3("Velocity    (m/s)", vel));
+        m_frameOrientationDisplayed->set_caption(formatVec3("Orientation (Deg)", ori));
+        m_frameForcesDisplayed->set_caption(formatVec3("Forces      (N)", force));
+    }
+
 }
 
 void Gui::drawAll() {
@@ -342,9 +372,9 @@ void Gui::m_createConfigurationPanel() {
 
 void Gui::m_createDebugPanel() {
     m_debugPanel = new nanogui::Window(m_screen, "Debug Options");
-    m_debugPanel->set_position(nanogui::Vector2i(15, 525));
+    m_debugPanel->set_position(nanogui::Vector2i(15, 670));
     m_debugPanel->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 10, 5));
-    m_debugPanel->set_fixed_width(260);
+    m_debugPanel->set_fixed_width(370);
 
     // Group 1 Visual Objects
     new nanogui::Label(m_debugPanel, std::string("Visual Objects :"),"sans-bold",20);
@@ -362,16 +392,22 @@ void Gui::m_createDebugPanel() {
         m_viewer->m_drawForcesVector(m_shouldDrawForcesVector);
     });
 
-    auto* buttonTraj = new nanogui::Button(group1, "Show Trajectories");
-    buttonTraj->set_callback([&] {
-
-    });
-
 
     // Group 2 Numeric Infos
     new nanogui::Label(m_debugPanel, std::string("Numeric Infos :"),"sans-bold",20);
     auto* group2 = new nanogui::Widget(m_debugPanel);
+    group2->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical,nanogui::Alignment::Fill, 5, 5));
 
+    m_comboBoxFrames = new nanogui::ComboBox(group2);
+    m_comboBoxFrames->set_font_size(20);
+    m_comboBoxFrames->set_callback([&](const int index) {
+        m_currentFrameDisplayed = m_frames[index];
+    });
+
+    m_framePositionDisplayed    = new nanogui::Label(group2, std::string("Position    (m)   : "), "mono", 15);
+    m_frameVelocityDisplayed    = new nanogui::Label(group2, std::string("Velocity    (m/s) : "), "mono", 15);
+    m_frameOrientationDisplayed = new nanogui::Label(group2, std::string("Orientation (Deg) : "), "mono", 15);
+    m_frameForcesDisplayed      = new nanogui::Label(group2, std::string("Forces      (N)   : "), "mono", 15);
 }
 
 std::string Gui::doubleToString(const double value, const int precision) {
@@ -388,4 +424,17 @@ void Gui::setTargetFromConfig(const float groundspeed, const std::vector<double>
     m_altitudeTargetText->set_value(doubleToString(m_payloadTarget[2],1));
     m_positionXTargetText->set_value(doubleToString(m_payloadTarget[0],1));
     m_positionYTargetText->set_value(doubleToString(m_payloadTarget[1],1));
+}
+
+void Gui::setFrames(const std::vector<Frame *> &frames) {
+    m_frames = frames;
+
+    std::vector<std::string> names;
+
+    for (const auto& f : m_frames) {
+        names.push_back(f->getName());
+    }
+
+    m_comboBoxFrames->set_items(names);
+    m_screen->perform_layout();
 }
