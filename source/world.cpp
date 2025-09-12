@@ -151,11 +151,15 @@ std::vector<Frame*> World::collectFrames() const {
         frames.insert(frames.end(), f.begin(), f.end());
     }
 
-    auto f = m_system->tetherNode()->frames();
-    frames.insert(frames.end(), f.begin(), f.end());
+    if (m_system->tetherNode()) {
+        auto f = m_system->tetherNode()->frames();
+        frames.insert(frames.end(), f.begin(), f.end());
+    }
 
-    f = m_system->payload()->frames();
-    frames.insert(frames.end(), f.begin(), f.end());
+    if (m_system->payload()) {
+        auto f = m_system->payload()->frames();
+        frames.insert(frames.end(), f.begin(), f.end());
+    }
 
     return frames;
 }
