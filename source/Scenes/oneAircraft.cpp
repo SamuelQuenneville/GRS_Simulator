@@ -25,7 +25,7 @@ void OneAircraft::createPhysicsWorld() {
 
     // ---------- AIRCRAFT ---------- //
     for (const auto& aircraft : m_world.system()->aircraft()) {
-        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), Vector3<double>(2, 2, 2), World::getExecutablePath());
+        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), Vector3<double>(2.0, 2.0, 2.0), World::getExecutablePath());
         aircraftObject->setColor(Color::color(aircraft->getId()));
 
         m_physicsObjects.push_back(std::move(aircraftObject));
@@ -77,6 +77,7 @@ void OneAircraft::renderSinglePass(Shader& shader, const Matrix4<double>& worldT
     // Render all the moving physics objects of the scene
     for (const auto& physicsObject : m_physicsObjects) {
         physicsObject->render(shader, worldToCameraMatrix);
+        physicsObject->renderVisualObject(m_colorShader, worldToCameraMatrix, shouldDrawReferenceFrame(), shouldDrawForcesVector());
     }
 
     // Render the static objects (floor could be obstacle...)

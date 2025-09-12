@@ -24,7 +24,7 @@ void OneAircraftGrounded::createPhysicsWorld() {
 
     // ---------- AIRCRAFT ---------- //
     for (const auto& aircraft : m_world.system()->aircraft()) {
-        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), Vector3<double>(1, 1, 1), World::getExecutablePath());
+        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), Vector3<double>(2.0, 2.0, 2.0), World::getExecutablePath());
         aircraftObject->setColor(Color::red());
         m_physicsObjects.push_back(std::move(aircraftObject));
     }
@@ -93,6 +93,7 @@ void OneAircraftGrounded::renderSinglePass(Shader& shader, const Matrix4<double>
     // Render all the moving physics objects of the scene
     for (const auto& physicsObject : m_physicsObjects) {
         physicsObject->render(shader, worldToCameraMatrix);
+        physicsObject->renderVisualObject(m_colorShader, worldToCameraMatrix, shouldDrawReferenceFrame(), shouldDrawForcesVector());
     }
 
     // Render the static objects (floor could be obstacle...)
