@@ -31,8 +31,8 @@ public:
 
     // Default event handler
     void keyboardEvent(int key, int scancode, int action, int modifiers);
-    void mouseButtonEvent(int button, int action, int modifiers);
-    void mouseMotionEvent(double x, double y);
+    void mouseButtonEvent(int button, int action, int modifiers, double mousePosX, double mousePosY) const;
+    void mouseMotionEvent(double x, double y) const;
     void scrollEvent(double x, double y) const;
 
     // Called when an OpenGL Error occurs

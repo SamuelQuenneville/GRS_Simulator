@@ -56,7 +56,7 @@ void Gui::init(GLFWwindow* window) {
     m_screen->perform_layout();
 }
 
-void Gui::update() {
+void Gui::update() const {
     m_fileLabel->set_caption(std::string("File : ") + m_configFileName);
     m_simRunTimeLabel->set_caption(std::string("Run Time : ") + doubleToString(m_viewer->getElapsedTime(),2));
 
@@ -107,6 +107,10 @@ void Gui::onMouseButtonEvent(const int button, const int action, const int modif
 
 void Gui::onKeyboardEvent(const int key, const int scancode, const int action, const int modifiers) {
     m_screen->key_callback_event(key, scancode, action, modifiers);
+}
+
+nanogui::Widget *Gui::findWidget(const nanogui::Vector2i &p) {
+    return m_screen->find_widget(p);
 }
 
 void Gui::m_createConfigurationPanel() {
@@ -372,7 +376,7 @@ void Gui::m_createConfigurationPanel() {
 
 void Gui::m_createDebugPanel() {
     m_debugPanel = new nanogui::Window(m_screen, "Debug Options");
-    m_debugPanel->set_position(nanogui::Vector2i(15, 670));
+    m_debugPanel->set_position(nanogui::Vector2i(15, 525));
     m_debugPanel->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 10, 5));
     m_debugPanel->set_fixed_width(370);
 

@@ -32,7 +32,7 @@ public:
     // Initialize the GUI
     void init(GLFWwindow* window);
 
-    void update();
+    void update() const;
     void drawAll();
     void draw();
     void drawTearDown();
@@ -41,6 +41,9 @@ public:
     void onMouseMotionEvent(double x, double y);
     void onMouseButtonEvent(int button, int action, int modifiers);
     void onKeyboardEvent(int key, int scancode, int action, int modifiers);
+
+    nanogui::Widget* findWidget(const nanogui::Vector2i& p);
+    [[nodiscard]] nanogui::ref<nanogui::Screen> screen() const {return m_screen;};
 
     [[nodiscard]] bool getIsDisplayed() const {return m_isDisplayed;};
     void setIsDisplayed(const bool isDisplayed) {m_isDisplayed = isDisplayed;};

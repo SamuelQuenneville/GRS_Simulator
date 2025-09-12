@@ -145,30 +145,20 @@ void SimulationViewer::keyboardEvent(const int key, const int scancode, const in
         return;
     }
 
-    // Show/hide the GUI with "i" key
+    // Show/hide the GUI with "c" key
     if (key == GLFW_KEY_C && action == GLFW_PRESS) {
         m_gui.setIsDisplayed(!m_gui.getIsDisplayed());
         return;
     }
 }
 
-void SimulationViewer::mouseButtonEvent(const int button, const int action, const int modifiers) {
-    m_gui.onMouseButtonEvent(button, action, modifiers);
-
-    // Get the mouse cursor position
-    double x;
-    double y;
-    glfwGetCursorPos(m_window.get(), &x, &y);
-
-    const bool down = action == GLFW_PRESS;
-
+void SimulationViewer::mouseButtonEvent(const int button, const int action, const int modifiers, const double mousePosX, const double mousePosY) const {
     if (m_scene) {
-        m_scene->mouseButtonEvent(button, down, modifiers, x, y);
+        m_scene->mouseButtonEvent(button, action == GLFW_PRESS, modifiers, mousePosX, mousePosY);
     }
 }
 
-void SimulationViewer::mouseMotionEvent(const double x, const double y) {
-    m_gui.onMouseMotionEvent(x, y);
+void SimulationViewer::mouseMotionEvent(const double x, const double y) const {
 
     const int leftButtonState   = glfwGetMouseButton(m_window.get(), GLFW_MOUSE_BUTTON_LEFT);
     const int rightButtonState  = glfwGetMouseButton(m_window.get(), GLFW_MOUSE_BUTTON_RIGHT);
@@ -306,35 +296,60 @@ void SimulationViewer::m_setGlfwHints() {
 }
 
 void SimulationViewer::m_setCallback() const {
+
     glfwSetCursorPosCallback(m_window.get(), [](GLFWwindow* window, const double x, const double y) {
-                                 auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
-        app->mouseMotionEvent(x, y);
-                             }
-    );
+        auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
+
+        const nanogui::Vector2i p = {static_cast<int>(x), static_cast<int>(y)};
+
+        // Send first to nanogui
+        app->m_gui.onMouseMotionEvent(x, y);
+
+        // Check if GUI
+        const nanogui::Widget* widget = app->m_gui.findWidget(p);
+        bool guiActive = widget && widget != app->m_gui.screen();
+
+        if (!guiActive) {
+            app->mouseMotionEvent(x, y);
+        }
+
+    });
 
     glfwSetMouseButtonCallback(m_window.get(), [](GLFWwindow* window, const int button, const int action, const int modifiers) {
-                                   auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
-        app->mouseButtonEvent(button, action, modifiers);
-                               }
-    );
+        auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
+
+        double x;
+        double y;
+        glfwGetCursorPos(window, &x, &y);
+        const nanogui::Vector2i p = {static_cast<int>(x), static_cast<int>(y)};
+
+        // Send first to nanogui
+        app->m_gui.onMouseButtonEvent(button, action, modifiers);
+
+        // Check if GUI
+        const nanogui::Widget* widget = app->m_gui.findWidget(p);
+        bool guiActive = widget && widget != app->m_gui.screen();
+
+        if (!guiActive) {
+            app->mouseButtonEvent(button, action, modifiers, x, y);
+        }
+
+    });
 
     glfwSetKeyCallback(m_window.get(), [](GLFWwindow* window, const int key, const int scancode, const int action, const int mods) {
-                           auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
+        auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
         app->keyboardEvent(key, scancode, action, mods);
-                       }
-    );
+    });
 
     glfwSetScrollCallback(m_window.get(), [](GLFWwindow* window, const double x, const double y) {
-                              auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
+        auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
         app->scrollEvent(x, y);
-                          }
-    );
+    });
 
     glfwSetFramebufferSizeCallback(m_window.get(), [](GLFWwindow* window, const int width, const int height) {
-                                       auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
-                                       app->onWindowResized(width, height);
-                                   }
-    );
+        auto* app = static_cast<SimulationViewer*>(glfwGetWindowUserPointer(window));
+        app->onWindowResized(width, height);
+    });
 }
 
 void GLAPIENTRY SimulationViewer::onOpenGLError(const GLenum source, const GLenum type, GLuint /*id*/, const GLenum severity, GLsizei /*length*/, const GLchar* message, const void* /*userParam*/ ) {
