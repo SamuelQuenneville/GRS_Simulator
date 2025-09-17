@@ -24,7 +24,7 @@ Payload::Payload(const worldPhysics& physics, Logger& logger, const payloadPrope
 
     aeroReference.setLoadCallback([this](const Frame& f) {
         f.setForce(m_calcAeroForces());
-        f.setMoment({0,0,0});
+        f.setMoment({0.0,0.0,0.0});
     });
 
     tetherAttach.setLoadCallback([this](const Frame& f) {
@@ -36,7 +36,7 @@ Payload::Payload(const worldPhysics& physics, Logger& logger, const payloadPrope
         }
 
         f.setForce(tetherForces);
-        f.setMoment({0,0,0});
+        f.setMoment({0.0,0.0,0.0});
     });
 }
 
@@ -49,7 +49,7 @@ void Payload::update(const double dt) {
         m_eulerIntegration(derivatives, dt);
 
         // Set new forces/moments to the node of this body
-        updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0,0,0});
+        updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0.0,0.0,0.0});
         setCenterOfMassTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::identity()));
     }
 

@@ -33,7 +33,7 @@ public:
 
     void nextStep(std::chrono::duration<double> timeStep);
 
-    double computeInterpolationFactor(std::chrono::duration<double> timeStep);
+    [[nodiscard]] double computeInterpolationFactor(std::chrono::duration<double> timeStep) const;
 
 private:
     std::chrono::time_point<clock> m_startTime;
@@ -42,9 +42,6 @@ private:
     std::chrono::duration<double> m_accumulator;
 
     bool m_isRunning;
-
-    Timer(const Timer& timer);
-    Timer& operator=(const Timer& timer);
 };
 
 

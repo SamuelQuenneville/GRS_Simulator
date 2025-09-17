@@ -8,13 +8,29 @@
 
 #include "meshReader.h"
 
+std::unordered_map<std::string, std::shared_ptr<MeshReader::meshData>> MeshReader::meshCache;
+
 void MeshReader::loadMesh(const std::string& filename, Mesh& meshContainer) {
     // Get the extension of the file
-    unsigned int startPosExtension = filename.find_last_of('.');
+    const unsigned int startPosExtension = filename.find_last_of('.');
     std::string extension = filename.substr(startPosExtension+1);
 
     // Load the file using the correct method
     if (extension == "obj") {
+
+        // Look if mesh was already parse
+        auto it = meshCache.find(filename);
+        if (it != meshCache.end()) {
+            // Already loaded, just copy
+            std::shared_ptr<meshData> data = it->second;
+            // Set the data to the mesh
+            meshContainer.setIndices(data->indices);
+            meshContainer.setVertices(data->vertices);
+            meshContainer.setNormals(data->normals);
+            meshContainer.setUVs(data->uvs);
+            return;
+        }
+
         loadObjectFile(filename, meshContainer);
     }
     else {
@@ -39,7 +55,7 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
     }
 
     std::string buffer;
-    std::string line, tmp;
+    std::string tmp;
     int id1, id2, id3, id4;
     int nId1, nId2, nId3, nId4;
     int tId1, tId2, tId3, tId4;
@@ -49,9 +65,9 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
     std::vector<Vector3<float>> vertices;
     std::vector<Vector3<float>> normals;
     std::vector<Vector2<float>> uvs;
-    std::vector<unsigned int > verticesIndices;
-    std::vector<unsigned int> normalsIndices;
-    std::vector<unsigned int> uvsIndices;
+    std::vector<size_t> verticesIndices;
+    std::vector<size_t> normalsIndices;
+    std::vector<size_t> uvsIndices;
 
     // ---------- Collect the data from the file ---------- //
 
@@ -68,22 +84,21 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
 
         }
         else if(word == "v") {  // Vertex position
-            std::sscanf(buffer.c_str(), "%*s %f %f %f", &v1, &v2, &v3);
+            lineStream >> v1 >> v2 >> v3;
             vertices.emplace_back(v1, v2, v3);
         }
         else if(word == "vt") { // Vertex texture coordinate
-            std::sscanf(buffer.c_str(), "%*s %f %f", &v1, &v2);
+            lineStream >> v1 >> v2;
             uvs.emplace_back(v1,v2);
         }
         else if(word == "vn") { // Vertex normal
-            std::sscanf(buffer.c_str(), "%*s %f %f %f", &v1, &v2, &v3);
+            lineStream >> v1 >> v2 >> v3;
             normals.emplace_back(v1 ,v2, v3);
         }
         else if (word == "f") { // Face
-            line = buffer;
-            found1 = static_cast<int>(line.find('/'));
+            found1 = buffer.find('/');
             bool isFaceQuad = false;
-            found2 = static_cast<int>(line.substr(found1+1).find('/'));
+            found2 = buffer.substr(found1+1).find('/');
 
             // If the face definition is of the form "f v1 v2 v3 v4"
             if(found1 == std::string::npos) {
@@ -91,7 +106,7 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
                 if (nbVertices == 4) isFaceQuad = true;
             }
                 // If the face definition is of the form "f v1// v2// v3// v4//"
-            else if (found2 == 0 && static_cast<int>(line.substr(found1+found2+1).find(' ') == 0)) {
+            else if (found2 == 0 && buffer.substr(found1+found2+1).find(' ') == 0) {
                 int nbVertices = std::sscanf(buffer.c_str(), "%*s %d// %d// %d// %d//", &id1, &id2, &id3, &id4);
                 if (nbVertices == 4) isFaceQuad = true;
             }
@@ -108,10 +123,10 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
                 nId4 = -1;
 
                 //get the part of the string until the second index
-                tmp = line.substr(found1+1);
-                found2 = static_cast<int>(tmp.find(' '));
+                tmp = buffer.substr(found1+1);
+                found2 = tmp.find(' ');
                 tmp = tmp.substr(0,found2);
-                found2 = static_cast<int>(tmp.find('/'));
+                found2 = tmp.find('/');
 
                 // If the face definition is of the form "f vert1/textcoord1 vert2/textcoord2 ..."
                 if(found2 == std::string::npos) {
@@ -124,8 +139,8 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
                     if (isFaceQuad) uvsIndices.emplace_back(tId4-1);
                 }
                 else {
-                    tmp = line.substr(found1+1);
-                    found2 = static_cast<int>(tmp.find('/'));
+                    tmp = buffer.substr(found1+1);
+                    found2 = tmp.find('/');
 
                     // If the face definition is of the form "f vert1//normal1 vert2//normal2 ..."
                     if(found2 == 0) {
@@ -175,6 +190,10 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
     std::vector<Vector3<float>> meshNormals;
     std::vector<Vector2<float>> meshUVs;
 
+    // avoid reallocations
+    meshVertices.reserve(verticesIndices.size());
+    meshNormals.reserve(normalsIndices.size());
+
     // We cannot load mesh with several parts for the moment
     unsigned int meshPart = 0;
 
@@ -221,10 +240,10 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
         }
 
         // Get the current vertex IDs
-        unsigned int i1 = newVerticesIndices[0];
-        unsigned int i2 = newVerticesIndices[1];
-        unsigned int i3 = newVerticesIndices[2];
-        unsigned int i4 = newVerticesIndices[3];
+        size_t i1 = newVerticesIndices[0];
+        size_t i2 = newVerticesIndices[1];
+        size_t i3 = newVerticesIndices[2];
+        size_t i4 = newVerticesIndices[3];
 
         // If the current vertex not in a quad (it is part of a triangle)
         if (!isQuad[j]) {
@@ -249,7 +268,7 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
 
             float a1 = v13.dot(v12);
             float a2 = v13.dot(v14);
-            if((a1 >= 0 && a2 <= 0) || (a1 <= 0 && a2 >= 0)) {
+            if((a1 >= 0.0f && a2 <= 0.0f) || (a1 <= 0.0f && a2 >= 0.0f)) {
                 meshIndices[meshPart].emplace_back(i1);
                 meshIndices[meshPart].emplace_back(i2);
                 meshIndices[meshPart].emplace_back(i3);
@@ -278,4 +297,12 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
     meshContainer.setVertices(meshVertices);
     meshContainer.setNormals(meshNormals);
     meshContainer.setUVs(meshUVs);
+
+    std::shared_ptr<meshData> newMesh = std::make_shared<meshData>();
+    newMesh->indices = meshIndices;
+    newMesh->vertices = meshVertices;
+    newMesh->normals = meshNormals;
+    newMesh->uvs = meshUVs;
+
+    meshCache[filename] = newMesh;
 }

@@ -39,8 +39,6 @@ public:
 
     void normalize();
 
-    [[nodiscard]] Quaternion getInverse() const;
-
     // Return the orientation matrix corresponding to this quaternion
     [[nodiscard]] Matrix3<double> getMatrix() const;
 
@@ -50,7 +48,7 @@ public:
     // Return a quaternion constructed from Euler angles (in radians)
     static Quaternion fromEulerAngles(double roll, double pitch, double yaw);
 
-    Vector3<double> eulerAngles() const;
+    [[nodiscard]] Vector3<double> eulerAngles() const;
 
     // Dot product between two quaternions
     [[nodiscard]] double dot(const Quaternion& quaternion) const;

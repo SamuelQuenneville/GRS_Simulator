@@ -77,7 +77,7 @@ Vector3<double> Tether::m_calcTensionForce() {
     Vector3<double> forceSpring = (m_properties.rigidity * tetherDeformation * tetherNormalize) + (m_properties.damping * m_relativeSpeed.dot(tetherNormalize) * tetherNormalize);
 
     const double tension = tetherNormalize.dot(forceSpring);
-    if(tension<0) {
+    if (tension < 0.0) {
         forceSpring = Vector3<double>::zeros();
     }
 

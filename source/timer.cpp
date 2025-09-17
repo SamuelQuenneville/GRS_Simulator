@@ -65,6 +65,6 @@ void Timer::nextStep(const std::chrono::duration<double> timeStep) {
     m_accumulator -= timeStep;
 }
 
-double Timer::computeInterpolationFactor(const std::chrono::duration<double> timeStep) {
+double Timer::computeInterpolationFactor(const std::chrono::duration<double> timeStep) const {
     return m_accumulator.count() / timeStep.count();
 }

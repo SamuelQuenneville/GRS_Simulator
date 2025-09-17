@@ -41,11 +41,11 @@ public:
 
     // Set a vector 2 uniform value to this shader (be careful if the uniform is not
     // used in the shader, the compiler will remove it, then when you will try to set it, an assert will occur)
-    void setVector2Uniform(const std::string& variableName, const Vector2<double>& v, bool errorIfMissing = true) const;
+    void setVector2Uniform(const std::string& variableName, const Vector2<float>& v, bool errorIfMissing = true) const;
 
     // Set a vector 3 uniform value to this shader (be careful if the uniform is not
     // used in the shader, the compiler will remove it, then when you will try to set it, an assert will occur)
-    void setVector3Uniform(const std::string& variableName, const Vector3<double>& v, bool errorIfMissing = true) const;
+    void setVector3Uniform(const std::string& variableName, const Vector3<float>& v, bool errorIfMissing = true) const;
 
     // Set a vector 4 uniform value to this shader (be careful if the uniform is not
     // used in the shader, the compiler will remove it, then when you will try to set it, an assert will occur)

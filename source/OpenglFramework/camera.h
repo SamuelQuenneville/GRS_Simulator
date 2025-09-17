@@ -42,19 +42,14 @@ protected:
 
     float m_sceneRadius;
 
-    // Near plane
     float m_nearPlane;
-
-    // Far plane
     float m_farPlane;
 
     uint32_t m_width;
     uint32_t m_height;
 
-    // Projection matrix
     Matrix4<double> m_projectionMatrix;
 
-    // Update the projection matrix
     void m_updateProjectionMatrix();
 
 };

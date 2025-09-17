@@ -154,14 +154,14 @@ void Scene::render() {
     m_phongShader.setMatrix4x4Uniform("projectionMatrix", m_camera.getProjectionMatrix());
     m_phongShader.setMatrix4x4Uniform("shadowMapLight0ProjectionMatrix", m_shadowMapBiasMatrix * shadowMapProjMatrix[0]);
     m_phongShader.setMatrix4x4Uniform("worldToLight0CameraMatrix", worldToLightCameraMatrix[0]);
-    m_phongShader.setVector3Uniform("light0PosCameraSpace", worldToCameraMatrix * m_light0.getOrigin());
-    m_phongShader.setVector3Uniform("light1PosCameraSpace", worldToCameraMatrix * m_light1.getOrigin());
+    m_phongShader.setVector3Uniform("light0PosCameraSpace", cast<float>(worldToCameraMatrix * m_light0.getOrigin()));
+    m_phongShader.setVector3Uniform("light1PosCameraSpace", cast<float>(worldToCameraMatrix * m_light1.getOrigin()));
     m_phongShader.setVector3Uniform("lightAmbientColor", {0.1f, 0.1f, 0.1f});
     m_phongShader.setVector3Uniform("light0DiffuseColor", {m_light0.getDiffuseColor().r, m_light0.getDiffuseColor().g, m_light0.getDiffuseColor().b});
     m_phongShader.setVector3Uniform("light1DiffuseColor", {m_light1.getDiffuseColor().r, m_light1.getDiffuseColor().g, m_light1.getDiffuseColor().b});
     m_phongShader.setIntUniform("shadowMapSampler0", textureUnits[0]);
     m_phongShader.setIntUniform("isShadowEnabled", true);
-    m_phongShader.setVector2Uniform("shadowMapDimension", {static_cast<double>(SHADOWMAP_WIDTH), static_cast<double>(SHADOWMAP_HEIGHT)});
+    m_phongShader.setVector2Uniform("shadowMapDimension", {static_cast<float>(SHADOWMAP_WIDTH), static_cast<float>(SHADOWMAP_HEIGHT)});
     m_phongShader.unbind();
 
     // Set the variables of the color shader
@@ -221,7 +221,6 @@ void Scene::reset() {
 void Scene::destroy() {
     m_elapsedTime = std::chrono::seconds ::zero();
 }
-
 
 bool Scene::mouseButtonEvent(int button, const bool down, int mods, const double mousePosX, const double mousePosY) {
     if (down) {
@@ -354,7 +353,7 @@ void Scene::m_translate(const int xMouse, const int yMouse) {
 }
 
 void Scene::m_rotate(const int xMouse, const int yMouse) {
-    float deltaHorizRotationAngle = static_cast<float>(m_lastMouseX - xMouse) / static_cast<float>(m_windowWidth) * M_PI;
+    const float deltaHorizRotationAngle = static_cast<float>(m_lastMouseX - xMouse) / static_cast<float>(m_windowWidth) * M_PI;
     float deltaVertRotationAngle  = static_cast<float>(m_lastMouseY - yMouse) / static_cast<float>(m_windowHeight) * M_PI;
 
     const double newVerticalAngle = m_currentCameraVerticalAngle + deltaVertRotationAngle;

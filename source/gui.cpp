@@ -64,6 +64,7 @@ void Gui::update() const {
         const auto pos = m_currentFrameDisplayed->originNode().position();
         const auto vel = m_currentFrameDisplayed->originNode().velocity();
         const auto ori = m_currentFrameDisplayed->transform().getOrientation().eulerAngles() * RAD_TO_DEG;
+
         const auto force = m_currentFrameDisplayed->originNode().force();
 
         m_framePositionDisplayed->set_caption(formatVec3("Position    (m)", pos));

@@ -113,7 +113,7 @@ void Aircraft::updateTransform(const double interpolationFactor) {
 }
 
 // Create the Vertex Buffer Objects used to render with OpenGL.
-/// We create two VBOs (one for vertices and one for indices)
+// We create two VBOs (one for vertices and one for indices)
 void Aircraft::m_createVertexBufferAndArrayObject() {
 
     // Create the VBO for the vertices data

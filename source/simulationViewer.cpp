@@ -8,8 +8,6 @@
 
 #include "simulationViewer.h"
 
-#include "Scenes/twoAircraftY.h"
-
 SimulationViewer::SimulationViewer(programArguments& args)
     : m_programArgs(args)
     , m_isInitialized(false)

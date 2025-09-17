@@ -32,9 +32,6 @@ public:
     // Get the OpenGL matrix of the transform
     void getOpenGLMatrix(double* openglMatrix) const;
 
-    // Return the inverse of the transform
-    [[nodiscard]] Transform getInverse() const;
-
     // Return an interpolated transform
     static Transform interpolateTransforms(const Transform& oldTransform, const Transform& newTransform, double interpolationFactor);
 

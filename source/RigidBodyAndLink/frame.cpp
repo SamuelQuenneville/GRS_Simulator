@@ -5,7 +5,6 @@
  * Université de Sherbrooke
  * Createk Innovation Lab
  */
-#include <utility>
 
 #include "frame.h"
 

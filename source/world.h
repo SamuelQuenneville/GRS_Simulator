@@ -40,9 +40,9 @@ public:
 
     simulationConfiguration simulationConfiguration{};
 
-    void update();
+    void update() const;
     void readConfigurationFile(const std::string& fileName);
-    Logger& logger();
+    [[nodiscard]] Logger& logger() const;
 
     void createSystem();
     void resetSystem();
@@ -50,12 +50,12 @@ public:
 
     [[nodiscard]] std::vector<Frame*> collectFrames() const;
 
-    void setPauseTimerCallback(std::function<void()> callback);
+    void setPauseTimerCallback(std::function<void()> callback) const;
 
     std::map<std::string, systemType> systemTypeStringToEnum;
     [[nodiscard]] systemType getSystemType() const;
     [[nodiscard]] int getSystemNumberOfUav() const;
-    System* system();
+    [[nodiscard]] System* system() const;
 
     static std::string getExecutablePath();
 

@@ -14,6 +14,8 @@
 #include "Control/lowLevelController.h"
 #include "powertrain.h"
 
+#define MAX_SERVO_CHANNELS 16
+
 class FixedWing final : public RigidBody {
 
 public:
@@ -24,7 +26,7 @@ public:
     [[nodiscard]] int getId() const;
 
     void update(double dt) override;
-    void updateSitl(double dt, const std::array<uint16_t, 16>& pwm, bool shouldMove);
+    void updateSitl(double dt, const std::array<uint16_t, MAX_SERVO_CHANNELS>& pwm, bool shouldMove);
 
     [[nodiscard]] fixedWingStates getStates() const {return m_states;};
 
@@ -49,7 +51,7 @@ public:
 
     void updateRotationMatrixCBodyEarth();
 
-    enum controlAxe {
+    enum controlAxis {
         AILERON,
         ELEVATOR,
         RUDDER,
@@ -74,7 +76,7 @@ private:
 
     bool m_launchTriggered = false;
     bool m_inLaunch = false;
-    float m_launcherAccel = 0.0;
+    float m_launcherAccel = 0.0f;
 
     bool m_flightLaunchTriggered = false;
     bool m_inFlightLaunch = false;
@@ -91,11 +93,10 @@ private:
     [[nodiscard]] Vector3<double> m_earthToBody(const Vector3<double>& earthVector) const;
     [[nodiscard]] Vector3<double> m_bodyToEarth(const Vector3<double>& bodyVector) const;
 
-    //fixedWingStates m_calcStatesDerivatives(Vector3<double> forceAeroBody, Vector3<double> momentAeroBody, const Vector3<double>& externalForceEarth);
     fixedWingStates m_calcStatesDerivatives();
     void m_eulerIntegration(const fixedWingStates& derivatives, double dt);
 
-    [[nodiscard]] double m_pwmToControl(controlAxe control, uint16_t pwm) const;
+    [[nodiscard]] double m_pwmToControl(controlAxis control, uint16_t pwm) const;
     void m_updateRpmSensor(double dt, double throttleInput);
 
     void m_writeLog();

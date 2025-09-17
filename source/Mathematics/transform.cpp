@@ -54,11 +54,6 @@ void Transform::getOpenGLMatrix(double* openglMatrix) const {
     openglMatrix[15] = 1.0;
 }
 
-Transform Transform::getInverse() const {
-    const Quaternion& invQuaternion = m_orientation.getInverse();
-    return {invQuaternion * (-m_position), invQuaternion};
-}
-
 Transform Transform::interpolateTransforms(const Transform& oldTransform, const Transform& newTransform, const double interpolationFactor) {
     Vector3 interPosition = oldTransform.m_position * (1.0 - interpolationFactor) + newTransform.m_position * interpolationFactor;
     Quaternion interOrientation = Quaternion::slerp(oldTransform.m_orientation, newTransform.m_orientation,interpolationFactor);

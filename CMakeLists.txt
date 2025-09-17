@@ -18,8 +18,6 @@ set(GRS_COMMUNICATION
 set(GRS_CONFIGURATION
         source/Configuration/configurationParser.cpp
         source/Configuration/configurationParser.h
-        source/Configuration/shellScript.cpp
-        source/Configuration/shellScript.h
 )
 
 set(GRS_CONTROL

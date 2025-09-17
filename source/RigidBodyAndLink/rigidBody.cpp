@@ -35,7 +35,7 @@ void RigidBody::deleteConnection(Node& frameNode, Node& node) {
     linkEndConnections.erase(
         std::remove_if(
             linkEndConnections.begin(), linkEndConnections.end(),
-            [&node](const Node *n) {
+            [&node](const Node* n) {
                 return node.getId() == n->getId();
             }),
         linkEndConnections.end());

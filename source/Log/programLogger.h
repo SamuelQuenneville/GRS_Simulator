@@ -43,8 +43,6 @@ public:
 private:
     ProgramLogger() = default;
     ~ProgramLogger();
-    ProgramLogger(const ProgramLogger&) = delete;
-    ProgramLogger& operator=(const ProgramLogger&) = delete;
 
     std::ofstream m_logFile;
     std::mutex m_logMutex;

@@ -41,8 +41,8 @@ FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWin
     propulsionReference.setLoadCallback([this](const Frame& f) {
         // TODO Moment?
 
-        f.setForce({m_inputs.deltaThrust,0,0});
-        f.setMoment({0,0,0});
+        f.setForce({m_inputs.deltaThrust,0.0,0.0});
+        f.setMoment({0.0,0.0,0.0});
     });
 
     tetherAttach.setLoadCallback([this](const Frame& f) {
@@ -54,7 +54,7 @@ FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWin
         }
 
         f.setForce(m_earthToBody(tetherForces));
-        f.setMoment({0,0,0});
+        f.setMoment({0.0,0.0,0.0});
     });
 }
 
@@ -94,7 +94,7 @@ void FixedWing::update(const double dt) {
     m_writeLog();
 }
 
-void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16>& pwm, const bool shouldMove) {
+void FixedWing::updateSitl(const double dt, const std::array<uint16_t, MAX_SERVO_CHANNELS>& pwm, const bool shouldMove) {
 
     // Detect SITL mode once
     if (!m_sitl) {
@@ -113,7 +113,7 @@ void FixedWing::updateSitl(const double dt, const std::array<uint16_t, 16>& pwm,
     };
 
     // All-zero input guard (fail-safe or inactive)
-    if (pwm[0] == 0 || inputs.deltaThrust == 0) {
+    if (pwm[0] == 0 || inputs.deltaThrust == 0.0) {
         inputs = {0.0,0.0,0.0,0.0};
     }
 
@@ -162,14 +162,13 @@ Vector3<double> FixedWing::m_calcForceAeroBodyFrame(const double airspeed, const
     const double CD = m_properties.CD_0 + (CL*CL) / (M_PI * m_properties.oswaldEfficiency * m_properties.aspectRatio);
 
     // stability vs body frame
-    const double CX = -CD * std::cos(alphaRadian) + CL * std::sin(alphaRadian);
-    const double CZ = -CD * std::sin(alphaRadian) - CL * std::cos(alphaRadian);
+    const double cosAlpha = std::cos(alphaRadian);
+    const double sinAlpha = std::sin(alphaRadian);
+    const double CX = -CD * cosAlpha + CL * sinAlpha;
+    const double CZ = -CD * sinAlpha - CL * cosAlpha;
 
     // q_bar
     const double qBarSurface = 0.5 * m_physics.airDensity * airspeed * airspeed * m_properties.wingSurface;
-
-    // 1 / 2*Va
-    const double oneOverTwoVa = 1.0 / (2.0 * airspeed);
 
     // del_commands
     const double delElevator = m_inputs.deltaElevator;
@@ -179,6 +178,8 @@ Vector3<double> FixedWing::m_calcForceAeroBodyFrame(const double airspeed, const
     double Fy = 0.0;
     double Fz = 0.0;
     if (qBarSurface > 0.0) {
+        const double oneOverTwoVa = 0.5 / airspeed;
+
         Fx += qBarSurface * (CX + m_properties.Cx_q * m_properties.wingChord * oneOverTwoVa * m_states.q + m_properties.Cx_DELTA_ELE * delElevator);
         Fy += qBarSurface * (m_properties.Cy_0 + m_properties.Cy_BETA * betaRadian + m_properties.Cy_p * m_properties.wingSpan * oneOverTwoVa * m_states.p + m_properties.Cy_r * m_properties.wingSpan * oneOverTwoVa * m_states.r + m_properties.Cy_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cy_DELTA_RUD * m_inputs.deltaRudder);
         Fz += qBarSurface * (CZ + m_properties.Cz_q * m_properties.wingChord * oneOverTwoVa * m_states.q + m_properties.Cz_DELTA_ELE * delElevator);
@@ -203,9 +204,6 @@ Vector3<double> FixedWing::m_calcMomentAeroBodyFrame(const double airspeed, cons
     // q_bar
     const double qBarSurface = 0.5 * m_physics.airDensity * airspeed * airspeed * m_properties.wingSurface;
 
-    // 1 / 2*Va
-    const double oneOverTwoVa = 1.0 / (2.0 * airspeed);
-
     // del_commands
     const double delElevator = m_inputs.deltaElevator;
 
@@ -214,6 +212,8 @@ Vector3<double> FixedWing::m_calcMomentAeroBodyFrame(const double airspeed, cons
     double My = 0.0;
     double Mz = 0.0;
     if (qBarSurface > 0.0) {
+        const double oneOverTwoVa = 0.5 / airspeed;
+
         Mx += qBarSurface * m_properties.wingSpan * (m_properties.Cl_0 + m_properties.Cl_BETA * betaRadian + m_properties.Cl_p * m_properties.wingSpan * oneOverTwoVa * m_states.p + m_properties.Cl_r * m_properties.wingSpan * oneOverTwoVa * m_states.r + m_properties.Cl_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cl_DELTA_RUD * m_inputs.deltaRudder);
         My += qBarSurface * m_properties.wingChord * (m_properties.Cm_0 + m_properties.Cm_ALPHA * delAlpha + m_properties.Cm_q * m_properties.wingChord * oneOverTwoVa * m_states.q + m_properties.Cm_DELTA_ELE * delElevator);
         Mz += qBarSurface * m_properties.wingSpan * (m_properties.Cn_0 + m_properties.Cn_BETA * betaRadian + m_properties.Cn_p * m_properties.wingSpan * oneOverTwoVa * m_states.p + m_properties.Cn_r * m_properties.wingSpan * oneOverTwoVa * m_states.r + m_properties.Cn_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cn_DELTA_RUD * m_inputs.deltaRudder);
@@ -382,13 +382,13 @@ void FixedWing::setInitialStates(initialStates& states) {
     setAttitude({m_states.phi, m_states.theta, m_states.psi});
     updateRotationMatrixCBodyEarth();
 
-    updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0,0,0});
+    updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0.0,0.0,0.0});
 
     constexpr double meshRollOffset = -M_PI / 2.0;
     setCenterOfMassTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi + meshRollOffset,m_states.theta,m_states.psi)));
 }
 
-double FixedWing::m_pwmToControl(const controlAxe control, const uint16_t pwm) const {
+double FixedWing::m_pwmToControl(const controlAxis control, const uint16_t pwm) const {
 
     constexpr double PWM_MIN  = 1100;
     constexpr double PWM_MEAN = 1500;

@@ -26,7 +26,7 @@
 #define RAD_TO_DEG (180.0f / M_PI)
 
 #ifdef M_PI_2
-# undef M_PI_2
+#undef M_PI_2
 #endif
 #define M_2PI (M_PI * 2)
 

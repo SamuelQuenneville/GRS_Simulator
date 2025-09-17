@@ -65,7 +65,7 @@ void InterfaceJSON::receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHA
                     m_instances[i].received_this_step = true;
 
                     // Store valid servo data
-                    for (int servo = 0; servo < MAX_SERVO_CHANNELS; servo++) {
+                    for (size_t servo = 0; servo < MAX_SERVO_CHANNELS; servo++) {
                         pwm[servo] = last_pkt.pwm[servo];
                     }
                     receivedPWM[i] = pwm;

@@ -133,10 +133,6 @@ void Quaternion::normalize() {
     }
 }
 
-Quaternion Quaternion::getInverse() const {
-    return {-x, -y, -z, w};
-}
-
 Matrix3<double> Quaternion::getMatrix() const {
 
     const double nQ = x*x + y*y + z*z + w*w;
@@ -175,34 +171,42 @@ Quaternion Quaternion::fromEulerAngles(const double roll, const double pitch, co
     quaternion.m_initWithEulerAngles(roll, pitch, yaw);
 
     // NED to y up
-    const Quaternion correction(0.707,0.0,0.0,0.707);
+    const double c = std::cos(M_PI / 4.0);
+    const Quaternion correction(c,0.0,0.0,c);
 
     return correction * quaternion;
 }
 
 Vector3<double> Quaternion::eulerAngles() const {
-    Vector3<double> angles;
 
-    // roll (x-axis rotation)
-    double sinr_cosp = 2.0 * (w * x + y * z);
-    double cosr_cosp = 1.0 - 2.0 * (x * x + y * y);
-    angles.setX(std::atan2(sinr_cosp, cosr_cosp));
+    // y up to NED
+    const double c = std::cos(M_PI / 4.0);
+    const Quaternion correction(-c,0.0,0.0,c);
+    const Quaternion q = correction * (*this);
 
-    // pitch (y-axis rotation)
-    double sinp = 2.0 * (w * y - z * x);
-    if (std::fabs(sinp) >= 1.0)
-        angles.setY(std::copysign(M_PI / 2.0, sinp)); // use 90 degrees if out of range
-    else
-        angles.setY(std::asin(sinp));
+    // Rotation matrix
+    //     | R11  R12  R13 |   | 1 - 2*(y*y + z*z)    2*(x*y - w*z)      2*(x*z + w*y)   |
+    // R = | R21  R22  R23 | = |   2*(x*y + w*z)    1 - 2*(x*x + z*z)    2*(y*z - w*x)   |
+    //     | R31  R32  R33 |   |   2*(x*z - w*y)      2*(y*z + w*x)    1 - 2*(x*x + y*y) |
 
-    // yaw (z-axis rotation)
-    double siny_cosp = 2.0 * (w * z + x * y);
-    double cosy_cosp = 1.0 - 2.0 * (y * y + z * z);
-    angles.setZ(std::atan2(siny_cosp, cosy_cosp));
+    const double R32 = 2.0 * (q.y * q.z + q.w * q.x);
+    const double R33 = 1.0 - 2.0 * (q.x * q.x + q.y * q.y);
+    double roll = std::atan2(R32, R33);
 
-    return angles;
+    const double negativeR31 = 2.0 * (q.w * q.y - q.z * q.x);
+    double pitch;
+    if (std::fabs(negativeR31) >= 1.0) {
+        pitch = std::copysign(M_PI / 2.0, negativeR31);
+    } else {
+        pitch = std::asin(negativeR31);
+    }
+
+    const double R21 = 2.0 * (q.x * q.y + q.w * q.z);
+    const double R11 = 1.0 - 2.0 * (q.y * q.y + q.z * q.z);
+    double yaw = std::atan2(R21, R11);
+
+    return {roll + M_PI/2.0, pitch, yaw};
 }
-
 
 double Quaternion::dot(const Quaternion& quaternion) const {
     return (x*quaternion.x + y*quaternion.y + z*quaternion.z + w*quaternion.w);
@@ -225,8 +229,7 @@ Quaternion Quaternion::slerp(const Quaternion& quaternion1, const Quaternion& qu
     // Because of precision, if cos(theta) is nearly 1,
     // therefore theta is nearly 0 and we can write
     // sin((1-t)*theta) as (1-t) and sin(t*theta) as t
-    constexpr double epsilon = 0.00001;
-    if(1-cosineTheta < epsilon) {
+    if(1-cosineTheta < std::numeric_limits<double>::epsilon()) {
         return quaternion1 * (1.0-t) + quaternion2 * (t * invert);
     }
 

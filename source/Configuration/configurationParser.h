@@ -12,7 +12,6 @@
 #include <string>
 
 #include "yaml-cpp/yaml.h"
-
 #include "Definitions/yamlCustomStructure.h"
 
 class ConfigurationParser {

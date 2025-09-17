@@ -34,7 +34,7 @@ public:
     void setTarget(const target& newTarget) {m_target = newTarget;};
     target& getTarget() {return m_target;};
 
-    void setControllerGains(const ctrlGains& newGains) {m_ctrlGains = newGains;};
+    void setControllerGains(const ctrlGains& newGains) const {m_ctrlGains = newGains;};
 
     void setPauseTimerCallback(std::function<void()> callback);
 

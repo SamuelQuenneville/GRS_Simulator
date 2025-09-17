@@ -19,7 +19,6 @@
 #include "Mathematics/matrix3.h"
 #include "Mathematics/transform.h"
 #include "frame.h"
-
 #include "Log/logger.h"
 
 class RigidBody {

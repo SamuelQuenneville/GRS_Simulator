@@ -20,7 +20,7 @@ World::World(programArguments& args)
 
 }
 
-void World::update() {
+void World::update() const {
 
     if (m_programArgs.sitlMode) {
         m_system->updateSitl(simulationConfiguration.dt.count());
@@ -33,13 +33,13 @@ void World::update() {
 
 void World::readConfigurationFile(const std::string& fileName) {
     YAML::Node nodeConfiguration = YAML::LoadFile(fileName);
-    simulationParameters simParams = ConfigurationParser::parseSimulationParameters(nodeConfiguration);
+    const simulationParameters simParams = ConfigurationParser::parseSimulationParameters(nodeConfiguration);
     m_systemConfiguration = ConfigurationParser::parseSystemConfiguration(nodeConfiguration);
 
     m_logDirectory = simParams.logFilesDirectory;
     m_logger = std::make_unique<Logger>(m_programArgs.loggingEnabled, m_logDirectory);
 
-    std::chrono::duration<double> timeStep(1.0 / m_systemConfiguration.llcRate);
+    const std::chrono::duration<double> timeStep(1.0 / m_systemConfiguration.llcRate);
     simulationConfiguration = {simParams.fixedDuration, simParams.duration, timeStep};
 
     m_systemProperties.fixedWing = ConfigurationParser::parseFixedWingProperties(simParams.aircraftPropertiesFileDirectory);
@@ -72,7 +72,7 @@ void World::readConfigurationFile(const std::string& fileName) {
     physics.updateWind({wind[0], wind[1], wind[2]});
 }
 
-Logger& World::logger() {
+Logger& World::logger() const {
     return *m_logger;
 }
 
@@ -164,7 +164,7 @@ std::vector<Frame*> World::collectFrames() const {
     return frames;
 }
 
-void World::setPauseTimerCallback(std::function<void()> callback) {
+void World::setPauseTimerCallback(std::function<void()> callback) const {
     m_system->setPauseTimerCallback(std::move(callback));
 }
 
@@ -176,7 +176,7 @@ int World::getSystemNumberOfUav() const {
     return m_systemConfiguration.numberOfUav;
 }
 
-System* World::system() {
+System* World::system() const {
     return m_system.get();
 }
 
