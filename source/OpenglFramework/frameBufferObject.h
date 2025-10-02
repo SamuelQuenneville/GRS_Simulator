@@ -18,9 +18,9 @@ public:
     FrameBufferObject();
     ~FrameBufferObject();
 
-    bool create(unsigned int width, unsigned int height, bool needRenderBuffer = true);
+    bool create(GLsizei width, GLsizei height, bool needRenderBuffer = true);
 
-    void attachTexture(unsigned int position, unsigned int textureId) const;
+    void attachTexture(GLenum position, GLuint textureId) const;
 
     void bind() const;
     void unbind() const;
@@ -28,8 +28,8 @@ public:
     void destroy();
 
 private:
-    unsigned int m_frameBufferId;
-    unsigned int m_renderBufferId;
+    GLuint m_frameBufferId;
+    GLuint m_renderBufferId;
 };
 
 

@@ -9,8 +9,6 @@
 #ifndef GRS_SIMULATOR_TEXTURE2D_H
 #define GRS_SIMULATOR_TEXTURE2D_H
 
-#include <string>
-#include <cassert>
 #include <nanogui/opengl.h>
 
 class Texture2D {
@@ -32,10 +30,10 @@ public:
     void unbind() const;
 
     // Get the OpenGL texture ID
-    [[nodiscard]] unsigned int getID() const;
+    [[nodiscard]] GLuint getID() const;
 
-    [[nodiscard]] unsigned int getUnit() const;
-    void setUnit(unsigned int unit);
+    [[nodiscard]] GLuint getUnit() const;
+    void setUnit(GLuint unit);
 
 private:
     GLuint m_id;

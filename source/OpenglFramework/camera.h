@@ -17,7 +17,7 @@ public:
     Camera();
     ~Camera() override = default;
 
-    [[nodiscard]] const Matrix4<double>& getProjectionMatrix() const;
+    [[nodiscard]] const grs::Matrix4d& getProjectionMatrix() const;
 
     void setDimensions(uint32_t width, uint32_t height);
 
@@ -32,7 +32,7 @@ public:
     // Set the zoom of the camera (a fraction between 0 and 1)
     void setZoom(double fraction);
 
-    void translateCamera(float dx, float dy, const Vector3<double>& worldPoint);
+    void translateCamera(float dx, float dy, const grs::Vec3d& worldPoint);
 
     [[nodiscard]] uint32_t getWidth() const;
     [[nodiscard]] uint32_t getHeight() const;
@@ -48,7 +48,7 @@ protected:
     uint32_t m_width;
     uint32_t m_height;
 
-    Matrix4<double> m_projectionMatrix;
+    grs::Matrix4d m_projectionMatrix{};
 
     void m_updateProjectionMatrix();
 

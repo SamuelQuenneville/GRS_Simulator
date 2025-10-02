@@ -87,11 +87,11 @@ private:
     std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> m_controller = nullptr;
 
     [[nodiscard]] std::tuple<double, double, double> m_angleOfAttackSideSlip() const;
-    [[nodiscard]] Vector3<double> m_calcForceAeroBodyFrame(double airspeed, double alphaRadian, double betaRadian) const;
-    [[nodiscard]] Vector3<double> m_calcMomentAeroBodyFrame(double airspeed, double alphaRadian, double betaRadian) const;
+    [[nodiscard]] grs::Vec3d m_calcForceAeroBodyFrame(double airspeed, double alphaRadian, double betaRadian) const;
+    [[nodiscard]] grs::Vec3d m_calcMomentAeroBodyFrame(double airspeed, double alphaRadian, double betaRadian) const;
 
-    [[nodiscard]] Vector3<double> m_earthToBody(const Vector3<double>& earthVector) const;
-    [[nodiscard]] Vector3<double> m_bodyToEarth(const Vector3<double>& bodyVector) const;
+    [[nodiscard]] grs::Vec3d m_earthToBody(const grs::Vec3d& earthVector) const;
+    [[nodiscard]] grs::Vec3d m_bodyToEarth(const grs::Vec3d& bodyVector) const;
 
     fixedWingStates m_calcStatesDerivatives();
     void m_eulerIntegration(const fixedWingStates& derivatives, double dt);

@@ -8,7 +8,7 @@
 
 #include "vertexBufferObject.h"
 
-VertexBufferObject::VertexBufferObject(GLenum targetData)
+VertexBufferObject::VertexBufferObject(const GLenum targetData)
     : m_vertexBufferId(0)
     , m_targetData(targetData)
 {

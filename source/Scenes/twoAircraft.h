@@ -27,7 +27,7 @@ public:
     void reset() override;
     void destroy() override;
 
-    void renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;
+    void renderSinglePass(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) override;
 
     void setPauseTimerCallback(std::function<void()> callback) override;
 

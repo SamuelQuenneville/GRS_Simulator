@@ -15,8 +15,6 @@
 #define GRS_SIMULATOR_SLEWLIMITER_H
 
 #pragma once
-
-#include <cstdint>
 #include <chrono>
 
 #include "Control/lowPassFilter.h"

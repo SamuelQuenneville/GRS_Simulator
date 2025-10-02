@@ -1,0 +1,456 @@
+/*
+ * GRS Simulation Environment
+ * Samuel Quenneville (samuel.quenneville@usherbrooke.ca)
+ *
+ * Université de Sherbrooke
+ * Createk Innovation Lab
+ */
+
+#ifndef GRS_SIMULATOR_MATRIX_H
+#define GRS_SIMULATOR_MATRIX_H
+
+#pragma once
+
+#include "vector.h"
+
+namespace grs {
+
+template <typename T, std::size_t N>
+struct Matrix {
+    static_assert(N >= 2 && N <= 4, "Matrix only supports 2x2, 3x3, 4x4");
+    static_assert(std::is_arithmetic_v<T>, "Matrix scalar type must be arithmetic");
+
+    std::array<T, N*N> data{};
+
+    // Constructor from initializer list (row-major order)
+    constexpr Matrix(std::initializer_list<T> values) {
+        std::size_t count = std::min(values.size(), data.size());
+        std::copy_n(values.begin(), count, data.begin());
+        if (count < data.size()) {
+            std::fill(data.begin() + count, data.end(), T{});
+        }
+    }
+
+    constexpr Matrix() noexcept {
+        data.fill(T{}); // zero initialize
+    }
+
+    constexpr T& operator()(const std::size_t r, const std::size_t c) noexcept { return data[r*N + c]; }
+    constexpr const T& operator()(const std::size_t r, const std::size_t c) const noexcept { return data[r*N + c]; }
+
+    [[nodiscard]] static constexpr std::size_t size() noexcept { return N; }
+
+    [[nodiscard]] static constexpr Matrix diagonal(const std::array<T,N>& values) noexcept {
+        Matrix R{};
+        for (std::size_t i = 0; i < N; ++i) {
+            R(i,i) = values[i];
+        }
+        return R;
+    }
+
+    [[nodiscard]] static constexpr Matrix identity() noexcept {
+        Matrix R{};
+        for (std::size_t i = 0; i < N; ++i) {
+            R(i,i) = T(1);
+        }
+        return R;
+    }
+
+    // determinant
+    [[nodiscard]] constexpr T determinant() const noexcept {
+        if constexpr (N == 2) {
+            return (*this)(0,0)*(*this)(1,1) - (*this)(0,1)*(*this)(1,0);
+        } else if constexpr (N == 3) {
+            return
+                (*this)(0,0)*((*this)(1,1)*(*this)(2,2) - (*this)(1,2)*(*this)(2,1)) -
+                (*this)(0,1)*((*this)(1,0)*(*this)(2,2) - (*this)(1,2)*(*this)(2,0)) +
+                (*this)(0,2)*((*this)(1,0)*(*this)(2,1) - (*this)(1,1)*(*this)(2,0));
+        } else {
+            static_assert(N == 2 || N == 3, "Determinant not implemented for this size");
+            return T{}; // never executed
+        }
+    }
+
+    // trace
+    [[nodiscard]] constexpr T trace() const noexcept {
+        T tr = T(0);
+        for (std::size_t i = 0; i < N; i++) {
+            tr += (*this)(i,i);
+        }
+        return tr;
+    }
+
+    // inverse
+    [[nodiscard]] constexpr Matrix inverse() const {
+        if constexpr (N == 2) {
+            T det = determinant();
+            if (std::abs(det) < T(1e-9)) throw std::runtime_error("Singular matrix");
+            Matrix<T,2> R{};
+            R(0,0) =  (*this)(1,1) / det;
+            R(0,1) = -(*this)(0,1) / det;
+            R(1,0) = -(*this)(1,0) / det;
+            R(1,1) =  (*this)(0,0) / det;
+            return R;
+        } else if constexpr (N == 3) {
+            T det = determinant();
+            if (std::abs(det) < T(1e-9)) throw std::runtime_error("Singular matrix");
+            Matrix<T,3> R{};
+            R(0,0) =  ((*this)(1,1)*(*this)(2,2) - (*this)(1,2)*(*this)(2,1)) / det;
+            R(0,1) = -((*this)(0,1)*(*this)(2,2) - (*this)(0,2)*(*this)(2,1)) / det;
+            R(0,2) =  ((*this)(0,1)*(*this)(1,2) - (*this)(0,2)*(*this)(1,1)) / det;
+
+            R(1,0) = -((*this)(1,0)*(*this)(2,2) - (*this)(1,2)*(*this)(2,0)) / det;
+            R(1,1) =  ((*this)(0,0)*(*this)(2,2) - (*this)(0,2)*(*this)(2,0)) / det;
+            R(1,2) = -((*this)(0,0)*(*this)(1,2) - (*this)(0,2)*(*this)(1,0)) / det;
+
+            R(2,0) =  ((*this)(1,0)*(*this)(2,1) - (*this)(1,1)*(*this)(2,0)) / det;
+            R(2,1) = -((*this)(0,0)*(*this)(2,1) - (*this)(0,1)*(*this)(2,0)) / det;
+            R(2,2) =  ((*this)(0,0)*(*this)(1,1) - (*this)(0,1)*(*this)(1,0)) / det;
+            return R;
+        } else if constexpr (N == 4) {
+            Matrix<T,4> R = *this;
+            std::size_t indxc[4];
+            std::size_t indxr[4];
+            int ipiv[4] = {0,0,0,0};
+
+            for (int i = 0; i < 4; i++) {
+                std::size_t irow;
+                std::size_t icol;
+                T big = T(0);
+                for (std::size_t j = 0 ; j < 4 ; j++) {
+                    if (ipiv[j] != 1) {
+                        for (std::size_t k = 0 ; k < 4 ; k++) {
+                            if (ipiv[k] == 0) {
+                                T val = std::fabs(R(j,k));
+                                if (val >= big) {
+                                    big = val;
+                                    irow = j;
+                                    icol = k;
+                                }
+                            } else if (ipiv[k] > 1) throw std::runtime_error("Singular matrix");
+                        }
+                    }
+                }
+                ++ipiv[icol];
+                if (irow != icol) {
+                    for (std::size_t k = 0 ; k < 4 ; k++) {
+                        std::swap(R(irow, k), R(icol, k));
+                    }
+                }
+
+                indxr[i] = irow;
+                indxc[i] = icol;
+                if (R(icol,icol) == T(0)) throw std::runtime_error("Singular matrix");
+
+                T pivinv = T(1) / R(icol,icol);
+                R(icol,icol) = T(1);
+                for (std::size_t k = 0 ; k < 4 ; k++) {
+                    R(icol,k) *= pivinv;
+                }
+                for (std::size_t j = 0 ; j < 4 ; j++) {
+                    if (j != icol) {
+                        T save = R(j,icol);
+                        R(j,icol) = T(0);
+                        for (std::size_t k = 0 ; k < 4 ; k++) {
+                            R(j,k) -= R(icol,k) * save;
+                        }
+                    }
+                }
+            }
+            for (int j = 3 ; j >= 0 ; j--) {
+                if(indxr[j]!=indxc[j]) {
+                    for(std::size_t r = 0 ; r < 4 ; r++) {
+                        std::swap(R(r, indxr[j]), R(r, indxc[j]));
+                    }
+                }
+            }
+
+            return R;
+
+        } else {
+            static_assert(N==2 || N==3 || N==4,"Inverse not implemented for this size");
+            return Matrix{}; // never executed
+        }
+    }
+
+    // transpose
+    [[nodiscard]] constexpr Matrix transpose() const noexcept {
+        Matrix R{};
+        for (std::size_t i = 0 ; i < N ; i++) {
+            for (std::size_t j = 0 ; j < N ; j++) {
+                R(i,j)=(*this)(j,i);
+            }
+        }
+        return R;
+    }
+
+    [[nodiscard]] constexpr Matrix<T,3> upperLeft3x3() const noexcept {
+        Matrix<T,3> R{};
+        for (std::size_t i = 0; i < 3; ++i) {
+            for (std::size_t j = 0; j < 3; ++j) {
+                R(i,j) = (*this)(i,j);
+            }
+        }
+        return R;
+    }
+
+};
+
+template <typename T, std::size_t N>
+constexpr Matrix<T,N> operator+(const Matrix<T,N>& matrix1, const Matrix<T,N>&  matrix2) noexcept
+{
+    Matrix<T,N> R{};
+    for (std::size_t i = 0; i < N*N; ++i) {
+        R.data[i] =  matrix1.data[i] +  matrix2.data[i];
+    }
+    return R;
+}
+
+template <typename T, std::size_t N>
+constexpr Matrix<T,N> operator-(const Matrix<T,N>&  matrix1, const Matrix<T,N>&  matrix2) noexcept
+{
+    Matrix<T,N> R{};
+    for (std::size_t i = 0; i < N*N; ++i) {
+        R.data[i] =  matrix1.data[i] -  matrix2.data[i];
+    }
+    return R;
+}
+
+// division by scalar
+template <typename T, std::size_t N>
+[[nodiscard]] constexpr Matrix<T,N> operator/(const Matrix<T,N>& matrix, T scalar) noexcept {
+    Matrix<T,N> R{};
+    for (std::size_t i = 0; i < N; ++i) {
+        for (std::size_t j = 0; j < N; ++j) {
+            R(i, j) =  matrix(i, j) / scalar;
+        }
+    }
+    return R;
+}
+
+// scalar multiplication
+template <typename T, std::size_t N>
+[[nodiscard]] constexpr Matrix<T,N> operator*(T scalar, const Matrix<T,N>&  matrix) noexcept {
+    Matrix<T,N> R{};
+    for (std::size_t i = 0; i < N*N; ++i) {
+        R.data[i] = scalar *  matrix.data[i];
+    }
+    return R;
+}
+
+template <typename T, std::size_t N>
+constexpr Matrix<T, N> operator*(const Matrix<T,N>& matrix, T scalar) noexcept {
+    return  matrix * scalar;
+}
+
+// vector multiplication
+template <typename T, std::size_t N>
+[[nodiscard]] constexpr Vector<T,N> operator*(const Matrix<T,N>& matrix, const Vector<T,N>& vector) noexcept {
+    Vector<T,N> R{};
+    for (std::size_t i = 0; i < N; ++i) {
+        T sum{};
+        for (std::size_t j = 0; j < N; ++j) {
+            sum += matrix(i,j) * vector[j];
+        }
+        R[i] = sum;
+    }
+    return R;
+}
+
+// 4x4 matrix * 3D point (homogeneous coordinates)
+template <typename T>
+[[nodiscard]] constexpr Vector<T,3> operator*(const Matrix<T,4>& matrix, const Vector<T,3>& vector) noexcept {
+    // Compute transformed coordinates
+    Vector<T,3> R{
+         matrix(0,0)*vector[0] + matrix(0,1)*vector[1] + matrix(0,2)*vector[2] + matrix(0,3),
+         matrix(1,0)*vector[0] + matrix(1,1)*vector[1] + matrix(1,2)*vector[2] + matrix(1,3),
+         matrix(2,0)*vector[0] + matrix(2,1)*vector[1] + matrix(2,2)*vector[2] + matrix(2,3)
+    };
+
+    // Homogeneous w
+    T w = matrix(3,0)*vector[0] + matrix(3,1)*vector[1] + matrix(3,2)*vector[2] + matrix(3,3);
+
+    if (w != T(0) && w != T(1)) {
+        R[0] /= w;
+        R[1] /= w;
+        R[2] /= w;
+    }
+    return R;
+}
+
+// Matrix * Matrix
+template <typename T, std::size_t N>
+constexpr Matrix<T,N> operator*(const Matrix<T,N>& matrix1, const Matrix<T,N>& matrix2) noexcept {
+    Matrix<T,N> R{};
+    for (std::size_t i = 0; i < N; ++i) {
+        for (std::size_t j = 0; j < N; ++j) {
+            T sum{};
+            for (std::size_t k = 0 ; k < N; ++k) {
+                sum += matrix1(i,k) * matrix2(k,j);
+            }
+            R(i,j) = sum;
+        }
+    }
+    return R;
+}
+
+// Rotation Matrix
+// Create rotation matrix around the X-axis
+//
+//        | 1             0            0  |
+// R_AB = | 0    cos(theta)    sin(theta) |
+//        | 0   -sin(theta)    cos(theta) |
+//
+template <typename T>
+[[nodiscard]] constexpr Matrix<T,3> rotationX(T angleRad) noexcept {
+    const T c = std::cos(angleRad);
+    const T s = std::sin(angleRad);
+
+    Matrix<T,3> R{};
+    R(0,0) = 1; R(0,1) =  0; R(0,2) = 0;
+    R(1,0) = 0; R(1,1) =  c; R(1,2) = s;
+    R(2,0) = 0; R(2,1) = -s; R(2,2) = c;
+    return R;
+}
+
+// Create rotation matrix around the Y-axis
+//
+//        |  cos(theta)   0   -sin(theta) |
+// R_AB = |          0    1            0  |
+//        |  sin(theta)   0    cos(theta) |
+//
+template <typename T>
+[[nodiscard]] constexpr Matrix<T,3> rotationY(T angleRad) noexcept {
+    const T c = std::cos(angleRad);
+    const T s = std::sin(angleRad);
+
+    Matrix<T,3> R{};
+    R(0,0) = c; R(0,1) = 0; R(0,2) = -s;
+    R(1,0) = 0; R(1,1) = 1; R(1,2) =  0;
+    R(2,0) = s; R(2,1) = 0; R(2,2) =  c;
+    return R;
+}
+
+// Create rotation matrix around the Z-axis
+//
+//        |  cos(theta)   sin(theta)   0 |
+// R_AB = | -sin(theta)   cos(theta)   0 |
+//        |          0            0    1 |
+//
+template <typename T>
+[[nodiscard]] constexpr Matrix<T,3> rotationZ(T angleRad) noexcept {
+    const T c = std::cos(angleRad);
+    const T s = std::sin(angleRad);
+
+    Matrix<T,3> R{};
+    R(0,0) =  c; R(0,1) = s; R(0,2) = 0;
+    R(1,0) = -s; R(1,1) = c; R(1,2) = 0;
+    R(2,0) =  0; R(2,1) = 0; R(2,2) = 1;
+    return R;
+}
+
+// 3×3 direction cosine matrix (DCM) from Euler angles in the Z–Y–X convention (yaw → pitch → roll)
+template <typename T>
+[[nodiscard]] constexpr Matrix<T,3> eulerToMat(T roll, T pitch, T yaw) noexcept {
+    // Roll = X rotation
+    const T cr = std::cos(roll);
+    const T sr = std::sin(roll);
+
+    // Pitch = Y rotation
+    const T cp = std::cos(pitch);
+    const T sp = std::sin(pitch);
+
+    // Yaw = Z rotation
+    const T cy = std::cos(yaw);
+    const T sy = std::sin(yaw);
+
+    Matrix<T,3> R{};
+    R(0,0) = cp*cy;
+    R(0,1) = cp*sy;
+    R(0,2) = -sp;
+
+    R(1,0) = -cr*sy + sr*sp*cy;
+    R(1,1) = cr*cy + sr*sp*sy;
+    R(1,2) = sr*cp;
+
+    R(2,0) = sr*sy + cr*sp*cy;
+    R(2,1) = -sr*cy + cr*sp*sy;
+    R(2,2) = cr*cp;
+    return R;
+}
+
+template <typename T>
+[[nodiscard]] constexpr Matrix<T,3> eulerToMat(Vector<T,3>& euler) noexcept {
+    // Roll = X rotation
+    const T cr = std::cos(euler[0]);
+    const T sr = std::sin(euler[0]);
+
+    // Pitch = Y rotation
+    const T cp = std::cos(euler[1]);
+    const T sp = std::sin(euler[1]);
+
+    // Yaw = Z rotation
+    const T cy = std::cos(euler[2]);
+    const T sy = std::sin(euler[2]);
+
+    Matrix<T,3> R{};
+    R(0,0) = cp*cy;
+    R(0,1) = cp*sy;
+    R(0,2) = -sp;
+
+    R(1,0) = -cr*sy + sr*sp*cy;
+    R(1,1) = cr*cy + sr*sp*sy;
+    R(1,2) = sr*cp;
+
+    R(2,0) = sr*sy + cr*sp*cy;
+    R(2,1) = -sr*cy + cr*sp*sy;
+    R(2,2) = cr*cp;
+    return R;
+}
+
+template <typename T>
+[[nodiscard]] constexpr Matrix<T,4> makeRotation(const Vector<T,3>& axis, T angleRad) noexcept {
+    const T c = std::cos(angleRad);
+    const T s = std::sin(angleRad);
+    const T oneMinusCos = T(1) - c;
+
+    // Normalize axis
+    const Vector<T,3> v = normalize(axis);
+
+    Matrix<T,4> R{};
+    R(0,0) = c + v[0]*v[0]*oneMinusCos;
+    R(0,1) = v[0]*v[1]*oneMinusCos - v[2]*s;
+    R(0,2) = v[0]*v[2]*oneMinusCos + v[1]*s;
+    R(0,3) = 0;
+
+
+    R(1,0) = v[0]*v[1]*oneMinusCos + v[2]*s;
+    R(1,1) = c + v[1]*v[1]*oneMinusCos;
+    R(1,2) = v[1]*v[2]*oneMinusCos - v[0]*s;
+    R(1,3) = 0;
+
+    R(2,0) = v[0]*v[2]*oneMinusCos - v[1]*s;
+    R(2,1) = v[1]*v[2]*oneMinusCos + v[0]*s;
+    R(2,2) = c + v[2]*v[2]*oneMinusCos;
+    R(2,3) = 0;
+
+    R(3,0) = 0;
+    R(3,1) = 0;
+    R(3,2) = 0;
+    R(3,3) = 1;
+
+    return R;
+}
+
+template <typename T>
+[[nodiscard]] constexpr Matrix<T,4> makeTranslation(const Vector<T,3>& vector) noexcept {
+    Matrix<T,4> R = Matrix<T,4>::identity();
+    R(0,3) = vector[0];
+    R(1,3) = vector[1];
+    R(2,3) = vector[2];
+    return R;
+}
+
+}
+
+#endif //GRS_SIMULATOR_MATRIX_H

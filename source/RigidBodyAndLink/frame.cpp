@@ -8,7 +8,7 @@
 
 #include "frame.h"
 
-Frame::Frame(const std::string& name, const Frame* reference, const Vector3<double>& position, const Vector3<double>& orientation, const Color::HexColor forceColor)
+Frame::Frame(const std::string& name, const Frame* reference, const grs::Vec3d& position, const grs::Vec3d& orientation, const Color::HexColor forceColor)
     : m_localPosition(position)
     , m_localOrientation(orientation)
     , m_referenceOriginFrame(reference)
@@ -16,7 +16,7 @@ Frame::Frame(const std::string& name, const Frame* reference, const Vector3<doub
     , m_forceColor(forceColor)
 {
     m_origin = std::make_unique<Node>();
-    m_frameToBody = Matrix3<double>::fromEulerAngles(m_localOrientation);
+    m_frameToBody = grs::eulerToMat(m_localOrientation);
 }
 
 void Frame::setLoadCallback(std::function<void(Frame&)> callback) {
@@ -27,16 +27,16 @@ void Frame::computeLoad() {
     if (m_loadCallback) {
         m_loadCallback(*this);
     } else {
-        setForce(Vector3<double>::zeros());
-        setMoment(Vector3<double>::zeros());
+        setForce(grs::Vec3d::zeros());
+        setMoment(grs::Vec3d::zeros());
     }
 }
 
-const Vector3<double>& Frame::getLocalPosition() const {
+const grs::Vec3d& Frame::getLocalPosition() const {
     return m_localPosition;
 }
 
-const Vector3<double>& Frame::getLocalOrientation() const {
+const grs::Vec3d& Frame::getLocalOrientation() const {
     return m_localOrientation;
 }
 
@@ -44,16 +44,16 @@ Node& Frame::originNode() const {
     return *m_origin;
 }
 
-void Frame::setTransform(const Transform& newTransform) {
+void Frame::setTransform(const grs::TransformD& newTransform) {
     m_transform = newTransform;
 }
 
-void Frame::setTransform(const Vector3<double>& newPosition, const Quaternion& newOrientation) {
-    m_transform.setPosition(newPosition);
-    m_transform.setOrientation(newOrientation);
+void Frame::setTransform(const grs::Vec3d& newPosition, const grs::QuaternionD& newOrientation) {
+    m_transform.position = newPosition;
+    m_transform.orientation = newOrientation;
 }
 
-const Transform& Frame::transform() const {
+const grs::TransformD& Frame::transform() const {
     return m_transform;
 }
 

@@ -19,41 +19,47 @@ FrameBufferObject::~FrameBufferObject() {
     destroy();
 }
 
-bool FrameBufferObject::create(const unsigned int width, const unsigned int height, const bool needRenderBuffer) {
+bool FrameBufferObject::create(const GLsizei width, const GLsizei height, const bool needRenderBuffer) {
     // Destroy the current FBO
     destroy();
 
     // Generate a new FBO
     glGenFramebuffers(1, &m_frameBufferId);
-    assert(m_frameBufferId != 0);
+    if (m_frameBufferId == 0) {
+        std::cerr << "Failed to generate framebuffer" << std::endl;
+        return false;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferId);
 
     // If we also need to create a render buffer
     if (needRenderBuffer) {
 
         // Generate the render buffer
         glGenRenderbuffers(1, &m_renderBufferId);
-        assert(m_renderBufferId != 0);
+        if (m_renderBufferId == 0) {
+            std::cerr << "Failed to generate renderbuffer" << std::endl;
+            return false;
+        }
 
         glBindRenderbuffer(GL_RENDERBUFFER, m_renderBufferId);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
-        glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferId);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, width, height);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,m_renderBufferId);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     // Check the FBO status
     const GLenum statusFBO = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     if(statusFBO != GL_FRAMEBUFFER_COMPLETE) {
-        std::cerr << "Error : An error occurred while creating the Frame Buffer Object !" << std::endl;
-        assert(false);
+        std::cerr << "FBO creation failed: status = 0x" << std::hex << statusFBO << std::endl;
         return false;
     }
 
     return true;
 }
 
-void FrameBufferObject::attachTexture(const unsigned int position, const unsigned int textureId) const {
+void FrameBufferObject::attachTexture(const GLenum position, const GLuint textureId) const {
     assert(m_frameBufferId);
 
     // Bind the current FBO

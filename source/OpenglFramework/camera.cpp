@@ -9,7 +9,6 @@
 #include "camera.h"
 
 Camera::Camera()
-    : Object3D()
 {
     // Set default values
     m_fieldOfView = 45.0f;
@@ -22,7 +21,7 @@ Camera::Camera()
     m_updateProjectionMatrix();
 }
 
-const Matrix4<double>& Camera::getProjectionMatrix() const {
+const grs::Matrix4d& Camera::getProjectionMatrix() const {
     return m_projectionMatrix;
 }
 
@@ -49,16 +48,16 @@ void Camera::setFieldOfView(const float fov) {
 }
 
 void Camera::setZoom(const double fraction) {
-    const Vector3<double> zoomVector(0.0, 0.0, m_sceneRadius * fraction);
+    const grs::Vec3d zoomVector(0.0, 0.0, m_sceneRadius * fraction);
     translateLocal(zoomVector);
 }
 
-void Camera::translateCamera(const float dx, const float dy, const Vector3<double>& worldPoint) {
+void Camera::translateCamera(const float dx, const float dy, const grs::Vec3d& worldPoint) {
     // Transform the world point into camera coordinates
-    const Vector3<double> pointCamera = m_transformMatrix.getInverse() * worldPoint;
+    const grs::Vec3d pointCamera = m_transformMatrix.inverse() * worldPoint;
 
     // Get the depth
-    const double z = -pointCamera.z();
+    const double z = -pointCamera[2];
 
     // Find the scaling of dx and dy from windows coordinates to near plane coordinates
     // and from there to camera coordinates at the object's depth
@@ -93,8 +92,10 @@ void Camera::m_updateProjectionMatrix() {
     double fw = -2.0 * m_farPlane * m_nearPlane / (m_farPlane - m_nearPlane);
 
     // Recompute the projection matrix
-    m_projectionMatrix = {{fx, 0, 0, 0},
-                          {0, fy, 0, 0},
-                          {0, 0, fz, fw},
-                          {0, 0, -1, 0}};
+    m_projectionMatrix = {
+        fx,  0,  0,  0,
+         0, fy,  0,  0,
+         0,  0, fz, fw,
+         0,  0, -1,  0
+    };
 }

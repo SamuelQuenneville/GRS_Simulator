@@ -50,7 +50,7 @@ void Tether::update(double dt) {
     m_updateRelativeSpeed();
 
     // Calculate the tension force and distribute to the nodes
-    const Vector3<double> tensionForce = m_calcTensionForce();
+    const grs::Vec3d tensionForce = m_calcTensionForce();
     startPoint->setForce(tensionForce);
     endPoint->setForce(-tensionForce);
 
@@ -66,19 +66,19 @@ void Tether::m_updateRelativeSpeed() {
     m_relativeSpeed = endPoint->velocity() - startPoint->velocity();
 }
 
-Vector3<double> Tether::m_calcTensionForce() {
+grs::Vec3d Tether::m_calcTensionForce() {
     // Find tether position relative to startPoint
-    const double tetherMagnitude = m_relativePosition.length();
-    const Vector3<double> tetherNormalize = m_relativePosition.normalize();
+    const double tetherMagnitude = m_relativePosition.norm();
+    const grs::Vec3d tetherNormalize = grs::normalize(m_relativePosition);
 
     // Calculate tether elongation
     const double tetherDeformation = tetherMagnitude - m_properties.length;
 
-    Vector3<double> forceSpring = (m_properties.rigidity * tetherDeformation * tetherNormalize) + (m_properties.damping * m_relativeSpeed.dot(tetherNormalize) * tetherNormalize);
+    grs::Vec3d forceSpring = (m_properties.rigidity * tetherDeformation * tetherNormalize) + (m_properties.damping * grs::dot(m_relativeSpeed, tetherNormalize) * tetherNormalize);
 
-    const double tension = tetherNormalize.dot(forceSpring);
+    const double tension = grs::dot(tetherNormalize, forceSpring);
     if (tension < 0.0) {
-        forceSpring = Vector3<double>::zeros();
+        forceSpring = grs::Vec3d::zeros();
     }
 
     m_tetherLogInfos.deformation = tetherDeformation;
@@ -127,21 +127,21 @@ std::tuple<double, double> Tether::m_calcLiftDragCoeff(const double Cf, const do
 }
 
 // TODO implement tether aerodynamic and discretization
-Vector3<double> Tether::m_calcTetherAeroForces(Vector3<double> windSpeed) {
-    const Vector3<double> forceAero = Vector3<double>::zeros();
+grs::Vec3d Tether::m_calcTetherAeroForces(grs::Vec3d windSpeed) {
+    const grs::Vec3d forceAero = grs::Vec3d::zeros();
     m_tetherLogInfos.forceAero = forceAero;
 
     return forceAero;
 }
 
 void Tether::grounded() const {
-    startPoint->setPosition(Vector3<double>::zeros());
-    startPoint->setVelocity(Vector3<double>::zeros());
+    startPoint->setPosition(grs::Vec3d::zeros());
+    startPoint->setVelocity(grs::Vec3d::zeros());
 }
 
 void Tether::m_writeLog() const {
 
-    tetherLogMessage logMessage = {
+    const tetherLogMessage logMessage = {
         m_id,
         m_tetherLogInfos.deformation,
         startPoint->position(),

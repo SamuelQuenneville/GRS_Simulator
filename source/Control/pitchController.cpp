@@ -18,12 +18,12 @@ PitchController::PitchController(worldPhysics& physics, pitchControllerGains& ga
               m_gains.targetFilter, m_gains.errorFilter, m_gains.derivativeFilter, m_dt);
 }
 
-float PitchController::getRateOut(float desiredRate, float scaler, bool disableIntegrator, float airspeed) {
+float PitchController::getRateOut(const float desiredRate, const float scaler, const bool disableIntegrator, const float airspeed) {
     bool limitIntegrator = std::fabs(m_lastOut) >= 45.0f;
-    float oldIntegrator = m_ratePID.getI();
+    const float oldIntegrator = m_ratePID.getI();
     m_ratePID.setDt(m_dt);
 
-    bool underspeed = airspeed <= 11.0f;
+    const bool underspeed = airspeed <= 11.0f;
     if(underspeed) {
         limitIntegrator = true;
     }
@@ -33,7 +33,7 @@ float PitchController::getRateOut(float desiredRate, float scaler, bool disableI
     //
     // note that we run AC_PID in radians so that the normal scaling
     // range for IMAX in AC_PID applies (usually an IMAX value less than 1.0)
-    m_ratePID.updateAll(radians(desiredRate) * scaler * scaler, static_cast<float>(m_aircraftStates.q) * scaler * scaler, limitIntegrator);
+    m_ratePID.updateAll(grs::degToRad(desiredRate) * scaler * scaler, static_cast<float>(m_aircraftStates.q) * scaler * scaler, limitIntegrator);
 
     if (underspeed) {
         // when underspeed we lock the integrator
@@ -47,58 +47,58 @@ float PitchController::getRateOut(float desiredRate, float scaler, bool disableI
     // convert AC_PID info object to same scale as old controller
     m_pidInfo = m_ratePID.getPidInfo();
 
-    m_pidInfo.P  = degrees(m_pidInfo.P);
-    m_pidInfo.I  = degrees(m_pidInfo.I);
-    m_pidInfo.D  = degrees(m_pidInfo.D);
+    m_pidInfo.P  = grs::radToDeg(m_pidInfo.P);
+    m_pidInfo.I  = grs::radToDeg(m_pidInfo.I);
+    m_pidInfo.D  = grs::radToDeg(m_pidInfo.D);
 
     // FF should be scaled by scaler/eas2tas, but since we have scaled
     // the AC_PID target above by scaler*scaler we need to instead
     // divide by scaler*eas2tas to get the right scaling
-    m_pidInfo.FF = degrees(m_ratePID.getFF() / scaler);
+    m_pidInfo.FF = grs::radToDeg(m_ratePID.getFF() / scaler);
 
     // fix the logged target and actual values to not have the scalers applied
     m_pidInfo.target = desiredRate;
-    m_pidInfo.actual = degrees(static_cast<float>(m_aircraftStates.q));
+    m_pidInfo.actual = grs::radToDeg(static_cast<float>(m_aircraftStates.q));
 
     // sum components
     m_lastOut = m_pidInfo.P + m_pidInfo.I + m_pidInfo.D + m_pidInfo.FF;
 
     // output is scaled to notional centidegrees of deflection
-    return constrainFloat(m_lastOut, m_gains.elevatorMin, m_gains.elevatorMax);
+    return std::clamp(m_lastOut, m_gains.elevatorMin, m_gains.elevatorMax);
 }
 
-float PitchController::getCoordinationRateOffset(float airspeed) const {
+float PitchController::getCoordinationRateOffset(const float airspeed) const {
     float rateOffset;
     auto bankAngle = static_cast<float>(m_aircraftStates.phi);
 
     // limit bank angle between +- 80 deg if right way up
-    if (std::fabs(bankAngle) < (M_PI/2.0))	{
-        bankAngle = constrainFloat(bankAngle, -radians(80), radians(80));
+    if (std::fabs(bankAngle) < (M_PI_2))	{
+        bankAngle = std::clamp(bankAngle, -grs::degToRad(80.0f), grs::degToRad(80.0f));
     } else {
         if (bankAngle > 0.0f) {
-            bankAngle = constrainFloat(bankAngle, radians(100), M_PI);
+            bankAngle = std::clamp(bankAngle, grs::degToRad(100.0f), M_PIf);
         } else {
-            bankAngle = constrainFloat(bankAngle, -M_PI, -radians(100));
+            bankAngle = std::clamp(bankAngle, -M_PIf, -grs::degToRad(100.0f));
         }
     }
 
-    if (std::fabs(degrees(m_aircraftStates.theta)) > 70.0) {
+    if (std::fabs(grs::radToDeg(m_aircraftStates.theta)) > 70.0) {
         // don't do turn coordination handling when at very high pitch angles
         rateOffset = 0.0f;
     } else {
-        rateOffset = std::cos(static_cast<float>(m_aircraftStates.theta))*std::fabs(degrees((static_cast<float>(m_physics.gravity / std::fmax(airspeed , 11.0f)) * std::tan(bankAngle) * std::sin(bankAngle)))) * m_rollCompensation;
+        rateOffset = std::cos(static_cast<float>(m_aircraftStates.theta))*std::fabs(grs::radToDeg((static_cast<float>(m_physics.gravity / std::fmax(airspeed , 11.0f)) * std::tan(bankAngle) * std::sin(bankAngle)))) * m_rollCompensation;
     }
 
     return rateOffset;
 }
 
-float PitchController::getServoOut(float navPitch, float scaler, bool disableIntegrator) {
-    auto airspeed = static_cast<float>(std::sqrt(m_aircraftStates.u * m_aircraftStates.u + m_aircraftStates.v * m_aircraftStates.v + m_aircraftStates.w * m_aircraftStates.w));
+float PitchController::getServoOut(const float navPitch, const float scaler, const bool disableIntegrator) {
+    const auto airspeed = static_cast<float>(std::sqrt(m_aircraftStates.u * m_aircraftStates.u + m_aircraftStates.v * m_aircraftStates.v + m_aircraftStates.w * m_aircraftStates.w));
 
-    float rateOffset = getCoordinationRateOffset(airspeed);
+    const float rateOffset = getCoordinationRateOffset(airspeed);
 
     // Calculate the desired pitch rate (deg/sec) from the angle error
-    m_angleErrorDeg = navPitch - degrees(static_cast<float>(m_aircraftStates.theta));
+    m_angleErrorDeg = navPitch - grs::radToDeg(static_cast<float>(m_aircraftStates.theta));
     float desiredRate = m_angleErrorDeg / m_tau;
 
     // limit the maximum pitch rate demand

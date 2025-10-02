@@ -22,13 +22,13 @@ public:
 
     virtual void updatePosition() {};
 
-    virtual void render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) = 0;
-    virtual void renderVisualObject(Shader& shader, const Matrix4<double>& worldToCameraMatrix, bool drawFrames, bool drawForces);
+    virtual void render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) = 0;
+    virtual void renderVisualObject(Shader& shader, const grs::Matrix4d& worldToCameraMatrix, bool drawFrames, bool drawForces);
 
     void setColor(const Color& color);
 
-    [[nodiscard]] const Transform& getTransform() const;
-    void setTransform(const Transform& transform);
+    [[nodiscard]] const grs::TransformD& getTransform() const;
+    void setTransform(const grs::TransformD& transform);
 
 protected:
     RigidBody* m_body;
@@ -36,13 +36,13 @@ protected:
 
     std::vector<std::shared_ptr<FrameAxis>> m_visualObjects;
 
-    Transform m_previousTransform;
+    grs::TransformD m_previousTransform;
 
     Color m_color;
 
     void m_createVisualObject();
 
-    Matrix4<double> m_calculateTransform(double interpolationFactor, const Matrix4<double>& scalingMatrix);
+    grs::Matrix4d m_calculateTransform(double interpolationFactor, const grs::Matrix4d& scalingMatrix);
 };
 
 

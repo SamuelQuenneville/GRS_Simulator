@@ -34,7 +34,7 @@ public:
 
     virtual void update();
     virtual void render();
-    virtual void renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix);
+    virtual void renderSinglePass(Shader& shader, const grs::Matrix4d& worldToCameraMatrix);
     virtual void drawReferenceFrame(bool shouldDraw);
     virtual void drawForcesVector(bool shouldDraw);
     virtual void reset();
@@ -53,7 +53,7 @@ public:
     [[nodiscard]] bool shouldDrawReferenceFrame() const {return m_shouldDrawReferenceFrame;};
     [[nodiscard]] bool shouldDrawForcesVector() const {return m_shouldDrawForcesVector;};
 
-    void changeView(const Matrix4<double>& viewMatrix);
+    void changeView(const grs::Matrix4d& viewMatrix);
 
     void setInterpolationFactor(double interpolationFactor);
 
@@ -84,11 +84,11 @@ protected:
     FrameBufferObject m_frameBufferObjectShadowMap[NB_SHADOW_MAPS];
     Texture2D m_shadowMapTexture[NB_SHADOW_MAPS];
 
-    Matrix4<double> m_shadowMapBiasMatrix;
+    grs::Matrix4d m_shadowMapBiasMatrix{};
 
     Camera m_camera;
 
-    Vector3<double> m_centerOfScene;
+    grs::Vec3d m_centerOfScene{};
 
     bool m_shouldDrawReferenceFrame = false;
     bool m_shouldDrawForcesVector = false;
@@ -115,7 +115,7 @@ protected:
     double m_initialZoom;
 
     void m_createShadowMapFrameBufferObjectAndTexture();
-    void m_setScenePosition(const Vector3<double>& position, float sceneRadius);
+    void m_setScenePosition(const grs::Vec3d& position, float sceneRadius);
     void m_resetCameraToViewAll();
 
     void m_zoom(double zoomDiff);

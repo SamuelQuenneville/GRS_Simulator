@@ -23,13 +23,13 @@ public:
 
     void updatePosition() override;
 
-    void render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;
+    void render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) override;
 
 private:
-    Vector3<float> m_point1;
-    Vector3<float> m_point2;
+    grs::Vec3f m_point1{};
+    grs::Vec3f m_point2{};
 
-    std::vector<Vector3<float>> m_linePoints;
+    std::vector<grs::Vec3f> m_linePoints;
 
     VertexBufferObject m_vertexBufferVertices;
     VertexArrayObject m_vertexArrayObject;

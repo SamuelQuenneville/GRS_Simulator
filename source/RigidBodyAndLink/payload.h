@@ -32,7 +32,7 @@ private:
 
     bool m_isGrounded; // static body
 
-    [[nodiscard]] Vector3<double> m_calcAeroForces() const;
+    [[nodiscard]] grs::Vec3d m_calcAeroForces() const;
 
     [[nodiscard]] payloadStates m_calcStatesDerivatives() const;
     void m_eulerIntegration(const payloadStates& derivatives, double dt);

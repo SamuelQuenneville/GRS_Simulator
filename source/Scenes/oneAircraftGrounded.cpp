@@ -24,7 +24,7 @@ void OneAircraftGrounded::createPhysicsWorld() {
 
     // ---------- AIRCRAFT ---------- //
     for (const auto& aircraft : m_world.system()->aircraft()) {
-        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), Vector3<double>(2.0, 2.0, 2.0), World::getExecutablePath());
+        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), grs::Vec3d(2.0, 2.0, 2.0), World::getExecutablePath());
         aircraftObject->setColor(Color::red());
         m_physicsObjects.push_back(std::move(aircraftObject));
     }
@@ -36,12 +36,12 @@ void OneAircraftGrounded::createPhysicsWorld() {
     }
 
     // ---------- LAUNCHER ---------- //
-    m_launcher = std::make_shared<Launcher>(Vector3<double>(1,1,1), World::getExecutablePath());
+    m_launcher = std::make_shared<Launcher>(grs::Vec3d(1,1,1), World::getExecutablePath());
     m_launcher->setColor(Color::backgroundColor());
     m_staticObjects.push_back(m_launcher);
 
     // ---------- GROUND ---------- //
-    m_ground = std::make_shared<Cube>(Vector3<float>(50, 0.5, 50), World::getExecutablePath());
+    m_ground = std::make_shared<Cube>(grs::Vec3f(50, 0.5, 50), World::getExecutablePath());
     m_ground->setColor(Color::floorColor());
     m_staticObjects.push_back(m_ground);
 }
@@ -54,8 +54,8 @@ void OneAircraftGrounded::destroyPhysicsWorld() {
 }
 
 void OneAircraftGrounded::initBodiesPositions() const {
-    m_launcher->setTransform(Transform({0.8, 0.816, 30.0}, Quaternion::fromEulerAngles(M_PI + radians(18.0), 0.0, M_PI/2.0)));
-    m_ground->setTransform(Transform({0.0, -0.5, 0.0}, Quaternion::identity()));
+    m_launcher->setTransform(grs::TransformD({0.8, 0.816, 30.0}, grs::eulerToQuat(M_PI + grs::degToRad(18.0), 0.0, M_PI_2).nedToYup()));
+    m_ground->setTransform(grs::TransformD({0.0, -0.5, 0.0}, grs::QuaternionD::identity()));
 }
 
 void OneAircraftGrounded::updatePhysics() {
@@ -81,7 +81,7 @@ void OneAircraftGrounded::destroy() {
     destroyPhysicsWorld();
 }
 
-void OneAircraftGrounded::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
+void OneAircraftGrounded::renderSinglePass(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) {
 
     for (const auto& tethersObject : m_tethersObjects) {
         tethersObject->render(m_colorShader, worldToCameraMatrix);

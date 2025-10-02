@@ -52,7 +52,7 @@ double thrust2rpm(float airspeed, float thrustTarget)
     }
 
     // Saturate desired RPM
-    float rpm = constrainFloat(x0, 0.0f, 9000.0f);
+    const float rpm = std::clamp(x0, 0.0f, 9000.0f);
 
     // Convert RPM to command between 0 and 1
     return rpm / 9000.0f;

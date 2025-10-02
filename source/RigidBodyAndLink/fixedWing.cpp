@@ -31,8 +31,8 @@ FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWin
         const auto [airspeed, alphaRadian, betaRadian] = m_angleOfAttackSideSlip();
 
         // Calculate forces and moments
-        const Vector3<double> forcesAeroBody  = m_calcForceAeroBodyFrame(airspeed, alphaRadian, betaRadian);
-        const Vector3<double> momentsAeroBody = m_calcMomentAeroBodyFrame(airspeed, alphaRadian, betaRadian);
+        const grs::Vec3d forcesAeroBody  = m_calcForceAeroBodyFrame(airspeed, alphaRadian, betaRadian);
+        const grs::Vec3d momentsAeroBody = m_calcMomentAeroBodyFrame(airspeed, alphaRadian, betaRadian);
 
         f.setForce(forcesAeroBody);
         f.setMoment(momentsAeroBody);
@@ -46,7 +46,7 @@ FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWin
     });
 
     tetherAttach.setLoadCallback([this](const Frame& f) {
-        Vector3<double> tetherForces = Vector3<double>::zeros();
+        grs::Vec3d tetherForces = grs::Vec3d::zeros();
 
         const auto connectedNode = connections[&f.originNode()];
         for(const Node* node : connectedNode) {
@@ -88,8 +88,8 @@ void FixedWing::update(const double dt) {
     m_eulerIntegration(derivatives, dt);
 
     // phi rotated because aircraft mesh is rotated
-    constexpr double meshRollOffset = -M_PI / 2.0;
-    setCenterOfMassTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi + meshRollOffset,m_states.theta,m_states.psi)));
+    constexpr double meshRollOffset = -M_PI_2;
+    setCenterOfMassTransform(grs::TransformD(centerOfMass().position().toOpenglRef(), grs::eulerToQuat(m_states.phi + meshRollOffset,m_states.theta,m_states.psi).nedToYup()));
 
     m_writeLog();
 }
@@ -132,8 +132,8 @@ void FixedWing::updateSitl(const double dt, const std::array<uint16_t, MAX_SERVO
     m_eulerIntegration(derivatives, dt);
 
     // phi rotated because aircraft mesh is rotated
-    constexpr double meshRollOffset = -M_PI / 2.0;
-    setCenterOfMassTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi + meshRollOffset,m_states.theta,m_states.psi)));
+    constexpr double meshRollOffset = -M_PI_2;
+    setCenterOfMassTransform(grs::TransformD(centerOfMass().position().toOpenglRef(), grs::eulerToQuat(m_states.phi + meshRollOffset,m_states.theta,m_states.psi).nedToYup()));
 
     m_writeLog();
 }
@@ -154,7 +154,7 @@ std::tuple<double, double, double> FixedWing::m_angleOfAttackSideSlip() const {
     return {Va, alphaRadian, betaRadian};
 }
 
-Vector3<double> FixedWing::m_calcForceAeroBodyFrame(const double airspeed, const double alphaRadian, const double betaRadian) const {
+grs::Vec3d FixedWing::m_calcForceAeroBodyFrame(const double airspeed, const double alphaRadian, const double betaRadian) const {
 
     const double delAlpha = alphaRadian;
     // CL and CD
@@ -194,10 +194,10 @@ Vector3<double> FixedWing::m_calcForceAeroBodyFrame(const double airspeed, const
         return {Fx,Fy,Fz};
     }
 
-    return Vector3<double>::zeros();
+    return grs::Vec3d::zeros();
 }
 
-Vector3<double> FixedWing::m_calcMomentAeroBodyFrame(const double airspeed, const double alphaRadian, const double betaRadian) const {
+grs::Vec3d FixedWing::m_calcMomentAeroBodyFrame(const double airspeed, const double alphaRadian, const double betaRadian) const {
 
     const double delAlpha = alphaRadian;
 
@@ -223,14 +223,14 @@ Vector3<double> FixedWing::m_calcMomentAeroBodyFrame(const double airspeed, cons
         return {Mx,My,Mz};
     }
 
-    return Vector3<double>::zeros();
+    return grs::Vec3d::zeros();
 }
 
 fixedWingStates FixedWing::m_calcStatesDerivatives() {
 
     // Convert external forces in Earth frame to Body frame
-    Vector3<double> totalForceBody  = centerOfMass().force();
-    Vector3<double> totalMomentBody = centerOfMass().moment();
+    grs::Vec3d totalForceBody  = centerOfMass().force();
+    grs::Vec3d totalMomentBody = centerOfMass().moment();
 
     // Matrix K_BG^-1
     /*
@@ -349,20 +349,20 @@ double FixedWing::groundspeed() const {
 
 void FixedWing::updateRotationMatrixCBodyEarth() {
     // Calculate the rotation matrix between the Earth and Body frame
-    Matrix3 phiRotationC1   = Matrix3<double>::makeXRotation(m_states.phi);
-    Matrix3 thetaRotationC2 = Matrix3<double>::makeYRotation(m_states.theta);
-    Matrix3 psiRotationC3   = Matrix3<double>::makeZRotation(m_states.psi);
+    const grs::Matrix3d phiRotationC1   = grs::rotationX(m_states.phi);
+    const grs::Matrix3d thetaRotationC2 = grs::rotationY(m_states.theta);
+    const grs::Matrix3d psiRotationC3   = grs::rotationZ(m_states.psi);
 
     // C_BodyEarth
     setRotationMatrixCBodyEarth(phiRotationC1*thetaRotationC2*psiRotationC3);
 }
 
-Vector3<double> FixedWing::m_earthToBody(const Vector3<double>& earthVector) const {
+grs::Vec3d FixedWing::m_earthToBody(const grs::Vec3d& earthVector) const {
     return getRotationMatrixCBodyEarth() * earthVector;
 }
 
-Vector3<double> FixedWing::m_bodyToEarth(const Vector3<double>& bodyVector) const {
-    auto r = getRotationMatrixCBodyEarth();
+grs::Vec3d FixedWing::m_bodyToEarth(const grs::Vec3d& bodyVector) const {
+    const auto r = getRotationMatrixCBodyEarth();
     return r.transpose() * bodyVector;
 }
 
@@ -384,8 +384,8 @@ void FixedWing::setInitialStates(initialStates& states) {
 
     updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0.0,0.0,0.0});
 
-    constexpr double meshRollOffset = -M_PI / 2.0;
-    setCenterOfMassTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(m_states.phi + meshRollOffset,m_states.theta,m_states.psi)));
+    constexpr double meshRollOffset = -M_PI_2;
+    setCenterOfMassTransform(grs::TransformD(centerOfMass().position().toOpenglRef(), grs::eulerToQuat(m_states.phi + meshRollOffset,m_states.theta,m_states.psi).nedToYup()));
 }
 
 double FixedWing::m_pwmToControl(const controlAxis control, const uint16_t pwm) const {
@@ -457,7 +457,7 @@ void FixedWing::m_updateRpmSensor(const double dt, const double throttleInput) {
 
 void FixedWing::m_writeLog() {
 
-    fixedWingLogMessage logMessage = {
+    const fixedWingLogMessage logMessage = {
         m_id,
         m_inputs.deltaAileron,
         m_inputs.deltaElevator,

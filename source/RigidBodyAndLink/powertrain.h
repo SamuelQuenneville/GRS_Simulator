@@ -9,7 +9,7 @@
 #ifndef POWERTRAIN_H
 #define POWERTRAIN_H
 
-#include "Mathematics/grsMath.h"
+#include <algorithm>
 
 #define MAX_ITER_RPM  100
 

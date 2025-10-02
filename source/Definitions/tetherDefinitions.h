@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "Mathematics/vector3.h"
+#include "Mathematics/math.h"
 
 /*
  *   TETHERS STRUCTURES
@@ -46,9 +46,9 @@ struct tethersProperties {
 };
 
 struct tetherLogInfos {
-    double deformation{};           // m
-    Vector3<double> forceSpring;    // N
-    Vector3<double> forceAero;      // N
+    double deformation{};      // m
+    grs::Vec3d forceSpring;    // N
+    grs::Vec3d forceAero;      // N
 };
 
 #endif //GRS_SIMULATOR_TETHERDEFINITIONS_H

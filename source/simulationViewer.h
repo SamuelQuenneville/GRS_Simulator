@@ -65,7 +65,7 @@ private:
     void m_updateSingleDynamicsStep();
 
     void m_updateTarget(float groundspeed, const std::vector<double> &payloadPosition) const;
-    void m_changeView(const Matrix4<double>& viewMatrix) const;
+    void m_changeView(const grs::Matrix4d& viewMatrix) const;
     void m_launchTriggered() const;
 
     void m_drawReferenceFrame(bool shouldDraw) const;

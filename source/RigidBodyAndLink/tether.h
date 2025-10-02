@@ -12,6 +12,7 @@
 #include "link.h"
 #include "Definitions/worldPhysics.h"
 #include "Definitions/tetherDefinitions.h"
+#include "Log/logger.h"
 
 class Tether final : public Link {
 
@@ -36,20 +37,20 @@ private:
     tetherLogInfos m_tetherLogInfos{};
 
     // endPoint - startPoint
-    Vector3<double> m_relativePosition{};
-    Vector3<double> m_relativeSpeed{};
+    grs::Vec3d m_relativePosition{};
+    grs::Vec3d m_relativeSpeed{};
 
     void m_updateRelativePosition();
     void m_updateRelativeSpeed();
 
     // Spring model
-    Vector3<double> m_calcTensionForce();
+    grs::Vec3d m_calcTensionForce();
 
     // Tether aerodynamic
     [[nodiscard]] double m_calcSkinFrictionCoeff(double parallelVelocity) const;
     [[nodiscard]] double m_calcCrossflowDrag(double normalVelocity) const;
     static std::tuple<double, double> m_calcLiftDragCoeff(double Cf, double Cn, double theta);
-    Vector3<double> m_calcTetherAeroForces(Vector3<double> windSpeed);
+    grs::Vec3d m_calcTetherAeroForces(grs::Vec3d windSpeed);
 
     void m_writeLog() const;
 };

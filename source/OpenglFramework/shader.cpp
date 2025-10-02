@@ -61,14 +61,14 @@ bool Shader::create(const std::string& filenameVertexShader, const std::string& 
         delete[] bufferVertexShader;
 
         // Get the compilation information
-        int compiled;
+        GLint compiled;
         glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, &compiled);
 
         // If the compilation failed
         if (compiled == 0) {
 
             // Get the log of the compilation
-            int lengthLog;
+            GLint lengthLog;
             glGetShaderiv(vertexShaderID, GL_INFO_LOG_LENGTH, &lengthLog);
             auto* str = new GLchar[lengthLog];
             glGetShaderInfoLog(vertexShaderID, lengthLog, nullptr, str);
@@ -112,14 +112,14 @@ bool Shader::create(const std::string& filenameVertexShader, const std::string& 
         delete[] bufferFragmentShader;
 
         // Get the compilation information
-        int compiled;
+        GLint compiled;
         glGetShaderiv(fragmentShaderID, GL_COMPILE_STATUS, &compiled);
 
         // If the compilation failed
         if (compiled == 0) {
 
             // Get the log of the compilation
-            int lengthLog;
+            GLint lengthLog;
             glGetShaderiv(fragmentShaderID, GL_INFO_LOG_LENGTH, &lengthLog);
             auto* str = new GLchar[lengthLog];
             glGetShaderInfoLog(fragmentShaderID, lengthLog, nullptr, str);
@@ -145,10 +145,10 @@ bool Shader::create(const std::string& filenameVertexShader, const std::string& 
 
     // Try to link the program
     glLinkProgram(m_programObjectId);
-    int linked;
+    GLint linked;
     glGetProgramiv(m_programObjectId, GL_LINK_STATUS, &linked);
     if (!linked) {
-        int logLength;
+        GLint logLength;
         glGetProgramiv(m_programObjectId, GL_INFO_LOG_LENGTH, &logLength);
         auto* strLog = new GLchar[logLength];
         glGetProgramInfoLog(m_programObjectId, logLength, nullptr, strLog);
@@ -210,55 +210,54 @@ void Shader::setIntUniform(const std::string& variableName, const int value, con
     }
 }
 
-void Shader::setVector2Uniform(const std::string& variableName, const Vector2<float>& v, const bool errorIfMissing) const {
+void Shader::setVector2Uniform(const std::string& variableName, const grs::Vec2f& v, const bool errorIfMissing) const {
     assert(m_programObjectId != 0);
     const GLint location = getUniformLocation(variableName, errorIfMissing);
     if (location != -1) {
-        glUniform2f(location, v.x(), v.y());
+        glUniform2f(location, v[0], v[1]);
     }
 }
 
-void Shader::setVector3Uniform(const std::string& variableName, const Vector3<float>& v, const bool errorIfMissing) const {
+void Shader::setVector3Uniform(const std::string& variableName, const grs::Vec3f& v, const bool errorIfMissing) const {
     assert(m_programObjectId != 0);
     const GLint location = getUniformLocation(variableName, errorIfMissing);
     if (location != -1) {
-        glUniform3f(location, v.x(), v.y(), v.z());
+        glUniform3f(location, v[0], v[1], v[2]);
     }
 }
 
-void Shader::setVector4Uniform(const std::string& variableName, const Vector4<float>& v, const bool errorIfMissing) const {
+void Shader::setVector4Uniform(const std::string& variableName, const grs::Vec4f& v, const bool errorIfMissing) const {
     assert(m_programObjectId != 0);
     const GLint location = getUniformLocation(variableName, errorIfMissing);
     if (location != -1) {
-        glUniform4f(location, v.x(), v.y(), v.z(), v.w());
+        glUniform4f(location, v[0], v[1], v[2], v[3]);
     }
 }
 
-void
-Shader::setMatrix3x3Uniform(const std::string& variableName, const Matrix3<double>& matrix, const bool errorIfMissing) const {
+void Shader::setMatrix3x3Uniform(const std::string& variableName, const grs::Matrix3d& matrix, const bool errorIfMissing) const {
     assert(m_programObjectId != 0);
     GLfloat mat[9];
-    for (int i=0; i<3; i++) {
-        for (int j=0; j<3; j++) {
+    for (int i = 0; i < 3 ; i++) {
+        for (int j = 0; j < 3 ; j++) {
             mat[i*3 + j] = static_cast<GLfloat>(matrix(i, j));
         }
     }
     const GLint location = getUniformLocation(variableName, errorIfMissing);
     if (location != -1) {
-        glUniformMatrix3fv(location, 1, true, mat);
+        glUniformMatrix3fv(location, 1, GL_TRUE, mat);
     }
 }
 
-void Shader::setMatrix4x4Uniform(const std::string& variableName, const Matrix4<double>& matrix, const bool errorIfMissing) const {
+void Shader::setMatrix4x4Uniform(const std::string& variableName, const grs::Matrix4d& matrix, const bool errorIfMissing) const {
     assert(m_programObjectId != 0);
     GLfloat mat[16];
-    for (int i=0; i<4; i++) {
-        for (int j=0; j<4; j++) {
+    for (int i = 0; i < 4 ; i++) {
+        for (int j = 0; j < 4; j++) {
             mat[i*4 + j] = static_cast<GLfloat>(matrix(i,j));
         }
     }
     const GLint location = getUniformLocation(variableName, errorIfMissing);
     if (location != -1) {
-        glUniformMatrix4fv(location, 1, true, mat);
+        glUniformMatrix4fv(location, 1, GL_TRUE, mat);
     }
 }

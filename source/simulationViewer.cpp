@@ -305,7 +305,7 @@ void SimulationViewer::m_setCallback() const {
 
         // Check if GUI
         const nanogui::Widget* widget = app->m_gui.findWidget(p);
-        bool guiActive = widget && widget != app->m_gui.screen();
+        const bool guiActive = widget && widget != app->m_gui.screen();
 
         if (!guiActive) {
             app->mouseMotionEvent(x, y);
@@ -326,7 +326,7 @@ void SimulationViewer::m_setCallback() const {
 
         // Check if GUI
         const nanogui::Widget* widget = app->m_gui.findWidget(p);
-        bool guiActive = widget && widget != app->m_gui.screen();
+        const bool guiActive = widget && widget != app->m_gui.screen();
 
         if (!guiActive) {
             app->mouseButtonEvent(button, action, modifiers, x, y);
@@ -420,7 +420,7 @@ void SimulationViewer::m_updateTarget(const float groundspeed, const std::vector
     m_scene->updateTarget(groundspeed, payloadPosition);
 }
 
-void SimulationViewer::m_changeView(const Matrix4<double>& viewMatrix) const {
+void SimulationViewer::m_changeView(const grs::Matrix4d& viewMatrix) const {
     m_scene->changeView(viewMatrix);
 }
 

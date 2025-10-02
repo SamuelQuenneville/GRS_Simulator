@@ -18,7 +18,7 @@ void Mesh::destroy() {
 }
 
 void Mesh::calculateNormals() {
-    m_normals = std::vector<Vector3<float>>(getNumbersVertices(), Vector3<float>::zeros());
+    m_normals = std::vector<grs::Vec3f>(getNumbersVertices(), grs::Vec3f::zeros());
 
     // For each triangular face
     for (int i=0; i < getNumbersFaces(); i++) {
@@ -33,10 +33,10 @@ void Mesh::calculateNormals() {
         assert(v3 < getNumbersVertices());
 
         // Compute the normal of the face
-        Vector3<float> p = getVertex(v1);
-        Vector3<float> q = getVertex(v2);
-        Vector3<float> r = getVertex(v3);
-        const Vector3<float> normal = (q - p).cross(r - p).normalize();
+        grs::Vec3f p = getVertex(v1);
+        grs::Vec3f q = getVertex(v2);
+        grs::Vec3f r = getVertex(v3);
+        const grs::Vec3f normal = grs::normalize(grs::cross(q - p,r - p));
 
         // Add the face surface normal to the sum of normals at
         // each vertex of the face
@@ -47,7 +47,7 @@ void Mesh::calculateNormals() {
 
     // Normalize the normal at each vertex
     for (int i=0; i < getNumbersVertices(); i++) {
-        m_normals[i] = m_normals[i].normalize();
+        m_normals[i] = grs::normalize(m_normals[i]);
     }
 }
 
@@ -63,27 +63,27 @@ unsigned int Mesh::getNumbersParts() const {
     return m_indices.size();
 }
 
-const std::vector<Vector3<float>>& Mesh::getVertices() const {
+const std::vector<grs::Vec3f>& Mesh::getVertices() const {
     return m_vertices;
 }
 
-void Mesh::setVertices(const std::vector<Vector3<float>>& vertices) {
+void Mesh::setVertices(const std::vector<grs::Vec3f>& vertices) {
     m_vertices = vertices;
 }
 
-const std::vector<Vector3<float>>& Mesh::getNormals() const {
+const std::vector<grs::Vec3f>& Mesh::getNormals() const {
     return m_normals;
 }
 
-void Mesh::setNormals(const std::vector<Vector3<float>>& normals) {
+void Mesh::setNormals(const std::vector<grs::Vec3f>& normals) {
     m_normals = normals;
 }
 
-const std::vector<Vector2<float>>& Mesh::getUVs() const {
+const std::vector<grs::Vec2f>& Mesh::getUVs() const {
     return m_uvs;
 }
 
-void Mesh::setUVs(const std::vector<Vector2<float>>& uvs) {
+void Mesh::setUVs(const std::vector<grs::Vec2f>& uvs) {
     m_uvs = uvs;
 }
 
@@ -95,7 +95,7 @@ void Mesh::setIndices(const std::vector<std::vector<unsigned int>>& indices) {
     m_indices = indices;
 }
 
-const Vector3<float>& Mesh::getVertex(const unsigned int i) const {
+const grs::Vec3f& Mesh::getVertex(const unsigned int i) const {
     assert(i < getNumbersVertices());
     return m_vertices[i];
 }

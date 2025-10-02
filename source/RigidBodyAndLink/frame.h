@@ -14,36 +14,34 @@
 
 #include "node.h"
 #include "Mathematics/color.h"
-#include "Mathematics/matrix3.h"
-#include "Mathematics/transform.h"
 
 class Frame {
 
 public:
-    explicit Frame(const std::string& name = "", const Frame* reference = nullptr, const Vector3<double>& position = Vector3<double>::zeros(), const Vector3<double>& orientation = Vector3<double>::zeros(), Color::HexColor forceColor = Color::HexColor::YELLOW);
+    explicit Frame(const std::string& name = "", const Frame* reference = nullptr, const grs::Vec3d& position = grs::Vec3d::zeros(), const grs::Vec3d& orientation = grs::Vec3d::zeros(), Color::HexColor forceColor = Color::HexColor::YELLOW);
     ~Frame() = default;
 
     void setLoadCallback(std::function<void(Frame&)> callback);
     void computeLoad();
 
-    void setForce(const Vector3<double>& force) const {m_origin->setForce(force);};
-    void setMoment(const Vector3<double>& moment) const {m_origin->setMoment(moment);};
+    void setForce(const grs::Vec3d& force) const {m_origin->setForce(force);};
+    void setMoment(const grs::Vec3d& moment) const {m_origin->setMoment(moment);};
 
-    [[nodiscard]] const Vector3<double>& getLocalPosition() const;
-    void setLocalPosition(const Vector3<double>& position) {m_localPosition = position;};
+    [[nodiscard]] const grs::Vec3d& getLocalPosition() const;
+    void setLocalPosition(const grs::Vec3d& position) {m_localPosition = position;};
 
-    [[nodiscard]] const Vector3<double>& getLocalOrientation() const;
-    void setLocalOrientation(const Vector3<double>& orientation) {m_localOrientation = orientation;};
+    [[nodiscard]] const grs::Vec3d& getLocalOrientation() const;
+    void setLocalOrientation(const grs::Vec3d& orientation) {m_localOrientation = orientation;};
 
     [[nodiscard]] Node& originNode() const;
     [[nodiscard]] std::string getName() const {return m_name;};
 
-    [[nodiscard]] Vector3<double> forceBody() const { return m_frameToBody * originNode().force();}
-    [[nodiscard]] Vector3<double> momentBody() const { return m_frameToBody * originNode().moment();}
+    [[nodiscard]] grs::Vec3d forceBody() const { return m_frameToBody * originNode().force();}
+    [[nodiscard]] grs::Vec3d momentBody() const { return m_frameToBody * originNode().moment();}
 
-    void setTransform(const Transform& newTransform);
-    void setTransform(const Vector3<double>& newPosition, const Quaternion& newOrientation);
-    [[nodiscard]] const Transform& transform() const;
+    void setTransform(const grs::TransformD& newTransform);
+    void setTransform(const grs::Vec3d& newPosition, const grs::QuaternionD& newOrientation);
+    [[nodiscard]] const grs::TransformD& transform() const;
 
     void setIsCenterOfMass(const bool isCenterOfMass) {m_isCenterOfMass = isCenterOfMass;};
     [[nodiscard]] bool isCenterOfMass() const {return m_isCenterOfMass;}
@@ -53,14 +51,14 @@ public:
 
 private:
     std::unique_ptr<Node> m_origin;
-    Transform m_transform = Transform::identity();
+    grs::TransformD m_transform = grs::TransformD::identity();
 
     std::function<void(Frame&)> m_loadCallback;
 
-    Vector3<double> m_localPosition    = Vector3<double>::zeros();
-    Vector3<double> m_localOrientation = Vector3<double>::zeros();
+    grs::Vec3d m_localPosition    = grs::Vec3d::zeros();
+    grs::Vec3d m_localOrientation = grs::Vec3d::zeros();
 
-    Matrix3<double> m_frameToBody;
+    grs::Matrix3d m_frameToBody{};
 
     const Frame* m_referenceOriginFrame;
     std::string m_name;

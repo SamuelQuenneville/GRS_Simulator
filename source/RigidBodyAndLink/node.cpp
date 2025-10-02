@@ -20,49 +20,49 @@ int Node::getId() const {
     return m_id;
 }
 
-void Node::update(const Vector3<double>& newPosition, const Vector3<double>& newVelocity, const Vector3<double>& newForce, const Vector3<double>& newMoment) {
+void Node::update(const grs::Vec3d& newPosition, const grs::Vec3d& newVelocity, const grs::Vec3d& newForce, const grs::Vec3d& newMoment) {
     m_position = newPosition;
     m_velocity = newVelocity;
     m_force = newForce;
     m_moment = newMoment;
 }
 
-const Vector3<double>& Node::position() const {
+const grs::Vec3d& Node::position() const {
     return m_position;
 }
 
-void Node::setPosition(const Vector3<double>& newPosition) {
+void Node::setPosition(const grs::Vec3d& newPosition) {
     m_position = newPosition;
 }
 
-const Vector3<double>& Node::velocity() const {
+const grs::Vec3d& Node::velocity() const {
     return m_velocity;
 }
 
-void Node::setVelocity(const Vector3<double>& newVelocity) {
+void Node::setVelocity(const grs::Vec3d& newVelocity) {
     m_velocity = newVelocity;
 }
 
-const Vector3<double>& Node::acceleration() const {
+const grs::Vec3d& Node::acceleration() const {
     return m_acceleration;
 }
 
-void Node::setAcceleration(const Vector3<double>& newAcceleration) {
+void Node::setAcceleration(const grs::Vec3d& newAcceleration) {
     m_acceleration = newAcceleration;
 }
 
-const Vector3<double>& Node::force() const {
+const grs::Vec3d& Node::force() const {
     return m_force;
 }
 
-void Node::setForce(const Vector3<double>& newForce) {
+void Node::setForce(const grs::Vec3d& newForce) {
     m_force = newForce;
 }
 
-const Vector3<double>& Node::moment() const {
+const grs::Vec3d& Node::moment() const {
     return m_moment;
 }
 
-void Node::setMoment(const Vector3<double>& newMoment) {
+void Node::setMoment(const grs::Vec3d& newMoment) {
     m_moment = newMoment;
 }

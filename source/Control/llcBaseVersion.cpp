@@ -8,7 +8,7 @@
 
 #include "llcBaseVersion.h"
 
-LlcBaseVersion::LlcBaseVersion(worldPhysics& physics, Logger& logger,llcGains& gains, float rate)
+LlcBaseVersion::LlcBaseVersion(const worldPhysics& physics, Logger& logger,llcGains& gains, const float rate)
     : m_physics(physics)
     , m_logger(logger)
     , m_gains(gains)
@@ -19,12 +19,12 @@ LlcBaseVersion::LlcBaseVersion(worldPhysics& physics, Logger& logger,llcGains& g
     m_altController   = std::make_unique<AltitudeController>(m_physics, m_gains.altitudeCtrlGains, m_rate);
 }
 
-fixedWingControlInputs LlcBaseVersion::calculateAircraftControlInputs(int aircraftId, const fixedWingStates& currentStates, const fixedWingCommands& commands) {
+fixedWingControlInputs LlcBaseVersion::calculateAircraftControlInputs(const int aircraftId, const fixedWingStates& currentStates, const fixedWingCommands& commands) {
     m_rollController->setAircraftStates(currentStates);
     m_pitchController->setAircraftStates(currentStates);
     m_altController->setAircraftStates(currentStates);
 
-    double altPitch = m_altController->getPitchOut(static_cast<float>(commands.altitude), false);
+    const double altPitch = m_altController->getPitchOut(static_cast<float>(commands.altitude), false);
 
     fixedWingControlInputs controlInputs{};
     controlInputs.deltaAileron  = m_stabilizeRoll(commands.phi);
@@ -36,43 +36,41 @@ fixedWingControlInputs LlcBaseVersion::calculateAircraftControlInputs(int aircra
     return controlInputs;
 }
 
-void LlcBaseVersion::m_calcNavigationRoll(double commandedRoll) {
+void LlcBaseVersion::m_calcNavigationRoll(const double commandedRoll) {
     m_navigationRoll = static_cast<float>(commandedRoll);
 }
 
-void LlcBaseVersion::m_calcNavigationPitch(double commandedPitch) {
+void LlcBaseVersion::m_calcNavigationPitch(const double commandedPitch) {
     m_navigationPitch = static_cast<float>(commandedPitch);
 }
 
-void LlcBaseVersion::m_calcNavigationYaw(double commandedYaw) {
+void LlcBaseVersion::m_calcNavigationYaw(const double commandedYaw) {
     m_navigationYaw = static_cast<float>(commandedYaw);
 }
 
-float LlcBaseVersion::m_stabilizeRoll(double commandedRoll) {
+float LlcBaseVersion::m_stabilizeRoll(const double commandedRoll) {
     m_calcNavigationRoll(commandedRoll);
 
     return m_rollController->getServoOut(m_navigationRoll, 1.0f, false);
 }
 
-float LlcBaseVersion::m_stabilizePitch(double commandedPitch) {
+float LlcBaseVersion::m_stabilizePitch(const double commandedPitch) {
     m_calcNavigationPitch(commandedPitch);
 
     return m_pitchController->getServoOut(m_navigationPitch, 1.0f, false);
 }
 
-int32_t LlcBaseVersion::m_stabilizeYaw(double commandedYaw) {
+int32_t LlcBaseVersion::m_stabilizeYaw(const double commandedYaw) {
     m_calcNavigationYaw(commandedYaw);
-
-    auto yawOut = static_cast<int32_t>(m_navigationYaw);
-    return yawOut;
+    return static_cast<int32_t>(m_navigationYaw);
 }
 
 int32_t LlcBaseVersion::m_stabilizeRpm(double commandedRpm) {
     return true;
 }
 
-void LlcBaseVersion::m_writeLog(int aircraftId, fixedWingControlInputs& inputs) {
-    llcLogMessage logMessage{};
+void LlcBaseVersion::m_writeLog(const int aircraftId, const fixedWingControlInputs& inputs) const {
+    llcLogMessage logMessage;
 
     logMessage = {
             aircraftId,

@@ -14,7 +14,7 @@ FrameAxis::FrameAxis(Frame* frame, const float length)
     , m_vertexBufferForce(GL_ARRAY_BUFFER)
     , m_length(length)
 {
-    m_previousTransform = Transform::identity();
+    m_previousTransform = grs::TransformD::identity();
 
     m_createVertexBufferAndArrayObject();
     m_createForceBufferAndArrayObject();
@@ -27,7 +27,7 @@ FrameAxis::~FrameAxis() {
 }
 
 
-void FrameAxis::render(const Shader& shader, const Matrix4<double>& worldToCameraMatrix, const bool drawFrames, const bool drawForces) const {
+void FrameAxis::render(const Shader& shader, const grs::Matrix4d& worldToCameraMatrix, const bool drawFrames, const bool drawForces) const {
 
     shader.bind();
 
@@ -48,11 +48,11 @@ void FrameAxis::render(const Shader& shader, const Matrix4<double>& worldToCamer
         m_vertexBufferVertices.bind();
 
         // Position attribute
-        glVertexAttribPointer(vertexPositionLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3<float>) + sizeof(uint32_t), nullptr);
+        glVertexAttribPointer(vertexPositionLoc, 3, GL_FLOAT, GL_FALSE, sizeof(grs::Vec3f) + sizeof(uint32_t), nullptr);
         glEnableVertexAttribArray(vertexPositionLoc);
 
         // Color attribute
-        glVertexAttribIPointer(vertexColorLoc, 3, GL_UNSIGNED_INT,  sizeof(Vector3<float>) + sizeof(uint32_t), reinterpret_cast<void *>(sizeof(Vector3<float>)));
+        glVertexAttribIPointer(vertexColorLoc, 3, GL_UNSIGNED_INT,  sizeof(grs::Vec3f) + sizeof(uint32_t), reinterpret_cast<void *>(sizeof(grs::Vec3f)));
         glEnableVertexAttribArray(vertexColorLoc);
 
         glDrawArrays(GL_LINES, 0, 6); // 3 arrows = 6 vertices
@@ -67,11 +67,11 @@ void FrameAxis::render(const Shader& shader, const Matrix4<double>& worldToCamer
         m_vertexBufferForce.bind();
 
         // Position attribute
-        glVertexAttribPointer(vertexPositionLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3<float>) + sizeof(uint32_t), nullptr);
+        glVertexAttribPointer(vertexPositionLoc, 3, GL_FLOAT, GL_FALSE, sizeof(grs::Vec3f) + sizeof(uint32_t), nullptr);
         glEnableVertexAttribArray(vertexPositionLoc);
 
         // Color attribute
-        glVertexAttribIPointer(vertexColorLoc, 3, GL_UNSIGNED_INT, sizeof(Vector3<float>) + sizeof(uint32_t), reinterpret_cast<void*>(sizeof(Vector3<float>)));
+        glVertexAttribIPointer(vertexColorLoc, 3, GL_UNSIGNED_INT, sizeof(grs::Vec3f) + sizeof(uint32_t), reinterpret_cast<void*>(sizeof(grs::Vec3f)));
         glEnableVertexAttribArray(vertexColorLoc);
 
         // glDepthFunc ensure force is render on top of tethers, frames axis and ground
@@ -89,35 +89,27 @@ void FrameAxis::render(const Shader& shader, const Matrix4<double>& worldToCamer
 // Update the transform matrix of the object
 void FrameAxis::updateTransform(const double interpolationFactor) {
     // Get the transform of the rigid body
-    const Transform transform = m_frame->transform();
+    const grs::TransformD transform = m_frame->transform();
 
     // Interpolate the transform between the previous one and the new one
-    const Transform interpolatedTransform = Transform::interpolateTransforms(m_previousTransform,transform, interpolationFactor);
+    const grs::TransformD interpolatedTransform = grs::TransformD::interpolate(m_previousTransform,transform, interpolationFactor);
     m_previousTransform = transform;
 
-    // Compute the transform used for rendering the box
-    double matrix[16];
-    interpolatedTransform.getOpenGLMatrix(matrix);
-    const Matrix4 newMatrix = {{matrix[0], matrix[4], matrix[8], matrix[12]},
-                              {matrix[1], matrix[5], matrix[9], matrix[13]},
-                              {matrix[2], matrix[6], matrix[10], matrix[14]},
-                              {matrix[3], matrix[7], matrix[11], matrix[15]}};
-
-    // Apply the scaling matrix to have the correct box dimensions
-    setTransformMatrix(newMatrix);
+    // Apply the scaling matrix
+    setTransformMatrix(interpolatedTransform.toMatrix4());
 }
 
 void FrameAxis::updateForceVector() const {
     auto force = m_frame->originNode().force();
 
-    if (force.length() > 1e-6f) {
-        force = force.normalize();
+    if (force.norm() > 1e-6f) {
+        force = grs::normalize(force);
     }
 
     // Scale to length for visualization
-    force = force * m_length;
+    force = force * static_cast<double>(m_length);
 
-    const FrameLine line(Vector3<float>::zeros(), cast<float>(force.toOpenglRef()), static_cast<uint32_t>(m_frame->getForceColor()));
+    const FrameLine line(grs::Vec3f::zeros(), grs::cast<float>(force.toOpenglRef()), static_cast<uint32_t>(m_frame->getForceColor()));
 
     m_vertexBufferForce.bind();
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(FrameLine), &line);
@@ -126,9 +118,9 @@ void FrameAxis::updateForceVector() const {
 
 void FrameAxis::m_createVertexBufferAndArrayObject() {
 
-    const auto x = FrameLine(Vector3<float>::zeros(), Vector3<float>(m_length, 0, 0).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::RED));
-    const auto y = FrameLine(Vector3<float>::zeros(), Vector3<float>(0, m_length, 0).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::BLUE));
-    const auto z = FrameLine(Vector3<float>::zeros(), Vector3<float>(0, 0, m_length).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::GREEN));
+    const auto x = FrameLine(grs::Vec3f::zeros(), grs::Vec3f(m_length, 0, 0).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::RED));
+    const auto y = FrameLine(grs::Vec3f::zeros(), grs::Vec3f(0, m_length, 0).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::BLUE));
+    const auto z = FrameLine(grs::Vec3f::zeros(), grs::Vec3f(0, 0, m_length).toOpenglRef(), static_cast<uint32_t>(Color::HexColor::GREEN));
 
     const std::vector<FrameLine> vertices = {x,y,z};
 
@@ -147,7 +139,7 @@ void FrameAxis::m_createVertexBufferAndArrayObject() {
 void FrameAxis::m_createForceBufferAndArrayObject() {
 
     // Two vertices: origin and end of force vector
-    const FrameLine line(Vector3<float>::zeros(), Vector3<float>(0.0f, 0.0f, 0.0f).toOpenglRef(), static_cast<uint32_t>(m_frame->getForceColor()));
+    const FrameLine line(grs::Vec3f::zeros(), grs::Vec3f::zeros(), static_cast<uint32_t>(m_frame->getForceColor()));
 
     m_vertexBufferForce.create();
     m_vertexBufferForce.bind();

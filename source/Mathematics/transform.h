@@ -6,47 +6,68 @@
  * Createk Innovation Lab
  */
 
-#ifndef GRS_SIMULATOR_TRANSFORM_H
-#define GRS_SIMULATOR_TRANSFORM_H
+#ifndef GRS_SIMULATOR_b_H
+#define GRS_SIMULATOR_b_H
 
 #pragma once
 
-#include "vector3.h"
 #include "quaternion.h"
 
-class Transform {
+namespace grs {
 
-public:
-    Transform();
-    Transform(const Vector3<double>& position, const Matrix3<double>& orientation);
-    Transform(const Vector3<double>& position, const Quaternion& orientation);
+template <typename T>
+struct Transform {
+    Vector<T,3> position{T(0), T(0), T(0)};
+    Quaternion<T> orientation{Quaternion<T>::identity()};
 
-    [[nodiscard]] const Vector3<double>& getPosition() const {return m_position;};
-    void setPosition(const Vector3<double>& newPosition) {m_position = newPosition;};
+    constexpr Transform() noexcept = default;
+    constexpr Transform(const Vector<T,3>& pos, const Quaternion<T>& ori) noexcept
+        : position(pos), orientation(ori) {}
 
-    [[nodiscard]] const Quaternion& getOrientation() const {return m_orientation;};
-    void setOrientation(const Quaternion& newOrientation) {m_orientation = newOrientation;};
+    [[nodiscard]] static Transform identity() noexcept {
+        return Transform(Vector<T,3>::zeros(), Quaternion<T>::identity());
+    }
 
-    void setToIdentity();
+    // Convert to a homogeneous 4x4 matrix (row-major)
+    [[nodiscard]] Matrix<T,4> toMatrix4() const noexcept {
+        Matrix<T,4> M{};
+        auto R = quatToRotMatrix(orientation);
 
-    // Get the OpenGL matrix of the transform
-    void getOpenGLMatrix(double* openglMatrix) const;
+        // Upper-left 3x3 is rotation
+        for (std::size_t r = 0; r < 3; ++r) {
+            for (std::size_t c = 0; c < 3; ++c) {
+                M(r, c) = R(r, c);
+            }
+        }
 
-    // Return an interpolated transform
-    static Transform interpolateTransforms(const Transform& oldTransform, const Transform& newTransform, double interpolationFactor);
+        // Last column = position
+        M(0, 3) = position[0];
+        M(1, 3) = position[1];
+        M(2, 3) = position[2];
 
-    // Return the identity transform
-    static Transform identity();
+        // Bottom row
+        M(3, 0) = T(0);
+        M(3, 1) = T(0);
+        M(3, 2) = T(0);
+        M(3, 3) = T(1);
 
-    // operator
-    Vector3<double> operator*(const Vector3<double>& vector) const;
-    Transform operator*(const Transform& transform2) const;
-    Transform& operator=(const Transform& transform2);
+        return M;
+    }
 
-private:
-    Vector3<double> m_position;
-    Quaternion m_orientation;
+    [[nodiscard]] static Transform interpolate(const Transform& a, const Transform& b, T t) {
+        return Transform(grs::lerp(a.position, b.position, t),
+                            grs::slerp(a.orientation, b.orientation, t));
+    }
 };
 
+template <typename T>
+[[nodiscard]] constexpr Transform<T> operator*(const Transform<T>& a, const Transform<T>& b) noexcept {
+    const auto position = a.position + a.orientation * b.position;
+    const auto orientation = a.orientation * b.orientation;
 
-#endif //GRS_SIMULATOR_TRANSFORM_H
+    return {position, orientation};
+}
+
+}
+
+#endif //GRS_SIMULATOR_b_H

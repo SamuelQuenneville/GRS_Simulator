@@ -11,53 +11,20 @@
 
 #pragma once
 
-#include <vector>
-
 class Color {
 
 public:
-    // RGBA color components
-    float r;
-    float g;
-    float b;
-    float a;
+    float r = 1.f;
+    float g = 1.f;
+    float b = 1.f;
+    float a = 1.f;
 
+    constexpr Color() = default;
+    constexpr Color(const float r_, const float g_, const float b_, const float a_ = 1.f) noexcept
+        : r(r_), g(g_), b(b_), a(a_) {}
 
-    Color() : r(1), g(1), b(1), a(1) {}
-    Color(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) {}
-    Color(const Color& color) = default;
-
-    ~Color() = default;
-
-    // Return the white color
-    static Color white()  {return {1.0f, 1.0f, 1.0f, 1.0f};}
-    static Color red()    {return {1.0f, 0.0f, 0.0f, 1.0f};}
-    static Color blue()   {return {0.0f, 0.0f, 1.0f, 1.0f};}
-    static Color yellow() {return {1.0f, 1.0f, 0.0f, 1.0f};}
-
-    static Color backgroundColor() {return {0.298f, 0.298f, 0.32157f, 1.0f};}
-    static Color floorColor() {return {0.78f, 0.78f, 0.78f, 1.0f};}
-
-    static Color color(const int index) {
-        switch (index) {
-            case 1: return red();
-            case 2: return yellow();
-            case 3: return blue();
-            case 4: return white();
-            default: throw std::out_of_range("Color index is out of range");
-        }
-    }
-
-    // = operator
-    Color& operator=(const Color& color) {
-        if (&color != this) {
-            r = color.r;
-            g = color.g;
-            b = color.b;
-            a = color.a;
-        }
-        return *this;
-    }
+    constexpr Color(const Color&) noexcept = default;
+    constexpr Color& operator=(const Color&) noexcept = default;
 
     enum class HexColor {
         RED     = 0xff0000,
@@ -69,6 +36,25 @@ public:
         MAGENTA = 0xff00ff,
         CYAN    = 0x00ffff,
     };
+
+    // Return the white color
+    static constexpr Color white()  {return {1.0f, 1.0f, 1.0f, 1.0f};}
+    static constexpr Color red()    {return {1.0f, 0.0f, 0.0f, 1.0f};}
+    static constexpr Color blue()   {return {0.0f, 0.0f, 1.0f, 1.0f};}
+    static constexpr Color yellow() {return {1.0f, 1.0f, 0.0f, 1.0f};}
+
+    static constexpr Color backgroundColor() {return {0.298f, 0.298f, 0.32157f, 1.0f};}
+    static constexpr Color floorColor() {return {0.78f, 0.78f, 0.78f, 1.0f};}
+
+    [[nodiscard]] static Color color(const int index) {
+        switch (index) {
+            case 1: return red();
+            case 2: return yellow();
+            case 3: return blue();
+            case 4: return white();
+            default: throw std::out_of_range("Color index is out of range");
+        }
+    }
 };
 
 #endif //GRS_SIMULATOR_COLOR_H

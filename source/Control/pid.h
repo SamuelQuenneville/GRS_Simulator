@@ -11,8 +11,7 @@
 
 #include <cstring>
 
-#include "Control/slewLimiter.h"
-#include "Mathematics//grsMath.h"
+#include "slewLimiter.h"
 
 class PID {
 

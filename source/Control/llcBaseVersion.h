@@ -14,10 +14,10 @@
 #include "Control/rollController.h"
 #include "Control/altitudeController.h"
 
-class LlcBaseVersion : public LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands> {
+class LlcBaseVersion final : public LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands> {
 
 public:
-    LlcBaseVersion(worldPhysics& physics, Logger& logger, llcGains& gains, float rate);
+    LlcBaseVersion(const worldPhysics& physics, Logger& logger, llcGains& gains, float rate);
 
     fixedWingControlInputs calculateAircraftControlInputs(int aircraftId, const fixedWingStates& currentStates, const fixedWingCommands& commands) override;
 
@@ -50,7 +50,7 @@ private:
     std::unique_ptr<PitchController>  m_pitchController;
     std::unique_ptr<AltitudeController> m_altController;
 
-    void m_writeLog(int aircraftId, fixedWingControlInputs& inputs);
+    void m_writeLog(int aircraftId, const fixedWingControlInputs& inputs) const;
 };
 
 

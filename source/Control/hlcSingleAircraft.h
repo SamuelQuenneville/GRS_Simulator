@@ -12,10 +12,10 @@
 #include "Control/highLevelController.h"
 #include "Control/groundspeedController.h"
 
-class HlcSingleAircraft : public HighLevelController<fixedWingCommands, fixedWingStates> {
+class HlcSingleAircraft final : public HighLevelController<fixedWingCommands, fixedWingStates> {
 
 public:
-    HlcSingleAircraft(worldPhysics& physics, Logger& logger, hlcGains& gains, float rate);
+    HlcSingleAircraft(const worldPhysics& physics, Logger& logger, hlcGains& gains, float rate);
     std::map<int, fixedWingCommands> calculateInputs(const std::vector<int>& ids, const std::vector<fixedWingStates>& currentStates, const target& target) override;
     std::map<int, fixedWingCommands> calculateInputs(const std::vector<int>& ids, const std::vector<fixedWingStates>& currentStates, const payloadStates& payloadStates, const target& target) override;
 
@@ -28,7 +28,7 @@ private:
 
     std::unique_ptr<GroundspeedController> m_groundspeedController;
 
-    void m_writeLog(const fixedWingCommands& commands);
+    void m_writeLog(const fixedWingCommands& commands) const;
 };
 
 

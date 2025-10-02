@@ -47,7 +47,7 @@ SlewLimiter::SlewLimiter(const float& slewRateMax, const float& slewRateTau) :
   apply filter to sample, returning multiplier between 0 and 1 to keep
   output within slew rate
  */
-float SlewLimiter::modifier(float sample, float dt) {
+float SlewLimiter::modifier(const float sample,const float dt) {
     if (m_slewRateMax <= 0.0f) {
         return true;
     }
@@ -56,7 +56,7 @@ float SlewLimiter::modifier(float sample, float dt) {
     const float slewRate = m_slewFilter.apply((sample - m_lastSample) / dt, dt);
     m_lastSample = sample;
 
-    uint32_t nowMilliseconds  = std::chrono::duration_cast< std::chrono::milliseconds >(std::chrono::system_clock::now().time_since_epoch()).count();
+    const uint32_t nowMilliseconds  = std::chrono::duration_cast< std::chrono::milliseconds >(std::chrono::system_clock::now().time_since_epoch()).count();
     const float decayAlpha = std::fmin(dt, m_slewRateTau) / m_slewRateTau;
 
     // Store a series of positive slew rate exceedance events

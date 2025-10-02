@@ -25,22 +25,22 @@ void TwoAircraft::createPhysicsWorld() {
 
     // ---------- AIRCRAFT ---------- //
     for (const auto& aircraft : m_world.system()->aircraft()) {
-        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), Vector3<double>(2, 2, 2), World::getExecutablePath());
+        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), grs::Vec3d(2, 2, 2), World::getExecutablePath());
         aircraftObject->setColor(Color::color(aircraft->getId()));
 
         m_physicsObjects.push_back(std::move(aircraftObject));
     }
 
     // ---------- LAUNCHER ---------- //
-    m_launcher1 = std::make_shared<Launcher>(Vector3<double>(1.0,1.0,1.0), World::getExecutablePath());
+    m_launcher1 = std::make_shared<Launcher>(grs::Vec3d(1.0,1.0,1.0), World::getExecutablePath());
     m_launcher1->setColor(Color::backgroundColor());
-    m_launcher2 = std::make_shared<Launcher>(Vector3<double>(1.0,1.0,1.0), World::getExecutablePath());
+    m_launcher2 = std::make_shared<Launcher>(grs::Vec3d(1.0,1.0,1.0), World::getExecutablePath());
     m_launcher2->setColor(Color::backgroundColor());
     m_staticObjects.push_back(m_launcher1);
     m_staticObjects.push_back(m_launcher2);
 
     // ---------- GROUND ---------- //
-    m_ground = std::make_shared<Cube>(Vector3<float>(50, 0.5, 50), World::getExecutablePath());
+    m_ground = std::make_shared<Cube>(grs::Vec3f(50, 0.5, 50), World::getExecutablePath());
     m_ground->setColor(Color::floorColor());
     m_staticObjects.push_back(m_ground);
 }
@@ -52,16 +52,16 @@ void TwoAircraft::destroyPhysicsWorld() {
 }
 
 void TwoAircraft::initBodiesPositions() const {
-    m_launcher1->setTransform(Transform({-0.849, 0.816, 100.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0), 0.0, M_PI/2.0)));
-    m_launcher2->setTransform(Transform({0.849, 0.816, -100.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0),0.0, -M_PI/2.0)));
-    m_ground->setTransform(Transform({0.0, -0.5, 0.0}, Quaternion::identity()));
+    m_launcher1->setTransform(grs::TransformD({-0.849, 0.816, 100.0}, grs::eulerToQuat(M_PI + grs::degToRad(19.0), 0.0, M_PI_2).nedToYup()));
+    m_launcher2->setTransform(grs::TransformD({0.849, 0.816, -100.0}, grs::eulerToQuat(M_PI + grs::degToRad(19.0),0.0, -M_PI_2).nedToYup()));
+    m_ground->setTransform(grs::TransformD({0.0, -0.5, 0.0}, grs::QuaternionD::identity()));
 }
 
 void TwoAircraft::updatePhysics() {
     m_world.update();
 }
 
-void TwoAircraft::updateTarget(const float groundspeed, std::vector<double> payloadPosition) {
+void TwoAircraft::updateTarget(const float groundspeed, const std::vector<double> payloadPosition) {
     target t = m_world.system()->getTarget();
     t.groundspeed = groundspeed;
     t.positionPayload = payloadPosition;
@@ -80,7 +80,7 @@ void TwoAircraft::destroy() {
     destroyPhysicsWorld();
 }
 
-void TwoAircraft::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
+void TwoAircraft::renderSinglePass(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) {
     // Bind the shader
     shader.bind();
 

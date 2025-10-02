@@ -10,10 +10,10 @@
 #define GRS_SIMULATOR_SHADER_H
 
 #include <fstream>
+#include <iostream>
 #include <nanogui/opengl.h>
 
-#include "Mathematics/matrix3.h"
-#include "Mathematics/matrix4.h"
+#include "Mathematics/math.h"
 
 class Shader {
 
@@ -41,23 +41,23 @@ public:
 
     // Set a vector 2 uniform value to this shader (be careful if the uniform is not
     // used in the shader, the compiler will remove it, then when you will try to set it, an assert will occur)
-    void setVector2Uniform(const std::string& variableName, const Vector2<float>& v, bool errorIfMissing = true) const;
+    void setVector2Uniform(const std::string& variableName, const grs::Vec2f& v, bool errorIfMissing = true) const;
 
     // Set a vector 3 uniform value to this shader (be careful if the uniform is not
     // used in the shader, the compiler will remove it, then when you will try to set it, an assert will occur)
-    void setVector3Uniform(const std::string& variableName, const Vector3<float>& v, bool errorIfMissing = true) const;
+    void setVector3Uniform(const std::string& variableName, const grs::Vec3f& v, bool errorIfMissing = true) const;
 
     // Set a vector 4 uniform value to this shader (be careful if the uniform is not
     // used in the shader, the compiler will remove it, then when you will try to set it, an assert will occur)
-    void setVector4Uniform(const std::string& variableName, const Vector4<float>& v, bool errorIfMissing = true) const;
+    void setVector4Uniform(const std::string& variableName, const grs::Vec4f& v, bool errorIfMissing = true) const;
 
     // Set a 3x3 matrix uniform value to this shader (be careful if the uniform is not
     // used in the shader, the compiler will remove it, then when you will try to set it, an assert will occur)
-    void setMatrix3x3Uniform(const std::string& variableName, const Matrix3<double>& matrix, bool errorIfMissing = true) const;
+    void setMatrix3x3Uniform(const std::string& variableName, const grs::Matrix3d& matrix, bool errorIfMissing = true) const;
 
     // Set a 4x4 matrix uniform value to this shader (be careful if the uniform is not
     // used in the shader, the compiler will remove it, then when you will try to set it, an assert will occur)
-    void setMatrix4x4Uniform(const std::string& variableName, const Matrix4<double>& matrix, bool errorIfMissing = true) const;
+    void setMatrix4x4Uniform(const std::string& variableName, const grs::Matrix4d& matrix, bool errorIfMissing = true) const;
 
 private:
     GLuint m_programObjectId;

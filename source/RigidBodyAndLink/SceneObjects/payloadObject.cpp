@@ -8,7 +8,7 @@
 
 #include "payloadObject.h"
 
-PayloadObject::PayloadObject(Payload* payload, const Vector3<float>& size, const std::string& executablePath)
+PayloadObject::PayloadObject(Payload* payload, const grs::Vec3f& size, const std::string& executablePath)
     : PhysicsObject(executablePath + R"(/source/Meshes/cube.obj)")
     , m_vertexBufferVertices(GL_ARRAY_BUFFER)
     , m_vertexBufferNormals(GL_ARRAY_BUFFER)
@@ -16,17 +16,14 @@ PayloadObject::PayloadObject(Payload* payload, const Vector3<float>& size, const
     , m_vertexBufferIndices(GL_ELEMENT_ARRAY_BUFFER)
 {
     // Initialize the size of the box
-    m_size[0] = size.x();
-    m_size[1] = size.y();
-    m_size[2] = size.z();
+    m_size[0] = size[0];
+    m_size[1] = size[1];
+    m_size[2] = size[2];
 
     // Compute the scaling matrix
-    m_scalingMatrix = Matrix4<double>{{m_size[0],         0,         0, 0},
-                                      {        0, m_size[1],         0, 0},
-                                      {        0,         0, m_size[2], 0},
-                                      {        0,         0,         0, 1}};
+    m_scalingMatrix = grs::Matrix4d::diagonal({m_size[0], m_size[1], m_size[2], 1.0});
 
-    m_previousTransform = Transform::identity();
+    m_previousTransform = grs::TransformD::identity();
 
     m_body = payload;
 
@@ -47,7 +44,7 @@ PayloadObject::~PayloadObject() {
     m_vertexArrayObject.destroy();
 }
 
-void PayloadObject::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
+void PayloadObject::render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) {
 
     shader.bind();
 
@@ -56,12 +53,12 @@ void PayloadObject::render(Shader& shader, const Matrix4<double>& worldToCameraM
     shader.setMatrix4x4Uniform("worldToCameraMatrix", worldToCameraMatrix);
 
     // Set the normal matrix (inverse transpose of the 3x3 upper-left sub matrix of the model-view matrix)
-    const Matrix4<double> localToCameraMatrix = worldToCameraMatrix * getTransformMatrix();
-    const Matrix3<double> normalMatrix = localToCameraMatrix.getUpperLeft3x3Matrix().getInverse().transpose();
+    const grs::Matrix4d localToCameraMatrix = worldToCameraMatrix * getTransformMatrix();
+    const grs::Matrix3d normalMatrix = localToCameraMatrix.upperLeft3x3().inverse().transpose();
     shader.setMatrix3x3Uniform("normalMatrix", normalMatrix, false);
 
     // Set the vertex color
-    const Vector4 color(m_color.r, m_color.g, m_color.b, m_color.a);
+    const grs::Vec4f color(m_color.r, m_color.g, m_color.b, m_color.a);
     shader.setVector4Uniform("globalVertexColor", color, false);
 
     m_vertexArrayObject.bind();
@@ -107,14 +104,14 @@ void PayloadObject::m_createVertexBufferAndArrayObject() {
     // Create the VBO for the vertices data
     m_vertexBufferVertices.create();
     m_vertexBufferVertices.bind();
-    const auto sizeVertices = static_cast<GLsizei>(m_vertices.size() * sizeof(Vector3<float>));
+    const auto sizeVertices = static_cast<GLsizei>(m_vertices.size() * sizeof(grs::Vec3f));
     m_vertexBufferVertices.copyDataIntoVBO(sizeVertices, getVerticesPointer(), GL_STATIC_DRAW);
     m_vertexBufferVertices.unbind();
 
     // Create the VBO for the normals data
     m_vertexBufferNormals.create();
     m_vertexBufferNormals.bind();
-    const auto sizeNormals = static_cast<GLsizei>(m_normals.size() * sizeof(Vector3<float>));
+    const auto sizeNormals = static_cast<GLsizei>(m_normals.size() * sizeof(grs::Vec3f));
     m_vertexBufferNormals.copyDataIntoVBO(sizeNormals, getNormalsPointer(), GL_STATIC_DRAW);
     m_vertexBufferNormals.unbind();
 
@@ -122,7 +119,7 @@ void PayloadObject::m_createVertexBufferAndArrayObject() {
         // Create the VBO for the texture co data
         m_vertexBufferTextureCoords.create();
         m_vertexBufferTextureCoords.bind();
-        const auto sizeTextureCoords = static_cast<GLsizei>(m_uvs.size() * sizeof(Vector2<float>));
+        const auto sizeTextureCoords = static_cast<GLsizei>(m_uvs.size() * sizeof(grs::Vec2f));
         m_vertexBufferTextureCoords.copyDataIntoVBO(sizeTextureCoords, getUVTextureCoordinatesPointer(), GL_STATIC_DRAW);
         m_vertexBufferTextureCoords.unbind();
     }

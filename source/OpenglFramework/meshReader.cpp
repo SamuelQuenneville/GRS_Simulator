@@ -13,16 +13,16 @@ std::unordered_map<std::string, std::shared_ptr<MeshReader::meshData>> MeshReade
 void MeshReader::loadMesh(const std::string& filename, Mesh& meshContainer) {
     // Get the extension of the file
     const unsigned int startPosExtension = filename.find_last_of('.');
-    std::string extension = filename.substr(startPosExtension+1);
+    const std::string extension = filename.substr(startPosExtension+1);
 
     // Load the file using the correct method
     if (extension == "obj") {
 
         // Look if mesh was already parse
-        auto it = meshCache.find(filename);
+        const auto it = meshCache.find(filename);
         if (it != meshCache.end()) {
             // Already loaded, just copy
-            std::shared_ptr<meshData> data = it->second;
+            const std::shared_ptr<meshData> data = it->second;
             // Set the data to the mesh
             meshContainer.setIndices(data->indices);
             meshContainer.setVertices(data->vertices);
@@ -62,9 +62,9 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
     float v1, v2, v3;
     size_t found1, found2;
     std::vector<bool> isQuad;
-    std::vector<Vector3<float>> vertices;
-    std::vector<Vector3<float>> normals;
-    std::vector<Vector2<float>> uvs;
+    std::vector<grs::Vec3f> vertices;
+    std::vector<grs::Vec3f> normals;
+    std::vector<grs::Vec2f> uvs;
     std::vector<size_t> verticesIndices;
     std::vector<size_t> normalsIndices;
     std::vector<size_t> uvsIndices;
@@ -186,9 +186,9 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
 
     // Mesh data
     std::vector<std::vector<unsigned int>> meshIndices;
-    std::vector<Vector3<float>> meshVertices;
-    std::vector<Vector3<float>> meshNormals;
-    std::vector<Vector2<float>> meshUVs;
+    std::vector<grs::Vec3f> meshVertices;
+    std::vector<grs::Vec3f> meshNormals;
+    std::vector<grs::Vec2f> meshUVs;
 
     // avoid reallocations
     meshVertices.reserve(verticesIndices.size());
@@ -257,17 +257,17 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
         }
         else {  // If the current vertex is in a quad
 
-            Vector3<float> v4 = meshVertices[i1];
-            Vector3<float> v5 = meshVertices[i2];
-            Vector3<float> v6 = meshVertices[i3];
-            Vector3<float> v7 = meshVertices[i4];
+            grs::Vec3f v4 = meshVertices[i1];
+            grs::Vec3f v5 = meshVertices[i2];
+            grs::Vec3f v6 = meshVertices[i3];
+            grs::Vec3f v7 = meshVertices[i4];
 
-            Vector3<float> v13 = v6-v4;
-            Vector3<float> v12 = v5-v4;
-            Vector3<float> v14 = v7-v4;
+            grs::Vec3f v13 = v6-v4;
+            grs::Vec3f v12 = v5-v4;
+            grs::Vec3f v14 = v7-v4;
 
-            float a1 = v13.dot(v12);
-            float a2 = v13.dot(v14);
+            float a1 = grs::dot(v13, v12);
+            float a2 = grs::dot(v13, v14);
             if((a1 >= 0.0f && a2 <= 0.0f) || (a1 <= 0.0f && a2 >= 0.0f)) {
                 meshIndices[meshPart].emplace_back(i1);
                 meshIndices[meshPart].emplace_back(i2);
@@ -298,7 +298,7 @@ void MeshReader::loadObjectFile(const std::string& filename, Mesh& meshContainer
     meshContainer.setNormals(meshNormals);
     meshContainer.setUVs(meshUVs);
 
-    std::shared_ptr<meshData> newMesh = std::make_shared<meshData>();
+    auto newMesh = std::make_shared<meshData>();
     newMesh->indices = meshIndices;
     newMesh->vertices = meshVertices;
     newMesh->normals = meshNormals;

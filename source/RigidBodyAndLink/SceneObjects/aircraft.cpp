@@ -9,19 +9,16 @@
 #include "aircraft.h"
 
 // Constructor
-Aircraft::Aircraft(FixedWing* aircraft, const Vector3<double>& scaling, const std::string& executablePath)
+Aircraft::Aircraft(FixedWing* aircraft, const grs::Vec3d& scaling, const std::string& executablePath)
         : PhysicsObject(executablePath + R"(/source/Meshes/aircraft.obj)")
         , m_vertexBufferVertices(GL_ARRAY_BUFFER)
         , m_vertexBufferNormals(GL_ARRAY_BUFFER)
         , m_vertexBufferTextureCoords(GL_ARRAY_BUFFER)
         , m_vertexBufferIndices(GL_ELEMENT_ARRAY_BUFFER)
 {
-    m_scalingMatrix = Matrix4<double>{{scaling.x(),           0,           0, 0},
-                                     {           0, scaling.y(),           0, 0},
-                                     {           0,           0, scaling.z(), 0},
-                                     {           0,           0,           0, 1}};
+    m_scalingMatrix = grs::Matrix4d::diagonal({scaling[0], scaling[1], scaling[2], 1.0});
 
-    m_previousTransform = Transform::identity();
+    m_previousTransform = grs::TransformD::identity();
 
     m_body = aircraft;
 
@@ -49,7 +46,7 @@ Aircraft::~Aircraft() {
 }
 
 // Render the sphere at the correct position and with the correct orientation
-void Aircraft::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
+void Aircraft::render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) {
 
     // Bind the shader
     shader.bind();
@@ -59,12 +56,12 @@ void Aircraft::render(Shader& shader, const Matrix4<double>& worldToCameraMatrix
     shader.setMatrix4x4Uniform("worldToCameraMatrix", worldToCameraMatrix);
 
     // Set the normal matrix (inverse transpose of the 3x3 upper-left sub matrix of the model-view matrix)
-    const Matrix4<double> localToCameraMatrix = worldToCameraMatrix * getTransformMatrix();
-    const Matrix3<double> normalMatrix = localToCameraMatrix.getUpperLeft3x3Matrix().getInverse().transpose();
+    const grs::Matrix4d localToCameraMatrix = worldToCameraMatrix * getTransformMatrix();
+    const grs::Matrix3d normalMatrix = localToCameraMatrix.upperLeft3x3().inverse().transpose();
     shader.setMatrix3x3Uniform("normalMatrix", normalMatrix, false);
 
     // Set the vertex color
-    const Vector4 color(m_color.r, m_color.g, m_color.b, m_color.a);
+    const grs::Vec4f color(m_color.r, m_color.g, m_color.b, m_color.a);
     shader.setVector4Uniform("globalVertexColor", color, false);
 
     // Bind the VAO
@@ -119,14 +116,14 @@ void Aircraft::m_createVertexBufferAndArrayObject() {
     // Create the VBO for the vertices data
     m_vertexBufferVertices.create();
     m_vertexBufferVertices.bind();
-    const auto sizeVertices = static_cast<GLsizei>(m_vertices.size() * sizeof(Vector3<float>));
+    const auto sizeVertices = static_cast<GLsizei>(m_vertices.size() * sizeof(grs::Vec3f));
     m_vertexBufferVertices.copyDataIntoVBO(sizeVertices, getVerticesPointer(), GL_STATIC_DRAW);
     m_vertexBufferVertices.unbind();
 
     // Create the VBO for the normals data
     m_vertexBufferNormals.create();
     m_vertexBufferNormals.bind();
-    const auto sizeNormals = static_cast<GLsizei>(m_normals.size() * sizeof(Vector3<float>));
+    const auto sizeNormals = static_cast<GLsizei>(m_normals.size() * sizeof(grs::Vec3f));
     m_vertexBufferNormals.copyDataIntoVBO(sizeNormals, getNormalsPointer(), GL_STATIC_DRAW);
     m_vertexBufferNormals.unbind();
 
@@ -134,7 +131,7 @@ void Aircraft::m_createVertexBufferAndArrayObject() {
         // Create the VBO for the texture co data
         m_vertexBufferTextureCoords.create();
         m_vertexBufferTextureCoords.bind();
-        const auto sizeTextureCoords = static_cast<GLsizei>(m_uvs.size() * sizeof(Vector2<float>));
+        const auto sizeTextureCoords = static_cast<GLsizei>(m_uvs.size() * sizeof(grs::Vec2f));
         m_vertexBufferTextureCoords.copyDataIntoVBO(sizeTextureCoords, getUVTextureCoordinatesPointer(), GL_STATIC_DRAW);
         m_vertexBufferTextureCoords.unbind();
     }

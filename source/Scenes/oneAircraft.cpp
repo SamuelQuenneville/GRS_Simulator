@@ -25,14 +25,14 @@ void OneAircraft::createPhysicsWorld() {
 
     // ---------- AIRCRAFT ---------- //
     for (const auto& aircraft : m_world.system()->aircraft()) {
-        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), Vector3<double>(2.0, 2.0, 2.0), World::getExecutablePath());
+        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), grs::Vec3d(2.0, 2.0, 2.0), World::getExecutablePath());
         aircraftObject->setColor(Color::color(aircraft->getId()));
 
         m_physicsObjects.push_back(std::move(aircraftObject));
     }
 
     // ---------- GROUND ---------- //
-    m_ground = std::make_shared<Cube>(Vector3<float>(50, 0.5, 50), World::getExecutablePath());
+    m_ground = std::make_shared<Cube>(grs::Vec3f(50.0, 0.5, 50.0), World::getExecutablePath());
     m_ground->setColor(Color::floorColor());
     m_staticObjects.push_back(m_ground);
 }
@@ -44,7 +44,7 @@ void OneAircraft::destroyPhysicsWorld() {
 }
 
 void OneAircraft::initBodiesPositions() const {
-    m_ground->setTransform(Transform({0.0, -0.5, 0.0}, Quaternion::identity()));
+    m_ground->setTransform(grs::TransformD({0.0, -0.5, 0.0}, grs::QuaternionD::identity()));
 }
 
 void OneAircraft::updatePhysics() {
@@ -70,7 +70,7 @@ void OneAircraft::destroy() {
     destroyPhysicsWorld();
 }
 
-void OneAircraft::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
+void OneAircraft::renderSinglePass(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) {
     // Bind the shader
     shader.bind();
 

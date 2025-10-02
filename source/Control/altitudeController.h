@@ -34,7 +34,7 @@ private:
     float m_dt;
     float m_lastOutRad = 0;
 
-    PID m_altPID{radians(4.0),radians(2.0),radians(0.5),0.0,radians(20.0),3.0,10.0,3.0,0.0025,0.2,1.0};
+    PID m_altPID{grs::degToRad(4.0),grs::degToRad(2.0),grs::degToRad(0.5),0.0,grs::degToRad(20.0),3.0,10.0,3.0,0.0025,0.2,1.0};
     PID::pidInfo m_pidInfo{};
 
     fixedWingStates m_aircraftStates{};

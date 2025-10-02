@@ -86,14 +86,14 @@ void Texture2D::unbind() const {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-unsigned int Texture2D::getID() const {
+GLuint Texture2D::getID() const {
     return m_id;
 }
 
-unsigned int Texture2D::getUnit() const {
+GLuint Texture2D::getUnit() const {
     return m_unit;
 }
 
-void Texture2D::setUnit(const unsigned int unit) {
+void Texture2D::setUnit(const GLuint unit) {
     m_unit = unit;
 }

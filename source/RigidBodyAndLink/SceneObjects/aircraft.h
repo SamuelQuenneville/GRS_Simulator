@@ -17,14 +17,14 @@
 class Aircraft final : public PhysicsObject {
 
 public :
-    Aircraft(FixedWing* aircraft, const Vector3<double>& scaling, const std::string& executablePath);
+    Aircraft(FixedWing* aircraft, const grs::Vec3d& scaling, const std::string& executablePath);
     ~Aircraft() override;
 
-    void render(Shader& shader, const Matrix4<double>& worldToCameraMatrix) override;
+    void render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) override;
     void updateTransform(double interpolationFactor) override;
 
 private :
-    Matrix4<double> m_scalingMatrix;
+    grs::Matrix4d m_scalingMatrix{};
 
     // Vertex Buffer Object for the vertices data
     VertexBufferObject m_vertexBufferVertices;

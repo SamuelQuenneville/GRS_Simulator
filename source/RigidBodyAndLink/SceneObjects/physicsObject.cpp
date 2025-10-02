@@ -28,7 +28,7 @@ PhysicsObject::PhysicsObject(const std::string& meshFilePath)
     }
 }
 
-void PhysicsObject::renderVisualObject(Shader& shader, const Matrix4<double>& worldToCameraMatrix, const bool drawFrames, const bool drawForces) {
+void PhysicsObject::renderVisualObject(Shader& shader, const grs::Matrix4d& worldToCameraMatrix, const bool drawFrames, const bool drawForces) {
     for (const auto& visualObject : m_visualObjects) {
         visualObject->render(shader, worldToCameraMatrix, drawFrames, drawForces);
     }
@@ -38,11 +38,11 @@ void PhysicsObject::setColor(const Color& color) {
     m_color = color;
 }
 
-const Transform& PhysicsObject::getTransform() const {
+const grs::TransformD& PhysicsObject::getTransform() const {
     return m_body->transform();
 }
 
-void PhysicsObject::setTransform(const Transform& transform) {
+void PhysicsObject::setTransform(const grs::TransformD& transform) {
     m_body->setTransform(transform);
     updateTransform(1.0);
 }
@@ -60,22 +60,14 @@ void PhysicsObject::m_createVisualObject() {
     }
 }
 
-Matrix4<double> PhysicsObject::m_calculateTransform(const double interpolationFactor, const Matrix4<double>& scalingMatrix) {
+grs::Matrix4d PhysicsObject::m_calculateTransform(const double interpolationFactor, const grs::Matrix4d& scalingMatrix) {
     // Get the transform of the rigid body
-    const Transform transform = m_body->transform();
+    const grs::TransformD transform = m_body->transform();
 
     // Interpolate the transform between the previous one and the new one
-    const Transform interpolatedTransform = Transform::interpolateTransforms(m_previousTransform,transform, interpolationFactor);
+    const grs::TransformD interpolatedTransform = grs::TransformD::interpolate(m_previousTransform, transform, interpolationFactor);
     m_previousTransform = transform;
 
-    // Compute the transform used for rendering the box
-    double matrix[16];
-    interpolatedTransform.getOpenGLMatrix(matrix);
-    const Matrix4 newMatrix = {{matrix[0], matrix[4], matrix[8], matrix[12]},
-                              {matrix[1], matrix[5], matrix[9], matrix[13]},
-                              {matrix[2], matrix[6], matrix[10], matrix[14]},
-                              {matrix[3], matrix[7], matrix[11], matrix[15]}};
-
-    // Apply the scaling matrix to have the correct box dimensions
-    return newMatrix * scalingMatrix;
+    // Apply the scaling matrix
+    return interpolatedTransform.toMatrix4() * scalingMatrix;
 }

@@ -14,10 +14,10 @@
 #include "Control/lateralController.h"
 #include "Control/phaseController.h"
 
-class HlcTwinAircraft : public HighLevelController<fixedWingCommands, fixedWingStates> {
+class HlcTwinAircraft final : public HighLevelController<fixedWingCommands, fixedWingStates> {
 
 public:
-    HlcTwinAircraft(worldPhysics& physics, Logger& logger, hlcGains& gains, float rate, double tetherLength);
+    HlcTwinAircraft(const worldPhysics& physics, Logger& logger, hlcGains& gains, float rate, double tetherLength);
     std::map<int, fixedWingCommands> calculateInputs(const std::vector<int>& ids, const std::vector<fixedWingStates>& currentStates, const target& target) override;
     std::map<int, fixedWingCommands> calculateInputs(const std::vector<int>& ids, const std::vector<fixedWingStates>& currentStates, const payloadStates& payloadStates, const target& target) override;
 
@@ -39,7 +39,7 @@ private:
     std::unique_ptr<PhaseController> m_phaseController1;
     std::unique_ptr<PhaseController> m_phaseController2;
 
-    void m_writeLog(const fixedWingCommands& commands1, const fixedWingCommands& commands2);
+    void m_writeLog(const fixedWingCommands& commands1, const fixedWingCommands& commands2) const;
 };
 
 

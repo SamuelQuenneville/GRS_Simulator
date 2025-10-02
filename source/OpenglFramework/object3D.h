@@ -9,8 +9,7 @@
 #ifndef GRS_SIMULATOR_OBJECT3D_H
 #define GRS_SIMULATOR_OBJECT3D_H
 
-#include "Mathematics/vector3.h"
-#include "Mathematics/matrix4.h"
+#include "Mathematics/math.h"
 
 // This class represent a generic 3D object on the scene.
 class Object3D {
@@ -20,38 +19,38 @@ public:
     virtual ~Object3D() = default;
 
     // Return the transform matrix
-    [[nodiscard]] const Matrix4<double>& getTransformMatrix() const;
+    [[nodiscard]] const grs::Matrix4d& getTransformMatrix() const;
 
     // Set the transform matrix
-    void setTransformMatrix(const Matrix4<double>& matrix);
+    void setTransformMatrix(const grs::Matrix4d& matrix);
     virtual void updateTransform(double interpolationFactor) {};
 
     // Set to the identity transform
     void setToIdentity();
 
     // Return the origin of object in world-space
-    [[nodiscard]] Vector3<double> getOrigin() const;
+    [[nodiscard]] grs::Vec3d getOrigin() const;
 
     // Translate the object in world-space
-    void translateWorld(const Vector3<double>& vector);
+    void translateWorld(const grs::Vec3d& vector);
 
     // Translate the object in local-space
-    void translateLocal(const Vector3<double>& vector);
+    void translateLocal(const grs::Vec3d& vector);
 
     // Rotate the object in world-space
-    void rotateWorld(const Vector3<double>& axis, float angle);
+    void rotateWorld(const grs::Vec3d& axis, double angle);
 
     // Rotate the object in local-space
-    void rotateLocal(const Vector3<double>& axis, float angle);
+    void rotateLocal(const grs::Vec3d& axis, double angle);
 
     // Rotate around a world-space point
-    void rotateAroundWorldPoint(const Vector3<double>& axis, float angle, const Vector3<double>& point);
+    void rotateAroundWorldPoint(const grs::Vec3d& axis, double angle, const grs::Vec3d& point);
 
     // Rotate around a local-space point
-    void rotateAroundLocalPoint(const Vector3<double>& axis, float angle, const Vector3<double>& worldPoint);
+    void rotateAroundLocalPoint(const grs::Vec3d& axis, double angle, const grs::Vec3d& worldPoint);
 
 protected:
-    Matrix4<double> m_transformMatrix = Matrix4<double>::identity();
+    grs::Matrix4d m_transformMatrix = grs::Matrix4d::identity();
 };
 
 

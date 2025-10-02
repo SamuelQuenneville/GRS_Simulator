@@ -26,20 +26,20 @@ Scene::Scene(const std::string& executablePath)
     , m_viewportHeight(0)
     , m_initialZoom(2.0f)
 {
-    m_light0.translateWorld({30.0f, 80.0f, 30.0f});
-    m_light1.translateWorld({30.0f, 80.0f, 30.0f});
+    m_light0.translateWorld({30.0, 80.0, 30.0});
+    m_light1.translateWorld({30.0, 80.0, 30.0});
 
     constexpr float lightIntensity0 = 0.5f;
     constexpr float lightIntensity1 = 0.2f;
-    const Color lightColor0(lightIntensity0 * 1.0f, lightIntensity0 * 1.0f, lightIntensity0 * 1.0f, 1.0f);
-    const Color lightColor1(lightIntensity1 * 1.0f, lightIntensity1 * 1.0f, lightIntensity1 * 1.0f, 1.0f);
+    constexpr Color lightColor0(lightIntensity0 * 1.0f, lightIntensity0 * 1.0f, lightIntensity0 * 1.0f, 1.0f);
+    constexpr Color lightColor1(lightIntensity1 * 1.0f, lightIntensity1 * 1.0f, lightIntensity1 * 1.0f, 1.0f);
 
     m_light0.setDiffuseColor(lightColor0);
     m_light1.setDiffuseColor(lightColor1);
 
     m_shadowMapLightCameras[0].translateWorld(m_light0.getOrigin());
-    m_shadowMapLightCameras[0].rotateLocal({1, 0, 0}, -M_PI / 4.0f);
-    m_shadowMapLightCameras[0].rotateLocal({0, 1, 0}, M_PI / 4.0f);
+    m_shadowMapLightCameras[0].rotateLocal({1, 0, 0}, -M_PI_4);
+    m_shadowMapLightCameras[0].rotateLocal({0, 1, 0}, M_PI_4);
 
     for (auto & m_shadowMapLightCamera : m_shadowMapLightCameras) {
         m_shadowMapLightCamera.setDimensions(SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT);
@@ -47,10 +47,10 @@ Scene::Scene(const std::string& executablePath)
         m_shadowMapLightCamera.setSceneRadius(100.0f);
     }
 
-    m_shadowMapBiasMatrix.setAllValues(0.5, 0.0, 0.0, 0.5,
-                                      0.0, 0.5, 0.0, 0.5,
-                                      0.0, 0.0, 0.5, 0.5,
-                                      0.0, 0.0, 0.0, 1.0);
+    m_shadowMapBiasMatrix = {0.5, 0.0, 0.0, 0.5,
+                                0.0, 0.5, 0.0, 0.5,
+                                0.0, 0.0, 0.5, 0.5,
+                                0.0, 0.0, 0.0, 1.0};
 
     m_createShadowMapFrameBufferObjectAndTexture();
 }
@@ -88,12 +88,12 @@ void Scene::render() {
 
     glClearColor(Color::backgroundColor().r, Color::backgroundColor().g, Color::backgroundColor().b, Color::backgroundColor().a);
 
-    Matrix4<double> shadowMapProjMatrix[NB_SHADOW_MAPS];
-    Matrix4<double> worldToLightCameraMatrix[NB_SHADOW_MAPS];
+    grs::Matrix4d shadowMapProjMatrix[NB_SHADOW_MAPS];
+    grs::Matrix4d worldToLightCameraMatrix[NB_SHADOW_MAPS];
     for (int i = 0; i < NB_SHADOW_MAPS; i++) {
 
         shadowMapProjMatrix[i] = m_shadowMapLightCameras[i].getProjectionMatrix();
-        worldToLightCameraMatrix[i] = m_shadowMapLightCameras[i].getTransformMatrix().getInverse();
+        worldToLightCameraMatrix[i] = m_shadowMapLightCameras[i].getTransformMatrix().inverse();
     }
 
     // ---------- Render the scene to generate the shadow map (first pass) ----------- //
@@ -137,7 +137,7 @@ void Scene::render() {
     glCullFace(GL_BACK);
 
     // Get the world-space to camera-space matrix
-    const Matrix4<double> worldToCameraMatrix = m_camera.getTransformMatrix().getInverse();
+    const grs::Matrix4d worldToCameraMatrix = m_camera.getTransformMatrix().inverse();
 
     m_phongShader.bind();
 
@@ -154,8 +154,8 @@ void Scene::render() {
     m_phongShader.setMatrix4x4Uniform("projectionMatrix", m_camera.getProjectionMatrix());
     m_phongShader.setMatrix4x4Uniform("shadowMapLight0ProjectionMatrix", m_shadowMapBiasMatrix * shadowMapProjMatrix[0]);
     m_phongShader.setMatrix4x4Uniform("worldToLight0CameraMatrix", worldToLightCameraMatrix[0]);
-    m_phongShader.setVector3Uniform("light0PosCameraSpace", cast<float>(worldToCameraMatrix * m_light0.getOrigin()));
-    m_phongShader.setVector3Uniform("light1PosCameraSpace", cast<float>(worldToCameraMatrix * m_light1.getOrigin()));
+    m_phongShader.setVector3Uniform("light0PosCameraSpace", grs::cast<float>(worldToCameraMatrix * m_light0.getOrigin()));
+    m_phongShader.setVector3Uniform("light1PosCameraSpace", grs::cast<float>(worldToCameraMatrix * m_light1.getOrigin()));
     m_phongShader.setVector3Uniform("lightAmbientColor", {0.1f, 0.1f, 0.1f});
     m_phongShader.setVector3Uniform("light0DiffuseColor", {m_light0.getDiffuseColor().r, m_light0.getDiffuseColor().g, m_light0.getDiffuseColor().b});
     m_phongShader.setVector3Uniform("light1DiffuseColor", {m_light1.getDiffuseColor().r, m_light1.getDiffuseColor().g, m_light1.getDiffuseColor().b});
@@ -187,7 +187,7 @@ void Scene::render() {
     }
 }
 
-void Scene::renderSinglePass(Shader& shader, const Matrix4<double>& worldToCameraMatrix) {
+void Scene::renderSinglePass(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) {
     // Bind the shader
     shader.bind();
 
@@ -215,7 +215,7 @@ void Scene::drawForcesVector(const bool shouldDraw) {
 
 void Scene::reset() {
     m_elapsedTime = std::chrono::seconds::zero();
-    changeView(Matrix4<double>::identity());
+    changeView(grs::Matrix4d::identity());
 }
 
 void Scene::destroy() {
@@ -274,9 +274,9 @@ void Scene::setInitialZoom(const float zoom) {
     m_initialZoom = zoom;
 }
 
-void Scene::changeView(const Matrix4<double>& viewMatrix) {
+void Scene::changeView(const grs::Matrix4d& viewMatrix) {
     m_camera.setTransformMatrix(viewMatrix);
-    m_setScenePosition(Vector3<double>::zeros(), 100.0f);
+    m_setScenePosition(grs::Vec3d::zeros(), 100.0f);
 }
 
 void Scene::setInterpolationFactor(const double interpolationFactor) {
@@ -320,7 +320,7 @@ void Scene::m_createShadowMapFrameBufferObjectAndTexture() {
     }
 }
 
-void Scene::m_setScenePosition(const Vector3<double>& position, const float sceneRadius) {
+void Scene::m_setScenePosition(const grs::Vec3d& position, const float sceneRadius) {
     // Set the position and radius of the scene
     m_centerOfScene = position;
     m_camera.setSceneRadius(sceneRadius);
@@ -353,18 +353,18 @@ void Scene::m_translate(const int xMouse, const int yMouse) {
 }
 
 void Scene::m_rotate(const int xMouse, const int yMouse) {
-    const float deltaHorizRotationAngle = static_cast<float>(m_lastMouseX - xMouse) / static_cast<float>(m_windowWidth) * M_PI;
-    float deltaVertRotationAngle  = static_cast<float>(m_lastMouseY - yMouse) / static_cast<float>(m_windowHeight) * M_PI;
+    const float deltaHorizRotationAngle = static_cast<float>(m_lastMouseX - xMouse) / static_cast<float>(m_windowWidth) * M_PIf;
+    float deltaVertRotationAngle  = static_cast<float>(m_lastMouseY - yMouse) / static_cast<float>(m_windowHeight) * M_PIf;
 
     const double newVerticalAngle = m_currentCameraVerticalAngle + deltaVertRotationAngle;
 
     // Limit Vertical angle
-    if (newVerticalAngle > (M_PI * 0.5) || newVerticalAngle < -(M_PI * 0.5)) {
+    if (newVerticalAngle > (M_PI_2) || newVerticalAngle < -(M_PI_2)) {
         deltaVertRotationAngle = 0.0;
     }
 
-    const Vector3 localVertAxis = m_camera.getTransformMatrix().getUpperLeft3x3Matrix().getInverse() * Vector3(0.0, 1.0, 0.0);
-    m_camera.rotateAroundLocalPoint(Vector3(1.0, 0.0, 0.0), deltaVertRotationAngle, m_centerOfScene);
+    const grs::Vec3d localVertAxis = m_camera.getTransformMatrix().upperLeft3x3().inverse() * grs::Vec3d(0.0, 1.0, 0.0);
+    m_camera.rotateAroundLocalPoint(grs::Vec3d(1.0, 0.0, 0.0), deltaVertRotationAngle, m_centerOfScene);
     m_camera.rotateAroundLocalPoint(localVertAxis, deltaHorizRotationAngle, m_centerOfScene);
 
     m_currentCameraVerticalAngle += deltaVertRotationAngle;

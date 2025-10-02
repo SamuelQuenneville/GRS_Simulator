@@ -8,15 +8,15 @@
 
 #include "simulationViewer.h"
 
-auto formatVec3 = [](const char* label, const Vector3<double>& v) {
+auto formatVec3 = [](const char* label, const grs::Vec3d& v) {
     std::ostringstream oss;
     constexpr int numWidth = 7;
 
     // left align label, right align numbers
     oss << std::left << std::setw(18) << label << ": [ "
-        << std::fixed << std::showpos << std::right << std::setw(numWidth) << std::setprecision(2) << v.x() << " "
-        << std::fixed << std::showpos << std::right << std::setw(numWidth) << std::setprecision(2) << v.y() << " "
-        << std::fixed << std::showpos << std::right << std::setw(numWidth) << std::setprecision(2) << v.z() << " ]";
+        << std::fixed << std::showpos << std::right << std::setw(numWidth) << std::setprecision(2) << v[0] << " "
+        << std::fixed << std::showpos << std::right << std::setw(numWidth) << std::setprecision(2) << v[1] << " "
+        << std::fixed << std::showpos << std::right << std::setw(numWidth) << std::setprecision(2) << v[2] << " ]";
 
     return oss.str();
 };
@@ -63,7 +63,7 @@ void Gui::update() const {
     if (m_currentFrameDisplayed != nullptr) {
         const auto pos = m_currentFrameDisplayed->originNode().position();
         const auto vel = m_currentFrameDisplayed->originNode().velocity();
-        const auto ori = m_currentFrameDisplayed->transform().getOrientation().eulerAngles() * RAD_TO_DEG;
+        const auto ori = grs::quatToEuler(m_currentFrameDisplayed->transform().orientation.yUpToNed()) * (180.0 / M_PI);
 
         const auto force = m_currentFrameDisplayed->originNode().force();
 
@@ -198,13 +198,11 @@ void Gui::m_createConfigurationPanel() {
     buttonTopView->set_fixed_width(73);
     buttonTopView->set_callback([&] {
 
-        const Matrix4<double> view
-                {
-                        { 1,  0,  0, 0},
-                        { 0,  0,  1, 0},
-                        { 0, -1,  0, 0},
-                        { 0,  0,  0, 1}
-                };
+        const grs::Matrix4d view
+            {1,  0,  0, 0,
+             0,  0,  1, 0,
+             0, -1,  0, 0,
+             0,  0,  0, 1};
 
         m_viewer->m_changeView(view);
     });
@@ -212,7 +210,7 @@ void Gui::m_createConfigurationPanel() {
     auto* buttonSideView = new nanogui::Button(subgroup11, "Side View");
     buttonSideView->set_fixed_width(74);
     buttonSideView->set_callback([&] {
-        m_viewer->m_changeView(Matrix4<double>::identity());
+        m_viewer->m_changeView(grs::Matrix4d::identity());
     });
 
     auto* buttonIsometricView = new nanogui::Button(subgroup11, "Iso View");
@@ -223,13 +221,11 @@ void Gui::m_createConfigurationPanel() {
         constexpr double b = std::sqrt(2.0) / std::sqrt(3.0);
         constexpr double c = 1.0 / std::sqrt(3.0);
 
-        const Matrix4<double> view
-                {
-                        {  a, -b/2.0,  c,  0},
-                        {  0,      b,  c,  0},
-                        { -a, -b/2.0,  c,  0},
-                        {  0,      0,  0,  1}
-                };
+        const grs::Matrix4d view
+            {a, -b/2.0,  c,  0,
+             0,      b,  c,  0,
+             -a, -b/2.0,  c,  0,
+             0,      0,  0,  1};
 
         m_viewer->m_changeView(view);
     });

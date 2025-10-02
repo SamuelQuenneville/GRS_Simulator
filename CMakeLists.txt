@@ -74,17 +74,13 @@ set(GRS_LOG
 )
 
 set(GRS_MATHEMATICS
-        source/Mathematics/grsMath.h
-        source/Mathematics/matrix3.h
-        source/Mathematics/vector2.h
-        source/Mathematics/vector3.h
-        source/Mathematics/vector4.h
-        source/Mathematics/matrix4.h
         source/Mathematics/color.h
+        source/Mathematics/vector.h
+        source/Mathematics/math.h
+        source/Mathematics/matrix.h
         source/Mathematics/quaternion.h
-        source/Mathematics/quaternion.cpp
-        source/Mathematics/transform.cpp
         source/Mathematics/transform.h
+        source/Mathematics/mathUtils.h
 )
 
 set(GRS_OPENGL_FRAMEWORK

@@ -28,7 +28,7 @@ Payload::Payload(const worldPhysics& physics, Logger& logger, const payloadPrope
     });
 
     tetherAttach.setLoadCallback([this](const Frame& f) {
-        Vector3<double> tetherForces = Vector3<double>::zeros();
+        grs::Vec3d tetherForces = grs::Vec3d::zeros();
 
         const auto connectedNode = connections[&f.originNode()];
         for(const Node* node : connectedNode) {
@@ -50,7 +50,7 @@ void Payload::update(const double dt) {
 
         // Set new forces/moments to the node of this body
         updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0.0,0.0,0.0});
-        setCenterOfMassTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::identity()));
+        setCenterOfMassTransform(grs::TransformD(centerOfMass().position().toOpenglRef(), grs::QuaternionD::identity()));
     }
 
     // Log
@@ -67,12 +67,12 @@ void Payload::setInitialStates(initialStates& states) {
     m_states.vz = states.position[2];
 
     updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0,0,0});
-    setCenterOfMassTransform(Transform(centerOfMass().position().toOpenglRef(), Quaternion::fromEulerAngles(states.orientation[0],states.orientation[1],states.orientation[2])));
+    setCenterOfMassTransform(grs::TransformD(centerOfMass().position().toOpenglRef(), grs::eulerToQuat(states.orientation[0],states.orientation[1],states.orientation[2]).nedToYup()));
 }
 
 void Payload::m_writeLog() {
 
-    payloadLogMessage logMessage = {
+    const payloadLogMessage logMessage = {
         centerOfMass().position(),
         centerOfMass().velocity(),
         externalForces()
@@ -114,11 +114,11 @@ void Payload::m_eulerIntegration(const payloadStates& derivatives, const double 
     }
 }
 
-Vector3<double> Payload::m_calcAeroForces() const {
+grs::Vec3d Payload::m_calcAeroForces() const {
 
     // Drag = -coeff * ||v_rel|| * v_rel; same as ||v_rel||^2 * v_rel/||v_rel||
-    double coeff = 0.5 * m_physics.airDensity * m_properties.cda;
-    Vector3<double> v_rel = centerOfMass().velocity() - cast<double>(m_physics.wind);
+    const double coeff = 0.5 * m_physics.airDensity * m_properties.cda;
+    const grs::Vec3d v_rel = centerOfMass().velocity() - grs::cast<double>(m_physics.wind);
 
-    return -coeff * v_rel.length() * v_rel;
+    return -coeff * v_rel.norm() * v_rel;
 }

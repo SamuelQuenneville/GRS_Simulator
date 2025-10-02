@@ -14,8 +14,8 @@ RigidBody::RigidBody()
     m_bodyOriginFrame->setIsCenterOfMass(true);
 }
 
-std::map<int, Vector3<double>> RigidBody::externalForces() {
-    std::map<int, Vector3<double>> forces;
+std::map<int, grs::Vec3d> RigidBody::externalForces() {
+    std::map<int, grs::Vec3d> forces;
 
     for (auto& [key, neighbors] : connections) {
         for (const Node* node : neighbors) {
@@ -42,23 +42,23 @@ void RigidBody::deleteConnection(Node& frameNode, Node& node) {
 }
 
 void RigidBody::updateForcesOnBody() {
-    Vector3<double> totalForce = Vector3<double>::zeros();
-    Vector3<double> totalMoment = Vector3<double>::zeros();
+    grs::Vec3d totalForce = grs::Vec3d::zeros();
+    grs::Vec3d totalMoment = grs::Vec3d::zeros();
 
     for (const auto& frame : m_frames) {
         frame->computeLoad();
 
-        Vector3<double> r = frame->getLocalPosition() - centerOfMassFrame()->getLocalPosition();
+        grs::Vec3d r = frame->getLocalPosition() - centerOfMassFrame()->getLocalPosition();
 
         totalForce += frame->forceBody();
-        totalMoment += frame->momentBody() + r.cross(frame->forceBody());
+        totalMoment += frame->momentBody() + grs::cross(r, frame->forceBody());
     }
 
     centerOfMass().setForce(totalForce);
     centerOfMass().setMoment(totalMoment);
 }
 
-void RigidBody::updateWorldInfos(const Vector3<double>& position, const Vector3<double>& velocity, const Vector3<double>& acceleration) {
+void RigidBody::updateWorldInfos(const grs::Vec3d& position, const grs::Vec3d& velocity, const grs::Vec3d& acceleration) const {
     centerOfMass().setPosition(position);
     centerOfMass().setVelocity(velocity);
     centerOfMass().setAcceleration(acceleration);
@@ -66,11 +66,11 @@ void RigidBody::updateWorldInfos(const Vector3<double>& position, const Vector3<
     for (const auto& f : m_frames) {
         if (!f->isCenterOfMass()) {
 
-            Vector3<double> pos_local = f->getLocalPosition() - centerOfMassFrame()->getLocalPosition();
-            Vector3<double> pos_world = m_rotationMatrixCBodyEarth.transpose() * pos_local;
+            grs::Vec3d pos_local = f->getLocalPosition() - centerOfMassFrame()->getLocalPosition();
+            grs::Vec3d pos_world = m_rotationMatrixCBodyEarth.transpose() * pos_local;
 
-            Vector3<double> vel_frame = velocity + m_angularVelocity.cross(pos_world);
-            Vector3<double> acc_frame = acceleration + m_angularAcceleration.cross(pos_world) + m_angularVelocity.cross(m_angularVelocity.cross(pos_world));
+            grs::Vec3d vel_frame = velocity + grs::cross(m_angularVelocity, pos_world);
+            grs::Vec3d acc_frame = acceleration + grs::cross(m_angularAcceleration, pos_world) + grs::cross(m_angularVelocity, grs::cross(m_angularVelocity, pos_world));
 
             f->originNode().setPosition(position + pos_world);
             f->originNode().setVelocity(vel_frame);
@@ -79,15 +79,15 @@ void RigidBody::updateWorldInfos(const Vector3<double>& position, const Vector3<
     }
 }
 
-void RigidBody::setCenterOfMassTransform(const Transform& newTransform) const {
+void RigidBody::setCenterOfMassTransform(const grs::TransformD& newTransform) const {
     centerOfMassFrame()->setTransform(newTransform);
 
     for (const auto& f : m_frames) {
         if (!f->isCenterOfMass()) {
             auto euler = f->getLocalOrientation();
 
-            constexpr double meshRollOffset = -M_PI / 2.0;
-            auto cgToFrame = Transform(f->getLocalPosition().toOpenglRef(), Quaternion::fromEulerAngles(euler.x() + meshRollOffset, euler.y(), euler.z()));
+            constexpr double meshRollOffset = -M_PI_2;
+            auto cgToFrame = grs::TransformD(f->getLocalPosition().toOpenglRef(), grs::eulerToQuat(euler[0] + meshRollOffset, euler[1], euler[2]).nedToYup());
 
             auto earthToFrame = newTransform * cgToFrame;
             f->setTransform(earthToFrame);
@@ -95,47 +95,47 @@ void RigidBody::setCenterOfMassTransform(const Transform& newTransform) const {
     }
 }
 
-void RigidBody::setTransform(const Transform& newTransform) const {
+void RigidBody::setTransform(const grs::TransformD& newTransform) const {
     centerOfMassFrame()->setTransform(newTransform);
 }
 
-void RigidBody::setTransform(const Vector3<double>& newPosition, const Quaternion& newOrientation) const {
+void RigidBody::setTransform(const grs::Vec3d& newPosition, const grs::QuaternionD& newOrientation) const {
     centerOfMassFrame()->setTransform(newPosition, newOrientation);
 }
 
-const Transform& RigidBody::transform() const {
+const grs::TransformD& RigidBody::transform() const {
     return centerOfMassFrame()->transform();
 }
 
-void RigidBody::setAttitude(const Vector3<double>& newAttitude) {
+void RigidBody::setAttitude(const grs::Vec3d& newAttitude) {
     m_attitude = newAttitude;
 }
 
-void RigidBody::setAngularVelocity(const Vector3<double>& newAngularVelocity) {
+void RigidBody::setAngularVelocity(const grs::Vec3d& newAngularVelocity) {
     m_angularVelocity = newAngularVelocity;
 }
 
-void RigidBody::setAngularAcceleration(const Vector3<double>& newAngularAcceleration) {
+void RigidBody::setAngularAcceleration(const grs::Vec3d& newAngularAcceleration) {
     m_angularAcceleration = newAngularAcceleration;
 }
 
-void RigidBody::setRotationMatrixCBodyEarth(const Matrix3<double>& newRotationMatrix) {
+void RigidBody::setRotationMatrixCBodyEarth(const grs::Matrix3d& newRotationMatrix) {
     m_rotationMatrixCBodyEarth = newRotationMatrix;
 }
 
-const Vector3<double>& RigidBody::getAttitude() const {
+const grs::Vec3d& RigidBody::getAttitude() const {
     return m_attitude;
 }
 
-const Vector3<double>& RigidBody::getAngularVelocity() const {
+const grs::Vec3d& RigidBody::getAngularVelocity() const {
     return m_angularVelocity;
 }
 
-const Vector3<double>& RigidBody::getAngularAcceleration() const {
+const grs::Vec3d& RigidBody::getAngularAcceleration() const {
     return m_angularAcceleration;
 }
 
-const Matrix3<double>& RigidBody::getRotationMatrixCBodyEarth() const {
+const grs::Matrix3d& RigidBody::getRotationMatrixCBodyEarth() const {
     return m_rotationMatrixCBodyEarth;
 }
 
@@ -160,7 +160,7 @@ void RigidBody::setCenterOfMassFrame(Frame& frame) const {
     frame.setIsCenterOfMass(true);
 }
 
-Frame& RigidBody::addFrame(const std::string& name, const Frame* reference, const Vector3<double>& position, const Vector3<double>& orientation, Color::HexColor color) {
+Frame& RigidBody::addFrame(const std::string& name, const Frame* reference, const grs::Vec3d& position, const grs::Vec3d& orientation, Color::HexColor color) {
     auto frame = std::make_unique<Frame>(name, reference, position, orientation, color);
     m_frames.push_back(std::move(frame));
     return *m_frames.back();

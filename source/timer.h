@@ -9,10 +9,7 @@
 #ifndef GRS_SIMULATOR_TIMER_H
 #define GRS_SIMULATOR_TIMER_H
 
-#include <stdexcept>
-#include <iostream>
 #include <chrono>
-#include <cassert>
 
 class Timer {
 

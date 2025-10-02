@@ -11,18 +11,18 @@
 
 #pragma once
 
-#include "Mathematics/vector3.h"
+#include "Mathematics/math.h"
 
 struct worldPhysics {
     float gravity = 9.81;
     float airDensity = 1.225;
     float soundSpeed = 343.0;
 
-    Vector3<float> wind = {0,0,0};
+    grs::Vec3f wind = grs::Vec3f::zeros();
 
     [[maybe_unused]] void setGravity(const float newGravity) {gravity = newGravity;};
     [[maybe_unused]] void setAirDensity(const float newDensity) {airDensity = newDensity;};
-    [[maybe_unused]] void updateWind(const Vector3<float>& newWind) {wind = newWind;};
+    [[maybe_unused]] void updateWind(const grs::Vec3f& newWind) {wind = newWind;};
 };
 
 #endif //GRS_SIMULATOR_WORLDPHYSICS_H

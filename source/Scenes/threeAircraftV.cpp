@@ -24,14 +24,14 @@ void ThreeAircraftV::createPhysicsWorld() {
 
     // ---------- AIRCRAFT ---------- //
     for (const auto& aircraft : m_world.system()->aircraft()) {
-        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), Vector3<double>(2.0, 2.0, 2.0), World::getExecutablePath());
+        auto aircraftObject = std::make_unique<Aircraft>(aircraft.get(), grs::Vec3d(2.0, 2.0, 2.0), World::getExecutablePath());
         aircraftObject->setColor(Color::color(aircraft->getId()));
 
         m_physicsObjects.push_back(std::move(aircraftObject));
     }
 
     // -----------  PAYLOAD ---------- //
-    auto payloadObject = std::make_unique<PayloadObject>(m_world.system()->payload().get(), Vector3<float>(0.4,0.4,0.4), World::getExecutablePath());
+    auto payloadObject = std::make_unique<PayloadObject>(m_world.system()->payload().get(), grs::Vec3f(0.4,0.4,0.4), World::getExecutablePath());
     payloadObject->setColor(Color::blue());
     m_physicsObjects.push_back(std::move(payloadObject));
 
@@ -42,22 +42,22 @@ void ThreeAircraftV::createPhysicsWorld() {
     }
 
     // ---------- LAUNCHER ---------- //
-    m_launcher1 = std::make_shared<Launcher>(Vector3<double>(1.0,1.0,1.0), World::getExecutablePath());
+    m_launcher1 = std::make_shared<Launcher>(grs::Vec3d(1.0,1.0,1.0), World::getExecutablePath());
     m_launcher1->setColor(Color::backgroundColor());
-    m_launcher2 = std::make_shared<Launcher>(Vector3<double>(1.0,1.0,1.0), World::getExecutablePath());
+    m_launcher2 = std::make_shared<Launcher>(grs::Vec3d(1.0,1.0,1.0), World::getExecutablePath());
     m_launcher2->setColor(Color::backgroundColor());
-    m_launcher3 = std::make_shared<Launcher>(Vector3<double>(1.0,1.0,1.0), World::getExecutablePath());
+    m_launcher3 = std::make_shared<Launcher>(grs::Vec3d(1.0,1.0,1.0), World::getExecutablePath());
     m_launcher3->setColor(Color::backgroundColor());
     m_staticObjects.push_back(m_launcher1);
     m_staticObjects.push_back(m_launcher2);
     m_staticObjects.push_back(m_launcher3);
 
     // ---------- GROUND ---------- //
-    m_ground = std::make_shared<Cube>(Vector3<float>(50.0, 0.5, 50.0), World::getExecutablePath());
+    m_ground = std::make_shared<Cube>(grs::Vec3f(50.0, 0.5, 50.0), World::getExecutablePath());
     m_ground->setColor(Color::floorColor());
     m_staticObjects.push_back(m_ground);
 
-    m_target = std::make_shared<Cube>(Vector3<float>(0.4, 0.4, 0.4), World::getExecutablePath());
+    m_target = std::make_shared<Cube>(grs::Vec3f(0.4, 0.4, 0.4), World::getExecutablePath());
     m_target->setColor({1.0f, 0.0f, 0.0f, 0.6f});
     m_staticObjects.push_back(m_target);
 }
@@ -70,16 +70,16 @@ void ThreeAircraftV::destroyPhysicsWorld() {
 }
 
 void ThreeAircraftV::initBodiesPositions() const {
-    m_launcher1->setTransform(Transform({-0.849, 0.816, 30.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0), 0.0, M_PI/2.0)));
-    m_launcher2->setTransform(Transform({-0.849, 0.816, 30.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0), 0.0, M_PI/2.0)));
-    m_launcher3->setTransform(Transform({-0.849, 0.816, 30.0}, Quaternion::fromEulerAngles(M_PI + radians(19.0), 0.0, M_PI/2.0)));
+    m_launcher1->setTransform(grs::TransformD({-0.849, 0.816, 30.0}, grs::eulerToQuat(M_PI + grs::degToRad(19.0), 0.0, M_PI_2).nedToYup()));
+    m_launcher2->setTransform(grs::TransformD({-0.849, 0.816, 30.0}, grs::eulerToQuat(M_PI + grs::degToRad(19.0), 0.0, M_PI_2).nedToYup()));
+    m_launcher3->setTransform(grs::TransformD({-0.849, 0.816, 30.0}, grs::eulerToQuat(M_PI + grs::degToRad(19.0), 0.0, M_PI_2).nedToYup()));
 
-    m_launcher2->rotateAroundWorldPoint({0,1,0},M_2PI/3,{0,0,0});
-    m_launcher3->rotateAroundWorldPoint({0,1,0},-M_2PI/3,{0,0,0});
+    m_launcher2->rotateAroundWorldPoint({0,1,0},2.0*M_PI/3.0,{0,0,0});
+    m_launcher3->rotateAroundWorldPoint({0,1,0},-2.0*M_PI/3.0,{0,0,0});
 
-    m_ground->setTransform(Transform({0.0, -0.5, 0.0}, Quaternion::identity()));
+    m_ground->setTransform(grs::TransformD({0.0, -0.5, 0.0}, grs::QuaternionD::identity()));
 
-    m_target->setTransform(Transform({0.0,0.0,0.0}, Quaternion::identity()));
+    m_target->setTransform(grs::TransformD({0.0,0.0,0.0}, grs::QuaternionD::identity()));
 }
 
 void ThreeAircraftV::updatePhysics() {
@@ -92,7 +92,7 @@ void ThreeAircraftV::updateTarget(const float groundspeed, std::vector<double> p
     t.positionPayload = payloadPosition;
     m_world.system()->setTarget(t);
 
-    m_target->setTransform(Transform({payloadPosition[0], payloadPosition[2],payloadPosition[1]}, Quaternion::identity()));
+    m_target->setTransform(grs::TransformD({payloadPosition[0], payloadPosition[2],payloadPosition[1]}, grs::QuaternionD::identity()));
 }
 
 void ThreeAircraftV::reset() {
@@ -107,7 +107,7 @@ void ThreeAircraftV::destroy() {
     destroyPhysicsWorld();
 }
 
-void ThreeAircraftV::renderSinglePass(Shader &shader, const Matrix4<double> &worldToCameraMatrix) {
+void ThreeAircraftV::renderSinglePass(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) {
     for (const auto& tethersObject : m_tethersObjects) {
         tethersObject->render(m_colorShader, worldToCameraMatrix);
     }

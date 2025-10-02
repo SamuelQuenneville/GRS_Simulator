@@ -8,30 +8,30 @@
 
 #include "lateralController.h"
 
-LateralController::LateralController(worldPhysics& physics, lateralControllerGains& gains, float rate)
+LateralController::LateralController(const worldPhysics& physics, lateralControllerGains& gains, const float rate)
     : m_physics(physics)
     , m_gains(gains)
     , m_dt(1.0f/rate)
-    , m_periodL1(25.0)
-    , m_dampingL1(0.707)
+    , m_periodL1(25.0f)
+    , m_dampingL1(0.707f)
 {
 
 }
 
-void LateralController::updateLoiter(const Vector2<double>& centerWP, float radius, float loiterDirection, bool isTethered) {
+void LateralController::updateLoiter(const grs::Vec2d& centerWP, const float radius, const float loiterDirection, const bool isTethered) {
 
-    auto groundspeed = static_cast<float>(std::sqrt(m_aircraftStates.vx * m_aircraftStates.vx + m_aircraftStates.vy * m_aircraftStates.vy));
+    const auto groundspeed = static_cast<float>(std::sqrt(m_aircraftStates.vx * m_aircraftStates.vx + m_aircraftStates.vy * m_aircraftStates.vy));
 
     // Calculate initial guidance gains
     float qL = m_periodL1 * m_dampingL1 / M_PI;
-    float kL = 4.0f * m_dampingL1 * m_dampingL1;
+    const float kL = 4.0f * m_dampingL1 * m_dampingL1;
     m_distanceL1 = qL * groundspeed;
 
     //Calculate the NE position of the aircraft relative to WP
-    Vector2<double> distanceNorthEastFromWP = {(m_aircraftStates.x - centerWP.x()),(m_aircraftStates.y - centerWP.y())};
+    const grs::Vec2d distanceNorthEastFromWP = {(m_aircraftStates.x - centerWP[0]),(m_aircraftStates.y - centerWP[1])};
 
-    auto distanceFromWP = static_cast<float>(distanceNorthEastFromWP.length());
-    Vector2<double> unitDistanceNorthEastFromWP = distanceNorthEastFromWP.normalize();
+    const auto distanceFromWP = static_cast<float>(distanceNorthEastFromWP.norm());
+    grs::Vec2d unitDistanceNorthEastFromWP = grs::normalize(distanceNorthEastFromWP);
 
     // Adaptive L1 for small radii
     if (m_distanceL1 > radius && std::fabs(distanceFromWP - radius) <= m_distanceL1) {
@@ -40,26 +40,26 @@ void LateralController::updateLoiter(const Vector2<double>& centerWP, float radi
         m_periodL1 = M_PI * qL / m_dampingL1;
     }
 
-    float omega = M_2PI / m_periodL1;
-    float kx = omega * omega;
-    float kv = 2.0f * m_dampingL1 * omega;
+    const float omega = 2.0f * M_PIf / m_periodL1;
+    const float kx = omega * omega;
+    const float kv = 2.0f * m_dampingL1 * omega;
 
     // Calculate nu to capture centerWP
-    auto xtrackVelCap = static_cast<float>(unitDistanceNorthEastFromWP.x() * m_aircraftStates.vy - unitDistanceNorthEastFromWP.y() * m_aircraftStates.vx);
-    float ltrackVelCap = - static_cast<float>(m_aircraftStates.vx * unitDistanceNorthEastFromWP.x() + m_aircraftStates.vy * unitDistanceNorthEastFromWP.y());
+    const auto xtrackVelCap = static_cast<float>(unitDistanceNorthEastFromWP[0] * m_aircraftStates.vy - unitDistanceNorthEastFromWP[1] * m_aircraftStates.vx);
+    const float ltrackVelCap = - static_cast<float>(m_aircraftStates.vx * unitDistanceNorthEastFromWP[0] + m_aircraftStates.vy * unitDistanceNorthEastFromWP[1]);
     float nu = std::atan2(xtrackVelCap,ltrackVelCap);
 
-    nu = constrainFloat(nu, -M_PI / 2.0f, M_PI / 2.0f);
+    nu = std::clamp(nu, -M_PI_2f, M_PI_2f);
 
     // Calculate radial position and velocity errors
-    float xtrackVelCirc = -ltrackVelCap;
-    float xtrackErrCirc = distanceFromWP - radius;
+    const float xtrackVelCirc = -ltrackVelCap;
+    const float xtrackErrCirc = distanceFromWP - radius;
 
     // Calculate acceleration to capture centerWP
-    float latAccDemCap = kL * groundspeed * groundspeed / m_distanceL1 * std::sin(nu);
+    const float latAccDemCap = kL * groundspeed * groundspeed / m_distanceL1 * std::sin(nu);
 
     // Tangent velocity
-    float velTangent = xtrackVelCap * loiterDirection;
+    const float velTangent = xtrackVelCap * loiterDirection;
 
     // Centripetal acceleration
     float latAccDemCircCtrl;
@@ -71,12 +71,12 @@ void LateralController::updateLoiter(const Vector2<double>& centerWP, float radi
 
     // Control acceleration
     m_integrator += (xtrackErrCirc * m_gains.I) * m_dt;
-    m_integrator = constrainFloat(m_integrator, -m_gains.iLimit, m_gains.iLimit);
+    m_integrator = std::clamp(m_integrator, -m_gains.iLimit, m_gains.iLimit);
 
-    float latAccDemPID = xtrackErrCirc * kx * m_gains.P + xtrackVelCirc * kv * m_gains.D + m_integrator;
+    const float latAccDemPID = xtrackErrCirc * kx * m_gains.P + xtrackVelCirc * kv * m_gains.D + m_integrator;
 
     // Sum PID control and centripetal acceleration for lateral manoeuvre demand
-    float latAccDemCirc = loiterDirection * (latAccDemPID + latAccDemCircCtrl);
+    const float latAccDemCirc = loiterDirection * (latAccDemPID + latAccDemCircCtrl);
 
     // Switch between a capture and loiter
     if (xtrackErrCirc > 0.0f && loiterDirection * latAccDemCap < loiterDirection * latAccDemCirc)
@@ -87,9 +87,9 @@ void LateralController::updateLoiter(const Vector2<double>& centerWP, float radi
     }
 
     m_ctrlInfo.actualPositionX     = m_aircraftStates.x;
-    m_ctrlInfo.targetPositionX     = centerWP.x();
+    m_ctrlInfo.targetPositionX     = centerWP[0];
     m_ctrlInfo.actualPositionY     = m_aircraftStates.y;
-    m_ctrlInfo.targetPositionY     = centerWP.y();
+    m_ctrlInfo.targetPositionY     = centerWP[1];
     m_ctrlInfo.radius              = m_integrator; //radius;
     m_ctrlInfo.kx                  = xtrackErrCirc * kx * m_gains.P; //kx;
     m_ctrlInfo.xtrackPositionError = xtrackErrCirc;
@@ -100,6 +100,6 @@ void LateralController::updateLoiter(const Vector2<double>& centerWP, float radi
 
 float LateralController::navRollCmd() const {
     float cmd = std::atan(m_latAccDem / static_cast<float>(m_physics.gravity));
-    cmd = constrainFloat(cmd, -m_gains.rollSaturation, m_gains.rollSaturation);
+    cmd = std::clamp(cmd, -m_gains.rollSaturation, m_gains.rollSaturation);
     return cmd;
 }

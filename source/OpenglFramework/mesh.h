@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <map>
+
 #include "object3D.h"
 #include "Mathematics/color.h"
 #include "texture2D.h"
@@ -29,19 +30,19 @@ public:
     [[nodiscard]] unsigned int getNumbersVertices() const;
     [[nodiscard]] unsigned int getNumbersParts() const;
 
-    [[nodiscard]] const std::vector<Vector3<float>>& getVertices() const;
-    void setVertices(const std::vector<Vector3<float>>& vertices);
+    [[nodiscard]] const std::vector<grs::Vec3f>& getVertices() const;
+    void setVertices(const std::vector<grs::Vec3f>& vertices);
 
-    [[nodiscard]] const std::vector<Vector3<float>>& getNormals() const;
-    void setNormals(const std::vector<Vector3<float>>& normals);
+    [[nodiscard]] const std::vector<grs::Vec3f>& getNormals() const;
+    void setNormals(const std::vector<grs::Vec3f>& normals);
 
-    [[nodiscard]] const std::vector<Vector2<float>>& getUVs() const;
-    void setUVs(const std::vector<Vector2<float>>& uvs);
+    [[nodiscard]] const std::vector<grs::Vec2f>& getUVs() const;
+    void setUVs(const std::vector<grs::Vec2f>& uvs);
 
     [[nodiscard]] const std::vector<uint32_t>& getIndices(unsigned int part = 0) const;
     void setIndices(const std::vector<std::vector<unsigned int>>& indices);
 
-    [[nodiscard]] const Vector3<float>& getVertex(unsigned int i) const;
+    [[nodiscard]] const grs::Vec3f& getVertex(unsigned int i) const;
 
     // Return the vertex index of the ith (i=0,1,2) vertex of a given face
     [[nodiscard]] unsigned int getVertexIndexInFace(unsigned int faceIndex, unsigned int i, unsigned int part = 0) const;
@@ -60,16 +61,16 @@ protected:
     std::vector<std::vector<unsigned int>> m_indices;
 
     // Vertices coordinates (local space)
-    std::vector<Vector3<float>> m_vertices;
+    std::vector<grs::Vec3f> m_vertices;
 
     // Normals coordinates
-    std::vector<Vector3<float>> m_normals;
+    std::vector<grs::Vec3f> m_normals;
 
     // Color for each vertex
     std::vector<Color> m_colors;
 
     // UV texture coordinates
-    std::vector<Vector2<float>> m_uvs;
+    std::vector<grs::Vec2f> m_uvs;
 
     // Textures of the mesh (one for each part of the mesh)
     std::map<uint32_t, Texture2D> m_textures;

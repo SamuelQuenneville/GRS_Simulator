@@ -13,7 +13,6 @@
 
 #include <map>
 
-#include "Mathematics/vector3.h"
 #include "Definitions/fixedWingDefinitions.h"
 #include "Control/pid.h"
 #include "Control/lateralController.h"
@@ -25,32 +24,32 @@ struct fixedWingLogMessage {
     double elevatorCommand{};
     double rudderCommand{};
     double thrustCommand{};
-    Vector3<double> nedPosition;
-    Vector3<double> earthSpeed;
-    Vector3<double> bodySpeed;
-    Vector3<double> attitude;
-    Vector3<double> angularSpeed;
-    Vector3<double> bodyForcesAero;
-    Vector3<double> bodyMomentsAero;
-    Vector3<double> bodyForcesTether;
-    Vector3<double> bodyMomentsTether;
+    grs::Vec3d nedPosition;
+    grs::Vec3d earthSpeed;
+    grs::Vec3d bodySpeed;
+    grs::Vec3d attitude;
+    grs::Vec3d angularSpeed;
+    grs::Vec3d bodyForcesAero;
+    grs::Vec3d bodyMomentsAero;
+    grs::Vec3d bodyForcesTether;
+    grs::Vec3d bodyMomentsTether;
 };
 
 struct payloadLogMessage {
-    Vector3<double> nedPosition;
-    Vector3<double> earthSpeed;
-    std::map<int, Vector3<double>> earthForcesTethers;
+    grs::Vec3d nedPosition;
+    grs::Vec3d earthSpeed;
+    std::map<int, grs::Vec3d> earthForcesTethers;
 };
 
 struct tetherLogMessage {
     int tetherId{};
     double elongation{};
-    Vector3<double> startPointPosition;
-    Vector3<double> startPointSpeed;
-    Vector3<double> endPointPosition;
-    Vector3<double> endPointSpeed;
-    Vector3<double> earthForcesSpring;
-    Vector3<double> earthForcesAero;
+    grs::Vec3d startPointPosition;
+    grs::Vec3d startPointSpeed;
+    grs::Vec3d endPointPosition;
+    grs::Vec3d endPointSpeed;
+    grs::Vec3d earthForcesSpring;
+    grs::Vec3d earthForcesAero;
 };
 
 struct hlcLogMessage {

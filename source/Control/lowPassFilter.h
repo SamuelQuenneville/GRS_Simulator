@@ -50,10 +50,8 @@
 
 #pragma once
 
-#include <Control/filter.h>
-#include "Mathematics/grsMath.h"
-#include "Mathematics/vector2.h"
-#include "Mathematics/vector3.h"
+#include "filter.h"
+#include "Mathematics/math.h"
 
 // DigitalLPF implements the filter math
 template <class T>
@@ -110,8 +108,8 @@ private:
 typedef LowPassFilter<int>      LowPassFilterInt;
 typedef LowPassFilter<long>     LowPassFilterLong;
 typedef LowPassFilter<float>    LowPassFilterFloat;
-typedef LowPassFilter<Vector2<float>> LowPassFilterVector2f;
-typedef LowPassFilter<Vector3<float>> LowPassFilterVector3f;
+//typedef LowPassFilter<grs::Vec2f> LowPassFilterVector2f;
+//typedef LowPassFilter<grs::Vec3f> LowPassFilterVector3f;
 
 
 #endif //GRS_SIMULATOR_LOWPASSFILTER_H

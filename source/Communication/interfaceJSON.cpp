@@ -108,12 +108,12 @@ void InterfaceJSON::sendData(const int uavId, const sensorData& data) {
     // Form the string
     const std::string message = "\n{\"timestamp\":" + std::to_string(data.timeStampSecond) +
                                 ",\"imu\":{" +
-                                    "\"gyro\":[" + std::to_string(gyro.x()) + "," + std::to_string(gyro.y()) + "," + std::to_string(gyro.z()) + "]" +
-                                    ",\"accel_body\":[" + std::to_string(acceleration.x()) + "," + std::to_string(acceleration.y()) + "," + std::to_string(acceleration.z()) + "]" +
+                                    "\"gyro\":[" + std::to_string(gyro[0]) + "," + std::to_string(gyro[1]) + "," + std::to_string(gyro[2]) + "]" +
+                                    ",\"accel_body\":[" + std::to_string(acceleration[0]) + "," + std::to_string(acceleration[1]) + "," + std::to_string(acceleration[2]) + "]" +
                                 "}" +
-                                ",\"position\":[" + std::to_string(position.x()) + "," + std::to_string(position.y()) + "," + std::to_string(position.z()) + "]" +
-                                ",\"attitude\":[" + std::to_string(attitude.x()) + "," + std::to_string(attitude.y()) + "," + std::to_string(attitude.z()) + "]" +
-                                ",\"velocity\":[" + std::to_string(velocity.x()) + "," + std::to_string(velocity.y()) + "," + std::to_string(velocity.z()) + "]" +
+                                ",\"position\":[" + std::to_string(position[0]) + "," + std::to_string(position[1]) + "," + std::to_string(position[2]) + "]" +
+                                ",\"attitude\":[" + std::to_string(attitude[0]) + "," + std::to_string(attitude[1]) + "," + std::to_string(attitude[2]) + "]" +
+                                ",\"velocity\":[" + std::to_string(velocity[0]) + "," + std::to_string(velocity[1]) + "," + std::to_string(velocity[2]) + "]" +
                                 ",\"airspeed\":"  + std::to_string(data.airspeed) +
                                 ",\"rpm\":" + std::to_string(data.rpm) + "}\n";
 

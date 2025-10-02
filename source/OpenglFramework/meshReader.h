@@ -11,6 +11,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <iostream>
 #include <unordered_map>
 #include <tuple>
 #include <algorithm>
@@ -25,9 +26,9 @@ public:
 
     struct meshData {
         std::vector<std::vector<unsigned int>> indices;
-        std::vector<Vector3<float>> vertices;
-        std::vector<Vector3<float>> normals;
-        std::vector<Vector2<float>> uvs;
+        std::vector<grs::Vec3f> vertices;
+        std::vector<grs::Vec3f> normals;
+        std::vector<grs::Vec2f> uvs;
     };
 
 

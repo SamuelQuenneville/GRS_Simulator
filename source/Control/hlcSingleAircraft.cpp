@@ -8,7 +8,7 @@
 
 #include "hlcSingleAircraft.h"
 
-HlcSingleAircraft::HlcSingleAircraft(worldPhysics& physics, Logger& logger, hlcGains& gains, float rate)
+HlcSingleAircraft::HlcSingleAircraft(const worldPhysics& physics, Logger& logger, hlcGains& gains, const float rate)
         : m_physics(physics)
         , m_logger(logger)
         , m_gains(gains)
@@ -21,7 +21,7 @@ HlcSingleAircraft::HlcSingleAircraft(worldPhysics& physics, Logger& logger, hlcG
 std::map<int, fixedWingCommands> HlcSingleAircraft::calculateInputs(const std::vector<int>& ids, const std::vector<fixedWingStates>& currentStates, const target& target) {
     m_groundspeedController->setAircraftStates(currentStates[0]);
 
-    float requiredThrust = m_groundspeedController->getThrustOut(target.groundspeed, false);
+    const float requiredThrust = m_groundspeedController->getThrustOut(target.groundspeed, false);
 
     fixedWingCommands commandsInputs{};
     commandsInputs.thrust = requiredThrust;
@@ -33,8 +33,8 @@ std::map<int, fixedWingCommands> HlcSingleAircraft::calculateInputs(const std::v
     return std::map<int, fixedWingCommands> {{ids[0], commandsInputs}};
 }
 
-void HlcSingleAircraft::m_writeLog(const fixedWingCommands& commands) {
-    hlcLogMessage logMessage{};
+void HlcSingleAircraft::m_writeLog(const fixedWingCommands& commands) const {
+    hlcLogMessage logMessage;
 
     logMessage = {
             commands,

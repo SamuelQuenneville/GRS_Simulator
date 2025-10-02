@@ -10,7 +10,7 @@
 #define JSONINTERFACE_H
 
 #pragma once
-#include "Mathematics/vector3.h"
+#include "Mathematics/math.h"
 
 #define MAX_SERVO_CHANNELS 16
 
@@ -40,11 +40,11 @@ struct servoPacket {
 
 struct sensorData {
     double timeStampSecond{};
-    Vector3<double> angularVelocity;
-    Vector3<double> acceleration;
-    Vector3<double> position;
-    Vector3<double> attitude;
-    Vector3<double> velocity;
+    grs::Vec3d angularVelocity;
+    grs::Vec3d acceleration;
+    grs::Vec3d position;
+    grs::Vec3d attitude;
+    grs::Vec3d velocity;
     double airspeed{};
     double rpm{};
 };
