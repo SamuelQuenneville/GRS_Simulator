@@ -6,6 +6,16 @@
  * Createk Innovation Lab
  */
 
+/**
+ * @file matrix.h
+ * @brief Generic fixed-size square matrix template implementation (2×2, 3×3, 4×4).
+ *
+ * This file provides a constexpr-capable matrix implementation with basic
+ * linear algebra operations such as determinant, trace, inverse, transpose,
+ * and matrix multiplication. It also includes utilities for constructing
+ * rotation matrices and homogeneous transformations.
+ */
+
 #ifndef GRS_SIMULATOR_MATRIX_H
 #define GRS_SIMULATOR_MATRIX_H
 
@@ -15,14 +25,30 @@
 
 namespace grs {
 
+/**
+ * @brief Generic fixed-size square matrix class.
+ *
+ * A statically-sized NxN matrix with elements stored in row-major order.
+ * Supports sizes 2×2, 3×3, and 4×4, and requires arithmetic scalar types.
+ *
+ * @tparam T Arithmetic scalar type (e.g. float, double, int).
+ * @tparam N Matrix dimension (2, 3, or 4).
+ */
 template <typename T, std::size_t N>
 struct Matrix {
     static_assert(N >= 2 && N <= 4, "Matrix only supports 2x2, 3x3, 4x4");
     static_assert(std::is_arithmetic_v<T>, "Matrix scalar type must be arithmetic");
 
+    /** @brief Internal storage of matrix elements in row-major order. */
     std::array<T, N*N> data{};
 
-    // Constructor from initializer list (row-major order)
+    /**
+     * @brief Construct a matrix from an initializer list.
+     *
+     * Missing values are initialized to zero if fewer than N×N values are provided.
+     *
+     * @param values Elements in row-major order.
+     */
     constexpr Matrix(std::initializer_list<T> values) {
         std::size_t count = std::min(values.size(), data.size());
         std::copy_n(values.begin(), count, data.begin());
@@ -31,15 +57,40 @@ struct Matrix {
         }
     }
 
+    /**
+     * @brief Default constructor. Initializes all elements to zero.
+     */
     constexpr Matrix() noexcept {
         data.fill(T{}); // zero initialize
     }
 
+    /**
+     * @brief Element access (mutable).
+     * @param r Row index [0  N-1].
+     * @param c Column index [0  N-1].
+     * @return Reference to element (@p r, @p c).
+     */
     constexpr T& operator()(const std::size_t r, const std::size_t c) noexcept { return data[r*N + c]; }
+
+    /**
+     * @brief Element access (const).
+     * @param r Row index [0  N-1].
+     * @param c Column index [0  N-1].
+     * @return Const reference to element (@p r, @p c).
+     */
     constexpr const T& operator()(const std::size_t r, const std::size_t c) const noexcept { return data[r*N + c]; }
 
+    /**
+     * @brief Get the matrix size.
+     * @return Number of rows/columns (N).
+     */
     [[nodiscard]] static constexpr std::size_t size() noexcept { return N; }
 
+    /**
+     * @brief Create a diagonal matrix.
+     * @param values Diagonal values.
+     * @return Matrix with values on the diagonal and zeros elsewhere.
+     */
     [[nodiscard]] static constexpr Matrix diagonal(const std::array<T,N>& values) noexcept {
         Matrix R{};
         for (std::size_t i = 0; i < N; ++i) {
@@ -48,6 +99,10 @@ struct Matrix {
         return R;
     }
 
+    /**
+     * @brief Create an identity matrix.
+     * @return NxN identity matrix.
+     */
     [[nodiscard]] static constexpr Matrix identity() noexcept {
         Matrix R{};
         for (std::size_t i = 0; i < N; ++i) {
@@ -56,7 +111,13 @@ struct Matrix {
         return R;
     }
 
-    // determinant
+    /**
+     * @brief Compute the determinant.
+     *
+     * Implemented for N = 2 and N = 3.
+     *
+     * @return Determinant of the matrix.
+     */
     [[nodiscard]] constexpr T determinant() const noexcept {
         if constexpr (N == 2) {
             return (*this)(0,0)*(*this)(1,1) - (*this)(0,1)*(*this)(1,0);
@@ -71,7 +132,10 @@ struct Matrix {
         }
     }
 
-    // trace
+    /**
+     * @brief Compute the matrix trace.
+     * @return Sum of diagonal elements.
+     */
     [[nodiscard]] constexpr T trace() const noexcept {
         T tr = T(0);
         for (std::size_t i = 0; i < N; i++) {
@@ -80,7 +144,14 @@ struct Matrix {
         return tr;
     }
 
-    // inverse
+    /**
+     * @brief Compute the matrix inverse.
+     *
+     * Implemented for N = 2, 3, and 4. Throws if the matrix is singular.
+     *
+     * @throws std::runtime_error If the matrix is singular.
+     * @return Inverse of the matrix.
+     */
     [[nodiscard]] constexpr Matrix inverse() const {
         if constexpr (N == 2) {
             T det = determinant();
@@ -173,7 +244,10 @@ struct Matrix {
         }
     }
 
-    // transpose
+    /**
+     * @brief Compute the transpose.
+     * @return Transposed matrix.
+     */
     [[nodiscard]] constexpr Matrix transpose() const noexcept {
         Matrix R{};
         for (std::size_t i = 0 ; i < N ; i++) {
@@ -184,6 +258,10 @@ struct Matrix {
         return R;
     }
 
+    /**
+     * @brief Extract the upper-left 3×3 block of a matrix.
+     * @return 3×3 matrix.
+     */
     [[nodiscard]] constexpr Matrix<T,3> upperLeft3x3() const noexcept {
         Matrix<T,3> R{};
         for (std::size_t i = 0; i < 3; ++i) {
@@ -196,6 +274,9 @@ struct Matrix {
 
 };
 
+/**
+ * @brief Matrix addition.
+ */
 template <typename T, std::size_t N>
 constexpr Matrix<T,N> operator+(const Matrix<T,N>& matrix1, const Matrix<T,N>&  matrix2) noexcept
 {
@@ -206,6 +287,9 @@ constexpr Matrix<T,N> operator+(const Matrix<T,N>& matrix1, const Matrix<T,N>&  
     return R;
 }
 
+/**
+ * @brief Matrix subtraction.
+ */
 template <typename T, std::size_t N>
 constexpr Matrix<T,N> operator-(const Matrix<T,N>&  matrix1, const Matrix<T,N>&  matrix2) noexcept
 {
@@ -216,7 +300,9 @@ constexpr Matrix<T,N> operator-(const Matrix<T,N>&  matrix1, const Matrix<T,N>& 
     return R;
 }
 
-// division by scalar
+/**
+ * @brief Division by scalar.
+ */
 template <typename T, std::size_t N>
 [[nodiscard]] constexpr Matrix<T,N> operator/(const Matrix<T,N>& matrix, T scalar) noexcept {
     Matrix<T,N> R{};
@@ -228,7 +314,9 @@ template <typename T, std::size_t N>
     return R;
 }
 
-// scalar multiplication
+/**
+ * @brief Scalar multiplication (scalar * matrix).
+ */
 template <typename T, std::size_t N>
 [[nodiscard]] constexpr Matrix<T,N> operator*(T scalar, const Matrix<T,N>&  matrix) noexcept {
     Matrix<T,N> R{};
@@ -238,12 +326,17 @@ template <typename T, std::size_t N>
     return R;
 }
 
+/**
+ * @brief Scalar multiplication (matrix * scalar).
+ */
 template <typename T, std::size_t N>
 constexpr Matrix<T, N> operator*(const Matrix<T,N>& matrix, T scalar) noexcept {
     return  matrix * scalar;
 }
 
-// vector multiplication
+/**
+ * @brief Matrix–vector multiplication.
+ */
 template <typename T, std::size_t N>
 [[nodiscard]] constexpr Vector<T,N> operator*(const Matrix<T,N>& matrix, const Vector<T,N>& vector) noexcept {
     Vector<T,N> R{};
@@ -257,7 +350,11 @@ template <typename T, std::size_t N>
     return R;
 }
 
-// 4x4 matrix * 3D point (homogeneous coordinates)
+/**
+ * @brief Multiply a 4×4 homogeneous transformation matrix with a 3D point.
+ *
+ * Applies affine transformation and homogeneous division.
+ */
 template <typename T>
 [[nodiscard]] constexpr Vector<T,3> operator*(const Matrix<T,4>& matrix, const Vector<T,3>& vector) noexcept {
     // Compute transformed coordinates
@@ -278,7 +375,9 @@ template <typename T>
     return R;
 }
 
-// Matrix * Matrix
+/**
+ * @brief Matrix–matrix multiplication.
+ */
 template <typename T, std::size_t N>
 constexpr Matrix<T,N> operator*(const Matrix<T,N>& matrix1, const Matrix<T,N>& matrix2) noexcept {
     Matrix<T,N> R{};
@@ -294,13 +393,16 @@ constexpr Matrix<T,N> operator*(const Matrix<T,N>& matrix1, const Matrix<T,N>& m
     return R;
 }
 
-// Rotation Matrix
-// Create rotation matrix around the X-axis
-//
-//        | 1             0            0  |
-// R_AB = | 0    cos(theta)    sin(theta) |
-//        | 0   -sin(theta)    cos(theta) |
-//
+/**
+ * @brief Create a rotation matrix around the X-axis.
+ * <pre>
+ *        | 1             0            0  |
+ *    R = | 0    cos(theta)    sin(theta) |
+ *        | 0   -sin(theta)    cos(theta) |
+ * </pre>
+ * @param angleRad Rotation angle in radians.
+ * @return 3×3 rotation matrix.
+ */
 template <typename T>
 [[nodiscard]] constexpr Matrix<T,3> rotationX(T angleRad) noexcept {
     const T c = std::cos(angleRad);
@@ -313,12 +415,16 @@ template <typename T>
     return R;
 }
 
-// Create rotation matrix around the Y-axis
-//
-//        |  cos(theta)   0   -sin(theta) |
-// R_AB = |          0    1            0  |
-//        |  sin(theta)   0    cos(theta) |
-//
+/**
+ * @brief Create a rotation matrix around the Y-axis.
+ * <pre>
+ *        |  cos(theta)   0   -sin(theta) |
+ *    R = |          0    1            0  |
+ *        |  sin(theta)   0    cos(theta) |
+ * </pre>
+ * @param angleRad Rotation angle in radians.
+ * @return 3×3 rotation matrix.
+ */
 template <typename T>
 [[nodiscard]] constexpr Matrix<T,3> rotationY(T angleRad) noexcept {
     const T c = std::cos(angleRad);
@@ -331,12 +437,16 @@ template <typename T>
     return R;
 }
 
-// Create rotation matrix around the Z-axis
-//
-//        |  cos(theta)   sin(theta)   0 |
-// R_AB = | -sin(theta)   cos(theta)   0 |
-//        |          0            0    1 |
-//
+/**
+ * @brief Create a rotation matrix around the Z-axis.
+ * <pre>
+ *        |  cos(theta)   sin(theta)   0 |
+ *    R = | -sin(theta)   cos(theta)   0 |
+ *        |          0            0    1 |
+ * </pre>
+ * @param angleRad Rotation angle in radians.
+ * @return 3×3 rotation matrix.
+ */
 template <typename T>
 [[nodiscard]] constexpr Matrix<T,3> rotationZ(T angleRad) noexcept {
     const T c = std::cos(angleRad);
@@ -349,7 +459,14 @@ template <typename T>
     return R;
 }
 
-// 3×3 direction cosine matrix (DCM) from Euler angles in the Z–Y–X convention (yaw → pitch → roll)
+/**
+ * @brief Construct a 3×3 DCM (Z-Y-X convention) from Euler angles.
+ *
+ * @param roll Rotation around X-axis (rad).
+ * @param pitch Rotation around Y-axis (rad).
+ * @param yaw Rotation around Z-axis (rad).
+ * @return 3×3 direction cosine matrix.
+ */
 template <typename T>
 [[nodiscard]] constexpr Matrix<T,3> eulerToMat(T roll, T pitch, T yaw) noexcept {
     // Roll = X rotation
@@ -379,6 +496,12 @@ template <typename T>
     return R;
 }
 
+/**
+ * @brief Construct a 3×3 DCM (Z-Y-X convention) from Euler angles.
+ *
+ * @param euler Vector of Euler angles [roll, pitch, yaw] in radians.
+ * @return 3×3 direction cosine matrix.
+ */
 template <typename T>
 [[nodiscard]] constexpr Matrix<T,3> eulerToMat(Vector<T,3>& euler) noexcept {
     // Roll = X rotation
@@ -408,6 +531,13 @@ template <typename T>
     return R;
 }
 
+/**
+ * @brief Create a 4×4 rotation matrix from an axis-angle representation.
+ *
+ * @param axis Axis of rotation (not required to be normalized).
+ * @param angleRad Rotation angle in radians.
+ * @return 4×4 homogeneous rotation matrix.
+ */
 template <typename T>
 [[nodiscard]] constexpr Matrix<T,4> makeRotation(const Vector<T,3>& axis, T angleRad) noexcept {
     const T c = std::cos(angleRad);
@@ -442,6 +572,12 @@ template <typename T>
     return R;
 }
 
+/**
+ * @brief Create a 4×4 translation matrix.
+ *
+ * @param vector Translation vector [x, y, z].
+ * @return 4×4 homogeneous translation matrix.
+ */
 template <typename T>
 [[nodiscard]] constexpr Matrix<T,4> makeTranslation(const Vector<T,3>& vector) noexcept {
     Matrix<T,4> R = Matrix<T,4>::identity();

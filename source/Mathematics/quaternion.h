@@ -6,8 +6,22 @@
  * Createk Innovation Lab
  */
 
-#ifndef GRS_SIMULATOR_QUATERNION2_H
-#define GRS_SIMULATOR_QUATERNION2_H
+/**
+ * @file quaternion.h
+ * @brief Defines the Quaternion template struct and related operations.
+ *
+ * This header provides an implementation of quaternions for representing
+ * and manipulating 3D rotations. It includes quaternion arithmetic,
+ * normalization, conjugation, inversion, conversion between Euler angles
+ * and rotation matrices, as well as spherical linear interpolation (SLERP).
+ *
+ * The quaternion is represented as a struct template with four components
+ * (x, y, z, w), where (x, y, z) represents the vector part and w represents
+ * the scalar part.
+ */
+
+#ifndef GRS_SIMULATOR_QUATERNION_H
+#define GRS_SIMULATOR_QUATERNION_H
 
 #pragma once
 #include <cassert>
@@ -16,16 +30,41 @@
 
 namespace grs {
 
+/**
+ * @brief Represents a quaternion with components (x, y, z, w).
+ *
+ * A quaternion is a mathematical structure commonly used to represent
+ * 3D orientations and rotations. This implementation provides basic
+ * arithmetic operators, normalization, conjugation, inversion, and
+ * conversions to/from Euler angles and rotation matrices.
+ *
+ * @tparam T Scalar type (e.g., float, double).
+ */
 template<typename T>
 struct Quaternion {
-    T x{}, y{}, z{}, w{}; // default = identity
+    /** @brief Quaternion components */
+    T x{}, y{}, z{}, w{};
 
-    // Constructor
+    /**
+     * @brief Default constructor.
+     */
     constexpr Quaternion() = default;
+
+    /**
+     * @brief Constructs a quaternion with explicit components.
+     * @param x_ X component.
+     * @param y_ Y component.
+     * @param z_ Z component.
+     * @param w_ W (scalar) component.
+     */
     constexpr Quaternion(const T x_, const T y_, const T z_, const T w_) noexcept
         : x(x_), y(y_), z(z_), w(w_) {}
 
-    // += operator
+    /**
+     * @brief Adds another quaternion to this quaternion.
+     * @param q Quaternion to add.
+     * @return Reference to this quaternion.
+     */
     constexpr Quaternion& operator+=(const Quaternion& q) noexcept {
         x += q.x;
         y += q.y;
@@ -34,7 +73,11 @@ struct Quaternion {
         return *this;
     }
 
-    // -= operator
+    /**
+     * @brief Subtracts another quaternion from this quaternion.
+     * @param q Quaternion to subtract.
+     * @return Reference to this quaternion.
+     */
     constexpr Quaternion& operator-=(const Quaternion& q) noexcept {
         x -= q.x;
         y -= q.y;
@@ -43,32 +86,58 @@ struct Quaternion {
         return *this;
     }
 
-    // Identity
+    /**
+     * @brief Returns the identity quaternion (0,0,0,1).
+     * @return Identity quaternion.
+     */
     [[nodiscard]] static constexpr Quaternion identity() noexcept {
         return {T(0), T(0), T(0), T(1)};
     }
 
-    // Length
+    /**
+     * @brief Computes the squared length (magnitude) of the quaternion.
+     * @return Squared length.
+     */
     [[nodiscard]] constexpr T lengthSquared() const noexcept {
         return x*x + y*y + z*z + w*w;
     }
 
+    /**
+     * @brief Computes the length (magnitude) of the quaternion.
+     * @return Length of the quaternion.
+     */
     [[nodiscard]] constexpr T length() const noexcept {
         return std::sqrt(lengthSquared());
     }
 
-    // Conjugate & Inverse
+    /**
+     * @brief Returns the conjugate of the quaternion.
+     *
+     * The conjugate is defined as (-x, -y, -z, w).
+     *
+     * @return Conjugate quaternion.
+     */
     [[nodiscard]] constexpr Quaternion conjugate() const noexcept {
         return {-x, -y, -z, w};
     }
 
+    /**
+     * @brief Returns the inverse of the quaternion.
+     *
+     * The inverse is computed as conjugate(q) / |q|².
+     *
+     * @return Inverse quaternion.
+     */
     [[nodiscard]] Quaternion inverse() const noexcept {
         const T ls = lengthSquared();
         assert(ls > T(0));
         return conjugate() * (T(1) / ls);
     }
 
-    // NED to Y up
+    /**
+     * @brief Converts quaternion from NED (North-East-Down) to Y-up convention.
+     * @return Quaternion in Y-up coordinates.
+     */
     [[nodiscard]] Quaternion nedToYup() const noexcept {
         const T c = std::cos(M_PI_4);
         const Quaternion correction = {c, T(0), T(0), c};
@@ -76,7 +145,10 @@ struct Quaternion {
         return correction * (*this);
     }
 
-    // Y up to NED
+    /**
+     * @brief Converts quaternion from Y-up to NED (North-East-Down) convention.
+     * @return Quaternion in NED coordinates.
+     */
     [[nodiscard]] Quaternion yUpToNed() const noexcept {
         const T c = std::cos(M_PI_4);
         const Quaternion correction = {-c, T(0), T(0), c};
@@ -86,22 +158,37 @@ struct Quaternion {
 
 };
 
-// Operators
+/**
+ * @brief Quaternion addition.
+ */
 template <typename T>
 constexpr Quaternion<T> operator+(const Quaternion<T>& q1, const Quaternion<T>& q2) noexcept {
     return {q1.x + q2.x, q1.y + q2.y, q1.z + q2.z, q1.w + q2.w};
 }
 
+/**
+* @brief Quaternion subtraction.
+*/
 template <typename T>
 constexpr Quaternion<T> operator-(const Quaternion<T>& q1, const Quaternion<T>& q2) noexcept {
     return {q1.x - q2.x, q1.y - q2.y, q1.z - q2.z, q1.w - q2.w};
 }
 
+/**
+ * @brief Scalar multiplication.
+ */
 template <typename T>
 constexpr Quaternion<T> operator*(const Quaternion<T>& q, const T scalar) noexcept {
     return {q.x * scalar, q.y * scalar, q.z * scalar, q.w * scalar};
 }
 
+/**
+ * @brief Hamilton product (quaternion * quaternion).
+ *
+ * @param q1 Left-hand side quaternion.
+ * @param q2 Right-hand side quaternion.
+ * @return Result of quaternion multiplication.
+ */
 template <typename T>
 constexpr Quaternion<T> operator*(const Quaternion<T>& q1, const Quaternion<T>& q2) noexcept {
     /* The following code is equivalent to this
@@ -116,6 +203,13 @@ constexpr Quaternion<T> operator*(const Quaternion<T>& q1, const Quaternion<T>& 
             q1.w * q2.w - q1.x * q2.x - q1.y * q2.y - q1.z * q2.z};
 }
 
+/**
+ * @brief Rotates a 3D vector by a quaternion.
+ *
+ * @param q Rotation quaternion.
+ * @param point 3D vector to rotate.
+ * @return Rotated vector.
+ */
 template <typename T>
 constexpr Vector<T,3> operator*(const Quaternion<T>& q, const Vector<T,3>& point) noexcept {
     /* The following code is equivalent to this
@@ -133,20 +227,35 @@ constexpr Vector<T,3> operator*(const Quaternion<T>& q, const Vector<T,3>& point
             q.w * prodZ - prodX * q.y + prodY * q.x - prodW * q.z};
 }
 
-// Normalize
+/**
+ * @brief Normalizes a quaternion.
+ * @param q Input quaternion.
+ * @return Unit quaternion in the same direction as q.
+ */
 template <typename T>
 [[nodiscard]] constexpr Quaternion<T> normalize(const Quaternion<T>& q) {
     const T len = q.length();
     return (len > T(0)) ? (q * (T(1)/len)) : q;
 }
 
-// Dot
+/**
+ * @brief Computes the dot product of two quaternions.
+ * @param q1 First quaternion.
+ * @param q2 Second quaternion.
+ * @return Dot product result.
+ */
 template <typename T>
 [[nodiscard]] constexpr T dot(const Quaternion<T>& q1, const Quaternion<T>& q2) noexcept {
     return q1.x*q2.x + q1.y*q2.y + q1.z*q2.z + q1.w*q2.w;
 }
 
-// Euler angles to quaternion
+/**
+ * @brief Converts Euler angles (roll, pitch, yaw) to a quaternion.
+ * @param roll Rotation around X axis (rad).
+ * @param pitch Rotation around Y axis (rad).
+ * @param yaw Rotation around Z axis (rad).
+ * @return Equivalent quaternion.
+ */
 template <typename T>
 [[nodiscard]] constexpr Quaternion<T> eulerToQuat(const T roll, const T pitch, const T yaw) {
     T angle = roll * 0.5;
@@ -170,6 +279,11 @@ template <typename T>
     return normalize(q);
 }
 
+/**
+ * @brief Converts Euler angles stored in a vector to a quaternion.
+ * @param euler Vector of Euler angles [roll, pitch, yaw].
+ * @return Equivalent quaternion.
+ */
 template <typename T>
 [[nodiscard]] constexpr Quaternion<T> eulerToQuat(const Vector<T,3>& euler) {
     T angle = euler[0] * 0.5;
@@ -193,7 +307,11 @@ template <typename T>
     return normalize(q);
 }
 
-// Quaternion to euler angles
+/**
+ * @brief Converts a quaternion to Euler angles (roll, pitch, yaw).
+ * @param q Quaternion to convert.
+ * @return Vector of Euler angles [roll, pitch, yaw] in radians.
+ */
 template <typename T>
 [[nodiscard]] constexpr Vector<T,3> quatToEuler(const Quaternion<T>& q) noexcept {
 
@@ -221,7 +339,11 @@ template <typename T>
     return {roll + M_PI_2, pitch, yaw};
 }
 
-// Quaternion to rotation matrix
+/**
+ * @brief Converts a quaternion to a 3x3 rotation matrix.
+ * @param q Input quaternion.
+ * @return Rotation matrix corresponding to quaternion.
+ */
 template <typename T>
 [[nodiscard]] constexpr Matrix<T,3> quatToRotMatrix(const Quaternion<T>& q) noexcept {
     const T lenSq = q.lengthSquared();
@@ -252,69 +374,80 @@ template <typename T>
     return m;
 }
 
-// Rotation matrix to quaternion
+/**
+ * @brief Converts a 3x3 rotation matrix to a quaternion.
+ * @param matrix Input rotation matrix.
+ * @return Equivalent quaternion.
+ */
 template <typename T>
-[[nodiscard]] constexpr Quaternion<T> rotMatrixToQuat(const Matrix<T,3>& m) noexcept {
-    const T tr = m.trace();
+[[nodiscard]] constexpr Quaternion<T> rotMatrixToQuat(const Matrix<T,3>& matrix) noexcept {
+    const T tr = matrix.trace();
 
     Quaternion<T> q{};
     T r,s;
 
     if (tr < T(0)) {
-        if (m(1,1) > m(0,0)) {
-            if (m(2,2) > m(1,1)) {
-                r = std::sqrt(m(2,2) - m(0,0) - m(1,1) + T(1));
+        if (matrix(1,1) > matrix(0,0)) {
+            if (matrix(2,2) > matrix(1,1)) {
+                r = std::sqrt(matrix(2,2) - matrix(0,0) - matrix(1,1) + T(1));
                 s = 0.5 / r;
 
                 // Compute the quaternion
-                q.x = (m(2,0) + m(0,2)) * s;
-                q.y = (m(1,2) + m(2,1)) * s;
+                q.x = (matrix(2,0) + matrix(0,2)) * s;
+                q.y = (matrix(1,2) + matrix(2,1)) * s;
                 q.z = 0.5 * r;
-                q.w = (m(1,0) + m(0,1)) * s;
+                q.w = (matrix(1,0) + matrix(0,1)) * s;
             } else {
-                r = std::sqrt(m(1,1) - m(2,2) - m(0,0) + T(1));
+                r = std::sqrt(matrix(1,1) - matrix(2,2) - matrix(0,0) + T(1));
                 s = 0.5 / r;
 
                 // Compute the quaternion
-                q.x = (m(0,1) + m(1,0)) * s;
+                q.x = (matrix(0,1) + matrix(1,0)) * s;
                 q.y = 0.5 * r;
-                q.z = (m(1,2) + m(2,1)) * s;
-                q.w = (m(0,2) - m(2,0)) * s;
+                q.z = (matrix(1,2) + matrix(2,1)) * s;
+                q.w = (matrix(0,2) - matrix(2,0)) * s;
             }
-        } else if (m(2,2) > m(0,0)) {
-            r = std::sqrt(m(2,2) - m(0,0) - m(1,1) + 1.0);
+        } else if (matrix(2,2) > matrix(0,0)) {
+            r = std::sqrt(matrix(2,2) - matrix(0,0) - matrix(1,1) + 1.0);
             s = 0.5 / r;
 
             // Compute the quaternion
-            q.x = (m(2,0) + m(0,2)) * s;
-            q.y = (m(1,2) + m(2,1)) * s;
+            q.x = (matrix(2,0) + matrix(0,2)) * s;
+            q.y = (matrix(1,2) + matrix(2,1)) * s;
             q.z = 0.5 * r;
-            q.w = (m(1,0) - m(0,1)) * s;
+            q.w = (matrix(1,0) - matrix(0,1)) * s;
         } else {
-            r = std::sqrt(m(0,0) - m(1,1) - m(2,2) + 1.0);
+            r = std::sqrt(matrix(0,0) - matrix(1,1) - matrix(2,2) + 1.0);
             s = 0.5 / r;
 
             // Compute the quaternion
             q.x = 0.5 * r;
-            q.y = (m(0,1) + m(1,0)) * s;
-            q.z = (m(2,0) + m(0,2)) * s;
-            q.w = (m(2,1) - m(1,2)) * s;
+            q.y = (matrix(0,1) + matrix(1,0)) * s;
+            q.z = (matrix(2,0) + matrix(0,2)) * s;
+            q.w = (matrix(2,1) - matrix(1,2)) * s;
         }
     } else {
         r = std::sqrt(tr + T(1));
         s = 0.5 / r;
 
         // Compute the quaternion
-        q.x = (m(2,1) - m(1,2)) * s;
-        q.y = (m(0,2) - m(2,0)) * s;
-        q.z = (m(1,0) - m(0,1)) * s;
+        q.x = (matrix(2,1) - matrix(1,2)) * s;
+        q.y = (matrix(0,2) - matrix(2,0)) * s;
+        q.z = (matrix(1,0) - matrix(0,1)) * s;
         q.w = 0.5 * r;
     }
 
     return q;
 }
 
-// Spherical Linear Interpolation, t must be between 0 and 1
+/**
+ * @brief Performs Spherical Linear Interpolation (SLERP) between two quaternions.
+ *
+ * @param q1 Starting quaternion.
+ * @param q2 Ending quaternion.
+ * @param t Interpolation factor (0 ≤ t ≤ 1).
+ * @return Interpolated quaternion.
+ */
 template <typename T>
 [[nodiscard]] constexpr Quaternion<T> slerp(const Quaternion<T>& q1, const Quaternion<T>& q2, const T t) {
     int invert = 1;
@@ -351,4 +484,4 @@ template <typename T>
 
 }
 
-#endif //GRS_SIMULATOR_QUATERNION2_H
+#endif //GRS_SIMULATOR_QUATERNION_H

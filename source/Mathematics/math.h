@@ -6,6 +6,18 @@
  * Createk Innovation Lab
  */
 
+/**
+ * @file math.h
+ * @brief Core math type aliases for vectors, matrices, quaternions, and transforms.
+ *
+ * This header provides convenient typedefs for commonly used mathematical types
+ * such as 2D/3D/4D vectors, 2x2/3x3/4x4 matrices, single/double precision
+ * quaternions, and rigid-body transforms.
+ *
+ * These aliases wrap around the templated `Vector`, `Matrix`, `Quaternion`, and
+ * `Transform` structs.
+ */
+
 #ifndef GRS_SIMULATOR_MATH_H
 #define GRS_SIMULATOR_MATH_H
 
@@ -19,39 +31,59 @@
 
 namespace grs {
 
-// Vector
-using Vec2i = Vector<int, 2>;
-using Vec3i = Vector<int, 3>;
-using Vec4i = Vector<int, 4>;
+/**
+ * @name Vector Type Aliases
+ * @brief Convenient integer, float, and double precision vector typedefs.
+ * @{
+ */
+using Vec2i = Vector<int, 2>;   ///< 2D integer vector
+using Vec3i = Vector<int, 3>;   ///< 3D integer vector
+using Vec4i = Vector<int, 4>;   ///< 4D integer vector
 
-using Vec2f = Vector<float, 2>;
-using Vec3f = Vector<float, 3>;
-using Vec4f = Vector<float, 4>;
+using Vec2f = Vector<float, 2>; ///< 2D single-precision float vector
+using Vec3f = Vector<float, 3>; ///< 3D single-precision float vector
+using Vec4f = Vector<float, 4>; ///< 4D single-precision float vector
 
-using Vec2d = Vector<double, 2>;
-using Vec3d = Vector<double, 3>;
-using Vec4d = Vector<double, 4>;
+using Vec2d = Vector<double, 2>; ///< 2D double-precision float vector
+using Vec3d = Vector<double, 3>; ///< 3D double-precision float vector
+using Vec4d = Vector<double, 4>; ///< 4D double-precision float vector
+/** @} */
 
-// Squared Matrix
-using Matrix2i = Matrix<int, 2>;
-using Matrix3i = Matrix<int, 3>;
-using Matrix4i = Matrix<int, 4>;
+/**
+ * @name Matrix Type Aliases
+ * @brief Convenient 2x2, 3x3, and 4x4 matrix typedefs.
+ * @{
+ */
+using Matrix2i = Matrix<int, 2>;    ///< 2x2 integer matrix
+using Matrix3i = Matrix<int, 3>;    ///< 3x3 integer matrix
+using Matrix4i = Matrix<int, 4>;    ///< 4x4 integer matrix
 
-using Matrix2f = Matrix<float, 2>;
-using Matrix3f = Matrix<float, 3>;
-using Matrix4f = Matrix<float, 4>;
+using Matrix2f = Matrix<float, 2>;  ///< 2x2 single-precision matrix
+using Matrix3f = Matrix<float, 3>;  ///< 3x3 single-precision matrix
+using Matrix4f = Matrix<float, 4>;  ///< 4x4 single-precision matrix
 
-using Matrix2d = Matrix<double, 2>;
-using Matrix3d = Matrix<double, 3>;
-using Matrix4d = Matrix<double, 4>;
+using Matrix2d = Matrix<double, 2>; ///< 2x2 double-precision matrix
+using Matrix3d = Matrix<double, 3>; ///< 3x3 double-precision matrix
+using Matrix4d = Matrix<double, 4>; ///< 4x4 double-precision matrix
+/** @} */
 
-// Quaternion
-using QuaternionF = Quaternion<float>;
-using QuaternionD = Quaternion<double>;
+/**
+ * @name Quaternion Type Aliases
+ * @brief Single and double precision quaternion typedefs.
+ * @{
+ */
+using QuaternionF = Quaternion<float>;   ///< Single-precision quaternion
+using QuaternionD = Quaternion<double>;  ///< Double-precision quaternion
+/** @} */
 
-// Transform
-using TransformF = Transform<float>;
-using TransformD = Transform<double>;
+/**
+ * @name Transform Type Aliases
+ * @brief Single and double precision rigid-body transform typedefs.
+ * @{
+ */
+using TransformF = Transform<float>;     ///< Single-precision transform
+using TransformD = Transform<double>;    ///< Double-precision transform
+/** @} */
 
 }
 

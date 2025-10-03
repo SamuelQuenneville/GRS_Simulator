@@ -41,8 +41,8 @@ FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWin
     propulsionReference.setLoadCallback([this](const Frame& f) {
         // TODO Moment?
 
-        f.setForce({m_inputs.deltaThrust,0.0,0.0});
-        f.setMoment({0.0,0.0,0.0});
+        f.setForce(grs::Vec3d(m_inputs.deltaThrust,0.0,0.0));
+        f.setMoment(grs::Vec3d::zeros());
     });
 
     tetherAttach.setLoadCallback([this](const Frame& f) {
@@ -54,7 +54,7 @@ FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWin
         }
 
         f.setForce(m_earthToBody(tetherForces));
-        f.setMoment({0.0,0.0,0.0});
+        f.setMoment(grs::Vec3d::zeros());
     });
 }
 
