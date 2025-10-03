@@ -336,7 +336,7 @@ template <typename T>
     const T R11 = 1.0 - 2.0 * (q.y * q.y + q.z * q.z);
     T yaw = std::atan2(R21, R11);
 
-    return {roll + M_PI_2, pitch, yaw};
+    return {roll, pitch, yaw};
 }
 
 /**

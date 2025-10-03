@@ -63,7 +63,8 @@ void Gui::update() const {
     if (m_currentFrameDisplayed != nullptr) {
         const auto pos = m_currentFrameDisplayed->originNode().position();
         const auto vel = m_currentFrameDisplayed->originNode().velocity();
-        const auto ori = grs::quatToEuler(m_currentFrameDisplayed->transform().orientation.yUpToNed()) * (180.0 / M_PI);
+        auto ori = grs::quatToEuler(m_currentFrameDisplayed->transform().orientation.yUpToNed()) * (180.0 / M_PI);
+        ori[0] += M_PI_2;
 
         const auto force = m_currentFrameDisplayed->originNode().force();
 

@@ -331,7 +331,7 @@ template <typename T, std::size_t N>
  */
 template <typename T, std::size_t N>
 constexpr Matrix<T, N> operator*(const Matrix<T,N>& matrix, T scalar) noexcept {
-    return  matrix * scalar;
+    return  scalar * matrix;
 }
 
 /**

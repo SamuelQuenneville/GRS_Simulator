@@ -169,7 +169,7 @@ struct Vector {
      * @brief Get the number of elements in the vector.
      * @return Vector dimension @p N.
      */
-    [[nodiscard]] static constexpr std::size_t size() noexcept { return N; }
+    [[nodiscard]] constexpr std::size_t size() noexcept { return N; }
 
     /**
      * @brief Compute the Euclidean norm (length) of the vector.

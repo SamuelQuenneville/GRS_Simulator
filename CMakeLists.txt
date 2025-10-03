@@ -255,9 +255,10 @@ FetchContent_MakeAvailable(googletest)
 
 
 add_executable(GRS_Simulator_tests
-        tests/tests-vector2.cpp
-        tests/tests-vector3.cpp
-        tests/tests-mathematics.cpp
+        tests/tests_vector.cpp
+        tests/tests_quaternion.cpp
+        tests/tests_mathUtils.cpp
+        tests/tests_matrix.cpp
 )
 
 target_include_directories (GRS_Simulator_tests PUBLIC source)
