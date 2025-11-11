@@ -12,6 +12,7 @@
 #include <map>
 
 #include "Definitions/configurationDefinitions.h"
+#include "Definitions/worldPhysics.h"
 #include "frame.h"
 #include "Log/logger.h"
 
@@ -29,6 +30,8 @@ public:
 
     virtual void addConnection(Node& frameNode, Node& node);
     virtual void deleteConnection(Node& frameNode, Node& node);
+
+    void logFramesData(double simTime);
 
     void updateForcesOnBody();
     void updateWorldInfos(const grs::Vec3d& position, const grs::Vec3d& velocity, const grs::Vec3d& acceleration) const;

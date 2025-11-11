@@ -41,6 +41,12 @@ void RigidBody::deleteConnection(Node& frameNode, Node& node) {
         linkEndConnections.end());
 }
 
+void RigidBody::logFramesData(const double simTime) {
+    for (const auto& frame : m_frames) {
+        frame->writeLog(simTime);
+    }
+}
+
 void RigidBody::updateForcesOnBody() {
     grs::Vec3d totalForce = grs::Vec3d::zeros();
     grs::Vec3d totalMoment = grs::Vec3d::zeros();

@@ -8,9 +8,8 @@
 
 #include "payload.h"
 
-Payload::Payload(const worldPhysics& physics, Logger& logger, const payloadProperties& properties, const bool isGrounded)
+Payload::Payload(const worldPhysics& physics, const payloadProperties& properties, const bool isGrounded)
     : m_physics(physics)
-    , m_logger(logger)
     , m_properties(properties)
     , m_isGrounded(isGrounded)
 {
@@ -41,6 +40,7 @@ Payload::Payload(const worldPhysics& physics, Logger& logger, const payloadPrope
 }
 
 void Payload::update(const double dt) {
+    m_simTime += dt;
 
     if (!m_isGrounded) {
         updateForcesOnBody();
@@ -70,15 +70,14 @@ void Payload::setInitialStates(initialStates& states) {
     setCenterOfMassTransform(grs::TransformD(centerOfMass().position().toOpenglRef(), grs::eulerToQuat(states.orientation[0],states.orientation[1],states.orientation[2]).nedToYup()));
 }
 
-void Payload::m_writeLog() {
+void Payload::m_writeLog() const {
 
-    const payloadLogMessage logMessage = {
-        centerOfMass().position(),
-        centerOfMass().velocity(),
-        externalForces()
-    };
+    std::ostringstream msg;
+    msg << m_simTime << ","
+        << m_states.x  << "," << m_states.y  << "," << m_states.z  << ","
+        << m_states.vx << "," << m_states.vy << "," << m_states.vz;
 
-    m_logger.writePayloadMessage(logMessage);
+    Logger::instance().log(LogType::Payload, msg.str());
 }
 
 payloadStates Payload::m_calcStatesDerivatives() const {

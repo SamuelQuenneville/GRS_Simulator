@@ -8,9 +8,8 @@
 
 #include "hlcSingleAircraft.h"
 
-HlcSingleAircraft::HlcSingleAircraft(const worldPhysics& physics, Logger& logger, hlcGains& gains, const float rate)
+HlcSingleAircraft::HlcSingleAircraft(const worldPhysics& physics, hlcGains& gains, const float rate)
         : m_physics(physics)
-        , m_logger(logger)
         , m_gains(gains)
         , m_rate(rate)
 {
@@ -34,14 +33,8 @@ std::map<int, fixedWingCommands> HlcSingleAircraft::calculateInputs(const std::v
 }
 
 void HlcSingleAircraft::m_writeLog(const fixedWingCommands& commands) const {
-    hlcLogMessage logMessage;
 
-    logMessage = {
-            commands,
-            m_groundspeedController->getPidInfo()
-    };
-
-    m_logger.writeHlcMessage(logMessage);
+    //TODO
 }
 
 std::map<int, fixedWingCommands> HlcSingleAircraft::calculateInputs(const std::vector<int> &ids, const std::vector<fixedWingStates> &currentStates, const payloadStates &payloadStates, const target &target) {

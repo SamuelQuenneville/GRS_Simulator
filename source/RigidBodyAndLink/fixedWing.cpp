@@ -8,12 +8,13 @@
 
 #include "fixedWing.h"
 
+#include "Log/programLogger.h"
+
 int FixedWing::m_idCounter = 0;
 
-FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWingProperties& properties)
+FixedWing::FixedWing(const worldPhysics& physics, const fixedWingProperties& properties)
     : m_id(++m_idCounter)
     , m_physics(physics)
-    , m_logger(logger)
     , m_properties(properties)
 {
     const std::string idString = "uav" + std::to_string(m_id);
@@ -58,8 +59,8 @@ FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWin
     });
 }
 
-FixedWing::FixedWing(const worldPhysics& physics, Logger& logger, const fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller)
-        : FixedWing(physics, logger, properties)
+FixedWing::FixedWing(const worldPhysics& physics, const fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller)
+        : FixedWing(physics, properties)
 {
     m_controller = std::move(controller);
 }
@@ -73,6 +74,7 @@ int FixedWing::getId() const {
 }
 
 void FixedWing::update(const double dt) {
+    m_simTime += dt;
 
     const fixedWingControlInputs inputs = m_controller->calculateAircraftControlInputs(getId(), getStates(), getCommands());
     setInputs(inputs);
@@ -95,6 +97,7 @@ void FixedWing::update(const double dt) {
 }
 
 void FixedWing::updateSitl(const double dt, const std::array<uint16_t, MAX_SERVO_CHANNELS>& pwm, const bool shouldMove) {
+    m_simTime += dt;
 
     // Detect SITL mode once
     if (!m_sitl) {
@@ -113,9 +116,18 @@ void FixedWing::updateSitl(const double dt, const std::array<uint16_t, MAX_SERVO
     };
 
     // All-zero input guard (fail-safe or inactive)
-    if (pwm[0] == 0 || inputs.deltaThrust == 0.0) {
+    if (pwm[0] == 0) {
         inputs = {0.0,0.0,0.0,0.0};
     }
+
+    // Log
+    std::ostringstream msg;
+    msg << std::fixed << std::setprecision(4)
+        << m_simTime << "," << m_id << ","
+        << pwm[0] << "," << pwm[1] << "," << pwm[2] << "," << pwm[3] << ","
+        << inputs.deltaAileron << "," << inputs.deltaElevator << "," << inputs.deltaThrust << "," << inputs.deltaRudder;
+    Logger::instance().log(LogType::SitlIn, msg.str());
+
 
     m_updateRpmSensor(dt, pwm[2]);
 
@@ -457,22 +469,16 @@ void FixedWing::m_updateRpmSensor(const double dt, const double throttleInput) {
 
 void FixedWing::m_writeLog() {
 
-    const fixedWingLogMessage logMessage = {
-        m_id,
-        m_inputs.deltaAileron,
-        m_inputs.deltaElevator,
-        m_inputs.deltaRudder,
-        m_inputs.deltaThrust,
-        centerOfMass().position(),
-        centerOfMass().velocity(),
-        {m_states.u, m_states.v, m_states.w},
-        {m_states.phi, m_states.theta, m_states.psi},
-        {m_states.p, m_states.q, m_states.r},
-        getFrame("uav" + std::to_string(m_id) + "_aeroRef")->originNode().force(),
-        getFrame("uav" + std::to_string(m_id) + "_aeroRef")->originNode().moment(),
-        m_earthToBody(getFrame("uav" + std::to_string(m_id) + "_tetherAttach")->originNode().force()),
-        m_earthToBody(getFrame("uav" + std::to_string(m_id) + "_tetherAttach")->originNode().moment())
-    };
+    std::ostringstream msg;
+    msg << std::fixed << std::setprecision(4)
+        << m_simTime    << "," << m_id << ","
+        << m_states.x   << "," << m_states.y     << "," << m_states.z   << ","
+        << m_states.vx  << "," << m_states.vy    << "," << m_states.vz  << ","
+        << m_states.u   << "," << m_states.v     << "," << m_states.w   << ","
+        << m_states.phi << "," << m_states.theta << "," << m_states.psi << ","
+        << m_states.p   << "," << m_states.q     << "," << m_states.r;
 
-    m_logger.writeAircraftMessage(logMessage);
+    Logger::instance().log(LogType::Aircraft, msg.str());
+
+    logFramesData(m_simTime);
 }

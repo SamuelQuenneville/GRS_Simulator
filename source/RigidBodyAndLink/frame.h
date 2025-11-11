@@ -11,9 +11,11 @@
 
 #include <functional>
 #include <memory>
+#include <sstream>
 
 #include "node.h"
 #include "Mathematics/color.h"
+#include "Log/logger.h"
 
 class Frame {
 
@@ -23,6 +25,8 @@ public:
 
     void setLoadCallback(std::function<void(Frame&)> callback);
     void computeLoad();
+
+    void writeLog(double simTime) const;
 
     void setForce(const grs::Vec3d& force) const {m_origin->setForce(force);};
     void setMoment(const grs::Vec3d& moment) const {m_origin->setMoment(moment);};
@@ -36,8 +40,8 @@ public:
     [[nodiscard]] Node& originNode() const;
     [[nodiscard]] std::string getName() const {return m_name;};
 
-    [[nodiscard]] grs::Vec3d forceBody() const { return m_frameToBody * originNode().force();}
-    [[nodiscard]] grs::Vec3d momentBody() const { return m_frameToBody * originNode().moment();}
+    [[nodiscard]] grs::Vec3d forceBody() const {return m_frameToBody * originNode().force();}
+    [[nodiscard]] grs::Vec3d momentBody() const {return m_frameToBody * originNode().moment();}
 
     void setTransform(const grs::TransformD& newTransform);
     void setTransform(const grs::Vec3d& newPosition, const grs::QuaternionD& newOrientation);

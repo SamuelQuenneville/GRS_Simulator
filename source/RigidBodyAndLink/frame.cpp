@@ -32,6 +32,19 @@ void Frame::computeLoad() {
     }
 }
 
+void Frame::writeLog(const double simTime) const {
+    std::ostringstream msg;
+    msg << std::fixed << std::setprecision(4)
+        << simTime << "," << m_name << "," << m_origin->getId() << ","
+        << m_origin->position()[0] << "," << m_origin->position()[1] << "," << m_origin->position()[2] << ","
+        << m_origin->velocity()[0] << "," << m_origin->velocity()[1] << "," << m_origin->velocity()[2] << ","
+        << m_origin->acceleration()[0] << "," << m_origin->acceleration()[1] << "," << m_origin->acceleration()[2] << ","
+        << forceBody()[0] << "," << forceBody()[1] << "," << forceBody()[2] << ","
+        << momentBody()[0] << "," << momentBody()[1] << "," << momentBody()[2];
+
+    Logger::instance().log(LogType::Frame, msg.str());
+}
+
 const grs::Vec3d& Frame::getLocalPosition() const {
     return m_localPosition;
 }

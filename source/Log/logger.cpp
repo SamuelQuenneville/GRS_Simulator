@@ -8,233 +8,78 @@
 
 #include "logger.h"
 
-Logger::Logger(const bool loggingEnabled, const std::string& logDirectory)
-    : m_logDirectory(logDirectory)
-    , m_loggingEnable(loggingEnabled)
-{
-    if (m_loggingEnable) {
-        m_initDirectory(logDirectory);
-    }
-
-    m_simulationTime = 0.0;
+Logger& Logger::instance() {
+    static Logger inst;
+    return inst;
 }
 
 Logger::~Logger() {
-    stopLog(m_aircraftLog);
-    stopLog(m_tethersLog);
-    stopLog(m_payloadLog);
-    stopLog(m_hlcLog);
-    stopLog(m_llcLog);
+    stop();
 }
 
-void Logger::loggerClockTick(const double dt) {
-    m_simulationTime += dt;
-}
 
-double Logger::getLoggerTime() const {
-    return m_simulationTime;
-}
+void Logger::start(const bool enabled, const std::string& logDirectory) {
+    m_enabled = enabled;
+    if (m_running || !m_enabled) return;
 
-void Logger::m_initDirectory(const std::string& logDirectory) {
     std::filesystem::create_directories(logDirectory);
 
-    time_t rawTime;
-    char buffer[80];
+    m_files[LogType::Aircraft].open(logDirectory + "/aircraft.csv");
+    m_files[LogType::Payload].open(logDirectory + "/payload.csv");
+    m_files[LogType::Tether].open(logDirectory + "/tether.csv");
+    m_files[LogType::SitlOut].open(logDirectory + "/sitlOut.csv");
+    m_files[LogType::SitlIn].open(logDirectory + "/sitlIn.csv");
+    m_files[LogType::Frame].open(logDirectory + "/frame.csv");
 
-    time(&rawTime);
-    const struct tm *timeInfo = localtime(&rawTime);
+    m_writeHeaders();
 
-    strftime(buffer,sizeof(buffer),"/%Y-%m-%d_%H-%M-%S",timeInfo);
-    const std::string date(buffer);
-
-    m_aircraftLog = startLog(logDirectory + date + "_aircraft.csv");
-    m_tethersLog = startLog(logDirectory + date + "_tethers.csv");
-    m_payloadLog = startLog(logDirectory + date + "_payload.csv");
-    m_hlcLog = startLog(logDirectory + date + "_hlc.csv");
-    m_llcLog = startLog(logDirectory + date + "_llc.csv");
+    m_running = true;
+    m_writerThread = std::thread(&Logger::m_writerLoop, this);
 }
 
-std::ofstream Logger::startLog(const std::string& fileName) {
-    std::ofstream logFile;
-    logFile.open(fileName);
+void Logger::stop() {
+    if (!m_running) return;
 
-    return logFile;
-}
+    m_running = false;
+    m_queue.stop();
 
-void Logger::stopLog(std::ofstream& logHandle) {
-    if (logHandle.is_open()) {
-       logHandle.close();
+    if (m_writerThread.joinable()) {
+        m_writerThread.join();
+    }
+
+    m_queue.clear();
+
+    for (auto& [_, file] : m_files) {
+        if (file.is_open()) {
+            file.close();
+        }
     }
 }
 
-void Logger::writeAircraftMessage(const fixedWingLogMessage& message) {
-
-    if (!m_aircraftLog.is_open()) {
-        return;
-    }
-    m_aircraftLog << message.uavId            << ","
-                  << getLoggerTime()          << ","
-                  << message.aileronCommand   << ","
-                  << message.elevatorCommand  << ","
-                  << message.rudderCommand    << ","
-                  << message.thrustCommand    << ","
-                  << message.nedPosition      << ","
-                  << message.earthSpeed       << ","
-                  << message.bodySpeed        << ","
-                  << message.attitude         << ","
-                  << message.angularSpeed     << ","
-                  << message.bodyForcesAero   << ","
-                  << message.bodyMomentsAero  << ","
-                  << message.bodyForcesTether << ","
-                  << message.bodyMomentsTether<< std::endl;
+void Logger::log(const LogType type, const std::string& line) {
+    if (!m_running || !m_enabled) return;
+    m_queue.push(LogItem{type, line});
 }
 
-void Logger::writeTetherMessage(const tetherLogMessage& message) {
-
-    if (!m_tethersLog.is_open()) {
-        return;
-    }
-    m_tethersLog << message.tetherId            << ","
-                 << getLoggerTime()             << ","
-                 << message.elongation          << ","
-                 << message.startPointPosition  << ","
-                 << message.startPointSpeed     << ","
-                 << message.endPointPosition    << ","
-                 << message.endPointSpeed       << ","
-                 << message.earthForcesSpring   << ","
-                 << message.earthForcesAero     << std::endl;
+void Logger::m_writeHeaders() {
+    m_files[LogType::Aircraft] << "time,id,x,y,z,vx,vy,vz,phi,theta,psi,p,q,r\n";
+    m_files[LogType::Payload]  << "time,id,x,y,z,vx,vy,vz\n";
+    m_files[LogType::Tether]   << "time,id,delta_x,p_start_x,p_start_y,p_start_z,p_end_x,p_end_y,p_end_z,fs_x,fs_y,fs_z,fa_x,fa_y,fa_z\n";
+    m_files[LogType::SitlOut]  << "time,id,gyro_x,gyro_y,gyro_z,a_x,a_y,a_z,x,y,z,phi,theta,psi,vx,vy,vz,airspeed,rpm\n";
+    m_files[LogType::SitlIn]   << "time,id,pwm_0,pwm_1,pwm_2,pwm_3,aileron_deg,elevator_deg,throttle,rudder_deg\n";
+    m_files[LogType::Frame]    << "time,name,node_id,x,y,z,vx,vy,vz,ax,ay,az,fx,fy,fz,mx,my,mz\n";
 }
 
-void Logger::writeHlcMessage(const hlcLogMessage& message) {
+void Logger::m_writerLoop() {
+    while (m_running || !m_queue.empty()) {
+        auto item = m_queue.pop();
+        if (!item.has_value()) {
+            break;
+        }
 
-    if (!m_hlcLog.is_open()) {
-        return;
+        auto it = m_files.find(item->type);
+        if (it != m_files.end() && it->second.is_open()) {
+            it->second << item->line << '\n';
+        }
     }
-    m_hlcLog << "1"                               << ","
-             << getLoggerTime()                   << ","
-             << message.commands1.altitude        << ","
-             << message.commands1.phi             << ","
-             << message.commands1.theta           << ","
-             << message.commands1.thrust          << ","
-             << message.groundspeedPid1.target    << ","
-             << message.groundspeedPid1.actual    << ","
-             << message.groundspeedPid1.error     << ","
-             << message.groundspeedPid1.P         << ","
-             << message.groundspeedPid1.I         << ","
-             << message.groundspeedPid1.D         << ","
-             << message.groundspeedPid1.FF        << ","
-             << message.groundspeedPid1.Dmod      << ","
-             << message.groundspeedPid1.slew_rate << ","
-             << message.groundspeedPid1.limit     << ","
-             << message.lateralController1.actualPositionX       << ","
-             << message.lateralController1.targetPositionX       << ","
-             << message.lateralController1.actualPositionY       << ","
-             << message.lateralController1.targetPositionY       << ","
-             << message.lateralController1.radius                << ","
-             << message.lateralController1.kx                    << ","
-             << message.lateralController1.xtrackPositionError   << ","
-             << message.lateralController1.kv                    << ","
-             << message.lateralController1.xtrackVelocityError   << ","
-             << message.lateralController1.accelerationTarget    << ","
-             << message.phaseController1.phase                   << ","
-             << message.phaseController1.phaseTarget             << ","
-             << message.phaseController1.P                       << ","
-             << message.phaseController1.I                       << ","
-             << message.phaseController1.D                       << ","
-             << message.phaseController1.thrustOut               << std::endl;
-
-    m_hlcLog << "2"                               << ","
-             << getLoggerTime()                   << ","
-             << message.commands2.altitude        << ","
-             << message.commands2.phi             << ","
-             << message.commands2.theta           << ","
-             << message.commands2.thrust          << ","
-             << message.groundspeedPid2.target    << ","
-             << message.groundspeedPid2.actual    << ","
-             << message.groundspeedPid2.error     << ","
-             << message.groundspeedPid2.P         << ","
-             << message.groundspeedPid2.I         << ","
-             << message.groundspeedPid2.D         << ","
-             << message.groundspeedPid2.FF        << ","
-             << message.groundspeedPid2.Dmod      << ","
-             << message.groundspeedPid2.slew_rate << ","
-             << message.groundspeedPid2.limit     << ","
-             << message.lateralController2.actualPositionX       << ","
-             << message.lateralController2.targetPositionX       << ","
-             << message.lateralController2.actualPositionY       << ","
-             << message.lateralController2.targetPositionY       << ","
-             << message.lateralController2.radius                << ","
-             << message.lateralController2.kx                    << ","
-             << message.lateralController2.xtrackPositionError   << ","
-             << message.lateralController2.kv                    << ","
-             << message.lateralController2.xtrackVelocityError   << ","
-             << message.lateralController2.accelerationTarget    << ","
-             << message.phaseController2.phase                   << ","
-             << message.phaseController2.phaseTarget             << ","
-             << message.phaseController2.P                       << ","
-             << message.phaseController2.I                       << ","
-             << message.phaseController2.D                       << ","
-             << message.phaseController2.thrustOut               << std::endl;
-
-}
-
-void Logger::writeLlcMessage(const llcLogMessage& message) {
-
-    if (!m_llcLog.is_open()) {
-        return;
-    }
-    m_llcLog << message.aircraftId            << ","
-             << getLoggerTime()               << ","
-             << message.inputs.deltaAileron   << ","
-             << message.inputs.deltaElevator  << ","
-             << message.inputs.deltaRudder    << ","
-             << message.inputs.deltaThrust    << ","
-             << message.pitchPid.target       << ","
-             << message.pitchPid.actual       << ","
-             << message.pitchPid.error        << ","
-             << message.pitchPid.P            << ","
-             << message.pitchPid.I            << ","
-             << message.pitchPid.D            << ","
-             << message.pitchPid.FF           << ","
-             << message.pitchPid.Dmod         << ","
-             << message.pitchPid.slew_rate    << ","
-             << message.pitchPid.limit        << ","
-             << message.rollPid.target        << ","
-             << message.rollPid.actual        << ","
-             << message.rollPid.error         << ","
-             << message.rollPid.P             << ","
-             << message.rollPid.I             << ","
-             << message.rollPid.D             << ","
-             << message.rollPid.FF            << ","
-             << message.rollPid.Dmod          << ","
-             << message.rollPid.slew_rate     << ","
-             << message.rollPid.limit         << ","
-             << message.altitudePid.target    << ","
-             << message.altitudePid.actual    << ","
-             << message.altitudePid.error     << ","
-             << message.altitudePid.P         << ","
-             << message.altitudePid.I         << ","
-             << message.altitudePid.D         << ","
-             << message.altitudePid.FF        << ","
-             << message.altitudePid.Dmod      << ","
-             << message.altitudePid.slew_rate << ","
-             << message.altitudePid.limit     << std::endl;
-}
-
-void Logger::writePayloadMessage(const payloadLogMessage& message) {
-
-    if (!m_payloadLog.is_open()) {
-        return;
-    }
-    m_payloadLog << getLoggerTime()     << ","
-                 << message.nedPosition << ","
-                 << message.earthSpeed  << ",";
-
-    for (const auto&[nodeNumber, forces] : message.earthForcesTethers) {
-        m_payloadLog << nodeNumber  << ","
-                     << forces      << ",";
-    }
-
-    m_payloadLog << std::endl;
-
 }

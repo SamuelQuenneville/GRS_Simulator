@@ -8,9 +8,8 @@
 
 #include "hlcTwinAircraft.h"
 
-HlcTwinAircraft::HlcTwinAircraft(const worldPhysics& physics, Logger& logger, hlcGains& gains, const float rate, const double tetherLength)
+HlcTwinAircraft::HlcTwinAircraft(const worldPhysics& physics, hlcGains& gains, const float rate, const double tetherLength)
     : m_physics(physics)
-    , m_logger(logger)
     , m_gains(gains)
     , m_rate(rate)
     , m_tetherLength(tetherLength)
@@ -106,18 +105,6 @@ std::map<int, fixedWingCommands> HlcTwinAircraft::calculateInputs(const std::vec
 }
 
 void HlcTwinAircraft::m_writeLog(const fixedWingCommands& commands1, const fixedWingCommands& commands2) const {
-    hlcLogMessage logMessage;
 
-    logMessage = {
-            commands1,
-            m_groundspeedController1->getPidInfo(),
-            m_lateralController1->getCtrlInfo(),
-            m_phaseController1->getCtrlInfo(),
-            commands2,
-            m_groundspeedController2->getPidInfo(),
-            m_lateralController2->getCtrlInfo(),
-            m_phaseController2->getCtrlInfo()
-    };
-
-    m_logger.writeHlcMessage(logMessage);
+    //TODO
 }

@@ -17,13 +17,12 @@
 class LlcBaseVersion final : public LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands> {
 
 public:
-    LlcBaseVersion(const worldPhysics& physics, Logger& logger, llcGains& gains, float rate);
+    LlcBaseVersion(const worldPhysics& physics, llcGains& gains, float rate);
 
     fixedWingControlInputs calculateAircraftControlInputs(int aircraftId, const fixedWingStates& currentStates, const fixedWingCommands& commands) override;
 
 private:
     worldPhysics m_physics;
-    Logger& m_logger;
     llcGains& m_gains;
 
     // Controller rate Hz

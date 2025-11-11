@@ -98,13 +98,6 @@ void InterfaceJSON::sendData(const int uavId, const sensorData& data) {
     const auto attitude = data.attitude;
     const auto velocity = data.velocity;
 
-    /*
-    printf("Roll   : %f, Pitch : %f, Yaw   : %f\n", data.attitude.x(), data.attitude.y(), data.attitude.z());
-    printf("Ax     : %f, Ay    : %f, Az    : %f\n", data.acceleration.x(), data.acceleration.y(), data.acceleration.z());
-    printf("North  : %f, East  : %f, Down  : %f\n", position.x(), position.y(), position.z());
-    printf("V North: %f, V East: %f, V Down: %f\n", velocity.x(), velocity.y(), velocity.z());
-    */
-
     // Form the string
     const std::string message = "\n{\"timestamp\":" + std::to_string(data.timeStampSecond) +
                                 ",\"imu\":{" +
@@ -117,11 +110,18 @@ void InterfaceJSON::sendData(const int uavId, const sensorData& data) {
                                 ",\"airspeed\":"  + std::to_string(data.airspeed) +
                                 ",\"rpm\":" + std::to_string(data.rpm) + "}\n";
 
+    // Log
+    std::ostringstream msg;
+    msg << std::fixed << std::setprecision(4)
+        << data.timeStampSecond << "," << uavId << ","
+        << gyro[0] << "," << gyro[1] << "," << gyro[2] << "," << acceleration[0] << "," << acceleration[1] << "," << acceleration[2] << ","
+        << position[0] << "," << position[1] << "," << position[2] << "," << attitude[0] << "," << attitude[1] << "," << attitude[2] << ","
+        << velocity[0] << "," << velocity[1] << "," << velocity[2] << "," << data.airspeed << "," << data.rpm;
+    Logger::instance().log(LogType::SitlOut, msg.str());
 
-
+    // Send through udp
     sendto(m_instances[uavId-1].socket_fd, message.data(), message.size(), 0,
-       reinterpret_cast<sockaddr*>(&m_instances[uavId-1].remote_addr),
-       sizeof(m_instances[uavId-1].remote_addr));
+       reinterpret_cast<sockaddr*>(&m_instances[uavId-1].remote_addr), sizeof(m_instances[uavId-1].remote_addr));
 }
 
 void InterfaceJSON::setWindvane(const float direction, const float speed) {
@@ -131,8 +131,7 @@ void InterfaceJSON::setWindvane(const float direction, const float speed) {
 }
 
 bool InterfaceJSON::allReceived(std::vector<instanceState>& instances) {
-    return std::all_of(instances.begin(), instances.end(),
-                       [](const instanceState& inst) { return inst.received_this_step; });
+    return std::all_of(instances.begin(), instances.end(), [](const instanceState& inst) { return inst.received_this_step; });
 }
 
 void InterfaceJSON::resetSyncFlags() {

@@ -10,11 +10,10 @@
 
 int Tether::m_idCounter = 0;
 
-Tether::Tether(const worldPhysics& physics, Logger& logger, const segmentProperties& properties)
+Tether::Tether(const worldPhysics& physics, const segmentProperties& properties)
     : m_id(++m_idCounter)
     , m_type(Link::RIGID)
     , m_physics(physics)
-    , m_logger(logger)
     , m_properties(properties)
 {
 
@@ -28,7 +27,9 @@ Link::linkType Tether::getType() const {
     return m_type;
 }
 
-void Tether::update(double dt) {
+void Tether::update(const double dt) {
+    m_simTime += dt;
+
     // Update node position base on connection if aircraft or payload
     const std::vector<Node*> &startPointConnections = connections[&startPointNode()];
     const std::vector<Node*> &endPointConnections = connections[&endPointNode()];
@@ -141,16 +142,15 @@ void Tether::grounded() const {
 
 void Tether::m_writeLog() const {
 
-    const tetherLogMessage logMessage = {
-        m_id,
-        m_tetherLogInfos.deformation,
-        startPoint->position(),
-        startPoint->velocity(),
-        endPoint->position(),
-        endPoint->velocity(),
-        m_tetherLogInfos.forceSpring,
-        m_tetherLogInfos.forceAero
-    };
+    std::ostringstream msg;
+    msg << std::fixed << std::setprecision(4)
+        << m_simTime << "," << m_id  << "," << m_tetherLogInfos.deformation << ","
+        << startPoint->position()[0] << "," << startPoint->position()[1] << "," << startPoint->position()[2] << ","
+        << startPoint->velocity()[0] << "," << startPoint->velocity()[1] << "," << startPoint->velocity()[2] << ","
+        << endPoint->position()[0]   << "," << endPoint->position()[1]   << "," << endPoint->position()[2]   << ","
+        << endPoint->velocity()[0]   << "," << endPoint->velocity()[1]   << "," << endPoint->velocity()[2]   << ","
+        << m_tetherLogInfos.forceSpring[0] << "," << m_tetherLogInfos.forceSpring[1] << "," << m_tetherLogInfos.forceSpring[2] << ","
+        << m_tetherLogInfos.forceAero[0]   << "," << m_tetherLogInfos.forceAero[1]   << "," << m_tetherLogInfos.forceAero[2];
 
-    m_logger.writeTetherMessage(logMessage);
+    Logger::instance().log(LogType::Tether, msg.str());
 }

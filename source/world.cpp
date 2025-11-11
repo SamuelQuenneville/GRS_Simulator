@@ -28,7 +28,18 @@ void World::update() const {
         m_system->update(simulationConfiguration.dt.count());
     }
 
-    logger().loggerClockTick(simulationConfiguration.dt.count());
+}
+
+std::string World::getDateString() {
+    time_t rawTime;
+    char buffer[80];
+
+    time(&rawTime);
+    const struct tm *timeInfo = localtime(&rawTime);
+
+    strftime(buffer,sizeof(buffer),"/%Y-%m-%d_%H-%M-%S",timeInfo);
+    const std::string date(buffer);
+    return date;
 }
 
 void World::readConfigurationFile(const std::string& fileName) {
@@ -37,7 +48,7 @@ void World::readConfigurationFile(const std::string& fileName) {
     m_systemConfiguration = ConfigurationParser::parseSystemConfiguration(nodeConfiguration);
 
     m_logDirectory = simParams.logFilesDirectory;
-    m_logger = std::make_unique<Logger>(m_programArgs.loggingEnabled, m_logDirectory);
+    Logger::instance().start(m_programArgs.loggingEnabled, m_logDirectory + getDateString());
 
     const std::chrono::duration<double> timeStep(1.0 / m_systemConfiguration.llcRate);
     simulationConfiguration = {simParams.fixedDuration, simParams.duration, timeStep};
@@ -72,13 +83,9 @@ void World::readConfigurationFile(const std::string& fileName) {
     physics.updateWind({wind[0], wind[1], wind[2]});
 }
 
-Logger& World::logger() const {
-    return *m_logger;
-}
-
 void World::createSystem() {
 
-    m_system = std::make_unique<System>(m_programArgs, physics, logger(), m_systemConfiguration, m_systemProperties, m_ctrlGains);
+    m_system = std::make_unique<System>(m_programArgs, physics, m_systemConfiguration, m_systemProperties, m_ctrlGains);
     m_system->setTarget(m_systemTarget);
 
     switch(getSystemType()) {
@@ -129,15 +136,15 @@ void World::createSystem() {
 }
 
 void World::resetSystem() {
-    m_logger.reset();
+    Logger::instance().stop();
     m_system.reset();
 
-    m_logger = std::make_unique<Logger>(m_programArgs.loggingEnabled, m_logDirectory);
+    Logger::instance().start(m_programArgs.loggingEnabled, m_logDirectory + getDateString());
     createSystem();
 }
 
 void World::deleteSystem() {
-    m_logger.reset();
+    Logger::instance().stop();
     m_system.reset();
 
     m_initialAircraftStatesVector.clear();

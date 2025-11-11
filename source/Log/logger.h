@@ -9,45 +9,39 @@
 #ifndef GRS_SIMULATOR_LOGGER_H
 #define GRS_SIMULATOR_LOGGER_H
 
+#include <atomic>
 #include <string>
 #include <filesystem>
 #include <fstream>
 #include <ctime>
+#include <thread>
+#include <unordered_map>
 #include <vector>
 
 #include "Definitions/logDefinitions.h"
+#include "threadSafeQueue.h"
 
 class Logger {
-
 public:
-    explicit Logger(bool loggingEnabled, const std::string& logDirectory);
+    static Logger& instance();
     ~Logger();
 
-    static std::ofstream startLog(const std::string& fileName);
-    static void stopLog(std::ofstream& logHandle);
+    void start(bool enabled, const std::string& logDirectory);
+    void stop();
 
-    void loggerClockTick(double dt);
-    double getLoggerTime() const;
-
-    void writeAircraftMessage(const fixedWingLogMessage& message);
-    void writeTetherMessage(const tetherLogMessage& message);
-    void writeHlcMessage(const hlcLogMessage& message);
-    void writeLlcMessage(const llcLogMessage& message);
-    void writePayloadMessage(const payloadLogMessage& message);
+    void log(LogType type, const std::string& line);
 
 private:
-    void m_initDirectory(const std::string& logDirectory);
-    std::string m_logDirectory;
+    Logger() = default;
 
-    bool m_loggingEnable;
+    void m_writeHeaders();
+    void m_writerLoop();
 
-    double m_simulationTime;
-
-    std::ofstream m_aircraftLog;
-    std::ofstream m_tethersLog;
-    std::ofstream m_payloadLog;
-    std::ofstream m_hlcLog;
-    std::ofstream m_llcLog;
+    std::unordered_map<LogType, std::ofstream> m_files;
+    ThreadSafeQueue<LogItem> m_queue;
+    std::thread m_writerThread;
+    std::atomic<bool> m_running = false;
+    std::atomic<bool> m_enabled = false;
 };
 
 

@@ -8,9 +8,8 @@
 
 #include "llcBaseVersion.h"
 
-LlcBaseVersion::LlcBaseVersion(const worldPhysics& physics, Logger& logger,llcGains& gains, const float rate)
+LlcBaseVersion::LlcBaseVersion(const worldPhysics& physics,llcGains& gains, const float rate)
     : m_physics(physics)
-    , m_logger(logger)
     , m_gains(gains)
     , m_rate(rate)
 {
@@ -70,15 +69,6 @@ int32_t LlcBaseVersion::m_stabilizeRpm(double commandedRpm) {
 }
 
 void LlcBaseVersion::m_writeLog(const int aircraftId, const fixedWingControlInputs& inputs) const {
-    llcLogMessage logMessage;
 
-    logMessage = {
-            aircraftId,
-            inputs,
-            m_pitchController->getPidInfo(),
-            m_rollController->getPidInfo(),
-            m_altController->getPidInfo()
-    };
-
-    m_logger.writeLlcMessage(logMessage);
+    //TODO
 }

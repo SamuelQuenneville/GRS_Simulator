@@ -15,7 +15,7 @@
 class Payload final : public RigidBody {
 
 public:
-    Payload(const worldPhysics& physics, Logger& logger, const payloadProperties& properties, bool isGrounded);
+    Payload(const worldPhysics& physics, const payloadProperties& properties, bool isGrounded);
 
     void update(double dt) override;
 
@@ -24,8 +24,9 @@ public:
     void setInitialStates(initialStates& states) override;
 
 private:
+    double m_simTime = 0.0;
+
     worldPhysics m_physics;
-    Logger& m_logger;
 
     payloadStates m_states{};
     payloadProperties m_properties;
@@ -38,7 +39,7 @@ private:
     void m_eulerIntegration(const payloadStates& derivatives, double dt);
 
 
-    void m_writeLog();
+    void m_writeLog() const;
 };
 
 

@@ -71,6 +71,7 @@ set(GRS_LOG
         source/Log/logger.h
         source/Log/programLogger.cpp
         source/Log/programLogger.h
+        source/Log/threadSafeQueue.h
 )
 
 set(GRS_MATHEMATICS

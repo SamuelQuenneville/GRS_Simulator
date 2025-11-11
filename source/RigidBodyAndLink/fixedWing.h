@@ -19,8 +19,8 @@
 class FixedWing final : public RigidBody {
 
 public:
-    FixedWing(const worldPhysics& physics, Logger& logger, const fixedWingProperties& properties);
-    FixedWing(const worldPhysics& physics, Logger& logger, const fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller);
+    FixedWing(const worldPhysics& physics, const fixedWingProperties& properties);
+    FixedWing(const worldPhysics& physics, const fixedWingProperties& properties, std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>>&& controller);
     ~FixedWing() override;
 
     [[nodiscard]] int getId() const;
@@ -58,14 +58,13 @@ public:
         THROTTLE,
     };
 
-    float TIME = 0.0f;
-
 private:
     int m_id;
     static int m_idCounter;
 
+    double m_simTime = 0.0;
+
     worldPhysics m_physics;
-    Logger& m_logger;
 
     fixedWingStates m_states{};
     fixedWingProperties m_properties;

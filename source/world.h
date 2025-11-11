@@ -41,8 +41,8 @@ public:
     simulationConfiguration simulationConfiguration{};
 
     void update() const;
+    [[nodiscard]] static std::string getDateString() ;
     void readConfigurationFile(const std::string& fileName);
-    [[nodiscard]] Logger& logger() const;
 
     void createSystem();
     void resetSystem();
@@ -61,8 +61,6 @@ public:
 
 private:
     programArguments& m_programArgs;
-
-    std::unique_ptr<Logger> m_logger;
 
     bool m_isRunning = true;
     std::string m_logDirectory;
