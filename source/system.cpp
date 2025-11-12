@@ -314,11 +314,11 @@ void System::createSystemTwoAircraftV(bool isGrounded, std::vector<initialStates
         aircraft2->addConnection(aircraft2->getFrame("uav2_tetherAttach")->originNode(), tether2->endPointNode());
         tether2->addConnection(tether2->endPointNode(), aircraft2->getFrame("uav2_tetherAttach")->originNode());
 
-        m_payload->addConnection(m_payload->getFrame("tetherAttach")->originNode(), tether1->startPointNode());
-        tether1->addConnection(tether1->startPointNode(), m_payload->getFrame("tetherAttach")->originNode());
+        m_payload->addConnection(m_payload->getFrame("payload_tetherAttach")->originNode(), tether1->startPointNode());
+        tether1->addConnection(tether1->startPointNode(), m_payload->getFrame("payload_tetherAttach")->originNode());
 
-        m_payload->addConnection(m_payload->getFrame("tetherAttach")->originNode(), tether2->startPointNode());
-        tether2->addConnection(tether2->startPointNode(),m_payload->getFrame("tetherAttach")->originNode());
+        m_payload->addConnection(m_payload->getFrame("payload_tetherAttach")->originNode(), tether2->startPointNode());
+        tether2->addConnection(tether2->startPointNode(),m_payload->getFrame("payload_tetherAttach")->originNode());
 
         m_startUdpSocket(aircraft1->getId());
         m_startUdpSocket(aircraft2->getId());
@@ -359,11 +359,11 @@ void System::createSystemTwoAircraftV(bool isGrounded, std::vector<initialStates
         aircraft2->addConnection(aircraft2->getFrame("uav2_tetherAttach")->originNode(), tether2->endPointNode());
         tether2->addConnection(tether2->endPointNode(), aircraft2->getFrame("uav2_tetherAttach")->originNode());
 
-        m_payload->addConnection(m_payload->getFrame("tetherAttach")->originNode(), tether1->startPointNode());
-        tether1->addConnection(tether1->startPointNode(), m_payload->getFrame("tetherAttach")->originNode());
+        m_payload->addConnection(m_payload->getFrame("payload_tetherAttach")->originNode(), tether1->startPointNode());
+        tether1->addConnection(tether1->startPointNode(), m_payload->getFrame("payload_tetherAttach")->originNode());
 
-        m_payload->addConnection(m_payload->getFrame("tetherAttach")->originNode(), tether2->startPointNode());
-        tether2->addConnection(tether2->startPointNode(), m_payload->getFrame("tetherAttach")->originNode());
+        m_payload->addConnection(m_payload->getFrame("payload_tetherAttach")->originNode(), tether2->startPointNode());
+        tether2->addConnection(tether2->startPointNode(), m_payload->getFrame("payload_tetherAttach")->originNode());
 
         // Push back Bodies and Links into lists
         m_aircraft.push_back(std::move(aircraft1));
@@ -416,17 +416,17 @@ void System::createSystemTwoAircraftY(bool isGrounded, std::vector<initialStates
         aircraft2->addConnection(aircraft2->getFrame("uav2_tetherAttach")->originNode(), tether2->endPointNode());
         tether2->addConnection(tether2->endPointNode(), aircraft2->getFrame("uav2_tetherAttach")->originNode());
 
-        m_tetherNode->addConnection(m_tetherNode->getFrame("tetherAttach")->originNode(), tether1->startPointNode());
-        tether1->addConnection(tether1->startPointNode(), m_tetherNode->getFrame("tetherAttach")->originNode());
+        m_tetherNode->addConnection(m_tetherNode->getFrame("tetherNode_tetherAttach")->originNode(), tether1->startPointNode());
+        tether1->addConnection(tether1->startPointNode(), m_tetherNode->getFrame("tetherNode_tetherAttach")->originNode());
 
-        m_tetherNode->addConnection(m_tetherNode->getFrame("tetherAttach")->originNode(), tether2->startPointNode());
-        tether2->addConnection(tether2->startPointNode(), m_tetherNode->getFrame("tetherAttach")->originNode());
+        m_tetherNode->addConnection(m_tetherNode->getFrame("tetherNode_tetherAttach")->originNode(), tether2->startPointNode());
+        tether2->addConnection(tether2->startPointNode(), m_tetherNode->getFrame("tetherNode_tetherAttach")->originNode());
 
-        m_tetherNode->addConnection(m_tetherNode->getFrame("tetherAttach")->originNode(), tether3->startPointNode());
-        tether3->addConnection(tether3->startPointNode(), m_tetherNode->getFrame("tetherAttach")->originNode());
+        m_tetherNode->addConnection(m_tetherNode->getFrame("tetherNode_tetherAttach")->originNode(), tether3->startPointNode());
+        tether3->addConnection(tether3->startPointNode(), m_tetherNode->getFrame("tetherNode_tetherAttach")->originNode());
 
-        m_payload->addConnection(m_payload->getFrame("tetherAttach")->originNode(), tether3->endPointNode());
-        tether3->addConnection(tether3->endPointNode(), m_payload->getFrame("tetherAttach")->originNode());
+        m_payload->addConnection(m_payload->getFrame("payload_tetherAttach")->originNode(), tether3->endPointNode());
+        tether3->addConnection(tether3->endPointNode(), m_payload->getFrame("payload_tetherAttach")->originNode());
 
 
         // Push back Bodies and Links into lists
@@ -480,14 +480,14 @@ void System::createSystemThreeAircraftV(bool isGrounded, std::vector<initialStat
         aircraft3->addConnection(aircraft3->getFrame("uav3_tetherAttach")->originNode(), tether3->endPointNode());
         tether3->addConnection(tether3->endPointNode(), aircraft3->getFrame("uav3_tetherAttach")->originNode());
 
-        m_payload->addConnection(m_payload->getFrame("tetherAttach")->originNode(), tether1->startPointNode());
-        tether1->addConnection(tether1->startPointNode(), m_payload->getFrame("tetherAttach")->originNode());
+        m_payload->addConnection(m_payload->getFrame("payload_tetherAttach")->originNode(), tether1->startPointNode());
+        tether1->addConnection(tether1->startPointNode(), m_payload->getFrame("payload_tetherAttach")->originNode());
 
-        m_payload->addConnection(m_payload->getFrame("tetherAttach")->originNode(), tether2->startPointNode());
-        tether2->addConnection(tether2->startPointNode(), m_payload->getFrame("tetherAttach")->originNode());
+        m_payload->addConnection(m_payload->getFrame("payload_tetherAttach")->originNode(), tether2->startPointNode());
+        tether2->addConnection(tether2->startPointNode(), m_payload->getFrame("payload_tetherAttach")->originNode());
 
-        m_payload->addConnection(m_payload->getFrame("tetherAttach")->originNode(), tether3->startPointNode());
-        tether3->addConnection(tether3->startPointNode(), m_payload->getFrame("tetherAttach")->originNode());
+        m_payload->addConnection(m_payload->getFrame("payload_tetherAttach")->originNode(), tether3->startPointNode());
+        tether3->addConnection(tether3->startPointNode(), m_payload->getFrame("payload_tetherAttach")->originNode());
 
         // Push back Bodies and Links into lists
         m_aircraft.push_back(std::move(aircraft1));
@@ -536,14 +536,14 @@ void System::createSystemThreeAircraftV(bool isGrounded, std::vector<initialStat
         aircraft3->addConnection(aircraft3->getFrame("uav3_tetherAttach")->originNode(), tether3->endPointNode());
         tether3->addConnection(tether3->endPointNode(), aircraft3->getFrame("uav3_tetherAttach")->originNode());
 
-        m_payload->addConnection(m_payload->getFrame("tetherAttach")->originNode(), tether1->startPointNode());
-        tether1->addConnection(tether1->startPointNode(), m_payload->getFrame("tetherAttach")->originNode());
+        m_payload->addConnection(m_payload->getFrame("payload_tetherAttach")->originNode(), tether1->startPointNode());
+        tether1->addConnection(tether1->startPointNode(), m_payload->getFrame("payload_tetherAttach")->originNode());
 
-        m_payload->addConnection(m_payload->getFrame("tetherAttach")->originNode(), tether2->startPointNode());
-        tether2->addConnection(tether2->startPointNode(), m_payload->getFrame("tetherAttach")->originNode());
+        m_payload->addConnection(m_payload->getFrame("payload_tetherAttach")->originNode(), tether2->startPointNode());
+        tether2->addConnection(tether2->startPointNode(), m_payload->getFrame("payload_tetherAttach")->originNode());
 
-        m_payload->addConnection(m_payload->getFrame("tetherAttach")->originNode(), tether3->startPointNode());
-        tether3->addConnection(tether3->startPointNode(), m_payload->getFrame("tetherAttach")->originNode());
+        m_payload->addConnection(m_payload->getFrame("payload_tetherAttach")->originNode(), tether3->startPointNode());
+        tether3->addConnection(tether3->startPointNode(), m_payload->getFrame("payload_tetherAttach")->originNode());
 
         // Push back Bodies and Links into lists
         m_aircraft.push_back(std::move(aircraft1));

@@ -32,6 +32,7 @@ struct payloadStates {
 };
 
 struct payloadProperties {
+    std::string name;
     float mass{};
     std::vector<float> dimension{};
     float cda{};

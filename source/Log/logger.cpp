@@ -64,7 +64,7 @@ void Logger::log(const LogType type, const std::string& line) {
 void Logger::m_writeHeaders() {
     m_files[LogType::Aircraft] << "time,id,x,y,z,vx,vy,vz,phi,theta,psi,p,q,r\n";
     m_files[LogType::Payload]  << "time,id,x,y,z,vx,vy,vz\n";
-    m_files[LogType::Tether]   << "time,id,delta_x,p_start_x,p_start_y,p_start_z,p_end_x,p_end_y,p_end_z,fs_x,fs_y,fs_z,fa_x,fa_y,fa_z\n";
+    m_files[LogType::Tether]   << "time,name,delta_x,p_start_x,p_start_y,p_start_z,p_end_x,p_end_y,p_end_z,fs_x,fs_y,fs_z,fa_x,fa_y,fa_z\n";
     m_files[LogType::SitlOut]  << "time,id,gyro_x,gyro_y,gyro_z,a_x,a_y,a_z,x,y,z,phi,theta,psi,vx,vy,vz,airspeed,rpm\n";
     m_files[LogType::SitlIn]   << "time,id,pwm_0,pwm_1,pwm_2,pwm_3,aileron_deg,elevator_deg,throttle,rudder_deg\n";
     m_files[LogType::Frame]    << "time,name,node_id,x,y,z,vx,vy,vz,ax,ay,az,fx,fy,fz,mx,my,mz\n";

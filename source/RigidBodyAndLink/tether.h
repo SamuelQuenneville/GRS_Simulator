@@ -19,16 +19,12 @@ class Tether final : public Link {
 public:
     Tether(const worldPhysics& physics, const segmentProperties& properties);
 
-    [[nodiscard]] int getId() const;
     [[nodiscard]] linkType getType() const;
 
     void update(double dt) override;
     void grounded() const;
 
 private:
-    int m_id;
-    static int m_idCounter;
-
     double m_simTime = 0.0;
 
     linkType m_type;

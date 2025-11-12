@@ -14,12 +14,12 @@ Payload::Payload(const worldPhysics& physics, const payloadProperties& propertie
     , m_isGrounded(isGrounded)
 {
     // Create a cg Frame
-    Frame& cg = addFrame("centerOfMass", this->bodyOriginFrame(), {0,0,0}, {0,0,0}, Color::HexColor::WHITE);
+    Frame& cg = addFrame(properties.name + "_centerOfMass", this->bodyOriginFrame(), {0,0,0}, {0,0,0}, Color::HexColor::WHITE);
     setCenterOfMassFrame(cg);
 
     // Create other Frames and assign function
-    Frame& aeroReference = addFrame("aeroRef", this->bodyOriginFrame(), {0,0,0}, {0,0,0}, Color::HexColor::CYAN);
-    Frame& tetherAttach  = addFrame("tetherAttach", this->bodyOriginFrame(), {0,0,0}, {0,0,0}, Color::HexColor::YELLOW);
+    Frame& aeroReference = addFrame(properties.name + "_aeroRef", this->bodyOriginFrame(), {0,0,0}, {0,0,0}, Color::HexColor::CYAN);
+    Frame& tetherAttach  = addFrame(properties.name + "_tetherAttach", this->bodyOriginFrame(), {0,0,0}, {0,0,0}, Color::HexColor::YELLOW);
 
     aeroReference.setLoadCallback([this](const Frame& f) {
         f.setForce(m_calcAeroForces());
@@ -70,7 +70,7 @@ void Payload::setInitialStates(initialStates& states) {
     setCenterOfMassTransform(grs::TransformD(centerOfMass().position().toOpenglRef(), grs::eulerToQuat(states.orientation[0],states.orientation[1],states.orientation[2]).nedToYup()));
 }
 
-void Payload::m_writeLog() const {
+void Payload::m_writeLog() {
 
     std::ostringstream msg;
     msg << m_simTime << ","
@@ -78,6 +78,8 @@ void Payload::m_writeLog() const {
         << m_states.vx << "," << m_states.vy << "," << m_states.vz;
 
     Logger::instance().log(LogType::Payload, msg.str());
+
+    logFramesData(m_simTime);
 }
 
 payloadStates Payload::m_calcStatesDerivatives() const {

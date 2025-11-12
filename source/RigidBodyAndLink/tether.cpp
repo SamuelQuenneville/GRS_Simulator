@@ -8,19 +8,12 @@
 
 #include "tether.h"
 
-int Tether::m_idCounter = 0;
-
 Tether::Tether(const worldPhysics& physics, const segmentProperties& properties)
-    : m_id(++m_idCounter)
-    , m_type(Link::RIGID)
+    : m_type(Link::RIGID)
     , m_physics(physics)
     , m_properties(properties)
 {
 
-}
-
-int Tether::getId() const {
-    return m_id;
 }
 
 Link::linkType Tether::getType() const {
@@ -144,7 +137,7 @@ void Tether::m_writeLog() const {
 
     std::ostringstream msg;
     msg << std::fixed << std::setprecision(4)
-        << m_simTime << "," << m_id  << "," << m_tetherLogInfos.deformation << ","
+        << m_simTime << "," << m_properties.name << "," << m_tetherLogInfos.deformation << ","
         << startPoint->position()[0] << "," << startPoint->position()[1] << "," << startPoint->position()[2] << ","
         << startPoint->velocity()[0] << "," << startPoint->velocity()[1] << "," << startPoint->velocity()[2] << ","
         << endPoint->position()[0]   << "," << endPoint->position()[1]   << "," << endPoint->position()[2]   << ","

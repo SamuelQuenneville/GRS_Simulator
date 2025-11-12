@@ -39,7 +39,7 @@ private:
     void m_eulerIntegration(const payloadStates& derivatives, double dt);
 
 
-    void m_writeLog() const;
+    void m_writeLog();
 };
 
 
