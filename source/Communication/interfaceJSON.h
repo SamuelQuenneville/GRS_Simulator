@@ -28,6 +28,7 @@ public:
     bool addSocket(int uavId, const char* fdmAddress, uint16_t fdmPortIn);
     void receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHANNELS>>& pwms, std::map<int, flags>& flagsList);
     void sendData(int uavId, const sensorData& data);
+    void sendDataPayload(int uavId, const sensorData& data);
     void setWindvane(float direction, float speed);
 
     static bool allReceived(std::vector<instanceState>& instances);

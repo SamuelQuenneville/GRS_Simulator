@@ -57,6 +57,14 @@ void Payload::update(const double dt) {
     m_writeLog();
 }
 
+int Payload::getId() const {
+    return m_id;
+}
+
+void Payload::setId(const int id) {
+    m_id = id;
+}
+
 void Payload::setInitialStates(initialStates& states) {
     m_states.x = states.position[0];
     m_states.y = states.position[1];

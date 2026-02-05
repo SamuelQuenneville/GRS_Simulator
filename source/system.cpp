@@ -80,6 +80,11 @@ void System::updateSitl(const double dt) {
     pwms.clear();
     m_communicationManager->receiveData(pwms, flags);
 
+    // Detect launch from GCS
+    if (m_timeSinceLaunch == 0 & flags[1].launchSitl) {
+        setLaunchTriggered(true);
+    }
+
     // If all forced command for all UAV provide a endSim = true we stop the update
     bool shouldEndSimulation = true;
 
@@ -128,8 +133,6 @@ void System::updateSitl(const double dt) {
             // Send JSON SITL
             sensorData sensorData = {static_cast<double>(nowMicros()) / 1000000.0, aircraft->getAngularVelocity(), aircraft->centerOfMass().acceleration(), aircraft->centerOfMass().position(), aircraft->getAttitude(), aircraft->centerOfMass().velocity(), aircraft->airspeed(), aircraft->getRpm()};
             m_communicationManager->sendData(aircraft->getId(), sensorData);
-
-            m_communicationManager->resetSyncFlags();
         }
 
         if (m_launchTriggered) {
@@ -139,7 +142,13 @@ void System::updateSitl(const double dt) {
         // Call payload update()
         if (m_payload != nullptr) {
             m_payload->update(dt);
+
+            // Send JSON SITL
+            sensorData sensorData = {static_cast<double>(nowMicros()) / 1000000.0, {0,0,0}, m_payload->centerOfMass().acceleration(), m_payload->centerOfMass().position(), {0,0,0}, m_payload->centerOfMass().velocity(), 0.0, 0.0};
+            m_communicationManager->sendDataPayload(m_payload->getId(), sensorData);
         }
+
+        m_communicationManager->resetSyncFlags();
     }
 }
 
@@ -302,6 +311,7 @@ void System::createSystemTwoAircraftV(bool isGrounded, std::vector<initialStates
         // Create payload and set initial conditions
         m_payload = std::make_unique<Payload>(m_physics, m_systemProperties.payload, isGrounded);
         m_payload->setInitialStates(payloadStates);
+        m_payload->setId(m_systemConfiguration.numberOfUav + 1);
 
         // Create tethers
         auto tether1 = std::make_unique<Tether>(m_physics, m_systemProperties.tether.byName("Leg1"));
@@ -322,6 +332,7 @@ void System::createSystemTwoAircraftV(bool isGrounded, std::vector<initialStates
 
         m_startUdpSocket(aircraft1->getId());
         m_startUdpSocket(aircraft2->getId());
+        m_startUdpSocket(m_payload->getId());
 
         // Push back Bodies and Links into lists
         m_aircraft.push_back(std::move(aircraft1));

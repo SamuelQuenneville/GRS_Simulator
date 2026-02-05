@@ -26,6 +26,7 @@ constexpr int MAX_WAIT_MS = 50;
 struct flags {
     bool shouldMove;
     bool endSimulation;
+    bool launchSitl;
 };
 
 // The servo packet received from ArduPilot SITL. Defined in SIM_JSON.h.
@@ -35,6 +36,7 @@ struct servoPacket {
     uint32_t frameCount;
     bool     shouldMove;
     bool     endSimulation;
+    bool     launchSitl;
     uint16_t pwm[MAX_SERVO_CHANNELS]; // pwm [aileron , elevator , throttle , rudder , ...]
 };
 

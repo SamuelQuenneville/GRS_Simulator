@@ -72,6 +72,7 @@ void InterfaceJSON::receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHA
 
                     receivedFlags[i].shouldMove    = last_pkt.shouldMove;
                     receivedFlags[i].endSimulation = last_pkt.endSimulation;
+                    receivedFlags[i].launchSitl    = last_pkt.launchSitl;
                 }
             }
         }
@@ -82,6 +83,7 @@ void InterfaceJSON::receiveData(std::map<int, std::array<uint16_t, MAX_SERVO_CHA
                 pwms[i+1] = receivedPWM[i];
                 flagsList[i+1].shouldMove = receivedFlags[i].shouldMove;
                 flagsList[i+1].endSimulation = receivedFlags[i].endSimulation;
+                flagsList[i+1].launchSitl = receivedFlags[i].launchSitl;
             }
 
             flag = false;
@@ -118,6 +120,29 @@ void InterfaceJSON::sendData(const int uavId, const sensorData& data) {
         << position[0] << "," << position[1] << "," << position[2] << "," << attitude[0] << "," << attitude[1] << "," << attitude[2] << ","
         << velocity[0] << "," << velocity[1] << "," << velocity[2] << "," << data.airspeed << "," << data.rpm;
     Logger::instance().log(LogType::SitlOut, msg.str());
+
+    // Send through udp
+    sendto(m_instances[uavId-1].socket_fd, message.data(), message.size(), 0,
+       reinterpret_cast<sockaddr*>(&m_instances[uavId-1].remote_addr), sizeof(m_instances[uavId-1].remote_addr));
+}
+
+void InterfaceJSON::sendDataPayload(const int uavId, const sensorData& data) {
+    const auto gyro = data.angularVelocity;
+    const auto acceleration = data.acceleration;
+    const auto position = data.position;
+    const auto attitude = data.attitude;
+    const auto velocity = data.velocity;
+
+    // Form the string
+    const std::string message = "\n{\"timestamp\":" + std::to_string(data.timeStampSecond) +
+                                ",\"imu\":{" +
+                                    "\"gyro\":[" + std::to_string(gyro[0]) + "," + std::to_string(gyro[1]) + "," + std::to_string(gyro[2]) + "]" +
+                                    ",\"accel_body\":[" + std::to_string(acceleration[0]) + "," + std::to_string(acceleration[1]) + "," + std::to_string(acceleration[2]) + "]" +
+                                "}" +
+                                ",\"position\":[" + std::to_string(position[0]) + "," + std::to_string(position[1]) + "," + std::to_string(position[2]) + "]" +
+                                ",\"attitude\":[" + std::to_string(attitude[0]) + "," + std::to_string(attitude[1]) + "," + std::to_string(attitude[2]) + "]" +
+                                ",\"velocity\":[" + std::to_string(velocity[0]) + "," + std::to_string(velocity[1]) + "," + std::to_string(velocity[2]) + "]" +
+                                "}\n";
 
     // Send through udp
     sendto(m_instances[uavId-1].socket_fd, message.data(), message.size(), 0,

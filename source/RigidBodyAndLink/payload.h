@@ -19,11 +19,15 @@ public:
 
     void update(double dt) override;
 
+    [[nodiscard]] int getId() const;
+    void setId(int id);
+
     [[nodiscard]] payloadStates getStates() const {return m_states;};
 
     void setInitialStates(initialStates& states) override;
 
 private:
+    int m_id;
     double m_simTime = 0.0;
 
     worldPhysics m_physics;
