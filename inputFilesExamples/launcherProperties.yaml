@@ -4,5 +4,5 @@
 #--------------------------------------------------
 
 LauncherProperties:
-  LAUNCHER_ACCEL: 100.0 # m/s^2
+  LAUNCHER_ACCEL: 0.0 # m/s^2
   LAUNCH_DURATION: 120  # ms

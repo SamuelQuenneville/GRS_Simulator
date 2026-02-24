@@ -37,7 +37,7 @@ AircraftProperties:
   # Lift and Drag
   CL_0    : 0.213850 # rad
   CL_ALPHA: 4.328933 # rad
-  CD_0    : 0.020000 # rad
+  CD_0    : 0.050000 # rad
   # Force x direction
   Cx_q        : -0.020758 # rad
   Cx_DELTA_ELE: 0.000037 # deg
