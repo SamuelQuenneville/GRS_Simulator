@@ -31,6 +31,8 @@ public:
 
     void log(LogType type, const std::string& line);
 
+    static uint64_t nowWallTimeMs();
+
 private:
     Logger() = default;
 

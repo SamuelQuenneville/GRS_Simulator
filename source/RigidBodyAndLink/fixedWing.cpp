@@ -123,7 +123,7 @@ void FixedWing::updateSitl(const double dt, const std::array<uint16_t, MAX_SERVO
     // Log
     std::ostringstream msg;
     msg << std::fixed << std::setprecision(4)
-        << m_simTime << "," << m_id << ","
+        << m_simTime << "," << Logger::nowWallTimeMs() << "," << m_id << ","
         << pwm[0] << "," << pwm[1] << "," << pwm[2] << "," << pwm[3] << ","
         << inputs.deltaAileron << "," << inputs.deltaElevator << "," << inputs.deltaThrust << "," << inputs.deltaRudder;
     Logger::instance().log(LogType::SitlIn, msg.str());
@@ -471,7 +471,7 @@ void FixedWing::m_writeLog() {
 
     std::ostringstream msg;
     msg << std::fixed << std::setprecision(4)
-        << m_simTime    << "," << m_id << ","
+        << m_simTime    << "," << Logger::nowWallTimeMs() << "," << m_id << ","
         << m_states.x   << "," << m_states.y     << "," << m_states.z   << ","
         << m_states.vx  << "," << m_states.vy    << "," << m_states.vz  << ","
         << m_states.u   << "," << m_states.v     << "," << m_states.w   << ","

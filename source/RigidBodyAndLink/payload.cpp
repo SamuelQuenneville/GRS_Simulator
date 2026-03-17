@@ -81,7 +81,7 @@ void Payload::setInitialStates(initialStates& states) {
 void Payload::m_writeLog() {
 
     std::ostringstream msg;
-    msg << m_simTime << "," << m_properties.name << ","
+    msg << m_simTime << "," << Logger::nowWallTimeMs() << "," << m_properties.name << ","
         << m_states.x  << "," << m_states.y  << "," << m_states.z  << ","
         << m_states.vx << "," << m_states.vy << "," << m_states.vz;
 

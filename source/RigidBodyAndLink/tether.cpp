@@ -137,7 +137,7 @@ void Tether::m_writeLog() const {
 
     std::ostringstream msg;
     msg << std::fixed << std::setprecision(4)
-        << m_simTime << "," << m_properties.name << "," << m_tetherLogInfos.deformation << ","
+        << m_simTime << "," << Logger::nowWallTimeMs() << "," << m_properties.name << "," << m_tetherLogInfos.deformation << ","
         << startPoint->position()[0] << "," << startPoint->position()[1] << "," << startPoint->position()[2] << ","
         << startPoint->velocity()[0] << "," << startPoint->velocity()[1] << "," << startPoint->velocity()[2] << ","
         << endPoint->position()[0]   << "," << endPoint->position()[1]   << "," << endPoint->position()[2]   << ","

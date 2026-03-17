@@ -35,7 +35,7 @@ void Frame::computeLoad() {
 void Frame::writeLog(const double simTime) const {
     std::ostringstream msg;
     msg << std::fixed << std::setprecision(4)
-        << simTime << "," << m_name << "," << m_origin->getId() << ","
+        << simTime << "," << Logger::nowWallTimeMs() << "," << m_name << "," << m_origin->getId() << ","
         << m_origin->position()[0] << "," << m_origin->position()[1] << "," << m_origin->position()[2] << ","
         << m_origin->velocity()[0] << "," << m_origin->velocity()[1] << "," << m_origin->velocity()[2] << ","
         << m_origin->acceleration()[0] << "," << m_origin->acceleration()[1] << "," << m_origin->acceleration()[2] << ","

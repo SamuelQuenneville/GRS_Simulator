@@ -115,7 +115,7 @@ void InterfaceJSON::sendData(const int uavId, const sensorData& data) {
     // Log
     std::ostringstream msg;
     msg << std::fixed << std::setprecision(4)
-        << data.timeStampSecond << "," << uavId << ","
+        << data.timeStampSecond << "," << Logger::nowWallTimeMs() << "," << uavId << ","
         << gyro[0] << "," << gyro[1] << "," << gyro[2] << "," << acceleration[0] << "," << acceleration[1] << "," << acceleration[2] << ","
         << position[0] << "," << position[1] << "," << position[2] << "," << attitude[0] << "," << attitude[1] << "," << attitude[2] << ","
         << velocity[0] << "," << velocity[1] << "," << velocity[2] << "," << data.airspeed << "," << data.rpm;
