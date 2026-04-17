@@ -12,15 +12,13 @@ SimulationParameters:
   PAYLOAD_PROPERTIES_FILE_NAME: 'inputFilesExamples/payloadProperties.yaml'
   LAUNCHER_PROPERTIES_FILE_NAME: 'inputFilesExamples/launcherProperties.yaml'
   CONTROLLER_GAINS_FILE_NAME: 'inputFilesExamples/controllerGains.yaml'
-  FIXED_DURATION: false
-  DURATION: 100 # seconds
-  WIND_ON: false
 #
 SystemConfiguration:
   NUMBER_OF_UAV: 2
   CONFIGURATION: 'Y' # FREE / V / Y
   GROUNDED: false
-  HAVE_LAUNCHER: false
+  HAVE_LAUNCHER: true
+  HAVE_TARGET: true
   TETHER_AERO_ON: false
   HLC_RATE: 20  # Hertz
   LLC_RATE: 400 # Hertz

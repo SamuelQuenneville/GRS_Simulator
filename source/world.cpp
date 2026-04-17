@@ -10,17 +10,16 @@
 
 World::World(programArguments& args)
     : m_programArgs(args)
+    , m_elapsedTime(0.0)
 {
-
     systemTypeStringToEnum = {
-            {"FREE", FREE},
-            {"V", V},
-            {"Y", Y}
+        {"FREE", FREE},
+        {"V", V},
+        {"Y", Y}
     };
-
 }
 
-void World::update() const {
+void World::update() {
 
     if (m_programArgs.sitlMode) {
         m_system->updateSitl(simulationConfiguration.dt.count());
@@ -28,6 +27,7 @@ void World::update() const {
         m_system->update(simulationConfiguration.dt.count());
     }
 
+    m_elapsedTime += simulationConfiguration.dt.count();
 }
 
 std::string World::getDateString() {
@@ -51,7 +51,7 @@ void World::readConfigurationFile(const std::string& fileName) {
     Logger::instance().start(m_programArgs.loggingEnabled, m_logDirectory + getDateString());
 
     const std::chrono::duration<double> timeStep(1.0 / m_systemConfiguration.llcRate);
-    simulationConfiguration = {simParams.fixedDuration, simParams.duration, timeStep};
+    simulationConfiguration = {timeStep};
 
     m_systemProperties.fixedWing = ConfigurationParser::parseFixedWingProperties(simParams.aircraftPropertiesFileDirectory);
     m_ctrlGains = ConfigurationParser::parseControllerGains(simParams.controllerGainsFileDirectory);
@@ -133,6 +133,9 @@ void World::createSystem() {
                     throw std::invalid_argument( "Invalid number of UAV" );
             }
     }
+
+    // Initialize a snapshot for scene creation
+    publishSnapshot(system()->getRenderData());
 }
 
 void World::resetSystem() {
@@ -179,12 +182,17 @@ systemType World::getSystemType() const {
     return systemTypeStringToEnum.at(m_systemConfiguration.configuration);
 }
 
-int World::getSystemNumberOfUav() const {
-    return m_systemConfiguration.numberOfUav;
+std::shared_ptr<System> World::system() const {
+    return m_system;
 }
 
-System* World::system() const {
-    return m_system.get();
+sceneConfiguration World::getSceneConfiguration() const {
+    sceneConfiguration config;
+    config.configuration = m_systemConfiguration.configuration;
+    config.haveLauncher  = m_systemConfiguration.haveLauncher;
+    config.haveTarget    = m_systemConfiguration.haveTarget;
+
+    return config;
 }
 
 #if defined(_WIN32) || defined(_WIN64) // Windows-specific implementation
@@ -219,6 +227,58 @@ std::string World::getExecutablePath() {
     std::string executablePath = fullPath.substr(0, fullPath.find_last_of('/'));
 
     return executablePath;
+}
+
+void World::startPhysicsThread() {
+    if (m_running.load()) return;
+
+    m_running.store(true);
+    m_physicsThread = std::thread(&World::m_physicsLoop, this);
+}
+
+void World::stopPhysicsThread() {
+    m_running.store(false);
+
+    if (m_physicsThread.joinable()) {
+        m_physicsThread.join();
+    }
+}
+
+std::shared_ptr<systemRenderData> World::getLatestSnapshot() const {
+    return std::atomic_load_explicit(&m_snapshot, std::memory_order_acquire);
+}
+
+void World::publishSnapshot(const std::shared_ptr<systemRenderData>& snapshot) {
+    snapshot->elapsedTime = m_elapsedTime;
+    std::atomic_store_explicit(&m_snapshot, snapshot, std::memory_order_release);
+}
+
+void World::m_physicsLoop() {
+
+    const auto dt = std::chrono::duration_cast<std::chrono::steady_clock::duration>(simulationConfiguration.dt);
+    auto next = std::chrono::steady_clock::now();
+
+    while (m_running.load()) {
+        next += dt;
+
+        // ---- PHYSICS STEP ----
+        if (isRunning()) {
+            update();
+        }
+
+        // ---- SNAPSHOT ----
+        if (const auto sys = system()) {
+            publishSnapshot(sys->getRenderData());
+        }
+
+        auto now = std::chrono::steady_clock::now();
+        if (now < next) {
+            std::this_thread::sleep_until(next);
+        } else {
+            // overrun → resync
+            next = now;
+        }
+    }
 }
 
 #else

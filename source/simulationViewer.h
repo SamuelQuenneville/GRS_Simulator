@@ -10,14 +10,9 @@
 #define GRS_SIMULATOR_SIMULATIONVIEWER_H
 
 #include "gui.h"
-
 #include "timer.h"
-#include "Scenes/oneAircraft.h"
-#include "Scenes/oneAircraftGrounded.h"
-#include "Scenes/twoAircraftV.h"
-#include "Scenes/twoAircraftY.h"
-#include "Scenes/twoAircraft.h"
-#include "Scenes/threeAircraftV.h"
+#include "world.h"
+#include "Scenes/scene.h"
 
 class SimulationViewer {
 
@@ -57,12 +52,9 @@ private:
     Scene* m_scene;
 
     double m_elapsedTime;
-    double m_totalDynamicTime;
     double m_dynamicStepTime;
 
     void m_update();
-    void m_updateDynamics();
-    void m_updateSingleDynamicsStep();
 
     void m_updateTarget(float groundspeed, const std::vector<double> &payloadPosition) const;
     void m_changeView(const grs::Matrix4d& viewMatrix) const;
@@ -78,7 +70,6 @@ private:
     void m_destroyScenes();
 
     void m_playSimulation();
-    void m_toggleTakeSingleStep();
     void m_pauseSimulation();
     void m_restartSimulation();
     void m_stopSimulation();

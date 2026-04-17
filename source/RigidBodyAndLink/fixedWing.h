@@ -12,6 +12,7 @@
 #include "RigidBodyAndLink/rigidBody.h"
 #include "Definitions/fixedWingDefinitions.h"
 #include "Control/lowLevelController.h"
+#include "Definitions/renderObjectDefinitions.h"
 #include "powertrain.h"
 
 #define MAX_SERVO_CHANNELS 16
@@ -50,6 +51,8 @@ public:
     [[nodiscard]] double groundspeed() const;
 
     void updateRotationMatrixCBodyEarth();
+
+    [[nodiscard]] bodyRenderData packRenderData() const;
 
     enum controlAxis {
         AILERON,

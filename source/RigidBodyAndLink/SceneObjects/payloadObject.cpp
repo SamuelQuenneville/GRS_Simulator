@@ -8,7 +8,7 @@
 
 #include "payloadObject.h"
 
-PayloadObject::PayloadObject(Payload* payload, const grs::Vec3f& size, const std::string& executablePath)
+PayloadObject::PayloadObject(const bodyRenderData& payloadRenderData, const grs::Vec3f& size, const std::string& executablePath)
     : PhysicsObject(executablePath + R"(/source/Meshes/cube.obj)")
     , m_vertexBufferVertices(GL_ARRAY_BUFFER)
     , m_vertexBufferNormals(GL_ARRAY_BUFFER)
@@ -25,7 +25,7 @@ PayloadObject::PayloadObject(Payload* payload, const grs::Vec3f& size, const std
 
     m_previousTransform = grs::TransformD::identity();
 
-    m_body = payload;
+    m_bodyRenderData = payloadRenderData;
 
     // Create Frames
     m_createVisualObject();
@@ -37,8 +37,6 @@ PayloadObject::PayloadObject(Payload* payload, const grs::Vec3f& size, const std
 }
 
 PayloadObject::~PayloadObject() {
-    m_body = nullptr;
-
     m_vertexBufferVertices.destroy();
     m_vertexBufferNormals.destroy();
     m_vertexArrayObject.destroy();

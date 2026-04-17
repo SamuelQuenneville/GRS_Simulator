@@ -11,8 +11,6 @@
 PhysicsObject::PhysicsObject()
     : Mesh()
 {
-    m_body = nullptr;
-    m_link = nullptr;
     m_color = Color::white();
 }
 
@@ -39,30 +37,37 @@ void PhysicsObject::setColor(const Color& color) {
 }
 
 const grs::TransformD& PhysicsObject::getTransform() const {
-    return m_body->transform();
+    return m_bodyRenderData.transform;
 }
 
 void PhysicsObject::setTransform(const grs::TransformD& transform) {
-    m_body->setTransform(transform);
+    m_bodyRenderData.transform = transform;
     updateTransform(1.0);
 }
 
-void PhysicsObject::m_createVisualObject() {
-    if (m_body->frames().empty()) {
-        auto visualObject = std::make_unique<FrameAxis>(m_body->bodyOriginFrame());
-        m_visualObjects.push_back(std::move(visualObject));
-    } else {
+void PhysicsObject::setBodyRenderData(const bodyRenderData& renderData) {
+    m_bodyRenderData = renderData;
 
-        for (auto& f : m_body->frames()) {
-            auto visualObject = std::make_unique<FrameAxis>(f);
-            m_visualObjects.push_back(std::move(visualObject));
-        }
+    for (std::size_t i = 0; i < m_visualObjects.size(); ++i) {
+        m_visualObjects[i]->setFrameRenderData(m_bodyRenderData.frames[i]);
+    }
+}
+
+void PhysicsObject::setTetherRenderData(const tetherRenderData& renderData) {
+    m_tetherRenderData = renderData;
+}
+
+void PhysicsObject::m_createVisualObject() {
+
+    for (auto& f : m_bodyRenderData.frames) {
+        auto visualObject = std::make_unique<FrameAxis>(f);
+        m_visualObjects.push_back(std::move(visualObject));
     }
 }
 
 grs::Matrix4d PhysicsObject::m_calculateTransform(const double interpolationFactor, const grs::Matrix4d& scalingMatrix) {
     // Get the transform of the rigid body
-    const grs::TransformD transform = m_body->transform();
+    const grs::TransformD transform = m_bodyRenderData.transform;
 
     // Interpolate the transform between the previous one and the new one
     const grs::TransformD interpolatedTransform = grs::TransformD::interpolate(m_previousTransform, transform, interpolationFactor);

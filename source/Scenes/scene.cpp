@@ -8,8 +8,8 @@
 
 #include "scene.h"
 
-Scene::Scene(const std::string& executablePath)
-    : m_elapsedTime(std::chrono::seconds::zero())
+Scene::Scene(const std::string& executablePath, const sceneConfiguration& config, const systemRenderData& renderData)
+    : m_executablePath(executablePath)
     , m_depthShader(executablePath + R"(/source/Shaders/depth.vert)", executablePath + R"(/source/Shaders/depth.frag)")
     , m_phongShader(executablePath + R"(/source/Shaders/phong.vert)", executablePath + R"(/source/Shaders/phong.frag)")
     , m_colorShader(executablePath + R"(/source/Shaders/color.vert)", executablePath + R"(/source/Shaders/color.frag)")
@@ -53,6 +53,14 @@ Scene::Scene(const std::string& executablePath)
                                 0.0, 0.0, 0.0, 1.0};
 
     m_createShadowMapFrameBufferObjectAndTexture();
+
+    // Set the center of the scene
+    m_setScenePosition({0.0, 0.0, 0.0}, 100.0f);
+    setInitialZoom(1.5f);
+    m_resetCameraToViewAll();
+
+    m_systemRenderData = renderData;
+    m_sceneConfig = config;
 }
 
 Scene::~Scene() {
@@ -67,14 +75,91 @@ Scene::~Scene() {
     m_colorShader.destroy();
 }
 
+void Scene::createPhysicsWorld() {
+
+    for (const auto& body : m_systemRenderData.bodies) {
+
+        // ---------- AIRCRAFT ---------- //
+        if (body.type == RenderObjectType::AIRCRAFT) {
+            auto aircraftObject = std::make_unique<Aircraft>(body, grs::Vec3d(2.0, 2.0, 2.0), m_executablePath);
+            aircraftObject->setColor(Color::color(body.id));
+
+            m_physicsObjects.push_back(std::move(aircraftObject));
+
+            // ---------- LAUNCHER ---------- //
+            if (m_sceneConfig.haveLauncher) {
+                auto launcherObject = std::make_shared<Launcher>(grs::Vec3d(1.0,1.0,1.0), m_executablePath);
+                launcherObject->setColor(Color::backgroundColor());
+
+                launcherObject->setTransform(grs::TransformD({-0.849, 0.816, 30.0}, grs::eulerToQuat(M_PI + grs::degToRad(19.0), 0.0, M_PI_2).nedToYup()));
+
+                const double yaw = grs::quatToEuler((body.transform.orientation).yUpToNed())[2];
+                launcherObject->rotateAroundWorldPoint({0,1,0}, yaw, {0,0,0});
+
+                m_staticObjects.push_back(std::move(launcherObject));
+            }
+
+            // -----------  PAYLOAD ---------- //
+        } else if (body.type == RenderObjectType::PAYLOAD) {
+            auto payloadObject = std::make_unique<PayloadObject>(body, grs::Vec3f(0.4,0.4,0.4), m_executablePath);
+            payloadObject->setColor(Color::blue());
+
+            m_physicsObjects.push_back(std::move(payloadObject));
+        }
+    }
+
+    // ------------ TETHER ----------- //
+    for (const auto& tether : m_systemRenderData.tethers) {
+        auto tetherObject = std::make_unique<TetherLine>(tether);
+        m_tethersObjects.push_back(std::move(tetherObject));
+    }
+
+    // ------------ PAYLOAD TARGET ----------- //
+    if (m_sceneConfig.haveTarget) {
+        m_targetObject = std::make_shared<Cube>(grs::Vec3f(0.4, 0.4, 0.4), m_executablePath);
+        m_targetObject->setColor({1.0f, 0.0f, 0.0f, 0.6f});
+        m_targetObject->setTransform(grs::TransformD({0.0,0.0,0.0}, grs::QuaternionD::identity()));
+
+        m_staticObjects.push_back(m_targetObject);
+    }
+
+    // ---------- GROUND ---------- //
+    m_groundObject = std::make_shared<Cube>(grs::Vec3f(50.0, 0.5, 50.0), m_executablePath);
+    m_groundObject->setColor(Color::floorColor());
+    m_groundObject->setTransform(grs::TransformD({0.0, -0.5, 0.0}, grs::QuaternionD::identity()));
+
+    m_staticObjects.push_back(m_groundObject);
+}
+
 void Scene::reshape(const int width, const int height) {
     m_camera.setDimensions(width, height);
 }
 
-void Scene::update() {
+void Scene::updateTarget(std::vector<double> payloadPosition) const {
+    m_targetObject->setTransform(grs::TransformD({payloadPosition[0], payloadPosition[2],payloadPosition[1]}, grs::QuaternionD::identity()));
+}
+
+void Scene::update(const systemRenderData& systemData) {
+
+    const size_t nBodies = std::min(systemData.bodies.size(), m_physicsObjects.size());
+    for (size_t i = 0; i < nBodies; i++) {
+        const auto& physicsObject = m_physicsObjects[i];
+        const auto& body = systemData.bodies[i];
+
+        physicsObject->setBodyRenderData(body);
+    }
+
     for (const auto& physicsObject : m_physicsObjects) {
         // Update the transform used for the rendering
         physicsObject->updateTransform(m_interpolationFactor);
+    }
+
+    const size_t nTether = std::min(systemData.tethers.size(), m_tethersObjects.size());
+    for (size_t i = 0; i < nTether; i++) {
+        const auto& tetherObject = m_tethersObjects[i];
+        const auto& tether = systemData.tethers[i];
+
+        tetherObject->setTetherRenderData(tether);
     }
 
     for (const auto& tetherObject : m_tethersObjects) {
@@ -188,12 +273,18 @@ void Scene::render() {
 }
 
 void Scene::renderSinglePass(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) {
+
+    for (const auto& tethersObject : m_tethersObjects) {
+        tethersObject->render(m_colorShader, worldToCameraMatrix);
+    }
+
     // Bind the shader
     shader.bind();
 
     // Render all the moving physics objects of the scene
     for (const auto& physicsObject : m_physicsObjects) {
         physicsObject->render(shader, worldToCameraMatrix);
+        physicsObject->renderVisualObject(m_colorShader, worldToCameraMatrix, shouldDrawReferenceFrame(), shouldDrawForcesVector());
     }
 
     // Render the static objects (floor could be obstacle...)
@@ -214,12 +305,17 @@ void Scene::drawForcesVector(const bool shouldDraw) {
 }
 
 void Scene::reset() {
-    m_elapsedTime = std::chrono::seconds::zero();
     changeView(grs::Matrix4d::identity());
+    destroy();
+
+    createPhysicsWorld();
 }
 
 void Scene::destroy() {
-    m_elapsedTime = std::chrono::seconds ::zero();
+    // Destroy all the physics objects of the scene
+    m_physicsObjects.clear();
+    m_tethersObjects.clear();
+    m_staticObjects.clear();
 }
 
 bool Scene::mouseButtonEvent(int button, const bool down, int mods, const double mousePosX, const double mousePosY) {
@@ -281,14 +377,6 @@ void Scene::changeView(const grs::Matrix4d& viewMatrix) {
 
 void Scene::setInterpolationFactor(const double interpolationFactor) {
     m_interpolationFactor = interpolationFactor;
-}
-
-std::chrono::duration<double> Scene::getElapsedTime() const {
-    return m_elapsedTime;
-}
-
-void Scene::setElapsedTime(const std::chrono::duration<double> elapsedTime) {
-    m_elapsedTime = elapsedTime;
 }
 
 void Scene::m_createShadowMapFrameBufferObjectAndTexture() {

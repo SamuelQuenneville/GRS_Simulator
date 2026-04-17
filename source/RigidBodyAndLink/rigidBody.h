@@ -31,7 +31,7 @@ public:
     virtual void addConnection(Node& frameNode, Node& node);
     virtual void deleteConnection(Node& frameNode, Node& node);
 
-    void logFramesData(double simTime);
+    void logFramesData(double simTime) const;
 
     void updateForcesOnBody();
     void updateWorldInfos(const grs::Vec3d& position, const grs::Vec3d& velocity, const grs::Vec3d& acceleration) const;

@@ -150,23 +150,15 @@ void Gui::m_createConfigurationPanel() {
 
     auto* buttonPlay = new nanogui::ToolButton(subgroup10, FA_PLAY);
     buttonPlay->set_flags(nanogui::Button::NormalButton);
-    buttonPlay->set_fixed_width(42);
+    buttonPlay->set_fixed_width(52);
     buttonPlay->set_callback([&] {
         if (m_hasConfigFile) {
             m_viewer->m_playSimulation();
         }
     });
-    auto* buttonPlayStep = new nanogui::ToolButton(subgroup10, FA_STEP_FORWARD);
-    buttonPlayStep->set_flags(nanogui::Button::NormalButton);
-    buttonPlayStep->set_fixed_width(42);
-    buttonPlayStep->set_callback([&] {
-        if (m_hasConfigFile) {
-            m_viewer->m_toggleTakeSingleStep();
-        }
-    });
     auto* buttonPause = new nanogui::ToolButton(subgroup10, FA_PAUSE);
     buttonPause->set_flags(nanogui::Button::NormalButton);
-    buttonPause->set_fixed_width(42);
+    buttonPause->set_fixed_width(53);
     buttonPause->set_callback([&] {
         if (m_hasConfigFile) {
             m_viewer->m_pauseSimulation();
@@ -174,7 +166,7 @@ void Gui::m_createConfigurationPanel() {
     });
     auto* buttonRestart = new nanogui::ToolButton(subgroup10, FA_REDO);
     buttonRestart->set_flags(nanogui::Button::NormalButton);
-    buttonRestart->set_fixed_width(42);
+    buttonRestart->set_fixed_width(53);
     buttonRestart->set_callback([&] {
         if (m_hasConfigFile) {
             m_viewer->m_restartSimulation();
@@ -182,7 +174,7 @@ void Gui::m_createConfigurationPanel() {
     });
     auto* buttonStop = new nanogui::ToolButton(subgroup10, FA_STOP);
     buttonStop->set_flags(nanogui::Button::NormalButton);
-    buttonStop->set_fixed_width(42);
+    buttonStop->set_fixed_width(52);
     buttonStop->set_callback([&] {
        if (m_hasConfigFile) {
            m_hasConfigFile = false;

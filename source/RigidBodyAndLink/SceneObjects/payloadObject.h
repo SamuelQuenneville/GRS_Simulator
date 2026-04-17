@@ -12,12 +12,11 @@
 #include "physicsObject.h"
 #include "OpenglFramework/vertexBufferObject.h"
 #include "OpenglFramework/vertexArrayObject.h"
-#include "RigidBodyAndLink/payload.h"
 
 class PayloadObject final : public PhysicsObject {
 
 public:
-    PayloadObject(Payload* payload, const grs::Vec3f& size, const std::string& executablePath);
+    PayloadObject(const bodyRenderData& payloadRenderData, const grs::Vec3f& size, const std::string& executablePath);
     ~PayloadObject() override;
 
     void render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) override;

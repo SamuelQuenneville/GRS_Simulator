@@ -18,6 +18,7 @@
 
 #include <functional>
 
+#include "Definitions/renderObjectDefinitions.h"
 #include "Configuration/configurationParser.h"
 #include "system.h"
 
@@ -33,14 +34,12 @@ public:
     worldPhysics physics;
 
     struct simulationConfiguration {
-        bool fixedDuration;
-        float duration;
         std::chrono::duration<double> dt;
     };
 
     simulationConfiguration simulationConfiguration{};
 
-    void update() const;
+    void update();
     [[nodiscard]] static std::string getDateString() ;
     void readConfigurationFile(const std::string& fileName);
 
@@ -54,16 +53,28 @@ public:
 
     std::map<std::string, systemType> systemTypeStringToEnum;
     [[nodiscard]] systemType getSystemType() const;
-    [[nodiscard]] int getSystemNumberOfUav() const;
-    [[nodiscard]] System* system() const;
+    [[nodiscard]] std::shared_ptr<System> system() const;
+
+    sceneConfiguration getSceneConfiguration() const;
 
     static std::string getExecutablePath();
+
+    void startPhysicsThread();
+    void stopPhysicsThread();
+    [[nodiscard]] std::shared_ptr<systemRenderData> getLatestSnapshot() const;
+    void publishSnapshot(const std::shared_ptr<systemRenderData>& snapshot);
 
 private:
     programArguments& m_programArgs;
 
-    bool m_isRunning = true;
+    bool m_isRunning = false;
     std::string m_logDirectory;
+
+    void m_physicsLoop();
+    std::thread m_physicsThread;
+    std::atomic<bool> m_running{false};
+    std::shared_ptr<systemRenderData> m_snapshot;
+    double m_elapsedTime;
 
     systemConfiguration m_systemConfiguration{};
     systemProperties m_systemProperties{};
@@ -73,7 +84,7 @@ private:
     initialStates m_initialPayloadStates;
     target m_systemTarget{};
 
-    std::unique_ptr<System> m_system;
+    std::shared_ptr<System> m_system;
 };
 
 #endif //GRS_SIMULATOR_WORLD_H

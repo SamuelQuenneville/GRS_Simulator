@@ -133,6 +133,15 @@ void Tether::grounded() const {
     startPoint->setVelocity(grs::Vec3d::zeros());
 }
 
+tetherRenderData Tether::packRenderData() const {
+
+    tetherRenderData data;
+    data.startPosition = static_cast<grs::Vec3f>(startPoint->position());
+    data.endPosition = static_cast<grs::Vec3f>(endPoint->position());
+
+    return data;
+}
+
 void Tether::m_writeLog() const {
 
     std::ostringstream msg;

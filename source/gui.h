@@ -14,7 +14,6 @@
 
 #include <nanogui/opengl.h>
 #include <nanogui/nanogui.h>
-#include <iomanip>
 
 #include "Log/programLogger.h"
 #include "RigidBodyAndLink/frame.h"

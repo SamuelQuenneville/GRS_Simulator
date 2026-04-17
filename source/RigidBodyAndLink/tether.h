@@ -10,6 +10,7 @@
 #define GRS_SIMULATOR_TETHER_H
 
 #include "link.h"
+#include "Definitions/renderObjectDefinitions.h"
 #include "Definitions/worldPhysics.h"
 #include "Definitions/tetherDefinitions.h"
 #include "Log/logger.h"
@@ -23,6 +24,8 @@ public:
 
     void update(double dt) override;
     void grounded() const;
+
+    [[nodiscard]] tetherRenderData packRenderData() const;
 
 private:
     double m_simTime = 0.0;

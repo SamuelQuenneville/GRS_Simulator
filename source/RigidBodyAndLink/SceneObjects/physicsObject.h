@@ -11,8 +11,8 @@
 
 #include "OpenglFramework/meshReader.h"
 #include "RigidBodyAndLink/SceneObjects/frameAxis.h"
-#include "RigidBodyAndLink/rigidBody.h"
 #include "RigidBodyAndLink/link.h"
+#include "Definitions/renderObjectDefinitions.h"
 
 class PhysicsObject : public Mesh {
 
@@ -30,9 +30,12 @@ public:
     [[nodiscard]] const grs::TransformD& getTransform() const;
     void setTransform(const grs::TransformD& transform);
 
+    void setBodyRenderData(const bodyRenderData& renderData);
+    void setTetherRenderData(const tetherRenderData& renderData);
+
 protected:
-    RigidBody* m_body;
-    Link* m_link;
+    bodyRenderData m_bodyRenderData{};
+    tetherRenderData m_tetherRenderData{};
 
     std::vector<std::shared_ptr<FrameAxis>> m_visualObjects;
 

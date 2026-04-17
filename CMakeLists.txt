@@ -64,6 +64,7 @@ set(GRS_DEFINITIONS
         source/Definitions/controllerGains.h
         source/Definitions/jsonInterface.h
         source/Definitions/launcherDefinitions.h
+        source/Definitions/renderObjectDefinitions.h
 )
 
 set(GRS_LOG
@@ -143,18 +144,6 @@ set(GRS_RIGID_BODIES_AND_LINK
 set(GRS_SCENES
         source/Scenes/scene.cpp
         source/Scenes/scene.h
-        source/Scenes/oneAircraftGrounded.cpp
-        source/Scenes/oneAircraftGrounded.h
-        source/Scenes/twoAircraftV.cpp
-        source/Scenes/twoAircraftV.h
-        source/Scenes/twoAircraft.cpp
-        source/Scenes/twoAircraft.h
-        source/Scenes/threeAircraftV.cpp
-        source/Scenes/threeAircraftV.h
-        source/Scenes/oneAircraft.cpp
-        source/Scenes/oneAircraft.h
-        source/Scenes/twoAircraftY.cpp
-        source/Scenes/twoAircraftY.h
 )
 
 set(GRS_SOURCE

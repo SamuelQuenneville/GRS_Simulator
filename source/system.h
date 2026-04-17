@@ -53,6 +53,8 @@ public:
 
     void setLaunchTriggered(const bool launchTriggered) {m_launchTriggered = launchTriggered;};
 
+    [[nodiscard]] std::shared_ptr<systemRenderData> getRenderData() const;
+
 private:
     programArguments& m_programArgs;
 

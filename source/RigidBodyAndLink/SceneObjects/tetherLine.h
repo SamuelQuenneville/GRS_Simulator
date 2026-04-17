@@ -12,13 +12,11 @@
 #include "physicsObject.h"
 #include "OpenglFramework/vertexBufferObject.h"
 #include "OpenglFramework/vertexArrayObject.h"
-#include "RigidBodyAndLink/tether.h"
-
 
 class TetherLine final : public PhysicsObject {
 
 public:
-    explicit TetherLine(Tether* tether);
+    explicit TetherLine(const tetherRenderData& tetherRenderData);
     ~TetherLine() override = default;
 
     void updatePosition() override;

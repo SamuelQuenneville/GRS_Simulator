@@ -13,18 +13,19 @@
 #include "OpenglFramework/shader.h"
 #include "OpenglFramework/vertexBufferObject.h"
 #include "OpenglFramework/vertexArrayObject.h"
-#include "RigidBodyAndLink/frame.h"
+#include "Definitions/renderObjectDefinitions.h"
 
 
 class FrameAxis final : public Object3D {
 
 public:
-    explicit FrameAxis(Frame* frame, float length = 2.0f);
+    explicit FrameAxis(const frameRenderData& renderData, float length = 2.0f);
     ~FrameAxis() override;
 
     void render(const Shader& shader, const grs::Matrix4d& worldToCameraMatrix, bool drawFrames, bool drawForces) const;
     void updateTransform(double interpolationFactor) override;
     void updateForceVector() const;
+    void setFrameRenderData(const frameRenderData& renderData);
 
     struct FrameLine {
         // Constructor
@@ -43,7 +44,8 @@ public:
     };
 
 private:
-    Frame* m_frame;
+    frameRenderData m_frameRenderData;
+
     grs::TransformD m_previousTransform;
 
     VertexBufferObject m_vertexBufferVertices;

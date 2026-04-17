@@ -17,7 +17,7 @@
 class Aircraft final : public PhysicsObject {
 
 public :
-    Aircraft(FixedWing* aircraft, const grs::Vec3d& scaling, const std::string& executablePath);
+    Aircraft(const bodyRenderData &aircraftRenderData, const grs::Vec3d& scaling, const std::string& executablePath);
     ~Aircraft() override;
 
     void render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) override;

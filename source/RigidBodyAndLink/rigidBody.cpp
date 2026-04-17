@@ -41,7 +41,7 @@ void RigidBody::deleteConnection(Node& frameNode, Node& node) {
         linkEndConnections.end());
 }
 
-void RigidBody::logFramesData(const double simTime) {
+void RigidBody::logFramesData(const double simTime) const {
     for (const auto& frame : m_frames) {
         frame->writeLog(simTime);
     }

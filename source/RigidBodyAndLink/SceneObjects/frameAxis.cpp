@@ -8,8 +8,8 @@
 
 #include "frameAxis.h"
 
-FrameAxis::FrameAxis(Frame* frame, const float length)
-    : m_frame(frame)
+FrameAxis::FrameAxis(const frameRenderData& renderData, const float length)
+    : m_frameRenderData(renderData)
     , m_vertexBufferVertices(GL_ARRAY_BUFFER)
     , m_vertexBufferForce(GL_ARRAY_BUFFER)
     , m_length(length)
@@ -89,7 +89,7 @@ void FrameAxis::render(const Shader& shader, const grs::Matrix4d& worldToCameraM
 // Update the transform matrix of the object
 void FrameAxis::updateTransform(const double interpolationFactor) {
     // Get the transform of the rigid body
-    const grs::TransformD transform = m_frame->transform();
+    const grs::TransformD transform = m_frameRenderData.transform;
 
     // Interpolate the transform between the previous one and the new one
     const grs::TransformD interpolatedTransform = grs::TransformD::interpolate(m_previousTransform,transform, interpolationFactor);
@@ -100,7 +100,7 @@ void FrameAxis::updateTransform(const double interpolationFactor) {
 }
 
 void FrameAxis::updateForceVector() const {
-    auto force = m_frame->originNode().force();
+    auto force = m_frameRenderData.forceAtOrigin;
 
     if (force.norm() > 1e-6f) {
         force = grs::normalize(force);
@@ -109,11 +109,15 @@ void FrameAxis::updateForceVector() const {
     // Scale to length for visualization
     force = force * static_cast<double>(m_length);
 
-    const FrameLine line(grs::Vec3f::zeros(), grs::cast<float>(force.toOpenglRef()), static_cast<uint32_t>(m_frame->getForceColor()));
+    const FrameLine line(grs::Vec3f::zeros(), grs::cast<float>(force.toOpenglRef()), static_cast<uint32_t>(m_frameRenderData.forceColor));
 
     m_vertexBufferForce.bind();
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(FrameLine), &line);
     m_vertexBufferForce.unbind();
+}
+
+void FrameAxis::setFrameRenderData(const frameRenderData& renderData) {
+    m_frameRenderData = renderData;
 }
 
 void FrameAxis::m_createVertexBufferAndArrayObject() {
@@ -139,7 +143,7 @@ void FrameAxis::m_createVertexBufferAndArrayObject() {
 void FrameAxis::m_createForceBufferAndArrayObject() {
 
     // Two vertices: origin and end of force vector
-    const FrameLine line(grs::Vec3f::zeros(), grs::Vec3f::zeros(), static_cast<uint32_t>(m_frame->getForceColor()));
+    const FrameLine line(grs::Vec3f::zeros(), grs::Vec3f::zeros(), static_cast<uint32_t>(m_frameRenderData.forceColor));
 
     m_vertexBufferForce.create();
     m_vertexBufferForce.bind();

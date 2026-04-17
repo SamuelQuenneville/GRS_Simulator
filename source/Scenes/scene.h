@@ -23,28 +23,26 @@
 class Scene {
 
 public:
-    explicit Scene(const std::string& executablePath);
-    virtual ~Scene();
+    explicit Scene(const std::string& executablePath, const sceneConfiguration& config, const systemRenderData& renderData);
+    ~Scene();
 
-    virtual void reshape(int width, int height);
+    void createPhysicsWorld();
 
-    // Update the physics world (take a simulation step) can be called several times per frame
-    virtual void updatePhysics() = 0;
-    virtual void updateTarget(float groundspeed,  std::vector<double> payloadPosition) = 0;
+    void reshape(int width, int height);
 
-    virtual void update();
-    virtual void render();
-    virtual void renderSinglePass(Shader& shader, const grs::Matrix4d& worldToCameraMatrix);
-    virtual void drawReferenceFrame(bool shouldDraw);
-    virtual void drawForcesVector(bool shouldDraw);
-    virtual void reset();
-    virtual void destroy();
+    void updateTarget(std::vector<double> payloadPosition) const;
 
-    virtual bool mouseButtonEvent(int button, bool down, int mods, double mousePosX, double mousePosY);
-    virtual bool mouseMotionEvent(double xMouse, double yMouse, int leftButtonState, int rightButtonState, int middleButtonState, int altKeyState);
-    virtual bool scrollingEvent(double xAxis, double yAxis, double scrollSensitivity);
+    void update(const systemRenderData& systemData);
+    void render();
+    void renderSinglePass(Shader& shader, const grs::Matrix4d& worldToCameraMatrix);
+    void drawReferenceFrame(bool shouldDraw);
+    void drawForcesVector(bool shouldDraw);
+    void reset();
+    void destroy();
 
-    virtual void setPauseTimerCallback(std::function<void()> callback) = 0;
+    bool mouseButtonEvent(int button, bool down, int mods, double mousePosX, double mousePosY);
+    bool mouseMotionEvent(double xMouse, double yMouse, int leftButtonState, int rightButtonState, int middleButtonState, int altKeyState);
+    bool scrollingEvent(double xAxis, double yAxis, double scrollSensitivity);
 
     void setWindowDimension(int width, int height);
     void setViewport(int x, int y, int width, int height);
@@ -57,20 +55,24 @@ public:
 
     void setInterpolationFactor(double interpolationFactor);
 
-    [[nodiscard]] std::chrono::duration<double> getElapsedTime() const;
-    void setElapsedTime(std::chrono::duration<double> elapsedTime);
-
 protected:
     const GLsizei SHADOWMAP_WIDTH  = 2048;
     const GLsizei SHADOWMAP_HEIGHT = 2048;
 
     static constexpr int NB_SHADOW_MAPS = 1;
 
-    std::chrono::duration<double> m_elapsedTime;   // Elapsed time (in seconds)
+    sceneConfiguration m_sceneConfig;
+    systemRenderData m_systemRenderData;
+
+    std::string m_executablePath;
 
     std::vector<std::unique_ptr<PhysicsObject>> m_physicsObjects;
     std::vector<std::unique_ptr<PhysicsObject>> m_tethersObjects;
     std::vector<std::shared_ptr<PhysicsObject>> m_staticObjects;
+
+    std::shared_ptr<Cube> m_groundObject;
+    std::shared_ptr<Cube> m_targetObject;
+    std::vector<std::shared_ptr<Launcher>> m_launchers;
 
     Shader m_depthShader;
     Shader m_phongShader;

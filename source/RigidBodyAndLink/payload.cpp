@@ -131,3 +131,16 @@ grs::Vec3d Payload::m_calcAeroForces() const {
 
     return -coeff * v_rel.norm() * v_rel;
 }
+
+bodyRenderData Payload::packRenderData() const {
+
+    std::vector<frameRenderData> framesData;
+
+    for (const auto& f : frames()) {
+        frameRenderData frame{f->transform(), f->originNode().force(), f->getForceColor()};
+        framesData.push_back(frame);
+    }
+
+    bodyRenderData data{RenderObjectType::PAYLOAD, m_id, transform(), framesData};
+    return data;
+}

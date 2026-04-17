@@ -25,7 +25,6 @@ Cube::Cube(const grs::Vec3f& size, const std::string& executablePath)
 
     m_previousTransform = grs::TransformD::identity();
 
-    m_body = new RigidBody();
     // Create the VBOs and VAO
     m_createVertexBufferAndArrayObject();
 
@@ -33,8 +32,6 @@ Cube::Cube(const grs::Vec3f& size, const std::string& executablePath)
 }
 
 Cube::~Cube() {
-    delete m_body;
-
     m_vertexBufferVertices.destroy();
     m_vertexBufferNormals.destroy();
     m_vertexArrayObject.destroy();

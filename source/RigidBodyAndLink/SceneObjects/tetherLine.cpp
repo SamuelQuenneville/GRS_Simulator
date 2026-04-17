@@ -8,10 +8,10 @@
 
 #include "tetherLine.h"
 
-TetherLine::TetherLine(Tether* tether)
+TetherLine::TetherLine(const tetherRenderData& tetherRenderData)
     : m_vertexBufferVertices(GL_ARRAY_BUFFER)
 {
-    m_link = tether;
+    m_tetherRenderData = tetherRenderData;
 }
 
 void TetherLine::render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) {
@@ -49,8 +49,8 @@ void TetherLine::render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix
 }
 
 void TetherLine::updatePosition() {
-    m_point1 = grs::cast<float>(m_link->startPoint->position().toOpenglRef());
-    m_point2 = grs::cast<float>(m_link->endPoint->position().toOpenglRef());
+    m_point1 = m_tetherRenderData.startPosition.toOpenglRef();
+    m_point2 = m_tetherRenderData.endPosition.toOpenglRef();
 
     m_linePoints.clear();
     m_linePoints.emplace_back(m_point1);

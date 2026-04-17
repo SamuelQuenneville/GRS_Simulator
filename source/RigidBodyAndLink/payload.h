@@ -11,6 +11,7 @@
 
 #include "RigidBodyAndLink/rigidBody.h"
 #include "Definitions/payloadDefinitions.h"
+#include "Definitions/renderObjectDefinitions.h"
 
 class Payload final : public RigidBody {
 
@@ -25,6 +26,8 @@ public:
     [[nodiscard]] payloadStates getStates() const {return m_states;};
 
     void setInitialStates(initialStates& states) override;
+
+    [[nodiscard]] bodyRenderData packRenderData() const;
 
 private:
     int m_id;

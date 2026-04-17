@@ -14,10 +14,9 @@
 #include <cstring>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <iostream>
+
 
 #include "Log/programLogger.h"
 

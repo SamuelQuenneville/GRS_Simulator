@@ -9,7 +9,7 @@
 #include "aircraft.h"
 
 // Constructor
-Aircraft::Aircraft(FixedWing* aircraft, const grs::Vec3d& scaling, const std::string& executablePath)
+Aircraft::Aircraft(const bodyRenderData& aircraftRenderData, const grs::Vec3d& scaling, const std::string& executablePath)
         : PhysicsObject(executablePath + R"(/source/Meshes/aircraft.obj)")
         , m_vertexBufferVertices(GL_ARRAY_BUFFER)
         , m_vertexBufferNormals(GL_ARRAY_BUFFER)
@@ -20,7 +20,7 @@ Aircraft::Aircraft(FixedWing* aircraft, const grs::Vec3d& scaling, const std::st
 
     m_previousTransform = grs::TransformD::identity();
 
-    m_body = aircraft;
+    m_bodyRenderData = aircraftRenderData;
 
     // Create Frames
     m_createVisualObject();
@@ -34,8 +34,6 @@ Aircraft::Aircraft(FixedWing* aircraft, const grs::Vec3d& scaling, const std::st
 // Destructor
 Aircraft::~Aircraft() {
     destroy();
-
-    m_body = nullptr;
 
     // Destroy the VBOs and VAO
     m_vertexBufferIndices.destroy();

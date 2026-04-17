@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <stdexcept>
+
 /**
  * @class Color
  * @brief Represents an RGBA color with utility methods and presets.

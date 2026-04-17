@@ -31,9 +31,6 @@ struct simulationParameters {
     std::string payloadPropertiesFileDirectory;
     std::string launcherPropertiesFileDirectory;
     std::string controllerGainsFileDirectory;
-    bool fixedDuration;
-    float duration;
-    bool windOn;
 };
 
 struct systemConfiguration {
@@ -41,9 +38,16 @@ struct systemConfiguration {
     std::string configuration;
     bool grounded;
     bool haveLauncher;
+    bool haveTarget;
     bool tetherAeroOn;
     int hlcRate;
     int llcRate;
+};
+
+struct sceneConfiguration {
+    std::string configuration;
+    bool haveLauncher;
+    bool haveTarget;
 };
 
 struct initialStates {

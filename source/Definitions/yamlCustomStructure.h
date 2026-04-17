@@ -39,9 +39,6 @@ namespace YAML {
             rhs.payloadPropertiesFileDirectory  = node["PAYLOAD_PROPERTIES_FILE_NAME"].as<std::string>();
             rhs.launcherPropertiesFileDirectory = node["LAUNCHER_PROPERTIES_FILE_NAME"].as<std::string>();
             rhs.controllerGainsFileDirectory    = node["CONTROLLER_GAINS_FILE_NAME"].as<std::string>();
-            rhs.fixedDuration                   = node["FIXED_DURATION"].as<bool>();
-            rhs.duration                        = node["DURATION"].as<float>();
-            rhs.windOn                          = node["WIND_ON"].as<bool>();
             return true;
         }
     };
@@ -57,6 +54,7 @@ namespace YAML {
             rhs.configuration                   = node["CONFIGURATION"].as<std::string>();
             rhs.grounded                        = node["GROUNDED"].as<bool>();
             rhs.haveLauncher                    = node["HAVE_LAUNCHER"].as<bool>();
+            rhs.haveTarget                      = node["HAVE_TARGET"].as<bool>();
             rhs.tetherAeroOn                    = node["TETHER_AERO_ON"].as<bool>();
             rhs.hlcRate                         = node["HLC_RATE"].as<int>();
             rhs.llcRate                         = node["LLC_RATE"].as<int>();

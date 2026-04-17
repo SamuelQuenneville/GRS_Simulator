@@ -9,9 +9,6 @@
 #ifndef INTERFACEJSON_H
 #define INTERFACEJSON_H
 
-#include <iostream>
-#include <string>
-#include <array>
 #include <poll.h>
 #include <thread>
 

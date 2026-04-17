@@ -20,8 +20,6 @@ Launcher::Launcher(const grs::Vec3d& scaling, const std::string& executablePath)
 
     m_previousTransform = grs::TransformD::identity();
 
-    m_body = new RigidBody();;
-
     // Create the VBOs and VAO
     m_createVertexBufferAndArrayObject();
 

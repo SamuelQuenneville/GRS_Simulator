@@ -8,8 +8,6 @@
 
 #include "fixedWing.h"
 
-#include "Log/programLogger.h"
-
 int FixedWing::m_idCounter = 0;
 
 FixedWing::FixedWing(const worldPhysics& physics, const fixedWingProperties& properties)
@@ -481,4 +479,16 @@ void FixedWing::m_writeLog() {
     Logger::instance().log(LogType::Aircraft, msg.str());
 
     logFramesData(m_simTime);
+}
+
+bodyRenderData FixedWing::packRenderData() const {
+
+    std::vector<frameRenderData> framesData;
+
+    for (const auto& f : frames()) {
+        frameRenderData frame{f->transform(), f->originNode().force(), f->getForceColor()};
+        framesData.push_back(frame);
+    }
+
+    return bodyRenderData{RenderObjectType::AIRCRAFT, m_id, transform(), framesData};
 }

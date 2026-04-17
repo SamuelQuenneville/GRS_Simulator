@@ -11,7 +11,6 @@
 
 #include <functional>
 #include <memory>
-#include <sstream>
 
 #include "node.h"
 #include "Mathematics/color.h"

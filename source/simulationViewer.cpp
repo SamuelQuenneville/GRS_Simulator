@@ -15,7 +15,6 @@ SimulationViewer::SimulationViewer(programArguments& args)
     , m_gui(this)
     , m_scene(nullptr)
     , m_elapsedTime(0.0)
-    , m_totalDynamicTime(0.0)
     , m_dynamicStepTime(0.0)
     , m_sceneCreated(false)
     , m_singlePhysicsStepEnabled(false)
@@ -85,8 +84,10 @@ void SimulationViewer::start() {
             m_world->createSystem();
             m_createScene();
 
+            m_world->startPhysicsThread();
+
             // callback binding, enable to stop timer from system
-            m_scene->setPauseTimerCallback([this]() {
+            m_world->setPauseTimerCallback([this]() {
                 m_pauseSimulation();
                 LOG_INFO("Reach end of trajectory!");
             });
@@ -114,6 +115,7 @@ void SimulationViewer::start() {
     }
 
     // Terminate GLFW, clearing any resources allocated by GLFW.
+    m_world->stopPhysicsThread();
     glfwTerminate();
 }
 
@@ -175,58 +177,8 @@ void SimulationViewer::scrollEvent(const double x, const double y) const {
 }
 
 void SimulationViewer::m_createScene() {
-    const systemType type = m_world->getSystemType();
-    const int numberOfUav = m_world->getSystemNumberOfUav();
-
-    switch(type) {
-        case FREE:
-            switch (numberOfUav) {
-                case 1:
-                    m_scene = new OneAircraft(*m_world);
-                    break;
-                case 2:
-                    m_scene = new TwoAircraft(*m_world);
-                    break;
-                case 3:
-                    throw std::invalid_argument( "System 3 aircraft free flying not implemented" );
-                default:
-                    throw std::invalid_argument( "Invalid number of UAV" );
-            }
-            m_sceneCreated = true;
-            break;
-
-        case V:
-            switch (numberOfUav) {
-                case 1:
-                    m_scene = new OneAircraftGrounded(*m_world);
-                    break;
-                case 2:
-                    m_scene = new TwoAircraftV(*m_world);
-                    break;
-                case 3:
-                    m_scene = new ThreeAircraftV(*m_world);
-                    break;
-                default:
-                    throw std::invalid_argument( "Invalid number of UAV" );
-            }
-            m_sceneCreated = true;
-            break;
-
-        case Y:
-            switch (numberOfUav) {
-                case 1:
-                    throw std::invalid_argument( "Invalid number of UAV" );
-                case 2:
-                    m_scene = new TwoAircraftY(*m_world);
-                    break;
-                case 3:
-                    throw std::invalid_argument( "System 3 aircraft Y tethers not implemented" );
-                default:
-                    throw std::invalid_argument( "Invalid number of UAV" );
-            }
-            m_sceneCreated = true;
-            break;
-    }
+    m_scene = new Scene(World::getExecutablePath(), m_world->getSceneConfiguration(), *m_world->getLatestSnapshot());
+    m_sceneCreated = true;
 }
 
 void SimulationViewer::m_destroyScenes() {
@@ -237,27 +189,21 @@ void SimulationViewer::m_destroyScenes() {
 void SimulationViewer::m_playSimulation() {
     if (!m_timer.isRunning()) {
         m_timer.start();
-    }
-}
-
-void SimulationViewer::m_toggleTakeSingleStep() {
-    m_singlePhysicsStepEnabled = true;
-    m_singlePhysicsStepDone = false;
-
-    if (m_timer.isRunning()) {
-        m_singlePhysicsStepEnabled = false;
+        m_world->start();
     }
 }
 
 void SimulationViewer::m_pauseSimulation() {
     if (m_timer.isRunning()) {
         m_timer.stop();
+        m_world->stop();
     }
 }
 
 void SimulationViewer::m_restartSimulation() {
     if (m_timer.isRunning()) {
         m_timer.stop();
+        m_world->stop();
         m_timer.reset();
     }
     m_elapsedTime = 0.0;
@@ -269,6 +215,8 @@ void SimulationViewer::m_restartSimulation() {
 void SimulationViewer::m_stopSimulation() {
     if (m_timer.isRunning()) {
         m_timer.stop();
+        m_world->stop();
+        m_world->stopPhysicsThread();
     }
     m_elapsedTime = 0.0;
 
@@ -359,65 +307,29 @@ void GLAPIENTRY SimulationViewer::onOpenGLError(const GLenum source, const GLenu
 #endif
 }
 
-void SimulationViewer::m_updateDynamics() {
-    // Update the elapsed time
-    m_scene->setElapsedTime(m_timer.getElapsedPhysicsTime());
-
-    if (m_timer.isRunning()) {
-        // Compute the time since the last update() call and update the timer
-        m_timer.update();
-
-        // While the time accumulator is not empty
-        while(m_timer.isPossibleToTakeStep(m_world->simulationConfiguration.dt)) {
-
-            const double currentTime = glfwGetTime();
-
-            // Take a physics simulation step
-            m_scene->updatePhysics();
-            m_elapsedTime += m_world->simulationConfiguration.dt.count();
-
-            m_dynamicStepTime = glfwGetTime() - currentTime;
-
-            // Update the timer
-            m_timer.nextStep(m_world->simulationConfiguration.dt);
-        }
-    }
-}
-
-void SimulationViewer::m_updateSingleDynamicsStep() {
-    assert(!m_timer.isRunning());
-    m_scene->updatePhysics();
-    m_elapsedTime += m_world->simulationConfiguration.dt.count();
-}
-
 void SimulationViewer::m_update() {
-    const double currentTime = glfwGetTime();
 
-    // Update the physics
-    if (m_singlePhysicsStepEnabled && !m_singlePhysicsStepDone) {
-        m_updateSingleDynamicsStep();
-        m_singlePhysicsStepDone = true;
-    }
-    else {
-        m_updateDynamics();
-    }
-
-    // Compute the physics update time
-    m_totalDynamicTime = glfwGetTime() - currentTime;
-
-    // Compute the interpolation factor
-    const double factor = m_timer.computeInterpolationFactor(m_world->simulationConfiguration.dt);
+    // Compute the interpolation factor , 1 because physic is assume to be quicker than rendering
+    constexpr double factor = 1.0;
     assert(factor >= 0.0 && factor <= 1.0);
 
     // Notify the scene about the interpolation factor
     m_scene->setInterpolationFactor(factor);
 
     // Update the scene
-    m_scene->update();
+    if (const auto snapshot = m_world->getLatestSnapshot()) {
+        m_scene->update(*snapshot);
+        m_elapsedTime = snapshot->elapsedTime;
+    }
 }
 
 void SimulationViewer::m_updateTarget(const float groundspeed, const std::vector<double>& payloadPosition) const {
-    m_scene->updateTarget(groundspeed, payloadPosition);
+    m_scene->updateTarget(payloadPosition);
+
+    target t = m_world->system()->getTarget();
+    t.groundspeed = groundspeed;
+    t.positionPayload = payloadPosition;
+    m_world->system()->setTarget(t);
 }
 
 void SimulationViewer::m_changeView(const grs::Matrix4d& viewMatrix) const {

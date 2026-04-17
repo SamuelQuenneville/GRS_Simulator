@@ -453,6 +453,34 @@ void System::createSystemTwoAircraftY(bool isGrounded, std::vector<initialStates
 
 }
 
+std::shared_ptr<systemRenderData> System::getRenderData() const {
+    std::vector<bodyRenderData> bodies;
+    std::vector<tetherRenderData> tethers;
+
+    for (const auto& b : m_aircraft) {
+        bodies.push_back(b->packRenderData());
+    }
+
+    if (m_payload != nullptr) {
+        bodies.push_back(m_payload->packRenderData());
+    }
+
+    if (m_tetherNode != nullptr) {
+        bodies.push_back(m_tetherNode->packRenderData());
+    }
+
+
+    for (const auto& t : m_links) {
+        tethers.push_back(t->packRenderData());
+    }
+
+    auto snapshot = std::make_shared<systemRenderData>();
+    snapshot->bodies = bodies;
+    snapshot->tethers = tethers;
+
+    return snapshot;
+}
+
 void System::createSystemThreeAircraftV(bool isGrounded, std::vector<initialStates>& aircraftStates, initialStates& payloadStates) {
 
     if (m_programArgs.sitlMode) {
