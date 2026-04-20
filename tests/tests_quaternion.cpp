@@ -113,3 +113,61 @@ TEST(QuaternionFloatTest, SLERP) {
     EXPECT_NEAR(v2[1], 0.7071067f, EPS);
     EXPECT_NEAR(v2[2], 0.0f, EPS);
 }
+
+TEST(QuaternionFloatTest, FrameConversionRoundTrip) {
+    constexpr float tol = 1e-5f;
+
+    Vector<float,3> euler{0.1745, 0.2617, 0.0};
+
+    const auto q_ned = eulerToQuat(euler);
+    const auto q_yxz = q_ned.nedToYup();
+    const auto q_back = q_yxz.yUpToNed();
+
+    auto e_back = quatToEuler(q_back);
+
+    EXPECT_NEAR(e_back[0], euler[0], tol);
+    EXPECT_NEAR(e_back[1], euler[1], tol);
+    EXPECT_NEAR(e_back[2], euler[2], tol);
+}
+
+TEST(QuaternionFloatTest, FrameConversionIdentity) {
+    const auto q = Quaternion<float>::identity();
+
+    const auto q2 = q.nedToYup();
+    const auto q3 = q2.yUpToNed();
+
+    EXPECT_NEAR(q3.x, q.x, EPS);
+    EXPECT_NEAR(q3.y, q.y, EPS);
+    EXPECT_NEAR(q3.z, q.z, EPS);
+    EXPECT_NEAR(q3.w, q.w, EPS);
+}
+
+TEST(QuaternionFloatTest, FrameConversionPureRollConsistency) {
+    const float roll = 0.8f;
+
+    const auto q_ned = eulerToQuat(Vector<float,3>{roll, 0.0f, 0.0f});
+    const auto q_yxz = q_ned.nedToYup();
+
+    const auto q_back = q_yxz.yUpToNed();
+    const auto e = quatToEuler(q_back);
+
+    EXPECT_NEAR(e[0], roll, EPS);
+}
+
+TEST(QuaternionFloatTest, FrameConversionVectorConsistency) {
+    const Vector<float,3> v_ned{1.0f, 2.0f, -3.0f};
+
+    const auto q = eulerToQuat(Vector<float,3>{0.4f, -0.2f, 0.7f});
+
+    const auto v1 = q * v_ned;
+
+    const auto q_yxz = q.nedToYup();
+    const auto v_yxz = q_yxz * v_ned;
+
+    const auto q_back = q_yxz.yUpToNed();
+    const auto v_back = q_back * v_ned;
+
+    EXPECT_NEAR(v_back[0], v1[0], 1e-4f);
+    EXPECT_NEAR(v_back[1], v1[1], 1e-4f);
+    EXPECT_NEAR(v_back[2], v1[2], 1e-4f);
+}

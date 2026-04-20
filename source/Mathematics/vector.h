@@ -166,6 +166,18 @@ struct Vector {
     }
 
     /**
+     * @brief Multiply a scalar in place.
+     * @param scalar value to multiply.
+     * @return Reference to this vector after subtraction.
+     */
+    constexpr Vector& operator*=(const T& scalar) noexcept {
+        for (std::size_t i = 0; i < N; ++i) {
+            data[i] *= scalar;
+        }
+        return *this;
+    }
+
+    /**
      * @brief Get the number of elements in the vector.
      * @return Vector dimension @p N.
      */
