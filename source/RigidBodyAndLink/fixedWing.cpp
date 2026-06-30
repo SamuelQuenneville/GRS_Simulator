@@ -84,8 +84,12 @@ void FixedWing::update(const double dt) {
     updateForcesOnBody();
 
     // Dynamics integration
-    const fixedWingStates derivatives = m_calcStatesDerivatives();
-    m_eulerIntegration(derivatives, dt);
+    if (m_inLaunch) {
+        m_integrateCatapult(dt);
+    } else {
+        const fixedWingStates derivatives = m_calcStatesDerivatives();
+        m_eulerIntegration(derivatives, dt);
+    }
 
     // phi rotated because aircraft mesh is rotated
     constexpr double meshRollOffset = -M_PI_2;
@@ -138,8 +142,12 @@ void FixedWing::updateSitl(const double dt, const std::array<uint16_t, MAX_SERVO
     updateForcesOnBody();
 
     // Dynamics integration
-    const fixedWingStates derivatives = m_calcStatesDerivatives();
-    m_eulerIntegration(derivatives, dt);
+    if (m_inLaunch) {
+        m_integrateCatapult(dt);
+    } else {
+        const fixedWingStates derivatives = m_calcStatesDerivatives();
+        m_eulerIntegration(derivatives, dt);
+    }
 
     // phi rotated because aircraft mesh is rotated
     constexpr double meshRollOffset = -M_PI_2;
@@ -193,11 +201,6 @@ grs::Vec3d FixedWing::m_calcForceAeroBodyFrame(const double airspeed, const doub
         Fx += qBarSurface * (CX + m_properties.Cx_q * m_properties.wingChord * oneOverTwoVa * m_states.q + m_properties.Cx_DELTA_ELE * delElevator);
         Fy += qBarSurface * (m_properties.Cy_0 + m_properties.Cy_BETA * betaRadian + m_properties.Cy_p * m_properties.wingSpan * oneOverTwoVa * m_states.p + m_properties.Cy_r * m_properties.wingSpan * oneOverTwoVa * m_states.r + m_properties.Cy_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cy_DELTA_RUD * m_inputs.deltaRudder);
         Fz += qBarSurface * (CZ + m_properties.Cz_q * m_properties.wingChord * oneOverTwoVa * m_states.q + m_properties.Cz_DELTA_ELE * delElevator);
-    }
-
-    // Easiest place to put it, don't required a transformation in Earth reference frame
-    if (m_inLaunch) {
-        Fx += m_properties.mass * m_launcherAccel;
     }
 
     if (m_launchTriggered || !m_sitl || m_inFlightLaunch) {
@@ -286,11 +289,6 @@ fixedWingStates FixedWing::m_calcStatesDerivatives() {
                 derivatives.w = 0.0;
             }
 
-            if (m_inLaunch) {
-                derivatives.p = 0.0;
-                derivatives.q = 0.0;
-                derivatives.r = 0.0;
-            }
         } else {
             if (!m_flightLaunchTriggered) {
                 derivatives.x = 0.0;
@@ -337,11 +335,17 @@ void FixedWing::m_eulerIntegration(const fixedWingStates& derivatives, const dou
     updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {derivatives.u, derivatives.v, -derivatives.w});
 
     if (!m_flightLaunchTriggered && m_sitl) {
-        setAngularVelocity({m_states.p, m_states.q, m_physics.gravity*std::tan(m_states.phi) / airspeed()});
+        double r = 0.0;
+        double dr = 0.0;
+        if (airspeed() > 0.1) {
+            r = m_physics.gravity*std::tan(m_states.phi) / airspeed();
+            dr = m_physics.gravity * (std::pow(1.0 / std::cos(m_states.phi), 2) * derivatives.phi) / airspeed();
+        }
+        setAngularVelocity({m_states.p, m_states.q, r});
 
         // Give a somewhat coherent value by neglecting airspeed derivative, we don't use frame angular acceleration
         // r_dot = m_physics.gravity * sec(phi)^2 * phi_dot / V - tan(phi) * V_dot / (V * V)
-        setAngularAcceleration({derivatives.p, derivatives.q,  m_physics.gravity * (std::pow(1.0 / std::cos(m_states.phi), 2) * derivatives.phi) / airspeed()});
+        setAngularAcceleration({derivatives.p, derivatives.q,  dr});
     } else {
         setAngularVelocity({m_states.p, m_states.q, m_states.r});
         setAngularAcceleration({derivatives.p, derivatives.q, derivatives.r});
@@ -376,6 +380,56 @@ grs::Vec3d FixedWing::m_bodyToEarth(const grs::Vec3d& bodyVector) const {
     return r.transpose() * bodyVector;
 }
 
+void FixedWing::m_integrateCatapult(const double dt) {
+    // Rail direction in NED
+    const double cp = std::cos(m_launcherPitch);
+    const double sp = std::sin(m_launcherPitch);
+    const double cy = std::cos(m_launcherYaw);
+    const double sy = std::sin(m_launcherYaw);
+
+    const grs::Vec3d railDir = {cp * cy, cp * sy, -sp};
+
+    // Current speed along rail
+    double V = m_states.u;
+
+    // Accelerations
+    const double thrustAccel = m_inputs.deltaThrust / m_properties.mass;
+    const double gravityAlongRail = m_physics.gravity * sp;
+    const double accel = m_launcherAccel + thrustAccel - gravityAlongRail;
+
+    // Integrate constrained longitudinal speed
+    V += accel * dt;
+
+    // Constrained body velocities
+    m_states.u = V;
+    m_states.v = 0.0;
+    m_states.w = 0.0;
+
+    // Constrained angular rates
+    m_states.p = 0.0;
+    m_states.q = 0.0;
+    m_states.r = 0.0;
+
+    // Earth-frame velocity
+    const grs::Vec3d velEarth = V * railDir;
+
+    m_states.vx = velEarth[0];
+    m_states.vy = velEarth[1];
+    m_states.vz = velEarth[2];
+
+    // Integrate constrained position
+    m_states.x += velEarth[0] * dt;
+    m_states.y += velEarth[1] * dt;
+    m_states.z += velEarth[2] * dt;
+
+    // Required by SITL PixHawk (always need to see gravity)
+    setAttitude({m_states.phi, m_states.theta, m_states.psi});
+    updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {accel, 0.0, 0.0});
+
+    setAngularVelocity({m_states.p, m_states.q, m_states.r});
+    setAngularAcceleration({0.0, 0.0, 0.0});
+}
+
 void FixedWing::setInitialStates(initialStates& states) {
     m_states.x = states.position[0];
     m_states.y = states.position[1];
@@ -388,6 +442,9 @@ void FixedWing::setInitialStates(initialStates& states) {
     m_states.phi   = states.orientation[0];
     m_states.theta = states.orientation[1];
     m_states.psi   = states.orientation[2];
+
+    m_launcherPitch = m_states.theta;
+    m_launcherYaw = -1.492653;
 
     setAttitude({m_states.phi, m_states.theta, m_states.psi});
     updateRotationMatrixCBodyEarth();

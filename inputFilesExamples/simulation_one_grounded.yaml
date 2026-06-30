@@ -29,14 +29,14 @@ InitialStatesPayload:
   ORIENTATION: [0.0, 0.0, 0.0] # [roll pitch yaw]
 #
 InitialStatesAircraft_1:
-  POSITION   : [0.0, 30.0, -0.75] # [x y z]
+  POSITION   : [29.96815, 0.0, -1.382] # [x y z]
   SPEED      : [0.0, 0.0, 0.0] # [vx vy vz]
-  ORIENTATION: [0.0, 0.322, 0.0] # [roll pitch yaw]
+  ORIENTATION: [0.1745, 0.2617, -1.5708] # [roll pitch yaw]
 #
 Target:
-  POS_PAYLOAD: [0.0, 0.0, 10.0]
-  GROUNDSPEED: 30.0 # m/s
-  RADIUS: 0.0 # m
+  POS_PAYLOAD: [0.0, 0.0, 0.0]
+  GROUNDSPEED: 1.0 # m/s
+  RADIUS: 1.0 # m
   AIRCRAFT_PITCH: 0.0
   AIRCRAFT_ROLL: 0.0
 #

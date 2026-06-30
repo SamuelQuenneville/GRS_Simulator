@@ -76,6 +76,9 @@ private:
 
     bool m_sitl = false;
 
+    double m_launcherPitch = 0.0;
+    double m_launcherYaw = 0.0;
+
     bool m_launchTriggered = false;
     bool m_inLaunch = false;
     float m_launcherAccel = 0.0f;
@@ -94,6 +97,8 @@ private:
 
     [[nodiscard]] grs::Vec3d m_earthToBody(const grs::Vec3d& earthVector) const;
     [[nodiscard]] grs::Vec3d m_bodyToEarth(const grs::Vec3d& bodyVector) const;
+
+    void m_integrateCatapult(double dt);
 
     fixedWingStates m_calcStatesDerivatives();
     void m_eulerIntegration(const fixedWingStates& derivatives, double dt);

@@ -81,7 +81,7 @@ void System::updateSitl(const double dt) {
     m_communicationManager->receiveData(pwms, flags);
 
     // Detect launch from GCS
-    if (m_timeSinceLaunch == 0 & flags[1].launchSitl) {
+    if (m_timeSinceLaunch == 0 && flags[1].launchSitl) {
         setLaunchTriggered(true);
     }
 

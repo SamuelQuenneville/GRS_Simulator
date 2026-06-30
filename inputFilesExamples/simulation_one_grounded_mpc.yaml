@@ -18,7 +18,7 @@ SystemConfiguration:
   CONFIGURATION: 'V' # FREE / V / Y
   GROUNDED: true
   HAVE_LAUNCHER: true
-  HAVE_TARGET: true
+  HAVE_TARGET: false
   TETHER_AERO_ON: false
   HLC_RATE: 20  # Hertz
   LLC_RATE: 400 # Hertz
@@ -29,9 +29,9 @@ InitialStatesPayload:
   ORIENTATION: [0.0, 0.0, 0.0] # [roll pitch yaw]
 #
 InitialStatesAircraft_1:
-  POSITION   : [0.0, 29.96815, -1.382] # [x y z]
-  SPEED      : [12.0, 0.0, 0.0] # [vx vy vz]
-  ORIENTATION: [0.1745, 0.2617, 0.0] # [roll pitch yaw]
+  POSITION   : [29.878, 2.3156, -0.76] # [x y z]
+  SPEED      : [0.0, 0.0, 0.0] # [vx vy vz]
+  ORIENTATION: [0.1745, 0.2617, -1.5708] # [roll pitch yaw]
 #
 Target:
   POS_PAYLOAD: [0.0, 0.0, 0.0]
