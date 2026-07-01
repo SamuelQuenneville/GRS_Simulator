@@ -124,11 +124,9 @@ void Scene::createPhysicsWorld() {
     }
 
     // ---------- GROUND ---------- //
-    m_groundObject = std::make_shared<Cube>(grs::Vec3f(50.0, 0.5, 50.0), m_executablePath);
-    m_groundObject->setColor(Color::floorColor());
-    m_groundObject->setTransform(grs::TransformD({0.0, -0.5, 0.0}, grs::QuaternionD::identity()));
+    m_ground = std::make_shared<Ground>(60.0f);
+    m_grid = std::make_shared<Grid>(60.0f, 10.0f);
 
-    m_staticObjects.push_back(m_groundObject);
 }
 
 void Scene::reshape(const int width, const int height) {
@@ -273,6 +271,12 @@ void Scene::render() {
 }
 
 void Scene::renderSinglePass(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) {
+
+    glDisable(GL_CULL_FACE);
+    m_ground->render(m_colorShader, worldToCameraMatrix, m_camera.getProjectionMatrix());
+    m_grid->render(m_colorShader, worldToCameraMatrix, m_camera.getProjectionMatrix());
+    glEnable(GL_CULL_FACE);
+
 
     for (const auto& tethersObject : m_tethersObjects) {
         tethersObject->render(m_colorShader, worldToCameraMatrix);

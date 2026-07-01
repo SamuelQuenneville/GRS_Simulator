@@ -67,6 +67,7 @@ public:
         RED     = 0xff0000,
         GREEN   = 0x00ff00,
         BLUE    = 0x0000ff,
+        GRAY    = 0x636363,
         BLACK   = 0x000000,
         WHITE   = 0xffffff,
         YELLOW  = 0xffff00,

@@ -52,7 +52,7 @@ void FrameAxis::render(const Shader& shader, const grs::Matrix4d& worldToCameraM
         glEnableVertexAttribArray(vertexPositionLoc);
 
         // Color attribute
-        glVertexAttribIPointer(vertexColorLoc, 3, GL_UNSIGNED_INT,  sizeof(grs::Vec3f) + sizeof(uint32_t), reinterpret_cast<void *>(sizeof(grs::Vec3f)));
+        glVertexAttribIPointer(vertexColorLoc, 1, GL_UNSIGNED_INT,  sizeof(grs::Vec3f) + sizeof(uint32_t), reinterpret_cast<void *>(sizeof(grs::Vec3f)));
         glEnableVertexAttribArray(vertexColorLoc);
 
         glDrawArrays(GL_LINES, 0, 6); // 3 arrows = 6 vertices
@@ -71,7 +71,7 @@ void FrameAxis::render(const Shader& shader, const grs::Matrix4d& worldToCameraM
         glEnableVertexAttribArray(vertexPositionLoc);
 
         // Color attribute
-        glVertexAttribIPointer(vertexColorLoc, 3, GL_UNSIGNED_INT, sizeof(grs::Vec3f) + sizeof(uint32_t), reinterpret_cast<void*>(sizeof(grs::Vec3f)));
+        glVertexAttribIPointer(vertexColorLoc, 1, GL_UNSIGNED_INT, sizeof(grs::Vec3f) + sizeof(uint32_t), reinterpret_cast<void*>(sizeof(grs::Vec3f)));
         glEnableVertexAttribArray(vertexColorLoc);
 
         // glDepthFunc ensure force is render on top of tethers, frames axis and ground

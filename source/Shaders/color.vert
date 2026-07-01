@@ -46,5 +46,5 @@ void main() {
     gl_Position = projectionMatrix * positionCameraSpace;
 
     // Transfer the vertex color to the fragment shader
-    vertexColorOut = vec4((vertexColor & 0xFF0000u) >> 16, (vertexColor & 0x00FF00u) >> 8, vertexColor & 0x0000FFu, 0xFF);
+    vertexColorOut = vec4(float((vertexColor >> 16) & 0xFFu),float((vertexColor >> 8)  & 0xFFu),float(vertexColor & 0xFFu),255.0) / 255.0;
 }

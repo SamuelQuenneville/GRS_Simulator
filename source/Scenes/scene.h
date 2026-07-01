@@ -14,6 +14,8 @@
 #include "RigidBodyAndLink/SceneObjects/cube.h"
 #include "RigidBodyAndLink/SceneObjects/aircraft.h"
 #include "RigidBodyAndLink/SceneObjects/launcher.h"
+#include "RigidBodyAndLink/SceneObjects/grid.h"
+#include "RigidBodyAndLink/SceneObjects/ground.h"
 #include "RigidBodyAndLink/SceneObjects/tetherLine.h"
 #include "RigidBodyAndLink/SceneObjects/payloadObject.h"
 #include "OpenglFramework/light.h"
@@ -70,7 +72,9 @@ protected:
     std::vector<std::unique_ptr<PhysicsObject>> m_tethersObjects;
     std::vector<std::shared_ptr<PhysicsObject>> m_staticObjects;
 
-    std::shared_ptr<Cube> m_groundObject;
+    std::shared_ptr<Ground> m_ground;
+    std::shared_ptr<Grid> m_grid;
+
     std::shared_ptr<Cube> m_targetObject;
     std::vector<std::shared_ptr<Launcher>> m_launchers;
 

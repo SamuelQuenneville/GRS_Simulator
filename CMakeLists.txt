@@ -139,6 +139,10 @@ set(GRS_RIGID_BODIES_AND_LINK
         source/RigidBodyAndLink/frame.h
         source/RigidBodyAndLink/SceneObjects/frameAxis.cpp
         source/RigidBodyAndLink/SceneObjects/frameAxis.h
+        source/RigidBodyAndLink/SceneObjects/grid.cpp
+        source/RigidBodyAndLink/SceneObjects/grid.h
+        source/RigidBodyAndLink/SceneObjects/ground.cpp
+        source/RigidBodyAndLink/SceneObjects/ground.h
 )
 
 set(GRS_SCENES

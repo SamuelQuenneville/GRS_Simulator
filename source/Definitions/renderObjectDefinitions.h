@@ -14,6 +14,11 @@
 #include "Mathematics/color.h"
 #include "Mathematics/math.h"
 
+struct Vertex {
+    grs::Vec3f position;
+    uint32_t color;
+};
+
 enum RenderObjectType {
     UNDEFINED,
     PAYLOAD,
