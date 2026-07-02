@@ -16,8 +16,6 @@ TetherLine::TetherLine(const tetherRenderData& tetherRenderData)
 
 void TetherLine::render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) {
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
     m_vertexArrayObject.bind();
     shader.bind();
     m_vertexBufferVertices.bind();
@@ -38,14 +36,12 @@ void TetherLine::render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix
     glVertexAttribPointer(vertexPositionLoc, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     // Draw the lines
-    glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_linePoints.size() * sizeof(grs::Vec3f)));
+    glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_linePoints.size()));
     glDisableVertexAttribArray(vertexPositionLoc);
 
     m_vertexBufferVertices.unbind();
     m_vertexArrayObject.unbind();
     shader.unbind();
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void TetherLine::updatePosition() {

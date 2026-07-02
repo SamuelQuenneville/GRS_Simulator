@@ -65,14 +65,17 @@ public:
      */
     enum class HexColor {
         RED     = 0xff0000,
+        WARM_RED = 0xC85A5A,
         GREEN   = 0x00ff00,
+        WARM_GREEN = 0x5FAF5F,
         BLUE    = 0x0000ff,
-        GRAY    = 0x636363,
+        GRAY    = 0xA8A8A8,
         BLACK   = 0x000000,
         WHITE   = 0xffffff,
         YELLOW  = 0xffff00,
         MAGENTA = 0xff00ff,
         CYAN    = 0x00ffff,
+        GRASS   = 0x325032,
     };
 
     /** @name Predefined Colors
@@ -84,7 +87,7 @@ public:
     static constexpr Color blue()   { return {0.0f, 0.0f, 1.0f, 1.0f}; } ///< Blue (opaque)
     static constexpr Color yellow() { return {1.0f, 1.0f, 0.0f, 1.0f}; } ///< Yellow (opaque)
 
-    static constexpr Color backgroundColor() { return {0.298f, 0.298f, 0.32157f, 1.0f}; } ///< Default background gray
+    static constexpr Color backgroundColor() { return {0.7f, 0.7f, 0.7f, 1.0f}; } ///< Default background gray
     static constexpr Color floorColor()      { return {0.78f, 0.78f, 0.78f, 1.0f}; }      ///< Default floor gray
     /** @} */
 

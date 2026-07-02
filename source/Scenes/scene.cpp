@@ -14,6 +14,7 @@ Scene::Scene(const std::string& executablePath, const sceneConfiguration& config
     , m_phongShader(executablePath + R"(/source/Shaders/phong.vert)", executablePath + R"(/source/Shaders/phong.frag)")
     , m_colorShader(executablePath + R"(/source/Shaders/color.vert)", executablePath + R"(/source/Shaders/color.frag)")
     , m_quadShader(executablePath + R"(/source/Shaders/quad.vert)", executablePath + R"(/source/Shaders/quad.frag)")
+    , m_skyboxShader(executablePath + R"(/source/Shaders/skybox.vert)", executablePath + R"(/source/Shaders/skybox.frag)")
     , m_lastMouseX(0)
     , m_lastMouseY(0)
     , m_windowWidth(0)
@@ -26,11 +27,13 @@ Scene::Scene(const std::string& executablePath, const sceneConfiguration& config
     , m_viewportHeight(0)
     , m_initialZoom(2.0f)
 {
-    m_light0.translateWorld({30.0, 80.0, 30.0});
-    m_light1.translateWorld({30.0, 80.0, 30.0});
+    m_skyCross = executablePath + R"(/Assets/Sky/sky.png)";
 
-    constexpr float lightIntensity0 = 0.5f;
-    constexpr float lightIntensity1 = 0.2f;
+    m_light0.translateWorld({100.0, 150.0, 80.0});
+    m_light1.translateWorld({-80.0, 40.0, -100.0});
+
+    constexpr float lightIntensity0 = 0.8f;
+    constexpr float lightIntensity1 = 0.1f;
     constexpr Color lightColor0(lightIntensity0 * 1.0f, lightIntensity0 * 1.0f, lightIntensity0 * 1.0f, 1.0f);
     constexpr Color lightColor1(lightIntensity1 * 1.0f, lightIntensity1 * 1.0f, lightIntensity1 * 1.0f, 1.0f);
 
@@ -94,7 +97,7 @@ void Scene::createPhysicsWorld() {
                 launcherObject->setTransform(grs::TransformD({-0.849, 0.816, 30.0}, grs::eulerToQuat(M_PI + grs::degToRad(19.0), 0.0, M_PI_2).nedToYup()));
 
                 const double yaw = grs::quatToEuler((body.transform.orientation).yUpToNed())[2];
-                launcherObject->rotateAroundWorldPoint({0,1,0}, yaw, {0,0,0});
+                launcherObject->rotateAroundWorldPoint(grs::Vec3d(0,1,0), yaw, grs::Vec3d::zeros());
 
                 m_staticObjects.push_back(std::move(launcherObject));
             }
@@ -118,14 +121,17 @@ void Scene::createPhysicsWorld() {
     if (m_sceneConfig.haveTarget) {
         m_targetObject = std::make_shared<Cube>(grs::Vec3f(0.4, 0.4, 0.4), m_executablePath);
         m_targetObject->setColor({1.0f, 0.0f, 0.0f, 0.6f});
-        m_targetObject->setTransform(grs::TransformD({0.0,0.0,0.0}, grs::QuaternionD::identity()));
+        m_targetObject->setTransform(grs::TransformD(grs::Vec3d::zeros(), grs::QuaternionD::identity()));
 
         m_staticObjects.push_back(m_targetObject);
     }
 
+    // ---------- Skybox ---------- //
+    m_sky = std::make_shared<Skybox>(m_skyCross);
+
     // ---------- GROUND ---------- //
-    m_ground = std::make_shared<Ground>(60.0f);
-    m_grid = std::make_shared<Grid>(60.0f, 10.0f);
+    m_ground = std::make_shared<Ground>(200.0f);
+    m_grid = std::make_shared<Grid>(50.0f, 10.0f);
 
 }
 
@@ -239,7 +245,7 @@ void Scene::render() {
     m_phongShader.setMatrix4x4Uniform("worldToLight0CameraMatrix", worldToLightCameraMatrix[0]);
     m_phongShader.setVector3Uniform("light0PosCameraSpace", grs::cast<float>(worldToCameraMatrix * m_light0.getOrigin()));
     m_phongShader.setVector3Uniform("light1PosCameraSpace", grs::cast<float>(worldToCameraMatrix * m_light1.getOrigin()));
-    m_phongShader.setVector3Uniform("lightAmbientColor", {0.1f, 0.1f, 0.1f});
+    m_phongShader.setVector3Uniform("lightAmbientColor", {0.22f, 0.24f, 0.27f});
     m_phongShader.setVector3Uniform("light0DiffuseColor", {m_light0.getDiffuseColor().r, m_light0.getDiffuseColor().g, m_light0.getDiffuseColor().b});
     m_phongShader.setVector3Uniform("light1DiffuseColor", {m_light1.getDiffuseColor().r, m_light1.getDiffuseColor().g, m_light1.getDiffuseColor().b});
     m_phongShader.setIntUniform("shadowMapSampler0", textureUnits[0]);
@@ -271,6 +277,10 @@ void Scene::render() {
 }
 
 void Scene::renderSinglePass(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) {
+
+    if (shouldDrawSky()) {
+       m_sky->render(m_skyboxShader, worldToCameraMatrix, m_camera.getProjectionMatrix());
+    }
 
     glDisable(GL_CULL_FACE);
     m_ground->render(m_colorShader, worldToCameraMatrix, m_camera.getProjectionMatrix());
@@ -306,6 +316,10 @@ void Scene::drawReferenceFrame(const bool shouldDraw) {
 
 void Scene::drawForcesVector(const bool shouldDraw) {
     m_shouldDrawForcesVector = shouldDraw;
+}
+
+void Scene::drawSky(const bool shouldDraw) {
+    m_shouldDrawSky = shouldDraw;
 }
 
 void Scene::reset() {

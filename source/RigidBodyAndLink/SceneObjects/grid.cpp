@@ -50,9 +50,9 @@ void Grid::m_createGrid(const float extent, const float spacing) {
     constexpr float majorWidth = 0.20f;
     constexpr float axisWidth  = 0.20f;
 
-    constexpr uint32_t gray  = static_cast<uint32_t>(0xD8D8D8);
-    constexpr uint32_t red   = static_cast<uint32_t>(0xC85A5A);
-    constexpr uint32_t green = static_cast<uint32_t>(0x5FAF5F);
+    constexpr uint32_t gray  = static_cast<uint32_t>(Color::HexColor::GRAY);
+    constexpr uint32_t red   = static_cast<uint32_t>(Color::HexColor::WARM_RED);
+    constexpr uint32_t green = static_cast<uint32_t>(Color::HexColor::WARM_GREEN);
 
     for (float x = -extent; x <= extent + 1e-5f; x += spacing) {
         uint32_t color = gray;

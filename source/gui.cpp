@@ -387,6 +387,12 @@ void Gui::m_createDebugPanel() {
         m_viewer->m_drawForcesVector(m_shouldDrawForcesVector);
     });
 
+    auto* buttonSky = new nanogui::Button(group1, "Show Sky");
+    buttonSky->set_callback([&] {
+        m_shouldDrawSky = !m_shouldDrawSky;
+        m_viewer->m_drawSky(m_shouldDrawSky);
+    });
+
 
     // Group 2 Numeric Infos
     new nanogui::Label(m_debugPanel, std::string("Numeric Infos :"),"sans-bold",20);

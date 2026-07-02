@@ -348,6 +348,10 @@ void SimulationViewer::m_drawForcesVector(const bool shouldDraw) const {
     m_scene->drawForcesVector(shouldDraw);
 }
 
+void SimulationViewer::m_drawSky(const bool shouldDraw) const {
+    m_scene->drawSky(shouldDraw);
+}
+
 void SimulationViewer::m_render() const {
     int bufferWidth;
     int bufferHeight;

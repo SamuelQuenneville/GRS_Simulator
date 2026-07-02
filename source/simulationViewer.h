@@ -62,6 +62,7 @@ private:
 
     void m_drawReferenceFrame(bool shouldDraw) const;
     void m_drawForcesVector(bool shouldDraw) const;
+    void m_drawSky(bool shouldDraw) const;
 
     void m_render() const;
 

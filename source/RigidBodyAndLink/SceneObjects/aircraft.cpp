@@ -10,7 +10,7 @@
 
 // Constructor
 Aircraft::Aircraft(const bodyRenderData& aircraftRenderData, const grs::Vec3d& scaling, const std::string& executablePath)
-        : PhysicsObject(executablePath + R"(/source/Meshes/aircraft.obj)")
+        : PhysicsObject(executablePath + R"(/Assets/Meshes/aircraft.obj)")
         , m_vertexBufferVertices(GL_ARRAY_BUFFER)
         , m_vertexBufferNormals(GL_ARRAY_BUFFER)
         , m_vertexBufferTextureCoords(GL_ARRAY_BUFFER)

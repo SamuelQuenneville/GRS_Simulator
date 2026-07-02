@@ -21,8 +21,8 @@ Ground::~Ground() {
 void Ground::m_createGeometry(const float extent, const float y) {
     m_vertices.clear();
 
-    // dark ground color (RGBA packed)
-    constexpr uint32_t color = 0x303030;
+    // ground color
+    constexpr uint32_t color = static_cast<uint32_t>(Color::HexColor::GRASS);
 
     const float e = extent;
 
@@ -79,7 +79,7 @@ void Ground::render(const Shader& shader, const grs::Matrix4d& worldToCameraMatr
     glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),nullptr);
     glVertexAttribIPointer(1,1,GL_UNSIGNED_INT, sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, color)));
 
-    glDrawArrays( GL_TRIANGLES,0,static_cast<GLsizei>(m_vertices.size()));
+    glDrawArrays(GL_TRIANGLES,0,static_cast<GLsizei>(m_vertices.size()));
 
     m_vertexBuffer.unbind();
     m_vertexArrayObject.unbind();

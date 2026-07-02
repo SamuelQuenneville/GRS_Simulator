@@ -106,6 +106,8 @@ set(GRS_OPENGL_FRAMEWORK
         source/OpenglFramework/vertexArrayObject.h
         source/OpenglFramework/vertexBufferObject.cpp
         source/OpenglFramework/vertexBufferObject.h
+        source/OpenglFramework/textureCube.cpp
+        source/OpenglFramework/textureCube.h
 )
 
 set(GRS_RIGID_BODIES_AND_LINK
@@ -143,6 +145,8 @@ set(GRS_RIGID_BODIES_AND_LINK
         source/RigidBodyAndLink/SceneObjects/grid.h
         source/RigidBodyAndLink/SceneObjects/ground.cpp
         source/RigidBodyAndLink/SceneObjects/ground.h
+        source/RigidBodyAndLink/SceneObjects/skybox.cpp
+        source/RigidBodyAndLink/SceneObjects/skybox.h
 )
 
 set(GRS_SCENES
@@ -162,13 +166,14 @@ set(GRS_SOURCE
         source/gui.h
         source/timer.cpp
         source/timer.h
+        source/stb_image.h
 )
 
 # Copy the Shaders used for the demo into the build directory
 file(COPY "source/Shaders/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/source/Shaders/")
 
 # Copy the Meshes used for the demo into the build directory
-file(COPY "source/Meshes/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/source/Meshes/")
+file(COPY "Assets/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Assets/")
 
 # Copy the Meshes used for the demo into the build directory
 file(COPY "inputFilesExamples/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/inputFilesExamples/")

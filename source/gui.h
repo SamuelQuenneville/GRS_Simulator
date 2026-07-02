@@ -65,6 +65,7 @@ protected:
 
     bool m_shouldDrawReferenceFrame = false;
     bool m_shouldDrawForcesVector = false;
+    bool m_shouldDrawSky = false;
 
     nanogui::TextBox* m_groundspeedTargetText;
     float m_groundspeedTarget = 0.0;

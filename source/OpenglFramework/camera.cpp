@@ -11,10 +11,10 @@
 Camera::Camera()
 {
     // Set default values
-    m_fieldOfView = 45.0f;
+    m_fieldOfView = 60.0f;
     m_sceneRadius = 1.0f;
     m_nearPlane = 0.1f;
-    m_farPlane = 10.0f;
+    m_farPlane = 500.0f;
     m_width = 1;
     m_height = 1;
 

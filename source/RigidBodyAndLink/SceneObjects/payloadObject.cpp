@@ -9,7 +9,7 @@
 #include "payloadObject.h"
 
 PayloadObject::PayloadObject(const bodyRenderData& payloadRenderData, const grs::Vec3f& size, const std::string& executablePath)
-    : PhysicsObject(executablePath + R"(/source/Meshes/cube.obj)")
+    : PhysicsObject(executablePath + R"(/Assets/Meshes/cube.obj)")
     , m_vertexBufferVertices(GL_ARRAY_BUFFER)
     , m_vertexBufferNormals(GL_ARRAY_BUFFER)
     , m_vertexBufferTextureCoords(GL_ARRAY_BUFFER)

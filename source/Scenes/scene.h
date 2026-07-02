@@ -16,6 +16,7 @@
 #include "RigidBodyAndLink/SceneObjects/launcher.h"
 #include "RigidBodyAndLink/SceneObjects/grid.h"
 #include "RigidBodyAndLink/SceneObjects/ground.h"
+#include "RigidBodyAndLink/SceneObjects/skybox.h"
 #include "RigidBodyAndLink/SceneObjects/tetherLine.h"
 #include "RigidBodyAndLink/SceneObjects/payloadObject.h"
 #include "OpenglFramework/light.h"
@@ -39,6 +40,7 @@ public:
     void renderSinglePass(Shader& shader, const grs::Matrix4d& worldToCameraMatrix);
     void drawReferenceFrame(bool shouldDraw);
     void drawForcesVector(bool shouldDraw);
+    void drawSky(bool shouldDraw);
     void reset();
     void destroy();
 
@@ -52,6 +54,7 @@ public:
 
     [[nodiscard]] bool shouldDrawReferenceFrame() const {return m_shouldDrawReferenceFrame;};
     [[nodiscard]] bool shouldDrawForcesVector() const {return m_shouldDrawForcesVector;};
+    [[nodiscard]] bool shouldDrawSky() const {return m_shouldDrawSky;};
 
     void changeView(const grs::Matrix4d& viewMatrix);
 
@@ -72,6 +75,8 @@ protected:
     std::vector<std::unique_ptr<PhysicsObject>> m_tethersObjects;
     std::vector<std::shared_ptr<PhysicsObject>> m_staticObjects;
 
+    std::string m_skyCross;
+    std::shared_ptr<Skybox> m_sky;
     std::shared_ptr<Ground> m_ground;
     std::shared_ptr<Grid> m_grid;
 
@@ -82,6 +87,7 @@ protected:
     Shader m_phongShader;
     Shader m_colorShader;
     Shader m_quadShader;
+    Shader m_skyboxShader;
 
     Light m_light0;
     Light m_light1;
@@ -98,6 +104,7 @@ protected:
 
     bool m_shouldDrawReferenceFrame = false;
     bool m_shouldDrawForcesVector = false;
+    bool m_shouldDrawSky = false;
 
     // Last mouse coordinates on the windows
     double m_lastMouseX;
