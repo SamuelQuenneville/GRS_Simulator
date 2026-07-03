@@ -31,8 +31,8 @@ uniform mat4 worldToCameraMatrix;       // World-space to camera-space matrix
 uniform mat4 projectionMatrix;          // Projection matrix
 
 // In variables
-in vec4 vertexPosition;
-in uint vertexColor;
+layout(location = 0) in vec4 vertexPosition;
+layout(location = 3) in uint vertexColor;
 
 // Out variables
 out vec4 vertexColorOut;

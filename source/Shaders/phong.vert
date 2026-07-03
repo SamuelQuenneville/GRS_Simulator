@@ -36,9 +36,9 @@ uniform mat4 shadowMapLight0ProjectionMatrix; // Shadow map projection matrix fo
 uniform mat4 shadowMapLight1ProjectionMatrix; // Shadow map projection matrix for light 1
 
 // In variables
-in vec4 vertexPosition;
-in vec3 vertexNormal;
-in vec2 textureCoords;
+layout(location = 0) in vec4 vertexPosition;
+layout(location = 1) in vec3 vertexNormal;
+layout(location = 2) in vec2 textureCoords;
 
 // Out variables
 out vec3 vertexPosCameraSpace;      // Camera-space position of the vertex

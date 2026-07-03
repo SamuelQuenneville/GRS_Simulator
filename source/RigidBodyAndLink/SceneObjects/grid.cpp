@@ -50,9 +50,9 @@ void Grid::m_createGrid(const float extent, const float spacing) {
     constexpr float majorWidth = 0.20f;
     constexpr float axisWidth  = 0.20f;
 
-    constexpr uint32_t gray  = static_cast<uint32_t>(Color::HexColor::GRAY);
-    constexpr uint32_t red   = static_cast<uint32_t>(Color::HexColor::WARM_RED);
-    constexpr uint32_t green = static_cast<uint32_t>(Color::HexColor::WARM_GREEN);
+    constexpr auto gray  = static_cast<uint32_t>(Color::HexColor::GRAY);
+    constexpr auto red   = static_cast<uint32_t>(Color::HexColor::WARM_RED);
+    constexpr auto green = static_cast<uint32_t>(Color::HexColor::WARM_GREEN);
 
     for (float x = -extent; x <= extent + 1e-5f; x += spacing) {
         uint32_t color = gray;
@@ -84,27 +84,21 @@ void Grid::m_createGrid(const float extent, const float spacing) {
 }
 
 void Grid::m_createBuffers() {
-    m_vertexBuffer.create();
-    m_vertexBuffer.bind();
-
-    m_vertexBuffer.copyDataIntoVBO(static_cast<GLsizei>(m_vertices.size() * sizeof(Vertex)),m_vertices.data(),GL_STATIC_DRAW);
-
-    m_vertexBuffer.unbind();
 
     m_vertexArrayObject.create();
     m_vertexArrayObject.bind();
 
+    // POSITION + COLOR
+    m_vertexBuffer.create();
     m_vertexBuffer.bind();
+    m_vertexBuffer.copyDataIntoVBO(static_cast<GLsizei>(m_vertices.size() * sizeof(Vertex)), m_vertices.data(),GL_STATIC_DRAW);
 
-    // Position attribute (location must match your shader)
-    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE, sizeof(Vertex),nullptr);
-    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(VertexLayout::Position);
+    glVertexAttribPointer(VertexLayout::Position,3,GL_FLOAT,GL_FALSE, sizeof(Vertex),nullptr);
 
-    // Color attribute (uint32 packed RGB)
-    glVertexAttribIPointer(1,1,GL_UNSIGNED_INT,sizeof(Vertex),reinterpret_cast<void *>(offsetof(Vertex, color)));
-    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(VertexLayout::Color);
+    glVertexAttribIPointer(VertexLayout::Color,1,GL_UNSIGNED_INT,sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, color)));
 
-    m_vertexBuffer.unbind();
     m_vertexArrayObject.unbind();
 }
 
@@ -117,21 +111,10 @@ void Grid::render(const Shader& shader, const grs::Matrix4d& worldToCameraMatrix
 
     shader.setIntUniform("isGlobalVertexColorEnabled",0,false);
 
-    const GLint posLoc = shader.getAttribLocation("vertexPosition");
-    const GLint colLoc = shader.getAttribLocation("vertexColor");
-
     m_vertexArrayObject.bind();
-    m_vertexBuffer.bind();
-
-    glVertexAttribPointer(posLoc,3,GL_FLOAT,GL_FALSE,sizeof(Vertex), nullptr);
-    glEnableVertexAttribArray(posLoc);
-
-    glVertexAttribIPointer(colLoc,1,GL_UNSIGNED_INT,sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, color)));
-    glEnableVertexAttribArray(colLoc);
 
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_vertices.size()));
 
-    m_vertexBuffer.unbind();
     m_vertexArrayObject.unbind();
 
     shader.unbind();

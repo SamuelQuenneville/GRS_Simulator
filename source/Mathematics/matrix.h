@@ -573,6 +573,34 @@ template <typename T>
 }
 
 /**
+ * @brief Create a 4×4 rotation matrix from a direction.
+ *
+ * @param direction Axis of rotation.
+ * @return 4×4 homogeneous rotation matrix.
+ */
+template<typename T>
+[[nodiscard]] Matrix<T,4> makeRotationFromZ(const Vector<T,3>& direction) {
+    const Vector<T,3> zAxis{0,0,1};
+
+    Vector<T,3> dir = normalize(direction);
+
+    const T cosTheta = dot(zAxis, dir);
+
+    // Same direction
+    if (cosTheta > T(0.999999))
+        return Matrix<T,4>::identity();
+
+    // Opposite direction
+    if (cosTheta < T(-0.999999))
+        return makeRotation(Vector<T,3>{1,0,0}, T(M_PI));
+
+    Vector<T,3> axis = normalize(cross(zAxis, dir));
+    T angle = std::acos(cosTheta);
+
+    return makeRotation(axis, angle);
+}
+
+/**
  * @brief Create a 4×4 translation matrix.
  *
  * @param vector Translation vector [x, y, z].
@@ -585,6 +613,23 @@ template <typename T>
     R(1,3) = vector[1];
     R(2,3) = vector[2];
     return R;
+}
+
+/**
+ * @brief Create a 4×4 scaled matrix.
+ *
+ * @param s Scale vector [x, y, z].
+ * @return 4×4 scaled matrix.
+ */
+template<typename T>
+[[nodiscard]] constexpr Matrix<T,4> makeScale(const Vector<T,3>& s) {
+    Matrix<T,4> M = Matrix<T,4>::identity();
+
+    M(0,0) = s[0];
+    M(1,1) = s[1];
+    M(2,2) = s[2];
+
+    return M;
 }
 
 }

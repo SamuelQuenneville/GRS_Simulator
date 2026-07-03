@@ -12,6 +12,7 @@
 #include "physicsObject.h"
 #include "OpenglFramework/vertexBufferObject.h"
 #include "OpenglFramework/vertexArrayObject.h"
+#include "Definitions/shaderLayout.h"
 
 class Cube final : public PhysicsObject {
 

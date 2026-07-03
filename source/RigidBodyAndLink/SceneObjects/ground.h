@@ -13,6 +13,7 @@
 #include "OpenglFramework/vertexBufferObject.h"
 #include "OpenglFramework/vertexArrayObject.h"
 #include "Definitions/renderObjectDefinitions.h"
+#include "Definitions/shaderLayout.h"
 
 class Ground {
 public:

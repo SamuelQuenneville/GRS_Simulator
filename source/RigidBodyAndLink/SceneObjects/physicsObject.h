@@ -31,11 +31,9 @@ public:
     void setTransform(const grs::TransformD& transform);
 
     void setBodyRenderData(const bodyRenderData& renderData);
-    void setTetherRenderData(const tetherRenderData& renderData);
 
 protected:
     bodyRenderData m_bodyRenderData{};
-    tetherRenderData m_tetherRenderData{};
 
     std::vector<std::shared_ptr<FrameAxis>> m_visualObjects;
 

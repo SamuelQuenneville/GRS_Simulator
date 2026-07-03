@@ -72,8 +72,8 @@ protected:
     std::string m_executablePath;
 
     std::vector<std::unique_ptr<PhysicsObject>> m_physicsObjects;
-    std::vector<std::unique_ptr<PhysicsObject>> m_tethersObjects;
     std::vector<std::shared_ptr<PhysicsObject>> m_staticObjects;
+    std::vector<std::unique_ptr<TetherLine>> m_tethersObjects;
 
     std::string m_skyCross;
     std::shared_ptr<Skybox> m_sky;

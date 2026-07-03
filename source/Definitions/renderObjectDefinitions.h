@@ -51,8 +51,8 @@ struct bodyRenderData {
  */
 
 struct tetherRenderData {
-    grs::Vec3f startPosition = grs::Vec3f::zeros();
-    grs::Vec3f endPosition   = grs::Vec3f::zeros();
+    grs::Vec3d startPosition = grs::Vec3d::zeros();
+    grs::Vec3d endPosition   = grs::Vec3d::zeros();
 };
 
 /*

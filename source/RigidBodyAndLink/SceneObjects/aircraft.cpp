@@ -46,7 +46,6 @@ Aircraft::~Aircraft() {
 // Render the sphere at the correct position and with the correct orientation
 void Aircraft::render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) {
 
-    // Bind the shader
     shader.bind();
 
     // Set the model to camera matrix
@@ -59,41 +58,17 @@ void Aircraft::render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) 
     shader.setMatrix3x3Uniform("normalMatrix", normalMatrix, false);
 
     // Set the vertex color
-    const grs::Vec4f color(m_color.r, m_color.g, m_color.b, m_color.a);
-    shader.setVector4Uniform("globalVertexColor", color, false);
+    shader.setVector4Uniform("globalVertexColor", m_color.toVec4f(), false);
 
-    // Bind the VAO
     m_vertexArrayObject.bind();
-
-    m_vertexBufferVertices.bind();
-
-    // Get the location of shader attribute variables
-    const GLint vertexPositionLoc = shader.getAttribLocation("vertexPosition");
-    const GLint vertexNormalLoc = shader.getAttribLocation("vertexNormal", false);
-
-    glEnableVertexAttribArray(vertexPositionLoc);
-    glVertexAttribPointer(vertexPositionLoc, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    m_vertexBufferNormals.bind();
-
-    if (vertexNormalLoc != -1) glVertexAttribPointer(vertexNormalLoc, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    if (vertexNormalLoc != -1) glEnableVertexAttribArray(vertexNormalLoc);
 
     // For each part of the mesh
     for (int i=0; i<getNumbersParts(); i++) {
         glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(getNumbersFaces(i) * 3), GL_UNSIGNED_INT, nullptr);
     }
 
-    glDisableVertexAttribArray(vertexPositionLoc);
-    if (vertexNormalLoc != -1) glDisableVertexAttribArray(vertexNormalLoc);
-
-    m_vertexBufferNormals.unbind();
-    m_vertexBufferVertices.unbind();
-
-    // Unbind the VAO
     m_vertexArrayObject.unbind();
 
-    // Unbind the shader
     shader.unbind();
 }
 
@@ -111,48 +86,39 @@ void Aircraft::updateTransform(const double interpolationFactor) {
 // We create two VBOs (one for vertices and one for indices)
 void Aircraft::m_createVertexBufferAndArrayObject() {
 
-    // Create the VBO for the vertices data
-    m_vertexBufferVertices.create();
-    m_vertexBufferVertices.bind();
-    const auto sizeVertices = static_cast<GLsizei>(m_vertices.size() * sizeof(grs::Vec3f));
-    m_vertexBufferVertices.copyDataIntoVBO(sizeVertices, getVerticesPointer(), GL_STATIC_DRAW);
-    m_vertexBufferVertices.unbind();
-
-    // Create the VBO for the normals data
-    m_vertexBufferNormals.create();
-    m_vertexBufferNormals.bind();
-    const auto sizeNormals = static_cast<GLsizei>(m_normals.size() * sizeof(grs::Vec3f));
-    m_vertexBufferNormals.copyDataIntoVBO(sizeNormals, getNormalsPointer(), GL_STATIC_DRAW);
-    m_vertexBufferNormals.unbind();
-
-    if (hasTexture()) {
-        // Create the VBO for the texture co data
-        m_vertexBufferTextureCoords.create();
-        m_vertexBufferTextureCoords.bind();
-        const auto sizeTextureCoords = static_cast<GLsizei>(m_uvs.size() * sizeof(grs::Vec2f));
-        m_vertexBufferTextureCoords.copyDataIntoVBO(sizeTextureCoords, getUVTextureCoordinatesPointer(), GL_STATIC_DRAW);
-        m_vertexBufferTextureCoords.unbind();
-    }
-
-    // Create th VBO for the indices data
-    m_vertexBufferIndices.create();
-    m_vertexBufferIndices.bind();
-    const auto sizeIndices = static_cast<GLsizei>(m_indices[0].size() * sizeof(unsigned int));
-    m_vertexBufferIndices.copyDataIntoVBO(sizeIndices, getIndicesPointer(), GL_STATIC_DRAW);
-    m_vertexBufferIndices.unbind();
-
-    // Create the VAO for both VBOs
     m_vertexArrayObject.create();
     m_vertexArrayObject.bind();
 
-    // Bind the VBO of vertices
+    // POSITION
+    m_vertexBufferVertices.create();
     m_vertexBufferVertices.bind();
-    m_vertexBufferNormals.bind();
+    m_vertexBufferVertices.copyDataIntoVBO(static_cast<GLsizei>(m_vertices.size() * sizeof(grs::Vec3f)), getVerticesPointer(), GL_STATIC_DRAW);
 
+    glEnableVertexAttribArray(VertexLayout::Position);
+    glVertexAttribPointer(VertexLayout::Position, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    // NORMALS
+    m_vertexBufferNormals.create();
+    m_vertexBufferNormals.bind();
+    m_vertexBufferNormals.copyDataIntoVBO(static_cast<GLsizei>(m_normals.size() * sizeof(grs::Vec3f)), getNormalsPointer(), GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(VertexLayout::Normal);
+    glVertexAttribPointer(VertexLayout::Normal, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    // UVs
     if (hasTexture()) {
+        m_vertexBufferTextureCoords.create();
         m_vertexBufferTextureCoords.bind();
+        m_vertexBufferTextureCoords.copyDataIntoVBO(static_cast<GLsizei>(m_uvs.size() * sizeof(grs::Vec2f)), getUVTextureCoordinatesPointer(), GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(VertexLayout::TexCoord);
+        glVertexAttribPointer(VertexLayout::TexCoord,2, GL_FLOAT,GL_FALSE,0, nullptr);
     }
 
+    // INDICES
+    m_vertexBufferIndices.create();
     m_vertexBufferIndices.bind();
+    m_vertexBufferIndices.copyDataIntoVBO(static_cast<GLsizei>(m_indices[0].size() * sizeof(unsigned int)), getIndicesPointer(), GL_STATIC_DRAW);
+
     m_vertexArrayObject.unbind();
 }

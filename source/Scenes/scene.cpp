@@ -147,10 +147,7 @@ void Scene::update(const systemRenderData& systemData) {
 
     const size_t nBodies = std::min(systemData.bodies.size(), m_physicsObjects.size());
     for (size_t i = 0; i < nBodies; i++) {
-        const auto& physicsObject = m_physicsObjects[i];
-        const auto& body = systemData.bodies[i];
-
-        physicsObject->setBodyRenderData(body);
+        m_physicsObjects[i]->setBodyRenderData(systemData.bodies[i]);
     }
 
     for (const auto& physicsObject : m_physicsObjects) {
@@ -160,22 +157,17 @@ void Scene::update(const systemRenderData& systemData) {
 
     const size_t nTether = std::min(systemData.tethers.size(), m_tethersObjects.size());
     for (size_t i = 0; i < nTether; i++) {
-        const auto& tetherObject = m_tethersObjects[i];
-        const auto& tether = systemData.tethers[i];
-
-        tetherObject->setTetherRenderData(tether);
+        m_tethersObjects[i]->update(systemData.tethers[i]);
     }
 
-    for (const auto& tetherObject : m_tethersObjects) {
-        tetherObject->updatePosition();
-    }
 }
 
 void Scene::render() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    glClearColor(Color::backgroundColor().r, Color::backgroundColor().g, Color::backgroundColor().b, Color::backgroundColor().a);
+    constexpr auto bg = Color::backgroundColor();
+    glClearColor(bg.r, bg.g, bg.b, bg.a);
 
     grs::Matrix4d shadowMapProjMatrix[NB_SHADOW_MAPS];
     grs::Matrix4d worldToLightCameraMatrix[NB_SHADOW_MAPS];
@@ -232,8 +224,8 @@ void Scene::render() {
 
     // Is shadow mapping is enabled
     GLint textureUnits[NB_SHADOW_MAPS];
-    for (const auto& i : m_shadowMapTexture) {
-        i.bind();
+    for (const auto& texture : m_shadowMapTexture) {
+        texture.bind();
     }
     for (int i = 0; i < NB_SHADOW_MAPS; i++) {
         textureUnits[i] = static_cast<GLint>(m_shadowMapTexture[i].getUnit());
@@ -271,7 +263,7 @@ void Scene::render() {
     renderSinglePass(m_phongShader, worldToCameraMatrix);
 
     // Is shadow mapping is enabled
-    for (const auto & texture : m_shadowMapTexture) {
+    for (const auto& texture : m_shadowMapTexture) {
         texture.unbind();
     }
 }
@@ -289,11 +281,8 @@ void Scene::renderSinglePass(Shader& shader, const grs::Matrix4d& worldToCameraM
 
 
     for (const auto& tethersObject : m_tethersObjects) {
-        tethersObject->render(m_colorShader, worldToCameraMatrix);
+        tethersObject->render(shader, worldToCameraMatrix);
     }
-
-    // Bind the shader
-    shader.bind();
 
     // Render all the moving physics objects of the scene
     for (const auto& physicsObject : m_physicsObjects) {
@@ -306,8 +295,6 @@ void Scene::renderSinglePass(Shader& shader, const grs::Matrix4d& worldToCameraM
         staticObject->render(shader, worldToCameraMatrix);
     }
 
-    // Unbind the shader
-    shader.unbind();
 }
 
 void Scene::drawReferenceFrame(const bool shouldDraw) {

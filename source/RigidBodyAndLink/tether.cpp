@@ -136,8 +136,8 @@ void Tether::grounded() const {
 tetherRenderData Tether::packRenderData() const {
 
     tetherRenderData data;
-    data.startPosition = static_cast<grs::Vec3f>(startPoint->position());
-    data.endPosition = static_cast<grs::Vec3f>(endPoint->position());
+    data.startPosition = startPoint->position();
+    data.endPosition = endPoint->position();
 
     return data;
 }

@@ -9,30 +9,23 @@
 #ifndef GRS_SIMULATOR_TETHERLINE_H
 #define GRS_SIMULATOR_TETHERLINE_H
 
-#include "physicsObject.h"
-#include "OpenglFramework/vertexBufferObject.h"
-#include "OpenglFramework/vertexArrayObject.h"
+#include "cylinder.h"
+#include "Definitions/renderObjectDefinitions.h"
 
-class TetherLine final : public PhysicsObject {
+class TetherLine {
 
 public:
     explicit TetherLine(const tetherRenderData& tetherRenderData);
-    ~TetherLine() override = default;
+    ~TetherLine() = default;
 
-    void updatePosition() override;
-
-    void render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) override;
+    void update(const tetherRenderData& renderData);
+    void render(const Shader& shader, const grs::Matrix4d& worldToCameraMatrix) const;
 
 private:
-    grs::Vec3f m_point1{};
-    grs::Vec3f m_point2{};
+    grs::Matrix4d m_modelMatrix = grs::Matrix4d::identity();
 
-    std::vector<grs::Vec3f> m_linePoints;
-
-    VertexBufferObject m_vertexBufferVertices;
-    VertexArrayObject m_vertexArrayObject;
-
-    void m_createVertexBufferAndArrayObject();
+    Cylinder m_cylinder;
+    tetherRenderData m_tetherRenderData{};
 };
 
 #endif //GRS_SIMULATOR_TETHERLINE_H

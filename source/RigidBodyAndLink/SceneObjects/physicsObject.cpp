@@ -53,10 +53,6 @@ void PhysicsObject::setBodyRenderData(const bodyRenderData& renderData) {
     }
 }
 
-void PhysicsObject::setTetherRenderData(const tetherRenderData& renderData) {
-    m_tetherRenderData = renderData;
-}
-
 void PhysicsObject::m_createVisualObject() {
 
     for (auto& f : m_bodyRenderData.frames) {

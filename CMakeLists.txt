@@ -65,6 +65,7 @@ set(GRS_DEFINITIONS
         source/Definitions/jsonInterface.h
         source/Definitions/launcherDefinitions.h
         source/Definitions/renderObjectDefinitions.h
+        source/Definitions/shaderLayout.h
 )
 
 set(GRS_LOG
@@ -147,6 +148,8 @@ set(GRS_RIGID_BODIES_AND_LINK
         source/RigidBodyAndLink/SceneObjects/ground.h
         source/RigidBodyAndLink/SceneObjects/skybox.cpp
         source/RigidBodyAndLink/SceneObjects/skybox.h
+        source/RigidBodyAndLink/SceneObjects/cylinder.cpp
+        source/RigidBodyAndLink/SceneObjects/cylinder.h
 )
 
 set(GRS_SCENES

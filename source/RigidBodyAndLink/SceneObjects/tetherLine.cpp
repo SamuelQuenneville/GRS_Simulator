@@ -9,62 +9,27 @@
 #include "tetherLine.h"
 
 TetherLine::TetherLine(const tetherRenderData& tetherRenderData)
-    : m_vertexBufferVertices(GL_ARRAY_BUFFER)
+    : m_cylinder(0.02f, 1.0f, 16)
 {
     m_tetherRenderData = tetherRenderData;
 }
 
-void TetherLine::render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) {
-
-    m_vertexArrayObject.bind();
-    shader.bind();
-    m_vertexBufferVertices.bind();
-
-    // Set the model to camera matrix
-    shader.setMatrix4x4Uniform("localToWorldMatrix", grs::Matrix4d::identity());
-    shader.setMatrix4x4Uniform("worldToCameraMatrix", worldToCameraMatrix);
-
-    // Set the vertex color
-    constexpr grs::Vec4f color(0.0, 0.0, 0.0, 1.0);
-    shader.setIntUniform("isGlobalVertexColorEnabled", 1, false);
-    shader.setVector4Uniform("globalVertexColor", color, false);
-
-    // Get the location of shader attribute variables
-    const GLint vertexPositionLoc = shader.getAttribLocation("vertexPosition");
-
-    glEnableVertexAttribArray(vertexPositionLoc);
-    glVertexAttribPointer(vertexPositionLoc, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    // Draw the lines
-    glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_linePoints.size()));
-    glDisableVertexAttribArray(vertexPositionLoc);
-
-    m_vertexBufferVertices.unbind();
-    m_vertexArrayObject.unbind();
-    shader.unbind();
+void TetherLine::render(const Shader& shader, const grs::Matrix4d& worldToCameraMatrix) const {
+    m_cylinder.render(shader,m_modelMatrix, worldToCameraMatrix);
 }
 
-void TetherLine::updatePosition() {
-    m_point1 = m_tetherRenderData.startPosition.toOpenglRef();
-    m_point2 = m_tetherRenderData.endPosition.toOpenglRef();
+void TetherLine::update(const tetherRenderData& renderData) {
+    m_tetherRenderData = renderData;
 
-    m_linePoints.clear();
-    m_linePoints.emplace_back(m_point1);
-    m_linePoints.emplace_back(m_point2);
+    const auto p1 = m_tetherRenderData.startPosition.toOpenglRef();
+    const auto p2 = m_tetherRenderData.endPosition.toOpenglRef();
 
-    m_createVertexBufferAndArrayObject();
+    const auto d = p2 - p1;
+    const double length = d.norm();
+
+    const auto T = grs::makeTranslation(p1);
+    const auto R = grs::makeRotationFromZ(d);
+    const auto S = grs::makeScale(grs::Vec3d(1.0, 1.0, length));
+
+    m_modelMatrix = T * R * S;
 }
-
-void TetherLine::m_createVertexBufferAndArrayObject() {
-    m_vertexBufferVertices.create();
-    m_vertexBufferVertices.bind();
-    const auto sizeVertices = static_cast<GLsizei>(m_linePoints.size() * sizeof(grs::Vec3f));
-    m_vertexBufferVertices.copyDataIntoVBO(sizeVertices, &m_linePoints[0], GL_STATIC_DRAW);
-    m_vertexBufferVertices.unbind();
-
-    m_vertexArrayObject.create();
-    m_vertexArrayObject.bind();
-    m_vertexBufferVertices.bind();
-    m_vertexArrayObject.unbind();
-}
-

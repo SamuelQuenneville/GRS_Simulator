@@ -26,7 +26,7 @@
 ********************************************************************************/
 
 // In variables
-in vec4 vertexPosition;
+layout(location = 0) in vec4 vertexPosition;
 
 // Out variables
 out vec2 texCoords;                 // Texture coordinates

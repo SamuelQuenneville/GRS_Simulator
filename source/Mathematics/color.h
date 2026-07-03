@@ -22,6 +22,8 @@
 
 #include <stdexcept>
 
+#include "Mathematics/math.h"
+
 /**
  * @class Color
  * @brief Represents an RGBA color with utility methods and presets.
@@ -87,8 +89,9 @@ public:
     static constexpr Color blue()   { return {0.0f, 0.0f, 1.0f, 1.0f}; } ///< Blue (opaque)
     static constexpr Color yellow() { return {1.0f, 1.0f, 0.0f, 1.0f}; } ///< Yellow (opaque)
 
-    static constexpr Color backgroundColor() { return {0.7f, 0.7f, 0.7f, 1.0f}; } ///< Default background gray
-    static constexpr Color floorColor()      { return {0.78f, 0.78f, 0.78f, 1.0f}; }      ///< Default floor gray
+    static constexpr Color backgroundColor() { return {0.7f, 0.7f, 0.7f, 1.0f}; }       ///< Default background gray
+    static constexpr Color floorColor()      { return {0.78f, 0.78f, 0.78f, 1.0f}; }    ///< Default floor gray
+    static constexpr Color tetherColor()      { return {0.65f, 0.67f, 0.70f, 1.0f}; }   ///< Default tether gray
     /** @} */
 
     /**
@@ -112,6 +115,11 @@ public:
             case 4: return white();
             default: throw std::out_of_range("Color index is out of range");
         }
+    }
+
+    /** @brief Explicit conversion to Vec4f */
+    [[nodiscard]] constexpr grs::Vec4f toVec4f() const noexcept {
+        return {r, g, b, a};
     }
 };
 

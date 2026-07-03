@@ -13,6 +13,7 @@
 #include "OpenglFramework/vertexBufferObject.h"
 #include "OpenglFramework/vertexArrayObject.h"
 #include "RigidBodyAndLink/fixedWing.h"
+#include "Definitions/shaderLayout.h"
 
 class Aircraft final : public PhysicsObject {
 
