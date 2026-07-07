@@ -13,17 +13,21 @@
 #include "RigidBodyAndLink/SceneObjects/frameAxis.h"
 #include "RigidBodyAndLink/link.h"
 #include "Definitions/renderObjectDefinitions.h"
+#include "Definitions/shaderLayout.h"
 
 class PhysicsObject : public Mesh {
 
 public:
     PhysicsObject();
     explicit PhysicsObject(const std::string& meshFilePath);
+    ~PhysicsObject() override;
 
     virtual void updatePosition() {};
 
-    virtual void render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) = 0;
+    virtual void render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix);
     virtual void renderVisualObject(Shader& shader, const grs::Matrix4d& worldToCameraMatrix, bool drawFrames, bool drawForces);
+
+    void createVertexBufferAndArrayObject();
 
     void setColor(const Color& color);
 
@@ -34,6 +38,21 @@ public:
 
 protected:
     bodyRenderData m_bodyRenderData{};
+
+    // Vertex Buffer Object for the vertices data
+    VertexBufferObject m_vertexBufferVertices;
+
+    // Vertex Buffer Object for the normals data
+    VertexBufferObject m_vertexBufferNormals;
+
+    // Vertex Buffer Object for the texture coords
+    VertexBufferObject m_vertexBufferTextureCoords;
+
+    // Vertex Buffer Object for the indices
+    VertexBufferObject m_vertexBufferIndices;
+
+    // Vertex Array Object for the vertex data
+    VertexArrayObject m_vertexArrayObject;
 
     std::vector<std::shared_ptr<FrameAxis>> m_visualObjects;
 

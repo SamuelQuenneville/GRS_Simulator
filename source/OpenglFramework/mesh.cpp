@@ -8,6 +8,10 @@
 
 #include "mesh.h"
 
+Mesh::~Mesh() {
+    destroy();
+}
+
 void Mesh::destroy() {
     m_vertices.clear();
     m_normals.clear();

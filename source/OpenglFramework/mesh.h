@@ -20,7 +20,7 @@ class Mesh : public Object3D {
 
 public:
     Mesh() = default;
-    ~Mesh() override = default;
+    ~Mesh() override;
 
     void destroy();
 
