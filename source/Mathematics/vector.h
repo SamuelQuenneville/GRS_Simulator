@@ -196,6 +196,18 @@ struct Vector {
     }
 
     /**
+     * @brief Compute the square of the Euclidean norm (length) of the vector.
+     * @return Squared norm of the vector.
+     */
+    [[nodiscard]] T normSquared() const noexcept {
+        T sum{};
+        for (std::size_t i = 0; i < N; ++i) {
+            sum += data[i] * data[i];
+        }
+        return sum;
+    }
+
+    /**
      * @brief Convert to an OpenGL reference frame.
      *
      * Reorders the vector components to match OpenGL conventions.
@@ -302,6 +314,68 @@ template <typename T, std::size_t N>
 [[nodiscard]] Vector<T,N> normalize(const Vector<T,N>& vector) noexcept {
     T n = vector.norm();
     return (n > T(0)) ? (vector * (1/n)) : vector;
+}
+
+/**
+ * @brief Component-wise product of two vectors.
+ *
+ * Computes the element-wise multiplication:
+ *     result[i] = vector1[i] * vector2[i]
+ *
+ * @param vector1 First vector.
+ * @param vector2 Second vector.
+ * @return Component-wise product.
+ */
+template <typename T, std::size_t N>
+[[nodiscard]] constexpr Vector<T,N> cwiseProduct(const Vector<T,N>& vector1, const Vector<T,N>& vector2) noexcept {
+    Vector<T,N> result{};
+
+    for (std::size_t i = 0; i < N; ++i) {
+        result[i] = vector1[i] * vector2[i];
+    }
+
+    return result;
+}
+
+/**
+ * @brief Component-wise division of two vectors.
+ *
+ * Computes the element-wise division:
+ *     result[i] = vector1[i] / vector2[i]
+ *
+ * @param vector1 Numerator vector.
+ * @param vector2 Denominator vector.
+ * @return Component-wise quotient.
+ */
+template <typename T, std::size_t N>
+[[nodiscard]] constexpr Vector<T,N> cwiseQuotient(const Vector<T,N>& vector1, const Vector<T,N>& vector2) noexcept {
+    Vector<T,N> result{};
+
+    for (std::size_t i = 0; i < N; ++i) {
+        result[i] = vector1[i] / vector2[i];
+    }
+
+    return result;
+}
+
+/**
+ * @brief Component-wise square root.
+ *
+ * Computes
+ *     result[i] = sqrt(vector[i])
+ *
+ * @param vector Input vector.
+ * @return Component-wise square root.
+ */
+template <typename T, std::size_t N>
+[[nodiscard]] Vector<T,N> cwiseSqrt(const Vector<T,N>& vector) noexcept {
+    Vector<T,N> result{};
+
+    for (std::size_t i = 0; i < N; ++i) {
+        result[i] = std::sqrt(vector[i]);
+    }
+
+    return result;
 }
 
 template <typename T, std::size_t N>

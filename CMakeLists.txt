@@ -157,6 +157,17 @@ set(GRS_SCENES
         source/Scenes/scene.h
 )
 
+set(GRS_WIND_MODEL
+        source/WindModel/meanWindModel.h
+        source/WindModel/turbulenceModel.h
+        source/WindModel/windEnvironment.cpp
+        source/WindModel/windEnvironment.h
+        source/WindModel/spectralWindField.cpp
+        source/WindModel/spectralWindField.h
+        source/WindModel/meanWind.cpp
+        source/WindModel/meanWind.h
+)
+
 set(GRS_SOURCE
         source/main.cpp
         source/world.cpp
@@ -191,6 +202,7 @@ add_executable(GRS_Simulator
         ${GRS_OPENGL_FRAMEWORK}
         ${GRS_RIGID_BODIES_AND_LINK}
         ${GRS_SCENES}
+        ${GRS_WIND_MODEL}
         ${GRS_SOURCE}
 )
 
