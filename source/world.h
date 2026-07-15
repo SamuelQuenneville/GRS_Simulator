@@ -20,6 +20,7 @@
 
 #include "Definitions/renderObjectDefinitions.h"
 #include "Configuration/configurationParser.h"
+#include "WindModel/windEnvironment.h"
 #include "system.h"
 
 class World {
@@ -75,6 +76,8 @@ private:
     std::atomic<bool> m_running{false};
     std::shared_ptr<systemRenderData> m_snapshot;
     double m_elapsedTime;
+
+    std::unique_ptr<WindEnvironment> m_windEnv;
 
     systemConfiguration m_systemConfiguration{};
     systemProperties m_systemProperties{};

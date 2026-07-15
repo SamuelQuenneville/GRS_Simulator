@@ -26,7 +26,7 @@
 class System {
 
 public:
-    explicit System(programArguments& args, worldPhysics& worldPhysics, systemConfiguration& configuration, systemProperties& properties, ctrlGains& gains);
+    explicit System(programArguments& args, worldPhysics& worldPhysics, WindEnvironment& windEnv, systemConfiguration& configuration, systemProperties& properties, ctrlGains& gains);
     ~System();
 
     void update(double dt);
@@ -59,6 +59,7 @@ private:
     programArguments& m_programArgs;
 
     worldPhysics& m_physics;
+    WindEnvironment& m_windEnv;
     std::unique_ptr<InterfaceJSON> m_communicationManager;
 
     systemConfiguration& m_systemConfiguration;

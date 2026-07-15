@@ -66,6 +66,7 @@ set(GRS_DEFINITIONS
         source/Definitions/launcherDefinitions.h
         source/Definitions/renderObjectDefinitions.h
         source/Definitions/shaderLayout.h
+        source/Definitions/windDefinitions.h
 )
 
 set(GRS_LOG

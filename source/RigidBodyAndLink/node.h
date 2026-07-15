@@ -36,9 +36,14 @@ public:
     [[nodiscard]] const grs::Vec3d& moment() const;
     void setMoment(const grs::Vec3d& newMoment);
 
+    [[nodiscard]] const grs::Vec3d& wind() const;
+    void setWind(const grs::Vec3d& newWind);
+
 private:
     int m_id;
     static int m_idCounter;
+
+    grs::Vec3d m_wind         = grs::Vec3d::zeros();        // For centerOfMass Earth wind shown in gui
 
     grs::Vec3d m_position     = grs::Vec3d::zeros();        // Own reference frame
     grs::Vec3d m_velocity     = grs::Vec3d::zeros();        // Own reference frame

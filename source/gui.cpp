@@ -37,6 +37,7 @@ Gui::Gui(SimulationViewer* app)
     , m_frameVelocityDisplayed(nullptr)
     , m_frameOrientationDisplayed(nullptr)
     , m_frameForcesDisplayed(nullptr)
+    , m_frameWindDisplayed(nullptr)
     , m_hasConfigFile(false)
     , m_isDisplayed(true)
 {
@@ -73,6 +74,10 @@ void Gui::update() const {
         m_frameVelocityDisplayed->set_caption(formatVec3("Velocity    (m/s)", vel));
         m_frameOrientationDisplayed->set_caption(formatVec3("Orientation (Deg)", ori));
         m_frameForcesDisplayed->set_caption(formatVec3("Forces      (N)", force));
+
+        if (m_currentFrameDisplayed->isCenterOfMass()) {
+            m_frameWindDisplayed->set_caption(formatVec3("Wind        (m/s) ", m_currentFrameDisplayed->originNode().wind()));
+        }
     }
 
 }
@@ -409,6 +414,7 @@ void Gui::m_createDebugPanel() {
     m_frameVelocityDisplayed    = new nanogui::Label(group2, std::string("Velocity    (m/s) : "), "mono", 15);
     m_frameOrientationDisplayed = new nanogui::Label(group2, std::string("Orientation (Deg) : "), "mono", 15);
     m_frameForcesDisplayed      = new nanogui::Label(group2, std::string("Forces      (N)   : "), "mono", 15);
+    m_frameWindDisplayed        = new nanogui::Label(group2, std::string("Wind        (m/s) : "), "mono", 15);
 }
 
 std::string Gui::doubleToString(const double value, const int precision) {

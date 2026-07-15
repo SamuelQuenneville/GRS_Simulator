@@ -8,11 +8,11 @@
 
 #include "spectralWindField.h"
 
-SpectralWindField::SpectralWindField(const params& parameters)
-    : m_parameters(parameters)
+SpectralWindField::SpectralWindField(const windProperties& parameters)
+    : m_params(parameters)
     , m_rng(parameters.seed)
 {
-    if (m_parameters.numberModes % 2 != 0) {
+    if (m_params.turbulenceNumberMode % 2 != 0) {
         throw std::runtime_error("SpectralWindField: numberModes must be even.");
     }
 
@@ -37,10 +37,10 @@ grs::Vec3d  SpectralWindField::getTurbulence(const grs::Vec3d& position, const g
 
 void SpectralWindField::m_generateModes() {
     m_fourierModes.clear();
-    m_fourierModes.reserve(m_parameters.numberModes);
+    m_fourierModes.reserve(m_params.turbulenceNumberMode);
 
     // Number of k/-k pairs
-    const std::size_t nPairs = m_parameters.numberModes / 2;
+    const std::size_t nPairs = m_params.turbulenceNumberMode / 2;
 
     // Von Karman constant
     const double C = 55.0 / (9.0 * std::sqrt(M_PI)) * std::tgamma(5.0 / 6.0) / std::tgamma(1.0 / 3.0);
@@ -48,8 +48,8 @@ void SpectralWindField::m_generateModes() {
     // Logarithmically spaced wavelengths
     std::vector<double> lambda(nPairs);
 
-    const double logMin = std::log10(m_parameters.lambdaMin);
-    const double logMax = std::log10(m_parameters.lambdaMax);
+    const double logMin = std::log10(m_params.turbulenceLambdaMin);
+    const double logMax = std::log10(m_params.turbulenceLambdaMax);
 
     for(std::size_t i=0 ; i<nPairs ; i++) {
         const double alpha = static_cast<double>(i) / static_cast<double>(nPairs-1);
@@ -83,9 +83,9 @@ void SpectralWindField::m_generateModes() {
         const double kmag = k[i];
 
         // Von Karman spectrum
-        const double x = kmag * m_parameters.L;
+        const double x = kmag * m_params.turbulenceLengthScale;
 
-        const double E = C * m_parameters.L * std::pow(x,4.0) / std::pow(1.0+x*x,17.0/6.0);
+        const double E = C * m_params.turbulenceLengthScale * std::pow(x,4.0) / std::pow(1.0+x*x,17.0/6.0);
 
         const double amplitude = std::sqrt(2.0 * E * dk[i]);
 
@@ -159,7 +159,7 @@ void SpectralWindField::m_calibrate()
     }
 
     // Scale factors
-    m_scaleFactor = grs::cwiseQuotient(m_parameters.sigma, m_rmsUncalibrated);
+    m_scaleFactor = grs::cwiseQuotient(grs::toVector<double,3>(m_params.sigma), m_rmsUncalibrated);
 }
 
 grs::Vec3d SpectralWindField::m_randomUnitVector() {

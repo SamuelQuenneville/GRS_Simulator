@@ -13,6 +13,7 @@
 
 #include "Definitions/configurationDefinitions.h"
 #include "Definitions/worldPhysics.h"
+#include "WindModel/windEnvironment.h"
 #include "frame.h"
 #include "Log/logger.h"
 
@@ -22,7 +23,7 @@ public:
     RigidBody();
     virtual ~RigidBody() = default;
 
-    virtual void update(double dt) {};
+    virtual void update(double dt, const WindEnvironment& windEnv) {};
 
     virtual std::map<int, grs::Vec3d> externalForces();
 

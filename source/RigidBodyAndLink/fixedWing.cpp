@@ -71,8 +71,11 @@ int FixedWing::getId() const {
     return m_id;
 }
 
-void FixedWing::update(const double dt) {
+void FixedWing::update(const double dt, const WindEnvironment& windEnv) {
     m_simTime += dt;
+
+    m_wind = windEnv.getTotalWind(centerOfMass().position(), m_simTime);
+    centerOfMass().setWind(m_wind);
 
     const fixedWingControlInputs inputs = m_controller->calculateAircraftControlInputs(getId(), getStates(), getCommands());
     setInputs(inputs);
@@ -98,8 +101,11 @@ void FixedWing::update(const double dt) {
     m_writeLog();
 }
 
-void FixedWing::updateSitl(const double dt, const std::array<uint16_t, MAX_SERVO_CHANNELS>& pwm, const bool shouldMove) {
+void FixedWing::updateSitl(const double dt, const WindEnvironment& windEnv, const std::array<uint16_t, MAX_SERVO_CHANNELS>& pwm, const bool shouldMove) {
     m_simTime += dt;
+
+    m_wind = windEnv.getTotalWind(centerOfMass().position(), m_simTime);
+    centerOfMass().setWind(m_wind);
 
     // Detect SITL mode once
     if (!m_sitl) {
@@ -265,12 +271,12 @@ fixedWingStates FixedWing::m_calcStatesDerivatives() {
     fixedWingStates derivatives{};
     const double oneOverTau = 1.0 / (m_properties.inertiaX * m_properties.inertiaZ - m_properties.inertiaXZ * m_properties.inertiaXZ);
 
-    derivatives.x     = m_states.u * (cosTheta*cosPsi) + m_states.v * (-cosPhi*sinPsi + sinPhi*sinTheta*cosPsi) + m_states.w * (sinPhi*sinPsi + cosPhi*sinTheta*cosPsi) + m_physics.wind[0];
-    derivatives.y     = m_states.u * (cosTheta*sinPsi) + m_states.v * (cosPhi*cosPsi + sinPhi*sinTheta*sinPsi) + m_states.w * (-sinPhi*cosPsi + cosPhi*sinTheta*sinPsi) + m_physics.wind[1];
-    derivatives.z     = m_states.u * (-sinTheta) + m_states.v * (sinPhi*cosTheta) + m_states.w * (cosPhi*cosTheta) + m_physics.wind[2];
-    derivatives.u     = m_states.r * m_states.v - m_states.q * m_states.w - m_physics.gravity * sinTheta + (totalForceBody[0]) / m_properties.mass;
-    derivatives.v     = m_states.p * m_states.w - m_states.r * m_states.u + m_physics.gravity * sinPhi * cosTheta + (totalForceBody[1]) / m_properties.mass;
-    derivatives.w     = m_states.q * m_states.u - m_states.p * m_states.v + m_physics.gravity * cosPhi * cosTheta + (totalForceBody[2]) / m_properties.mass;
+    derivatives.x     = m_states.u * (cosTheta*cosPsi) + m_states.v * (-cosPhi*sinPsi + sinPhi*sinTheta*cosPsi) + m_states.w * (sinPhi*sinPsi + cosPhi*sinTheta*cosPsi) + m_wind[0];
+    derivatives.y     = m_states.u * (cosTheta*sinPsi) + m_states.v * (cosPhi*cosPsi + sinPhi*sinTheta*sinPsi) + m_states.w * (-sinPhi*cosPsi + cosPhi*sinTheta*sinPsi) + m_wind[1];
+    derivatives.z     = m_states.u * (-sinTheta) + m_states.v * (sinPhi*cosTheta) + m_states.w * (cosPhi*cosTheta) + m_wind[2];
+    derivatives.u     = m_states.r * m_states.v - m_states.q * m_states.w - m_physics.gravity * sinTheta + totalForceBody[0] / m_properties.mass;
+    derivatives.v     = m_states.p * m_states.w - m_states.r * m_states.u + m_physics.gravity * sinPhi * cosTheta + totalForceBody[1] / m_properties.mass;
+    derivatives.w     = m_states.q * m_states.u - m_states.p * m_states.v + m_physics.gravity * cosPhi * cosTheta + totalForceBody[2] / m_properties.mass;
     derivatives.phi   = m_states.p + (m_states.q * sinPhi + m_states.r * cosPhi) * tanTheta;
     derivatives.theta = m_states.q * cosPhi - m_states.r * sinPhi;
     derivatives.psi   = (m_states.q * sinPhi + m_states.r * cosPhi) * secTheta;

@@ -39,8 +39,11 @@ Payload::Payload(const worldPhysics& physics, const payloadProperties& propertie
     });
 }
 
-void Payload::update(const double dt) {
+void Payload::update(const double dt, const WindEnvironment& windEnv) {
     m_simTime += dt;
+
+    m_wind = windEnv.getTotalWind(centerOfMass().position(), m_simTime);
+    centerOfMass().setWind(m_wind);
 
     if (!m_isGrounded) {
         updateForcesOnBody();
@@ -78,7 +81,7 @@ void Payload::setInitialStates(initialStates& states) {
     setCenterOfMassTransform(grs::TransformD(centerOfMass().position().toOpenglRef(), grs::eulerToQuat(states.orientation[0],states.orientation[1],states.orientation[2]).nedToYup()));
 }
 
-void Payload::m_writeLog() {
+void Payload::m_writeLog() const {
 
     std::ostringstream msg;
     msg << m_simTime << "," << Logger::nowWallTimeMs() << "," << m_properties.name << ","
@@ -127,7 +130,7 @@ grs::Vec3d Payload::m_calcAeroForces() const {
 
     // Drag = -coeff * ||v_rel|| * v_rel; same as ||v_rel||^2 * v_rel/||v_rel||
     const double coeff = 0.5 * m_physics.airDensity * m_properties.cda;
-    const grs::Vec3d v_rel = centerOfMass().velocity() - grs::cast<double>(m_physics.wind);
+    const grs::Vec3d v_rel = centerOfMass().velocity() - m_wind;
 
     return -coeff * v_rel.norm() * v_rel;
 }

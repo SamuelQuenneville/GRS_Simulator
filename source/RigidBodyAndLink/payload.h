@@ -18,7 +18,7 @@ class Payload final : public RigidBody {
 public:
     Payload(const worldPhysics& physics, const payloadProperties& properties, bool isGrounded);
 
-    void update(double dt) override;
+    void update(double dt, const WindEnvironment& windEnv) override;
 
     [[nodiscard]] int getId() const;
     void setId(int id);
@@ -34,6 +34,7 @@ private:
     double m_simTime = 0.0;
 
     worldPhysics m_physics;
+    grs::Vec3d m_wind = grs::Vec3d::zeros();
 
     payloadStates m_states{};
     payloadProperties m_properties;
@@ -46,7 +47,7 @@ private:
     void m_eulerIntegration(const payloadStates& derivatives, double dt);
 
 
-    void m_writeLog();
+    void m_writeLog() const;
 };
 
 

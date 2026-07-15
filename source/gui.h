@@ -79,6 +79,7 @@ protected:
     nanogui::Label* m_frameVelocityDisplayed;
     nanogui::Label* m_frameOrientationDisplayed;
     nanogui::Label* m_frameForcesDisplayed;
+    nanogui::Label* m_frameWindDisplayed;
 
     nanogui::ComboBox* m_comboBoxFrames = nullptr;
 

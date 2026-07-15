@@ -18,9 +18,10 @@ uint64_t nowMillis() {
     return ms;
 }
 
-System::System(programArguments& args, worldPhysics& worldPhysics, systemConfiguration& configuration, systemProperties& properties, ctrlGains& gains)
+System::System(programArguments& args, worldPhysics& worldPhysics, WindEnvironment& windEnv, systemConfiguration& configuration, systemProperties& properties, ctrlGains& gains)
     : m_programArgs(args)
     , m_physics(worldPhysics)
+    , m_windEnv(windEnv)
     , m_systemConfiguration(configuration)
     , m_systemProperties(properties)
     , m_ctrlGains(gains)
@@ -58,17 +59,17 @@ void System::update(const double dt) {
     // Call fixedWing update()
     for(const auto& aircraft : m_aircraft) {
         aircraft->setCommands(m_commands[aircraft->getId()]);
-        aircraft->update(dt);
+        aircraft->update(dt, m_windEnv);
     }
 
     // Call payload update()
     if (m_tetherNode != nullptr) {
-        m_tetherNode->update(dt);
+        m_tetherNode->update(dt, m_windEnv);
     }
 
     // Call payload update()
     if (m_payload != nullptr) {
-        m_payload->update(dt);
+        m_payload->update(dt, m_windEnv);
     }
 }
 
@@ -128,7 +129,7 @@ void System::updateSitl(const double dt) {
                 }
             }
 
-            aircraft->updateSitl(dt, pwms[aircraft->getId()], flags[aircraft->getId()].shouldMove);
+            aircraft->updateSitl(dt, m_windEnv, pwms[aircraft->getId()], flags[aircraft->getId()].shouldMove);
 
             // Send JSON SITL
             sensorData sensorData = {static_cast<double>(nowMicros()) / 1000000.0, aircraft->getAngularVelocity(), aircraft->centerOfMass().acceleration(), aircraft->centerOfMass().position(), aircraft->getAttitude(), aircraft->centerOfMass().velocity(), aircraft->airspeed(), aircraft->getRpm()};
@@ -141,10 +142,10 @@ void System::updateSitl(const double dt) {
 
         // Call payload update()
         if (m_payload != nullptr) {
-            m_payload->update(dt);
+            m_payload->update(dt, m_windEnv);
 
             // Send JSON SITL
-            sensorData sensorData = {static_cast<double>(nowMicros()) / 1000000.0, {0,0,0}, m_payload->centerOfMass().acceleration(), m_payload->centerOfMass().position(), {0,0,0}, m_payload->centerOfMass().velocity(), 0.0, 0.0};
+            const sensorData sensorData = {static_cast<double>(nowMicros()) / 1000000.0, {0,0,0}, m_payload->centerOfMass().acceleration(), m_payload->centerOfMass().position(), {0,0,0}, m_payload->centerOfMass().velocity(), 0.0, 0.0};
             m_communicationManager->sendDataPayload(m_payload->getId(), sensorData);
         }
 

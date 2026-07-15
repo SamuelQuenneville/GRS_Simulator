@@ -10,6 +10,7 @@
 #define GRS_SIMULATOR_MEANWIND_H
 
 #include "meanWindModel.h"
+#include "Definitions/windDefinitions.h"
 
 // ===========================================================================
 // MeanWind
@@ -35,18 +36,8 @@
 // ===========================================================================
 class MeanWind final : public MeanWindModel {
 public:
-    enum class Profile { None, Ramp, PowerLaw };
 
-    struct params {
-        grs::Vec3d meanWind{5.0, 0.0, 0.0};     // reference mean wind vector [m/s]
-        Profile profile = Profile::Ramp;
-        double powerLawExponent = 1.0 / 7.0;
-        double groundHeight = 5.0;              // [m] altitude below which mean wind = 0
-        double fullHeight   = 15.0;             // [m] altitude at/above which mean wind = full value
-        double altitudeSign = -1.0;             // +1 if z increases with altitude (ENU) -1 for NED-style frames (z increases downward)
-    };
-
-    explicit MeanWind(const params& params);
+    explicit MeanWind(const windProperties& params);
 
     [[nodiscard]] grs::Vec3d getMeanWind(const grs::Vec3d& position) const override;
 
@@ -54,10 +45,8 @@ public:
     // amplitude ramp) can reuse the same smooth step shape if desired.
     [[nodiscard]] double altitudeFactor(double z) const;
 
-    [[nodiscard]] const params& parameters() const { return m_params; }
-
 private:
-    params m_params;
+    windProperties m_params;
 };
 
 

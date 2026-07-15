@@ -26,8 +26,8 @@ public:
 
     [[nodiscard]] int getId() const;
 
-    void update(double dt) override;
-    void updateSitl(double dt, const std::array<uint16_t, MAX_SERVO_CHANNELS>& pwm, bool shouldMove);
+    void update(double dt, const WindEnvironment& windEnv) override;
+    void updateSitl(double dt, const WindEnvironment& windEnv, const std::array<uint16_t, MAX_SERVO_CHANNELS>& pwm, bool shouldMove);
 
     [[nodiscard]] fixedWingStates getStates() const {return m_states;};
 
@@ -68,6 +68,7 @@ private:
     double m_simTime = 0.0;
 
     worldPhysics m_physics;
+    grs::Vec3d m_wind = grs::Vec3d::zeros();
 
     fixedWingStates m_states{};
     fixedWingProperties m_properties;

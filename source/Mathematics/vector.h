@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <ostream>
 #include <type_traits>
+#include <vector>
 
 namespace grs {
 
@@ -47,6 +48,14 @@ struct Vector {
 
     /** @brief Internal storage of vector elements. */
     std::array<T, N> data{};
+
+    constexpr Vector() = default;
+
+    constexpr Vector(const Vector&) = default;
+    constexpr Vector(Vector&&) = default;
+    constexpr Vector& operator=(const Vector&) = default;
+    constexpr Vector& operator=(Vector&&) = default;
+    ~Vector() = default;
 
     /**
      * @brief Construct a vector from an initializer list.
@@ -225,6 +234,31 @@ struct Vector {
         }
     }
 };
+
+/**
+ * @brief Convert std::vector.
+ *
+ * @param vector Input vector.
+ * @return Converted vector.
+ */
+template<typename T, std::size_t N>
+[[nodiscard]] Vector<T,N> toVector(const std::vector<T>& vector)
+{
+    if (vector.size() != N)
+    {
+        throw std::invalid_argument(
+            "std::vector has incorrect size.");
+    }
+
+    Vector<T,N> result;
+
+    for (std::size_t i = 0; i < N; ++i)
+    {
+        result[i] = vector[i];
+    }
+
+    return result;
+}
 
 /**
  * @brief Equality comparison.

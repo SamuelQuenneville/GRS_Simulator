@@ -79,13 +79,18 @@ void World::readConfigurationFile(const std::string& fileName) {
         m_systemTarget.altOffsetY = m_systemProperties.tether.byName("Vertical").length;
     }
 
-    std::vector<float> wind = ConfigurationParser::parseWind(fileName);
-    physics.updateWind({wind[0], wind[1], wind[2]});
+    // Wind Environment
+    windProperties windParams = ConfigurationParser::parseWind(fileName);
+
+    auto turb = std::make_shared<SpectralWindField>(windParams);
+    auto mean = std::make_shared<MeanWind>(windParams);
+
+    m_windEnv = std::make_unique<WindEnvironment>(mean, turb, windParams);
 }
 
 void World::createSystem() {
 
-    m_system = std::make_unique<System>(m_programArgs, physics, m_systemConfiguration, m_systemProperties, m_ctrlGains);
+    m_system = std::make_unique<System>(m_programArgs, physics, *m_windEnv, m_systemConfiguration, m_systemProperties, m_ctrlGains);
     m_system->setTarget(m_systemTarget);
 
     switch(getSystemType()) {

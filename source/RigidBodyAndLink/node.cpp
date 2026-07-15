@@ -66,3 +66,11 @@ const grs::Vec3d& Node::moment() const {
 void Node::setMoment(const grs::Vec3d& newMoment) {
     m_moment = newMoment;
 }
+
+const grs::Vec3d& Node::wind() const {
+    return m_wind;
+}
+
+void Node::setWind(const grs::Vec3d& newWind) {
+    m_wind = newWind;
+}

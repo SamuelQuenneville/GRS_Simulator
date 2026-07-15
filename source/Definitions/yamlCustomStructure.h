@@ -19,6 +19,7 @@
 #include "launcherDefinitions.h"
 #include "configurationDefinitions.h"
 #include "controllerGains.h"
+#include "windDefinitions.h"
 
 /*
  *   YAML template for custom struct
@@ -266,6 +267,31 @@ namespace YAML {
 
             rhs.launcherAccel      = node["LAUNCHER_ACCEL"].as<float>();
             rhs.launchDuration     = node["LAUNCH_DURATION"].as<double>();
+            return true;
+        }
+    };
+
+    template<>
+    struct convert<windProperties> {
+        static bool decode(const Node& node, windProperties& rhs) {
+            if (!node.IsMap()) {
+                return false;
+            }
+
+            rhs.wind                   = node["WIND"].as<bool>();
+            rhs.turbulence             = node["TURBULENCE"].as<bool>();
+            rhs.seed                   = node["SEED"].as<u_int32_t>();
+            rhs.meanWind               = node["MEAN_WIND"].as<std::vector<double>>();
+            rhs.meanWindPofile         = node["MEAN_WIND_PROFILE"].as<std::string>();
+            rhs.meanWindGroundHeight   = node["MEAN_WIND_GROUND_HEIGHT"].as<double>();
+            rhs.meanWindFullHeight     = node["MEAN_WIND_FULL_HEIGHT"].as<double>();
+            rhs.sigma                  = node["SIGMA"].as<std::vector<double>>();
+            rhs.turbulenceGroundHeight = node["TURBULENCE_GROUND_HEIGHT"].as<double>();
+            rhs.turbulenceFullHeight   = node["TURBULENCE_FULL_HEIGHT"].as<double>();
+            rhs.turbulenceLengthScale  = node["TURBULENCE_LENGTH_SCALE"].as<double>();
+            rhs.turbulenceLambdaMin    = node["TURBULENCE_LAMBDA_MIN"].as<double>();
+            rhs.turbulenceLambdaMax    = node["TURBULENCE_LAMBDA_MAX"].as<double>();
+            rhs.turbulenceNumberMode   = node["TURBULENCE_NUMBER_MODE"].as<int>();
             return true;
         }
     };

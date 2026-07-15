@@ -35,4 +35,18 @@ Target:
   AIRCRAFT_PITCH: 0.0
   AIRCRAFT_ROLL: 0.0
 #
-Wind: [0.0, 0.0, 0.0] # [wx wy wz]
+Wind:
+  WIND: false
+  TURBULENCE: false
+  SEED: 1                        # For reproducibility of turbulence
+  MEAN_WIND: [5.0, 0.0, 0.0]     # [m/s] [wx wy wz]
+  MEAN_WIND_PROFILE: 'NONE'      # NONE, RAMP, POWERLAW
+  MEAN_WIND_GROUND_HEIGHT: 15.0   # No wind below [m]
+  MEAN_WIND_FULL_HEIGHT: 20.0    # Full wind above [m]
+  SIGMA: [0.5, 0.5, 0.25]        # Turbulence intensity [m/s] [sig_wx sig_wy sig_wz]
+  TURBULENCE_GROUND_HEIGHT: 5.0  # No turbulence below [m]
+  TURBULENCE_FULL_HEIGHT: 15.0   # Full turbulence above [m]
+  TURBULENCE_LENGTH_SCALE: 150.0 # integral length scale [m]
+  TURBULENCE_LAMBDA_MIN: 0.5     # minimum wavelength [m]
+  TURBULENCE_LAMBDA_MAX: 2000.0  # maximum wavelength [m]
+  TURBULENCE_NUMBER_MODE: 1024   # total number of Fourier modes (must be even)
