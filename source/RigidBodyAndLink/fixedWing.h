@@ -68,7 +68,8 @@ private:
     double m_simTime = 0.0;
 
     worldPhysics m_physics;
-    grs::Vec3d m_wind = grs::Vec3d::zeros();
+    grs::Vec3d m_windEarth = grs::Vec3d::zeros();
+    grs::Vec3d m_windBody = grs::Vec3d::zeros();
 
     fixedWingStates m_states{};
     fixedWingProperties m_properties;

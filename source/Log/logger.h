@@ -31,6 +31,8 @@ public:
 
     void log(LogType type, const std::string& line);
 
+    void copyConfigFile(const std::string& configFile, const std::string& logDirectory) const;
+
     static uint64_t nowWallTimeMs();
 
 private:

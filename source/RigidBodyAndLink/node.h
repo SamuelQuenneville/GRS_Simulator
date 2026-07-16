@@ -43,7 +43,7 @@ private:
     int m_id;
     static int m_idCounter;
 
-    grs::Vec3d m_wind         = grs::Vec3d::zeros();        // For centerOfMass Earth wind shown in gui
+    grs::Vec3d m_wind         = grs::Vec3d::zeros();        // For centerOfMass Body frame wind shown in gui
 
     grs::Vec3d m_position     = grs::Vec3d::zeros();        // Own reference frame
     grs::Vec3d m_velocity     = grs::Vec3d::zeros();        // Own reference frame

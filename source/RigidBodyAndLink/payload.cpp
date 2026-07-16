@@ -86,7 +86,8 @@ void Payload::m_writeLog() const {
     std::ostringstream msg;
     msg << m_simTime << "," << Logger::nowWallTimeMs() << "," << m_properties.name << ","
         << m_states.x  << "," << m_states.y  << "," << m_states.z  << ","
-        << m_states.vx << "," << m_states.vy << "," << m_states.vz;
+        << m_states.vx << "," << m_states.vy << "," << m_states.vz << ","
+        << m_wind[0]   << "," << m_wind[1]   << "," << m_wind[2];
 
     Logger::instance().log(LogType::Payload, msg.str());
 

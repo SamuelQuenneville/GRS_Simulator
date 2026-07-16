@@ -49,6 +49,7 @@ void World::readConfigurationFile(const std::string& fileName) {
 
     m_logDirectory = simParams.logFilesDirectory;
     Logger::instance().start(m_programArgs.loggingEnabled, m_logDirectory + getDateString());
+    Logger::instance().copyConfigFile(fileName, m_logDirectory + getDateString());
 
     const std::chrono::duration<double> timeStep(1.0 / m_systemConfiguration.llcRate);
     simulationConfiguration = {timeStep};

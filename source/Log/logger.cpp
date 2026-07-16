@@ -61,14 +61,21 @@ void Logger::log(const LogType type, const std::string& line) {
     m_queue.push(LogItem{type, line});
 }
 
+void Logger::copyConfigFile(const std::string& configFile, const std::string& logDirectory) const {
+    if (!m_running || !m_enabled) return;
+
+    const std::filesystem::path configPath(configFile);
+    std::filesystem::copy_file(configPath,logDirectory + "/config.yaml",std::filesystem::copy_options::overwrite_existing);
+}
+
 uint64_t Logger::nowWallTimeMs() {
     const auto now = std::chrono::system_clock::now();
     return std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
 }
 
 void Logger::m_writeHeaders() {
-    m_files[LogType::Aircraft] << "simTimeSec,wallTimeMs,id,x,y,z,vx,vy,vz,u,v,w,phi,theta,psi,p,q,r\n";
-    m_files[LogType::Payload]  << "simTimeSec,wallTimeMs,name,x,y,z,vx,vy,vz\n";
+    m_files[LogType::Aircraft] << "simTimeSec,wallTimeMs,id,x,y,z,vx,vy,vz,u,v,w,phi,theta,psi,p,q,r,wx,wy,wz,wu,wv,ww\n";
+    m_files[LogType::Payload]  << "simTimeSec,wallTimeMs,name,x,y,z,vx,vy,vz,wx,wy,wz\n";
     m_files[LogType::Tether]   << "simTimeSec,wallTimeMs,name,delta_x,p_start_x,p_start_y,p_start_z,v_start_x,v_start_y,v_start_z,p_end_x,p_end_y,p_end_z,v_end_x,v_end_y,v_end_z,fs_x,fs_y,fs_z,fa_x,fa_y,fa_z\n";
     m_files[LogType::SitlOut]  << "simTimeSec,wallTimeMs,id,gyro_x,gyro_y,gyro_z,a_x,a_y,a_z,x,y,z,phi,theta,psi,vx,vy,vz,airspeed,rpm\n";
     m_files[LogType::SitlIn]   << "simTimeSec,wallTimeMs,id,pwm_0,pwm_1,pwm_2,pwm_3,aileron_deg,elevator_deg,throttle,rudder_deg\n";

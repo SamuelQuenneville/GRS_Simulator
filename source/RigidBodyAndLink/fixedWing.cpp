@@ -74,14 +74,15 @@ int FixedWing::getId() const {
 void FixedWing::update(const double dt, const WindEnvironment& windEnv) {
     m_simTime += dt;
 
-    m_wind = windEnv.getTotalWind(centerOfMass().position(), m_simTime);
-    centerOfMass().setWind(m_wind);
+    // Compute rotation matrix
+    updateRotationMatrixCBodyEarth();
+
+    m_windEarth = windEnv.getTotalWind(centerOfMass().position(), m_simTime);
+    m_windBody = m_earthToBody(m_windEarth);
+    centerOfMass().setWind(m_windBody);
 
     const fixedWingControlInputs inputs = m_controller->calculateAircraftControlInputs(getId(), getStates(), getCommands());
     setInputs(inputs);
-
-    // Compute rotation matrix
-    updateRotationMatrixCBodyEarth();
 
     // Go through all Frames
     updateForcesOnBody();
@@ -104,8 +105,12 @@ void FixedWing::update(const double dt, const WindEnvironment& windEnv) {
 void FixedWing::updateSitl(const double dt, const WindEnvironment& windEnv, const std::array<uint16_t, MAX_SERVO_CHANNELS>& pwm, const bool shouldMove) {
     m_simTime += dt;
 
-    m_wind = windEnv.getTotalWind(centerOfMass().position(), m_simTime);
-    centerOfMass().setWind(m_wind);
+    // Compute rotation matrix
+    updateRotationMatrixCBodyEarth();
+
+    m_windEarth = windEnv.getTotalWind(centerOfMass().position(), m_simTime);
+    m_windBody = m_earthToBody(m_windEarth);
+    centerOfMass().setWind(m_windBody);
 
     // Detect SITL mode once
     if (!m_sitl) {
@@ -140,9 +145,6 @@ void FixedWing::updateSitl(const double dt, const WindEnvironment& windEnv, cons
     m_updateRpmSensor(dt, pwm[2]);
 
     setInputs(inputs);
-
-    // Compute rotation matrix
-    updateRotationMatrixCBodyEarth();
 
     // Go through all Frames
     updateForcesOnBody();
@@ -271,9 +273,9 @@ fixedWingStates FixedWing::m_calcStatesDerivatives() {
     fixedWingStates derivatives{};
     const double oneOverTau = 1.0 / (m_properties.inertiaX * m_properties.inertiaZ - m_properties.inertiaXZ * m_properties.inertiaXZ);
 
-    derivatives.x     = m_states.u * (cosTheta*cosPsi) + m_states.v * (-cosPhi*sinPsi + sinPhi*sinTheta*cosPsi) + m_states.w * (sinPhi*sinPsi + cosPhi*sinTheta*cosPsi) + m_wind[0];
-    derivatives.y     = m_states.u * (cosTheta*sinPsi) + m_states.v * (cosPhi*cosPsi + sinPhi*sinTheta*sinPsi) + m_states.w * (-sinPhi*cosPsi + cosPhi*sinTheta*sinPsi) + m_wind[1];
-    derivatives.z     = m_states.u * (-sinTheta) + m_states.v * (sinPhi*cosTheta) + m_states.w * (cosPhi*cosTheta) + m_wind[2];
+    derivatives.x     = m_states.u * (cosTheta*cosPsi) + m_states.v * (-cosPhi*sinPsi + sinPhi*sinTheta*cosPsi) + m_states.w * (sinPhi*sinPsi + cosPhi*sinTheta*cosPsi) + m_windEarth[0];
+    derivatives.y     = m_states.u * (cosTheta*sinPsi) + m_states.v * (cosPhi*cosPsi + sinPhi*sinTheta*sinPsi) + m_states.w * (-sinPhi*cosPsi + cosPhi*sinTheta*sinPsi) + m_windEarth[1];
+    derivatives.z     = m_states.u * (-sinTheta) + m_states.v * (sinPhi*cosTheta) + m_states.w * (cosPhi*cosTheta) + m_windEarth[2];
     derivatives.u     = m_states.r * m_states.v - m_states.q * m_states.w - m_physics.gravity * sinTheta + totalForceBody[0] / m_properties.mass;
     derivatives.v     = m_states.p * m_states.w - m_states.r * m_states.u + m_physics.gravity * sinPhi * cosTheta + totalForceBody[1] / m_properties.mass;
     derivatives.w     = m_states.q * m_states.u - m_states.p * m_states.v + m_physics.gravity * cosPhi * cosTheta + totalForceBody[2] / m_properties.mass;
@@ -537,7 +539,9 @@ void FixedWing::m_writeLog() {
         << m_states.vx  << "," << m_states.vy    << "," << m_states.vz  << ","
         << m_states.u   << "," << m_states.v     << "," << m_states.w   << ","
         << m_states.phi << "," << m_states.theta << "," << m_states.psi << ","
-        << m_states.p   << "," << m_states.q     << "," << m_states.r;
+        << m_states.p   << "," << m_states.q     << "," << m_states.r   << ","
+        << m_windEarth[0] << "," << m_windEarth[1] << "," << m_windEarth[2] << ","
+        << m_windBody[0]  << "," << m_windBody[1]  << "," << m_windBody[2];
 
     Logger::instance().log(LogType::Aircraft, msg.str());
 
