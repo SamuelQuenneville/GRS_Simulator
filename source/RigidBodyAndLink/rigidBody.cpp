@@ -64,6 +64,7 @@ void RigidBody::updateForcesOnBody() {
     centerOfMass().setMoment(totalMoment);
 }
 
+// acceleration: inertial (kinematic) acceleration of the center of mass in NED, consistent with position and velocity
 void RigidBody::updateWorldInfos(const grs::Vec3d& position, const grs::Vec3d& velocity, const grs::Vec3d& acceleration) const {
     centerOfMass().setPosition(position);
     centerOfMass().setVelocity(velocity);
@@ -75,8 +76,10 @@ void RigidBody::updateWorldInfos(const grs::Vec3d& position, const grs::Vec3d& v
             grs::Vec3d pos_local = f->getLocalPosition() - centerOfMassFrame()->getLocalPosition();
             grs::Vec3d pos_world = m_rotationMatrixCBodyEarth.transpose() * pos_local;
 
-            grs::Vec3d vel_frame = velocity + grs::cross(m_angularVelocity, pos_world);
-            grs::Vec3d acc_frame = acceleration + grs::cross(m_angularAcceleration, pos_world) + grs::cross(m_angularVelocity, grs::cross(m_angularVelocity, pos_world));
+            // Angular rates are body frame (p,q,r): take the cross products with the body-frame lever arm, then rotate to Earth
+            const grs::Matrix3d C_EarthBody = m_rotationMatrixCBodyEarth.transpose();
+            grs::Vec3d vel_frame = velocity + C_EarthBody * grs::cross(m_angularVelocity, pos_local);
+            grs::Vec3d acc_frame = acceleration + C_EarthBody * (grs::cross(m_angularAcceleration, pos_local) + grs::cross(m_angularVelocity, grs::cross(m_angularVelocity, pos_local)));
 
             f->originNode().setPosition(position + pos_world);
             f->originNode().setVelocity(vel_frame);
@@ -127,6 +130,14 @@ void RigidBody::setAngularAcceleration(const grs::Vec3d& newAngularAcceleration)
 
 void RigidBody::setRotationMatrixCBodyEarth(const grs::Matrix3d& newRotationMatrix) {
     m_rotationMatrixCBodyEarth = newRotationMatrix;
+}
+
+void RigidBody::setSpecificForceBody(const grs::Vec3d& newSpecificForce) {
+    m_specificForceBody = newSpecificForce;
+}
+
+const grs::Vec3d& RigidBody::getSpecificForceBody() const {
+    return m_specificForceBody;
 }
 
 const grs::Vec3d& RigidBody::getAttitude() const {

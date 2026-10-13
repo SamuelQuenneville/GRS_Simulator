@@ -132,7 +132,14 @@ void System::updateSitl(const double dt) {
             aircraft->updateSitl(dt, m_windEnv, pwms[aircraft->getId()], flags[aircraft->getId()].shouldMove);
 
             // Send JSON SITL
-            sensorData sensorData = {static_cast<double>(nowMicros()) / 1000000.0, aircraft->getAngularVelocity(), aircraft->centerOfMass().acceleration(), aircraft->centerOfMass().position(), aircraft->getAttitude(), aircraft->centerOfMass().velocity(), aircraft->airspeed(), aircraft->getRpm()};
+            sensorData sensorData = {.timeStampSecond = static_cast<double>(nowMicros()) / 1000000.0,
+                                     .angularVelocity = aircraft->getAngularVelocity(),
+                                     .acceleration = aircraft->getSpecificForceBody(),
+                                     .position = aircraft->centerOfMass().position(),
+                                     .attitude = aircraft->getAttitude(),
+                                     .velocity = aircraft->centerOfMass().velocity(),
+                                     .airspeed = aircraft->airspeed(),
+                                     .rpm = aircraft->getRpm()};
             m_communicationManager->sendData(aircraft->getId(), sensorData);
         }
 
@@ -145,7 +152,14 @@ void System::updateSitl(const double dt) {
             m_payload->update(dt, m_windEnv);
 
             // Send JSON SITL
-            const sensorData sensorData = {static_cast<double>(nowMicros()) / 1000000.0, {0,0,0}, m_payload->centerOfMass().acceleration(), m_payload->centerOfMass().position(), {0,0,0}, m_payload->centerOfMass().velocity(), 0.0, 0.0};
+            const sensorData sensorData = {.timeStampSecond = static_cast<double>(nowMicros()) / 1000000.0,
+                                           .angularVelocity = {0,0,0},
+                                           .acceleration = m_payload->getSpecificForceBody(),
+                                           .position = m_payload->centerOfMass().position(),
+                                           .attitude = {0,0,0},
+                                           .velocity = m_payload->centerOfMass().velocity(),
+                                           .airspeed = 0.0,
+                                           .rpm = 0.0};
             m_communicationManager->sendDataPayload(m_payload->getId(), sensorData);
         }
 
@@ -413,7 +427,7 @@ void System::createSystemTwoAircraftY(bool isGrounded, std::vector<initialStates
 
         // Create a tetherNode and set initial conditions
         m_tetherNode = std::make_unique<Payload>(m_physics, m_systemProperties.tetherNode, isGrounded);
-        initialStates nodeStates = {{0,0,-0.05}, {0,0,0}, {0,0,0}};
+        initialStates nodeStates = {.position = {0,0,-0.05}, .speed = {0,0,0}, .orientation = {0,0,0}};
         m_tetherNode->setInitialStates(nodeStates);
 
         // Create tethers

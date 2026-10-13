@@ -33,14 +33,14 @@ void Grid::m_addLine(const grs::Vec3f& p1, const grs::Vec3f& p2, const float wid
     const grs::Vec3f v3 = p2 - perp;
 
     // Triangle 1
-    m_vertices.push_back({v0, color});
-    m_vertices.push_back({v1, color});
-    m_vertices.push_back({v2, color});
+    m_vertices.push_back({.position = v0, .color = color});
+    m_vertices.push_back({.position = v1, .color = color});
+    m_vertices.push_back({.position = v2, .color = color});
 
     // Triangle 2
-    m_vertices.push_back({v0, color});
-    m_vertices.push_back({v2, color});
-    m_vertices.push_back({v3, color});
+    m_vertices.push_back({.position = v0, .color = color});
+    m_vertices.push_back({.position = v2, .color = color});
+    m_vertices.push_back({.position = v3, .color = color});
 }
 
 void Grid::m_createGrid(const float extent, const float spacing) {

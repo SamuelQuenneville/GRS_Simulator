@@ -216,9 +216,9 @@ void Gui::m_createConfigurationPanel() {
     buttonIsometricView->set_fixed_width(73);
     buttonIsometricView->set_callback([&] {
 
-        constexpr double a = std::sqrt(2.0) / 2.0;
-        constexpr double b = std::sqrt(2.0) / std::sqrt(3.0);
-        constexpr double c = 1.0 / std::sqrt(3.0);
+        const double a = std::sqrt(2.0) / 2.0;
+        const double b = std::sqrt(2.0) / std::sqrt(3.0);
+        const double c = 1.0 / std::sqrt(3.0);
 
         const grs::Matrix4d view
             {a, -b/2.0,  c,  0,

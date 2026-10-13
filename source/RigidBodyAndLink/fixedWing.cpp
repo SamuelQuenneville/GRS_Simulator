@@ -122,15 +122,15 @@ void FixedWing::updateSitl(const double dt, const WindEnvironment& windEnv, cons
 
     // Convert PWM to normalized control inputs
     fixedWingControlInputs inputs{
-        m_pwmToControl(ELEVATOR, pwm[1]),
-         m_pwmToControl(AILERON,  pwm[0]),
-         m_pwmToControl(RUDDER,   pwm[3]),
-         m_pwmToControl(THROTTLE, pwm[2])
+         .deltaElevator = m_pwmToControl(ELEVATOR, pwm[1]),
+         .deltaAileron  = m_pwmToControl(AILERON,  pwm[0]),
+         .deltaRudder   = m_pwmToControl(RUDDER,   pwm[3]),
+         .deltaThrust   = m_pwmToControl(THROTTLE, pwm[2])
     };
 
     // All-zero input guard (fail-safe or inactive)
     if (pwm[0] == 0) {
-        inputs = {0.0,0.0,0.0,0.0};
+        inputs = {.deltaElevator = 0.0, .deltaAileron = 0.0, .deltaRudder = 0.0, .deltaThrust = 0.0};
     }
 
     // Log
@@ -286,25 +286,19 @@ fixedWingStates FixedWing::m_calcStatesDerivatives() {
     derivatives.q     = 1.0 / m_properties.inertiaY * (m_states.p * m_states.r * (m_properties.inertiaZ - m_properties.inertiaX) - (m_states.p * m_states.p - m_states.r * m_states.r) * m_properties.inertiaXZ) + 1.0 / m_properties.inertiaY * (totalMomentBody[1]);
     derivatives.r     = oneOverTau * (m_states.q * m_states.p * (m_properties.inertiaX * (m_properties.inertiaX - m_properties.inertiaY) + m_properties.inertiaXZ * m_properties.inertiaXZ) - m_states.q * m_states.r * (m_properties.inertiaXZ * (m_properties.inertiaZ - m_properties.inertiaY + m_properties.inertiaX))) + oneOverTau * (m_properties.inertiaXZ * totalMomentBody[0] + m_properties.inertiaX * totalMomentBody[2]);
 
-    if (m_sitl) {
+    if (m_isTranslationHeld()) {
+        derivatives.x = 0.0;
+        derivatives.y = 0.0;
+        derivatives.z = 0.0;
+
         if (!m_inFlightLaunch) {
-            if (!m_launchTriggered) {
-                derivatives.x = 0.0;
-                derivatives.y = 0.0;
-                derivatives.z = 0.0;
-                derivatives.u = 0.0;
-                derivatives.v = 0.0;
-                derivatives.w = 0.0;
-            }
-
+            // On the launcher, waiting for the launch
+            derivatives.u = 0.0;
+            derivatives.v = 0.0;
+            derivatives.w = 0.0;
         } else {
-            if (!m_flightLaunchTriggered) {
-                derivatives.x = 0.0;
-                derivatives.y = 0.0;
-                derivatives.z = 0.0;
-
-                derivatives.psi   = 0.0;
-            }
+            // In-flight launch, waiting for shouldMove
+            derivatives.psi = 0.0;
         }
     }
 
@@ -330,17 +324,32 @@ void FixedWing::m_eulerIntegration(const fixedWingStates& derivatives, const dou
     m_states.vy = derivatives.y;
     m_states.vz = derivatives.z;
 
+    // Inertial acceleration of the CG in NED. With the air-relative body velocities used here,
+    // d/dt(C_EarthBody * v_air) = C_EarthBody * F_body/m + g (the wind time derivative is neglected).
+    // The rotation matrix is the one the forces were computed with (start of step), so the IMU reads exactly F_body/m.
+    const grs::Matrix3d C_EarthBody = getRotationMatrixCBodyEarth().transpose();
+    grs::Vec3d accelNed = C_EarthBody * (centerOfMass().force() * (1.0 / m_properties.mass)) + grs::Vec3d(0.0, 0.0, m_physics.gravity);
+
+    if (m_isTranslationHeld()) {
+        accelNed = grs::Vec3d::zeros();
+    }
+
     // Simulate the ground plane at z = 0
     if (m_states.z >= 0.0 && m_states.vz > 0.0) { // penetrating and moving further down
         m_states.z  = 0.0;
         m_states.vz = 0.0;
 
         m_states.w = 0.0;
+
+        // The ground can only push up (normal force): no downward acceleration while in contact
+        accelNed[2] = std::min(accelNed[2], 0.0);
     }
 
-    // Required by SITL PixHawk (always need to see gravity)
     setAttitude({m_states.phi, m_states.theta, m_states.psi});
-    updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {derivatives.u, derivatives.v, -derivatives.w});
+    updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, accelNed);
+
+    // Accelerometer output (what a Pixhawk IMU measures and logs)
+    setSpecificForceBody(m_calcSpecificForceBody(accelNed));
 
     if (!m_flightLaunchTriggered && m_sitl) {
         double r = 0.0;
@@ -359,6 +368,23 @@ void FixedWing::m_eulerIntegration(const fixedWingStates& derivatives, const dou
         setAngularAcceleration({derivatives.p, derivatives.q, derivatives.r});
     }
 
+}
+
+bool FixedWing::m_isTranslationHeld() const {
+    if (!m_sitl) {
+        return false;
+    }
+
+    if (m_inFlightLaunch) {
+        return !m_flightLaunchTriggered;
+    }
+
+    return !m_launchTriggered;
+}
+
+grs::Vec3d FixedWing::m_calcSpecificForceBody(const grs::Vec3d& accelNed) const {
+    // f_b = C_BodyEarth * (a_NED - g_NED), g_NED = [0 0 g]
+    return getRotationMatrixCBodyEarth() * (accelNed - grs::Vec3d(0.0, 0.0, m_physics.gravity));
 }
 
 double FixedWing::airspeed() const {
@@ -430,9 +456,12 @@ void FixedWing::m_integrateCatapult(const double dt) {
     m_states.y += velEarth[1] * dt;
     m_states.z += velEarth[2] * dt;
 
-    // Required by SITL PixHawk (always need to see gravity)
+    // Inertial acceleration along the rail (NED) and accelerometer output
+    const grs::Vec3d accelNed = accel * railDir;
+
     setAttitude({m_states.phi, m_states.theta, m_states.psi});
-    updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {accel, 0.0, 0.0});
+    updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, accelNed);
+    setSpecificForceBody(m_calcSpecificForceBody(accelNed));
 
     setAngularVelocity({m_states.p, m_states.q, m_states.r});
     setAngularAcceleration({0.0, 0.0, 0.0});
@@ -458,6 +487,7 @@ void FixedWing::setInitialStates(initialStates& states) {
     updateRotationMatrixCBodyEarth();
 
     updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0.0,0.0,0.0});
+    setSpecificForceBody(m_calcSpecificForceBody(grs::Vec3d::zeros()));
 
     constexpr double meshRollOffset = -M_PI_2;
     setCenterOfMassTransform(grs::TransformD(centerOfMass().position().toOpenglRef(), grs::eulerToQuat(m_states.phi + meshRollOffset,m_states.theta,m_states.psi).nedToYup()));
@@ -518,7 +548,7 @@ double FixedWing::m_pwmToControl(const controlAxis control, const uint16_t pwm) 
 
 void FixedWing::m_updateRpmSensor(const double dt, const double throttleInput) {
 
-    double rpm = (throttleInput - 1100.0) * 9000.0/900.0;
+    double rpm = (throttleInput - 1100.0) * 9000.0/800.0;
     if (rpm < 10.0) {
         rpm = 0.0;
     }
@@ -541,7 +571,9 @@ void FixedWing::m_writeLog() {
         << m_states.phi << "," << m_states.theta << "," << m_states.psi << ","
         << m_states.p   << "," << m_states.q     << "," << m_states.r   << ","
         << m_windEarth[0] << "," << m_windEarth[1] << "," << m_windEarth[2] << ","
-        << m_windBody[0]  << "," << m_windBody[1]  << "," << m_windBody[2];
+        << m_windBody[0]  << "," << m_windBody[1]  << "," << m_windBody[2] << ","
+        << centerOfMass().acceleration()[0] << "," << centerOfMass().acceleration()[1] << "," << centerOfMass().acceleration()[2] << ","
+        << getSpecificForceBody()[0] << "," << getSpecificForceBody()[1] << "," << getSpecificForceBody()[2];
 
     Logger::instance().log(LogType::Aircraft, msg.str());
 
@@ -553,9 +585,9 @@ bodyRenderData FixedWing::packRenderData() const {
     std::vector<frameRenderData> framesData;
 
     for (const auto& f : frames()) {
-        frameRenderData frame{f->transform(), f->originNode().force(), f->getForceColor()};
+        frameRenderData frame{.transform = f->transform(), .forceAtOrigin = f->originNode().force(), .forceColor = f->getForceColor()};
         framesData.push_back(frame);
     }
 
-    return bodyRenderData{RenderObjectType::AIRCRAFT, m_id, transform(), framesData};
+    return bodyRenderData{.type = RenderObjectType::AIRCRAFT, .id = m_id, .transform = transform(), .frames = framesData};
 }

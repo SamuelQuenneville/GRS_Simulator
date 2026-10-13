@@ -46,11 +46,15 @@ public:
     void setAngularVelocity(const grs::Vec3d& newAngularVelocity);
     void setAngularAcceleration(const grs::Vec3d& newAngularAcceleration);
     void setRotationMatrixCBodyEarth(const grs::Matrix3d& newRotationMatrix);
+    void setSpecificForceBody(const grs::Vec3d& newSpecificForce);
 
     [[nodiscard]] const grs::Vec3d& getAttitude() const;
     [[nodiscard]] const grs::Vec3d& getAngularVelocity() const;
     [[nodiscard]] const grs::Vec3d& getAngularAcceleration() const;
     [[nodiscard]] const grs::Matrix3d& getRotationMatrixCBodyEarth() const;
+
+    // Accelerometer output (IMU), body FRD, m/s^2: f_b = C_BodyEarth * (a_NED - [0 0 g]). Reads [0 0 -g] at rest, level.
+    [[nodiscard]] const grs::Vec3d& getSpecificForceBody() const;
 
     [[nodiscard]] Frame* bodyOriginFrame() const {return m_bodyOriginFrame.get();}
 
@@ -73,6 +77,8 @@ private:
     grs::Vec3d m_angularAcceleration = grs::Vec3d::zeros();
 
     grs::Matrix3d m_rotationMatrixCBodyEarth = grs::Matrix3d::identity();
+
+    grs::Vec3d m_specificForceBody = grs::Vec3d::zeros();
 };
 
 

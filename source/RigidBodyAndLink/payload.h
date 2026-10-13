@@ -9,6 +9,8 @@
 #ifndef GRS_SIMULATOR_PAYLOAD_H
 #define GRS_SIMULATOR_PAYLOAD_H
 
+#include <algorithm>
+
 #include "RigidBodyAndLink/rigidBody.h"
 #include "Definitions/payloadDefinitions.h"
 #include "Definitions/renderObjectDefinitions.h"
@@ -44,7 +46,11 @@ private:
     [[nodiscard]] grs::Vec3d m_calcAeroForces() const;
 
     [[nodiscard]] payloadStates m_calcStatesDerivatives() const;
-    void m_eulerIntegration(const payloadStates& derivatives, double dt);
+    // Returns true when the ground plane constrained the body this step
+    bool m_eulerIntegration(const payloadStates& derivatives, double dt);
+
+    // Payload has no attitude (identity), so body frame == NED: f_b = a_NED - [0 0 g]
+    [[nodiscard]] grs::Vec3d m_calcSpecificForceBody(const grs::Vec3d& accelNed) const;
 
 
     void m_writeLog() const;

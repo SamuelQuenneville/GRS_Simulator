@@ -48,14 +48,14 @@ void Cylinder::m_createMesh(const float radius, const float height, const uint32
         float vBot = 0.0f;
 
         // Triangle 1
-        m_vertices.push_back({p00, n0, {u0, vTop}});
-        m_vertices.push_back({p01, n0, {u0, vBot}});
-        m_vertices.push_back({p10, n1, {u1, vTop}});
+        m_vertices.push_back({.position = p00, .normal = n0, .texCoord = {u0, vTop}});
+        m_vertices.push_back({.position = p01, .normal = n0, .texCoord = {u0, vBot}});
+        m_vertices.push_back({.position = p10, .normal = n1, .texCoord = {u1, vTop}});
 
         // Triangle 2
-        m_vertices.push_back({p10, n1, {u1, vTop}});
-        m_vertices.push_back({p01, n0, {u0, vBot}});
-        m_vertices.push_back({p11, n1, {u1, vBot}});
+        m_vertices.push_back({.position = p10, .normal = n1, .texCoord = {u1, vTop}});
+        m_vertices.push_back({.position = p01, .normal = n0, .texCoord = {u0, vBot}});
+        m_vertices.push_back({.position = p11, .normal = n1, .texCoord = {u1, vBot}});
     }
 
     m_vertexCount = static_cast<GLsizei>(m_vertices.size());

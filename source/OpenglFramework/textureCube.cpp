@@ -91,12 +91,12 @@ TextureCube::TextureCube(const std::string& path) {
     };
 
     std::vector<Face> faces = {
-        {GL_TEXTURE_CUBE_MAP_POSITIVE_X, 2, 1}, // right
-        {GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, 1}, // left
-        {GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 1, 0}, // top
-        {GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 1, 2}, // bottom
-        {GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 1, 1}, // front
-        {GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 3, 1}  // back
+        {.target = GL_TEXTURE_CUBE_MAP_POSITIVE_X, .x = 2, .y = 1}, // right
+        {.target = GL_TEXTURE_CUBE_MAP_NEGATIVE_X, .x = 0, .y = 1}, // left
+        {.target = GL_TEXTURE_CUBE_MAP_POSITIVE_Y, .x = 1, .y = 0}, // top
+        {.target = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, .x = 1, .y = 2}, // bottom
+        {.target = GL_TEXTURE_CUBE_MAP_POSITIVE_Z, .x = 1, .y = 1}, // front
+        {.target = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, .x = 3, .y = 1}  // back
     };
 
     glGenTextures(1, &m_id);

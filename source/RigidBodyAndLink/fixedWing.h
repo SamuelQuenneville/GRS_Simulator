@@ -9,6 +9,8 @@
 #ifndef GRS_SIMULATOR_FIXEDWING_H
 #define GRS_SIMULATOR_FIXEDWING_H
 
+#include <algorithm>
+
 #include "RigidBodyAndLink/rigidBody.h"
 #include "Definitions/fixedWingDefinitions.h"
 #include "Control/lowLevelController.h"
@@ -101,6 +103,9 @@ private:
     [[nodiscard]] grs::Vec3d m_bodyToEarth(const grs::Vec3d& bodyVector) const;
 
     void m_integrateCatapult(double dt);
+
+    [[nodiscard]] bool m_isTranslationHeld() const;
+    [[nodiscard]] grs::Vec3d m_calcSpecificForceBody(const grs::Vec3d& accelNed) const;
 
     fixedWingStates m_calcStatesDerivatives();
     void m_eulerIntegration(const fixedWingStates& derivatives, double dt);

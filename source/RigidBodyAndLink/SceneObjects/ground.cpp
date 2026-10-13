@@ -27,14 +27,14 @@ void Ground::m_createGeometry(const float extent, const float y) {
     const float e = extent;
 
     // Triangle 1
-    m_vertices.push_back({grs::Vec3f(-e, y, -e), color});
-    m_vertices.push_back({grs::Vec3f( e, y, -e), color});
-    m_vertices.push_back({grs::Vec3f( e, y,  e), color});
+    m_vertices.push_back({.position = grs::Vec3f(-e, y, -e), .color = color});
+    m_vertices.push_back({.position = grs::Vec3f( e, y, -e), .color = color});
+    m_vertices.push_back({.position = grs::Vec3f( e, y,  e), .color = color});
 
     // Triangle 2
-    m_vertices.push_back({grs::Vec3f(-e, y, -e), color});
-    m_vertices.push_back({grs::Vec3f( e, y,  e), color});
-    m_vertices.push_back({grs::Vec3f(-e, y,  e), color});
+    m_vertices.push_back({.position = grs::Vec3f(-e, y, -e), .color = color});
+    m_vertices.push_back({.position = grs::Vec3f( e, y,  e), .color = color});
+    m_vertices.push_back({.position = grs::Vec3f(-e, y,  e), .color = color});
 }
 
 void Ground::m_createBuffers() {

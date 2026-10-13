@@ -49,11 +49,21 @@ void Payload::update(const double dt, const WindEnvironment& windEnv) {
         updateForcesOnBody();
 
         const payloadStates derivatives   = m_calcStatesDerivatives();
-        m_eulerIntegration(derivatives, dt);
+        const bool groundContact = m_eulerIntegration(derivatives, dt);
+
+        // Inertial acceleration in NED; the ground can only push up while in contact
+        grs::Vec3d accelNed(derivatives.vx, derivatives.vy, derivatives.vz);
+        if (groundContact) {
+            accelNed[2] = std::min(accelNed[2], 0.0);
+        }
 
         // Set new forces/moments to the node of this body
-        updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0.0,0.0,0.0});
+        updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, accelNed);
+        setSpecificForceBody(m_calcSpecificForceBody(accelNed));
         setCenterOfMassTransform(grs::TransformD(centerOfMass().position().toOpenglRef(), grs::QuaternionD::identity()));
+    } else {
+        // Static body: an accelerometer at rest reads [0 0 -g]
+        setSpecificForceBody(m_calcSpecificForceBody(grs::Vec3d::zeros()));
     }
 
     // Log
@@ -73,11 +83,12 @@ void Payload::setInitialStates(initialStates& states) {
     m_states.y = states.position[1];
     m_states.z = states.position[2];
 
-    m_states.vx = states.position[0];
-    m_states.vy = states.position[1];
-    m_states.vz = states.position[2];
+    m_states.vx = states.speed[0];
+    m_states.vy = states.speed[1];
+    m_states.vz = states.speed[2];
 
     updateWorldInfos({m_states.x, m_states.y, m_states.z}, {m_states.vx, m_states.vy, m_states.vz}, {0,0,0});
+    setSpecificForceBody(m_calcSpecificForceBody(grs::Vec3d::zeros()));
     setCenterOfMassTransform(grs::TransformD(centerOfMass().position().toOpenglRef(), grs::eulerToQuat(states.orientation[0],states.orientation[1],states.orientation[2]).nedToYup()));
 }
 
@@ -87,7 +98,9 @@ void Payload::m_writeLog() const {
     msg << m_simTime << "," << Logger::nowWallTimeMs() << "," << m_properties.name << ","
         << m_states.x  << "," << m_states.y  << "," << m_states.z  << ","
         << m_states.vx << "," << m_states.vy << "," << m_states.vz << ","
-        << m_wind[0]   << "," << m_wind[1]   << "," << m_wind[2];
+        << m_wind[0]   << "," << m_wind[1]   << "," << m_wind[2]   << ","
+        << centerOfMass().acceleration()[0] << "," << centerOfMass().acceleration()[1] << "," << centerOfMass().acceleration()[2] << ","
+        << getSpecificForceBody()[0] << "," << getSpecificForceBody()[1] << "," << getSpecificForceBody()[2];
 
     Logger::instance().log(LogType::Payload, msg.str());
 
@@ -110,7 +123,7 @@ payloadStates Payload::m_calcStatesDerivatives() const {
     return derivatives;
 }
 
-void Payload::m_eulerIntegration(const payloadStates& derivatives, const double dt) {
+bool Payload::m_eulerIntegration(const payloadStates& derivatives, const double dt) {
 
     m_states.x += derivatives.x * dt;
     m_states.y += derivatives.y * dt;
@@ -124,7 +137,14 @@ void Payload::m_eulerIntegration(const payloadStates& derivatives, const double 
     if (m_states.z >= 0.0 && m_states.vz > 0.0) { // penetrating and moving further down
         m_states.z  = 0.0;
         m_states.vz = 0.0;
+        return true;
     }
+
+    return false;
+}
+
+grs::Vec3d Payload::m_calcSpecificForceBody(const grs::Vec3d& accelNed) const {
+    return accelNed - grs::Vec3d(0.0, 0.0, m_physics.gravity);
 }
 
 grs::Vec3d Payload::m_calcAeroForces() const {
@@ -141,10 +161,10 @@ bodyRenderData Payload::packRenderData() const {
     std::vector<frameRenderData> framesData;
 
     for (const auto& f : frames()) {
-        frameRenderData frame{f->transform(), f->originNode().force(), f->getForceColor()};
+        frameRenderData frame{.transform = f->transform(), .forceAtOrigin = f->originNode().force(), .forceColor = f->getForceColor()};
         framesData.push_back(frame);
     }
 
-    bodyRenderData data{RenderObjectType::PAYLOAD, m_id, transform(), framesData};
+    bodyRenderData data{.type = RenderObjectType::PAYLOAD, .id = m_id, .transform = transform(), .frames = framesData};
     return data;
 }

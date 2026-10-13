@@ -8,83 +8,43 @@
 
 #include "powertrain.h"
 
-float f(float n, float x, float y, float z, float phi, float psi, float thrustTarget)
-{
-    return (-x*phi*phi/(n*n) - y*phi/n + z) * psi*n*n - thrustTarget;
+#include <algorithm>
+#include <cmath>
+
+namespace {
+    // thrust = (-X*u^2 - Y*u + Z) * rho * rps^2 * D^4, u = airspeed / (rps*D).
+    // With n in rpm and phi = 60*airspeed/D (so u = phi/n):
+    // thrust = psi * (Z*n^2 - Y*phi*n - X*phi^2), psi = rho*D^4/3600.
+    constexpr double kAirDensity = 1.225;            // [kg/m^3]
+    constexpr double kPropDiameter = 16.0 * 0.0254;  // [m]
+    constexpr double kThrustCoeffX = 0.1588;
+    constexpr double kThrustCoeffY = 0.0106;
+    constexpr double kThrustCoeffZ = 0.0757;
+    constexpr double kPsi = kAirDensity * kPropDiameter * kPropDiameter * kPropDiameter * kPropDiameter / 3600.0;
+    constexpr double kMaxRpm = 9000.0;
 }
 
-float df(float n, float x, float y, float z, float phi, float psi)
-{
-    return (2*x*phi*phi/(n*n*n) + y*phi/(n*n)) * psi*n*n + (-x*phi*phi/(n*n) - y*phi/n + z) * 2*psi*n;
-}
-
-/*
- * Convert a desired thrust (Newton) at a given airspeed (m/s) to a rpm command
- * for an APC 16x8E propeller
- */
-double thrust2rpm(float airspeed, float thrustTarget)
-{
-    constexpr float rho = 1.225;      // air density in kg/m^2
-    constexpr float D = 16*0.0254;    // propeller diameter in meter
-    float phi = 60*airspeed/D;
-    float psi = rho*D*D*D*D/3600.0f;
-
-    // Define with wind tunnel testing
-    constexpr float x = 0.1588;
-    constexpr float y = 0.0106;
-    constexpr float z = 0.0757;
-
-    float x0 = 4000;        // initial guess about half range
-    float x1 = 0;
-    float res = 100;
-
-    // Newton Raphson method
-    int i = 0;
-    while (res > 10 && i++ < MAX_ITER_RPM)
-    {
-        float f0 = f(x0,x,y,z,phi,psi,thrustTarget);
-        float df0 = df(x0,x,y,z,phi,psi);
-
-        x1 = x0 - f0/df0;
-
-        res = f(x1,x,y,z,phi,psi,thrustTarget);
-        x0 = x1;
+double thrust2rpm(const float airspeed, const float thrustTarget) {
+    if (!std::isfinite(thrustTarget)) {
+        return 0.0;
     }
 
-    // Saturate desired RPM
-    const float rpm = std::clamp(x0, 0.0f, 9000.0f);
+    const double v = std::isfinite(airspeed) ? std::max(static_cast<double>(airspeed), 0.0) : 0.0;
+    const double phi = 60.0 * v / kPropDiameter;
 
-    // Convert RPM to command between 0 and 1
-    return rpm / 9000.0f;
+    // Positive root of Z*n^2 - Y*phi*n - (X*phi^2 + T/psi) = 0.
+    const double c = kThrustCoeffX * phi * phi + std::max(static_cast<double>(thrustTarget), 0.0) / kPsi;
+    const double rpm = (kThrustCoeffY * phi + std::sqrt(kThrustCoeffY * kThrustCoeffY * phi * phi + 4.0 * kThrustCoeffZ * c)) / (2.0 * kThrustCoeffZ);
+
+    return std::clamp(rpm, 0.0, kMaxRpm) / kMaxRpm;
 }
 
 double rpm2thrust(const float airspeed, const float rpmTarget) {
-    constexpr float rho = 1.225;      // air density in kg/m^2
-    constexpr float D = 16*0.0254;    // propeller diameter in meter
-
-    const float rps = rpmTarget / 60.0f;
-    const float airspeedOverRpsD = airspeed / (rps*D);
-
-    // Define with wind tunnel testing
-    constexpr float x = 0.1588;
-    constexpr float y = 0.0106;
-    constexpr float z = 0.0757;
-
-    return (-x * airspeedOverRpsD*airspeedOverRpsD - y * airspeedOverRpsD + z) * rho * rps*rps * D*D*D*D;
+    const double phi = 60.0 * airspeed / kPropDiameter;
+    const double n = rpmTarget;
+    return kPsi * (kThrustCoeffZ * n * n - kThrustCoeffY * phi * n - kThrustCoeffX * phi * phi);
 }
 
-float maxThrust(const float airspeed)
-{
-    constexpr float rho = 1.225;      // air density in kg/m^2
-    constexpr float D = 16*0.0254;    // propeller diameter in meter
-
-    constexpr float maxRps = 9000.0f / 60.0f;
-    const float airspeedOverRpsD = airspeed / (maxRps*D);
-
-    // Define with wind tunnel testing
-    constexpr float x = 0.1588;
-    constexpr float y = 0.0106;
-    constexpr float z = 0.0757;
-
-    return (-x * airspeedOverRpsD*airspeedOverRpsD - y * airspeedOverRpsD + z) * rho * maxRps*maxRps * D*D*D*D;
+float maxThrust(const float airspeed) {
+    return static_cast<float>(rpm2thrust(airspeed, kMaxRpm));
 }

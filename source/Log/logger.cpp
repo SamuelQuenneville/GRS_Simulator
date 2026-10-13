@@ -58,7 +58,7 @@ void Logger::stop() {
 
 void Logger::log(const LogType type, const std::string& line) {
     if (!m_running || !m_enabled) return;
-    m_queue.push(LogItem{type, line});
+    m_queue.push(LogItem{.type = type, .line = line});
 }
 
 void Logger::copyConfigFile(const std::string& configFile, const std::string& logDirectory) const {
@@ -74,10 +74,10 @@ uint64_t Logger::nowWallTimeMs() {
 }
 
 void Logger::m_writeHeaders() {
-    m_files[LogType::Aircraft] << "simTimeSec,wallTimeMs,id,x,y,z,vx,vy,vz,u,v,w,phi,theta,psi,p,q,r,wx,wy,wz,wu,wv,ww\n";
-    m_files[LogType::Payload]  << "simTimeSec,wallTimeMs,name,x,y,z,vx,vy,vz,wx,wy,wz\n";
+    m_files[LogType::Aircraft] << "simTimeSec,wallTimeMs,id,x,y,z,vx,vy,vz,u,v,w,phi,theta,psi,p,q,r,wx,wy,wz,wu,wv,ww,a_n,a_e,a_d,f_x,f_y,f_z\n";
+    m_files[LogType::Payload]  << "simTimeSec,wallTimeMs,name,x,y,z,vx,vy,vz,wx,wy,wz,a_n,a_e,a_d,f_x,f_y,f_z\n";
     m_files[LogType::Tether]   << "simTimeSec,wallTimeMs,name,delta_x,p_start_x,p_start_y,p_start_z,v_start_x,v_start_y,v_start_z,p_end_x,p_end_y,p_end_z,v_end_x,v_end_y,v_end_z,fs_x,fs_y,fs_z,fa_x,fa_y,fa_z\n";
-    m_files[LogType::SitlOut]  << "simTimeSec,wallTimeMs,id,gyro_x,gyro_y,gyro_z,a_x,a_y,a_z,x,y,z,phi,theta,psi,vx,vy,vz,airspeed,rpm\n";
+    m_files[LogType::SitlOut]  << "simTimeSec,wallTimeMs,id,gyro_x,gyro_y,gyro_z,f_x,f_y,f_z,x,y,z,phi,theta,psi,vx,vy,vz,airspeed,rpm\n";
     m_files[LogType::SitlIn]   << "simTimeSec,wallTimeMs,id,pwm_0,pwm_1,pwm_2,pwm_3,aileron_deg,elevator_deg,throttle,rudder_deg\n";
     m_files[LogType::Frame]    << "simTimeSec,wallTimeMs,name,node_id,x,y,z,vx,vy,vz,ax,ay,az,fx,fy,fz,mx,my,mz\n";
 }
