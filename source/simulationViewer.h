@@ -54,7 +54,8 @@ private:
     double m_elapsedTime;
     double m_dynamicStepTime;
 
-    void m_update();
+    void m_update(const systemRenderData* snapshot);
+    void m_syncGuiWithSystem();
 
     void m_updateTarget(float groundspeed, const std::vector<double> &payloadPosition) const;
     void m_changeView(const grs::Matrix4d& viewMatrix) const;
@@ -63,10 +64,13 @@ private:
     void m_drawReferenceFrame(bool shouldDraw) const;
     void m_drawForcesVector(bool shouldDraw) const;
     void m_drawSky(bool shouldDraw) const;
+    void m_toggleFollowSystem();
 
     void m_render() const;
 
     bool m_sceneCreated;
+    bool m_renderEnabled = true;
+    bool m_followSystem = true;
     void m_createScene();
     void m_destroyScenes();
 
@@ -78,7 +82,7 @@ private:
     bool m_singlePhysicsStepEnabled;
     bool m_singlePhysicsStepDone;
 
-    static void m_setGlfwHints();
+    void m_setGlfwHints() const;
     void m_setCallback() const;
     static void m_enableGlfwDebugOutput();
 };

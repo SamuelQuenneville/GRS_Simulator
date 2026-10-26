@@ -16,7 +16,11 @@
 #include <climits>
 #endif
 
+#include <atomic>
 #include <functional>
+#include <mutex>
+#include <optional>
+#include <thread>
 
 #include "Definitions/renderObjectDefinitions.h"
 #include "Configuration/configurationParser.h"
@@ -28,9 +32,9 @@ class World {
 public:
     explicit World(programArguments& args);
 
-    [[nodiscard]] bool isRunning() const {return m_isRunning;};
-    void start() {m_isRunning = true;};
-    void stop() {m_isRunning = false;};
+    [[nodiscard]] bool isRunning() const {return m_isRunning.load();};
+    void start() {m_isRunning.store(true);};
+    void stop() {m_isRunning.store(false);};
 
     worldPhysics physics;
 
@@ -48,9 +52,14 @@ public:
     void resetSystem();
     void deleteSystem();
 
-    [[nodiscard]] std::vector<Frame*> collectFrames() const;
+    // Commands from the GUI thread, applied by the physics thread before its next step
+    void requestTarget(const target& newTarget);
+    void requestLaunch();
+    [[nodiscard]] target initialTarget() const {return m_systemTarget;};
 
-    void setPauseTimerCallback(std::function<void()> callback) const;
+    // True once after the system reported the end of the run (SITL endSimulation flags)
+    [[nodiscard]] bool consumeEndOfRun() {return m_endOfRun.exchange(false);};
+    [[nodiscard]] double elapsedTime() const {return m_elapsedTime.load();};
 
     std::map<std::string, systemType> systemTypeStringToEnum;
     [[nodiscard]] systemType getSystemType() const;
@@ -68,14 +77,20 @@ public:
 private:
     programArguments& m_programArgs;
 
-    bool m_isRunning = false;
+    std::atomic<bool> m_isRunning{false};
     std::string m_logDirectory;
 
     void m_physicsLoop();
+    void m_applyPendingCommands();
     std::thread m_physicsThread;
     std::atomic<bool> m_running{false};
     std::shared_ptr<systemRenderData> m_snapshot;
-    double m_elapsedTime;
+    std::atomic<double> m_elapsedTime{0.0};
+    std::atomic<bool> m_endOfRun{false};
+
+    std::mutex m_commandMutex;
+    std::optional<target> m_pendingTarget;
+    std::atomic<bool> m_pendingLaunch{false};
 
     std::unique_ptr<WindEnvironment> m_windEnv;
 

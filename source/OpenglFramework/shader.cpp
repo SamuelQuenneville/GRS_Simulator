@@ -163,6 +163,7 @@ bool Shader::create(const std::string& filenameVertexShader, const std::string& 
 }
 
 void Shader::destroy() {
+    m_uniformLocations.clear();
     if (m_programObjectId != 0) {
         glDeleteProgram(m_programObjectId);
         m_programObjectId = 0;
@@ -181,7 +182,13 @@ void Shader::unbind() const {
 
 GLint Shader::getUniformLocation(const std::string& variableName, const bool errorIfMissing) const {
     assert(m_programObjectId != 0);
+
+    if (const auto it = m_uniformLocations.find(variableName); it != m_uniformLocations.end()) {
+        return it->second;
+    }
+
     const GLint location = glGetUniformLocation(m_programObjectId, variableName.c_str());
+    m_uniformLocations.emplace(variableName, location);
     if (location == -1 && errorIfMissing) {
         std::cerr << "Error in vertex shader " << m_filenameFragmentShader << " or in fragment shader"
                   << m_filenameFragmentShader << " : No Uniform variable : " << variableName << std::endl;
@@ -207,6 +214,14 @@ void Shader::setIntUniform(const std::string& variableName, const int value, con
     const GLint location = getUniformLocation(variableName, errorIfMissing);
     if (location != -1) {
         glUniform1i(location, value);
+    }
+}
+
+void Shader::setFloatUniform(const std::string& variableName, const float value, const bool errorIfMissing) const {
+    assert(m_programObjectId != 0);
+    const GLint location = getUniformLocation(variableName, errorIfMissing);
+    if (location != -1) {
+        glUniform1f(location, value);
     }
 }
 

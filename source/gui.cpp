@@ -57,29 +57,34 @@ void Gui::init(GLFWwindow* window) {
     m_screen->perform_layout();
 }
 
-void Gui::update() const {
+void Gui::update(const systemRenderData* snapshot) const {
     m_fileLabel->set_caption(std::string("File : ") + m_configFileName);
     m_simRunTimeLabel->set_caption(std::string("Run Time : ") + doubleToString(m_viewer->getElapsedTime(),2));
 
-    if (m_currentFrameDisplayed != nullptr) {
-        const auto pos = m_currentFrameDisplayed->originNode().position();
-        const auto vel = m_currentFrameDisplayed->originNode().velocity();
-        auto ori = grs::quatToEuler(m_currentFrameDisplayed->transform().orientation.yUpToNed());
-        ori[0] += M_PI_2; // mesh offset
-        ori *= 180.0 / M_PI;
-
-        const auto force = m_currentFrameDisplayed->originNode().force();
-
-        m_framePositionDisplayed->set_caption(formatVec3("Position    (m)", pos));
-        m_frameVelocityDisplayed->set_caption(formatVec3("Velocity    (m/s)", vel));
-        m_frameOrientationDisplayed->set_caption(formatVec3("Orientation (Deg)", ori));
-        m_frameForcesDisplayed->set_caption(formatVec3("Forces      (N)", force));
-
-        if (m_currentFrameDisplayed->isCenterOfMass()) {
-            m_frameWindDisplayed->set_caption(formatVec3("Wind        (m/s) ", m_currentFrameDisplayed->originNode().wind()));
-        }
+    if (snapshot == nullptr || m_currentFrameDisplayed < 0 || static_cast<size_t>(m_currentFrameDisplayed) >= m_frameIndices.size()) {
+        return;
     }
 
+    const auto [bodyIdx, frameIdx] = m_frameIndices[m_currentFrameDisplayed];
+    if (bodyIdx >= snapshot->bodies.size() || frameIdx >= snapshot->bodies[bodyIdx].frames.size()) {
+        return;
+    }
+    const frameRenderData& frame = snapshot->bodies[bodyIdx].frames[frameIdx];
+
+    auto ori = grs::quatToEuler(frame.transform.orientation.yUpToNed());
+    ori[0] += M_PI_2; // mesh offset
+    ori *= 180.0 / M_PI;
+
+    m_framePositionDisplayed->set_caption(formatVec3("Position    (m)", frame.position));
+    m_frameVelocityDisplayed->set_caption(formatVec3("Velocity    (m/s)", frame.velocity));
+    m_frameOrientationDisplayed->set_caption(formatVec3("Orientation (Deg)", ori));
+    m_frameForcesDisplayed->set_caption(formatVec3("Forces      (N)", frame.forceAtOrigin));
+
+    if (frame.isCenterOfMass) {
+        m_frameWindDisplayed->set_caption(formatVec3("Wind        (m/s) ", frame.wind));
+    } else {
+        m_frameWindDisplayed->set_caption("Wind        (m/s)  : n/a (not a CoM frame)");
+    }
 }
 
 void Gui::drawAll() {
@@ -133,15 +138,10 @@ void Gui::m_createConfigurationPanel() {
     group1->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical,nanogui::Alignment::Fill, 5, 5));
     auto* buttonConfig = new nanogui::Button(group1, "Choose Configuration/Test");
     buttonConfig->set_callback([&] {
-        std::strcpy(m_configFilePath,nanogui::file_dialog({{"yaml", "Config File"}}, false).c_str());
-
-        const std::filesystem::path path(m_configFilePath);
-
-        std::strcpy(m_dir, path.parent_path().string().c_str()); // Copy directory
-        std::strcpy(m_configFileName, path.stem().string().c_str()); // Copy filename (without extension)
-        std::strcpy(m_ext, path.extension().string().c_str()); // Copy extension
-
-        m_hasConfigFile = true;
+        const std::string selected = nanogui::file_dialog({{"yaml", "Config File"}}, false);
+        if (!selected.empty()) {
+            setConfigFile(selected);
+        }
     });
 
     m_fileLabel = new nanogui::Label(group1, std::string("File : "),"sans-bold");
@@ -398,6 +398,11 @@ void Gui::m_createDebugPanel() {
         m_viewer->m_drawSky(m_shouldDrawSky);
     });
 
+    m_followButton = new nanogui::Button(group1, "Camera : Follow System (F)");
+    m_followButton->set_callback([&] {
+        m_viewer->m_toggleFollowSystem();
+    });
+
 
     // Group 2 Numeric Infos
     new nanogui::Label(m_debugPanel, std::string("Numeric Infos :"),"sans-bold",20);
@@ -407,7 +412,7 @@ void Gui::m_createDebugPanel() {
     m_comboBoxFrames = new nanogui::ComboBox(group2);
     m_comboBoxFrames->set_font_size(20);
     m_comboBoxFrames->set_callback([&](const int index) {
-        m_currentFrameDisplayed = m_frames[index];
+        m_currentFrameDisplayed = index;
     });
 
     m_framePositionDisplayed    = new nanogui::Label(group2, std::string("Position    (m)   : "), "mono", 15);
@@ -415,6 +420,17 @@ void Gui::m_createDebugPanel() {
     m_frameOrientationDisplayed = new nanogui::Label(group2, std::string("Orientation (Deg) : "), "mono", 15);
     m_frameForcesDisplayed      = new nanogui::Label(group2, std::string("Forces      (N)   : "), "mono", 15);
     m_frameWindDisplayed        = new nanogui::Label(group2, std::string("Wind        (m/s) : "), "mono", 15);
+}
+
+void Gui::setConfigFile(const std::string& filePath) {
+    const std::filesystem::path path(filePath);
+
+    std::snprintf(m_configFilePath, sizeof(m_configFilePath), "%s", filePath.c_str());
+    std::snprintf(m_dir, sizeof(m_dir), "%s", path.parent_path().string().c_str());  // Directory
+    std::snprintf(m_configFileName, sizeof(m_configFileName), "%s", path.stem().string().c_str()); // Filename without extension
+    std::snprintf(m_ext, sizeof(m_ext), "%s", path.extension().string().c_str()); // Extension
+
+    m_hasConfigFile = true;
 }
 
 std::string Gui::doubleToString(const double value, const int precision) {
@@ -433,15 +449,30 @@ void Gui::setTargetFromConfig(const float groundspeed, const std::vector<double>
     m_positionYTargetText->set_value(doubleToString(m_payloadTarget[1],1));
 }
 
-void Gui::setFrames(const std::vector<Frame *> &frames) {
-    m_frames = frames;
-
+void Gui::setFrames(const systemRenderData& snapshot) {
+    m_frameIndices.clear();
     std::vector<std::string> names;
 
-    for (const auto& f : m_frames) {
-        names.push_back(f->getName());
+    for (size_t b = 0; b < snapshot.bodies.size(); ++b) {
+        for (size_t f = 0; f < snapshot.bodies[b].frames.size(); ++f) {
+            m_frameIndices.emplace_back(b, f);
+            names.push_back(snapshot.bodies[b].frames[f].name);
+        }
     }
 
+    m_currentFrameDisplayed = names.empty() ? -1 : 0;
     m_comboBoxFrames->set_items(names);
+    if (!names.empty()) m_comboBoxFrames->set_selected_index(0);
+    m_screen->perform_layout();
+}
+
+void Gui::setFollowCaption(const bool follow) {
+    m_followButton->set_caption(follow ? "Camera : Follow System (F)" : "Camera : Fixed (F)");
+}
+
+void Gui::clearFrames() {
+    m_frameIndices.clear();
+    m_currentFrameDisplayed = -1;
+    m_comboBoxFrames->set_items({});
     m_screen->perform_layout();
 }

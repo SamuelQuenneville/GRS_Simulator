@@ -70,3 +70,16 @@ const grs::TransformD& Frame::transform() const {
     return m_transform;
 }
 
+frameRenderData Frame::packRenderData() const {
+    frameRenderData data;
+    data.transform      = m_transform;
+    data.forceAtOrigin  = originNode().force();
+    data.forceColor     = m_forceColor;
+    data.name           = m_name;
+    data.isCenterOfMass = m_isCenterOfMass;
+    data.position       = originNode().position();
+    data.velocity       = originNode().velocity();
+    data.wind           = originNode().wind();
+    return data;
+}
+

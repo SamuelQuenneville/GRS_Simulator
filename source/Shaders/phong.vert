@@ -8,7 +8,7 @@
 * This software is provided 'as-is', without any express or implied warranty.   *
 * In no event will the authors be held liable for any damages arising from the  *
 * use of this software.                                                         *
-*                                                                               *
+*                                                                                *
 * Permission is granted to anyone to use this software for any purpose,         *
 * including commercial applications, and to alter it and redistribute it        *
 * freely, subject to the following restrictions:                                *
@@ -25,50 +25,31 @@
 *                                                                               *
 ********************************************************************************/
 
-// Uniform variables
+/*
+ * Altered source version: lighting rewritten for the GRS Simulation Environment
+ * Lit mesh shader (aircraft, payload, tethers, launcher)
+ */
+
 uniform mat4 localToWorldMatrix;        // Local-space to world-space matrix
 uniform mat4 worldToCameraMatrix;       // World-space to camera-space matrix
-uniform mat4 worldToLight0CameraMatrix; // World-space to light0 camera-space matrix (for shadow mapping)
-uniform mat4 worldToLight1CameraMatrix; // World-space to light1 camera-space matrix (for shadow mapping)
 uniform mat4 projectionMatrix;          // Projection matrix
-uniform mat3 normalMatrix;              // Normal matrix
-uniform mat4 shadowMapLight0ProjectionMatrix; // Shadow map projection matrix for light 0
-uniform mat4 shadowMapLight1ProjectionMatrix; // Shadow map projection matrix for light 1
+uniform mat3 normalMatrix;              // Normal matrix (local to camera space)
+uniform mat4 lightSpaceMatrix;          // World-space to shadow map texture space (bias * proj * view)
 
-// In variables
 layout(location = 0) in vec4 vertexPosition;
 layout(location = 1) in vec3 vertexNormal;
-layout(location = 2) in vec2 textureCoords;
 
-// Out variables
-out vec3 vertexPosCameraSpace;      // Camera-space position of the vertex
-out vec3 vertexNormalCameraSpace;   // Vertex normal in camera-space
-out vec2 texCoords;                 // Texture coordinates
-out vec4 shadowMapCoords[2];        // Shadow map texture coords
+out vec3 vPosCameraSpace;
+out vec3 vNormalCameraSpace;
+out vec4 vShadowCoords;
 
 void main() {
+    vec4 positionWorld  = localToWorldMatrix * vertexPosition;
+    vec4 positionCamera = worldToCameraMatrix * positionWorld;
 
-    // Compute the vertex position
-    vec4 positionCameraSpace = worldToCameraMatrix * localToWorldMatrix * vertexPosition;
-    vertexPosCameraSpace = positionCameraSpace.xyz;
+    vPosCameraSpace    = positionCamera.xyz;
+    vNormalCameraSpace = normalMatrix * vertexNormal;
+    vShadowCoords      = lightSpaceMatrix * positionWorld;
 
-    // Compute the world surface normal
-    vertexNormalCameraSpace = normalMatrix * vertexNormal;
-
-    // Get the texture coordinates
-    texCoords = textureCoords;
-
-    // Compute the texture coords of the vertex in the shadow map
-    mat4 worldToLightCameraMatrix[2];
-    worldToLightCameraMatrix[0] = worldToLight0CameraMatrix;
-    worldToLightCameraMatrix[1] = worldToLight1CameraMatrix;
-    mat4 shadowMapProjectionMatrix[2];
-    shadowMapProjectionMatrix[0] = shadowMapLight0ProjectionMatrix;
-    shadowMapProjectionMatrix[1] = shadowMapLight1ProjectionMatrix;
-    for (int l=0; l < 2; l++) {
-        shadowMapCoords[l] = shadowMapProjectionMatrix[l] * worldToLightCameraMatrix[l] * localToWorldMatrix * vertexPosition;
-    }
-
-    // Compute the clip-space vertex coordinates
-    gl_Position = projectionMatrix * positionCameraSpace;
+    gl_Position = projectionMatrix * positionCamera;
 }

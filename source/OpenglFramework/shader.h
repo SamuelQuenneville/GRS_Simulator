@@ -11,6 +11,8 @@
 
 #include <fstream>
 #include <iostream>
+#include <string>
+#include <unordered_map>
 #include <nanogui/opengl.h>
 
 #include "Mathematics/math.h"
@@ -41,6 +43,8 @@ public:
 
     // Set a vector 2 uniform value to this shader (be careful if the uniform is not
     // used in the shader, the compiler will remove it, then when you will try to set it, an assert will occur)
+    void setFloatUniform(const std::string& variableName, float value, bool errorIfMissing = true) const;
+
     void setVector2Uniform(const std::string& variableName, const grs::Vec2f& v, bool errorIfMissing = true) const;
 
     // Set a vector 3 uniform value to this shader (be careful if the uniform is not
@@ -61,6 +65,11 @@ public:
 
 private:
     GLuint m_programObjectId;
+
+    // glGetUniformLocation is a string lookup in the driver; it was called
+    // for every uniform of every object of every pass, so cache the result
+    mutable std::unordered_map<std::string, GLint> m_uniformLocations;
+
     std::string m_filenameVertexShader;
     std::string m_filenameFragmentShader;
 };

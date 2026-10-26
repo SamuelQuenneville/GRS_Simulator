@@ -11,6 +11,9 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "Mathematics/color.h"
 #include "Mathematics/math.h"
 
@@ -33,6 +36,14 @@ struct frameRenderData {
     grs::TransformD transform     = grs::TransformD::identity();
     grs::Vec3d      forceAtOrigin = grs::Vec3d::zeros();
     Color::HexColor forceColor    = Color::HexColor::BLACK;
+
+    // Numeric values shown in the GUI debug panel (copied so the GUI never
+    // reads live simulation objects from the render thread)
+    std::string     name;
+    bool            isCenterOfMass = false;
+    grs::Vec3d      position = grs::Vec3d::zeros();
+    grs::Vec3d      velocity = grs::Vec3d::zeros();
+    grs::Vec3d      wind     = grs::Vec3d::zeros();
 };
 
 /*

@@ -14,6 +14,7 @@
 
 #include "node.h"
 #include "Mathematics/color.h"
+#include "Definitions/renderObjectDefinitions.h"
 #include "Log/logger.h"
 
 class Frame {
@@ -50,6 +51,8 @@ public:
     [[nodiscard]] bool isCenterOfMass() const {return m_isCenterOfMass;}
 
     [[nodiscard]] Color::HexColor getForceColor() const {return m_forceColor;}
+
+    [[nodiscard]] frameRenderData packRenderData() const;
 
 
 private:

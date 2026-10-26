@@ -25,100 +25,72 @@
 *                                                                               *
 ********************************************************************************/
 
-// Uniform variables
-uniform vec3 lightAmbientColor;             // Lights ambient color
-uniform vec3 light0PosCameraSpace;			// Camera-space position of the light 0
-uniform vec3 light1PosCameraSpace;			// Camera-space position of the light 1
-uniform vec3 light2PosCameraSpace;			// Camera-space position of the light 2
-uniform vec3 light0DiffuseColor;            // Light 0 diffuse color
-uniform vec3 light1DiffuseColor;            // Light 1 diffuse color
-uniform vec3 light2DiffuseColor;            // Light 2 diffuse color
-uniform sampler2D textureSampler;           // Texture
-uniform sampler2D shadowMapSampler0;      // Shadow map texture sampler
-uniform sampler2D shadowMapSampler1;      // Shadow map texture sampler
-uniform bool isTexture;                     // True if we need to use the texture
-uniform vec4 globalVertexColor;                   // Vertex color
-uniform bool isShadowEnabled;               // True if shadow mapping is enabled
-uniform vec2 shadowMapDimension;            // Shadow map dimension
+/*
+ * Altered source version: lighting rewritten for the GRS Simulation Environment
+ * Lit mesh shader: hemispheric ambient, sun with soft shadows, fill light,
+ * Blinn-Phong specular and distance fog.
+ */
 
-// In variables
-in vec3 vertexPosCameraSpace;          // Camera-space position of the vertex
-in vec3 vertexNormalCameraSpace;       // Vertex normal in camera-space
-in vec2 texCoords;                     // Texture coordinates
-in vec4 shadowMapCoords[2];            // Shadow map texture coords
+uniform vec4 globalVertexColor;         // Object base color (alpha used for blending)
 
-// Out variable
-out vec4 color;                        // Output color
+uniform vec3 sunDirCameraSpace;         // Direction towards the sun (normalized)
+uniform vec3 sunColor;
+uniform vec3 fillDirCameraSpace;        // Direction towards the fill light (normalized)
+uniform vec3 fillColor;
+uniform vec3 upCameraSpace;             // World up in camera space
+uniform vec3 skyAmbientColor;
+uniform vec3 groundAmbientColor;
 
-// Texture for PCF Shadow mapping
-float textureLookupPCF(sampler2D map, vec2 texCoords, vec2 offset)
-{
-    vec2 shadowMapScale = vec2(1.0, 1.0) / shadowMapDimension;
-    return texture(map, texCoords.xy + offset * shadowMapScale).r;
+uniform sampler2DShadow shadowMapSampler;
+uniform vec2 shadowMapTexelSize;
+uniform bool isShadowEnabled;
+
+uniform vec3 fogColor;
+uniform float fogStart;
+uniform float fogEnd;
+
+in vec3 vPosCameraSpace;
+in vec3 vNormalCameraSpace;
+in vec4 vShadowCoords;
+
+out vec4 color;
+
+float sunVisibility(vec4 shadowCoords) {
+    vec3 p = shadowCoords.xyz / shadowCoords.w;
+    if (p.x <= 0.0 || p.x >= 1.0 || p.y <= 0.0 || p.y >= 1.0 || p.z >= 1.0) return 1.0;
+
+    // 4 taps half a texel apart, each one bilinearly filtered by the hardware comparison
+    vec2 o = 0.75 * shadowMapTexelSize;
+    float sum = texture(shadowMapSampler, vec3(p.xy + vec2(-o.x, -o.y), p.z))
+              + texture(shadowMapSampler, vec3(p.xy + vec2( o.x, -o.y), p.z))
+              + texture(shadowMapSampler, vec3(p.xy + vec2(-o.x,  o.y), p.z))
+              + texture(shadowMapSampler, vec3(p.xy + vec2( o.x,  o.y), p.z));
+    return sum * 0.25;
 }
 
 void main() {
+    vec3 base = globalVertexColor.rgb;
+    vec3 N = normalize(vNormalCameraSpace);
+    if (!gl_FrontFacing) N = -N;
+    vec3 V = normalize(-vPosCameraSpace);
 
-	// Compute the ambient term
-	vec3 ambient = lightAmbientColor;
+    // Ambient: sky from above, ground bounce from below
+    vec3 ambient = mix(groundAmbientColor, skyAmbientColor, dot(N, upCameraSpace) * 0.5 + 0.5);
 
-	// Get the texture color
-        vec3 textureColor = globalVertexColor.rgb;
-	if (isTexture) textureColor = texture(textureSampler, texCoords).rgb;
+    float NdotL = max(dot(N, sunDirCameraSpace), 0.0);
+    float visibility = isShadowEnabled ? sunVisibility(vShadowCoords) : 1.0;
+    visibility = mix(0.35, 1.0, visibility); // shadowed areas keep some direct light
 
-	// Compute the surface normal vector
-	vec3 N = normalize(vertexNormalCameraSpace);
+    vec3 H = normalize(sunDirCameraSpace + V);
+    float specular = NdotL > 0.0 ? pow(max(dot(N, H), 0.0), 64.0) * 0.4 : 0.0;
 
-	color = vec4(ambient, 1);
+    float fill = max(dot(N, fillDirCameraSpace), 0.0);
 
-        vec3 lightPosCameraSpace[3];
-	lightPosCameraSpace[0] = light0PosCameraSpace;
-	lightPosCameraSpace[1] = light1PosCameraSpace;
-	lightPosCameraSpace[2] = light2PosCameraSpace;
-        vec3 lightDiffuseColor[3];
-	lightDiffuseColor[0] = light0DiffuseColor;
-	lightDiffuseColor[1] = light1DiffuseColor;
-	lightDiffuseColor[2] = light2DiffuseColor;
+    vec3 result = base * (ambient + sunColor * NdotL * visibility + fillColor * fill)
+                + sunColor * specular * visibility;
 
-        bool isShadowEnabledForLight[3];
-        isShadowEnabledForLight[0] = true;
-        isShadowEnabledForLight[1] = true;
-        isShadowEnabledForLight[2] = false;
+    float fogFactor = clamp((length(vPosCameraSpace) - fogStart) / (fogEnd - fogStart), 0.0, 1.0);
+    result = mix(result, fogColor, fogFactor * fogFactor);
 
-	// For each light source
-        for (int l=0; l < 3; l++) {
-
-                // Compute the diffuse term of light 0
-		vec3 L0 = normalize(lightPosCameraSpace[l] - vertexPosCameraSpace);
-		float diffuseFactor = max(dot(N, L0), 0.0);
-		vec3 diffuse = lightDiffuseColor[l] * diffuseFactor * textureColor;
-
-		// Compute shadow factor
-		float shadow = 1.0;
-                if (isShadowEnabled && isShadowEnabledForLight[l]) {
-
-			shadow = 0.0;
-			float bias = 0.0003;
-			float shadowBias = -0.000;
-			vec4 shadowMapUV = shadowMapCoords[l];
-			shadowMapUV.z -= shadowBias;
-			vec4 shadowMapCoordsOverW = shadowMapUV / shadowMapUV.w;
-
-			// PCF Shadow Mapping
-			for (float i=-1; i<=1; i++) {
-                            for (float j=-1; j<=1; j++) {
-                                float distInShadowMap0 = textureLookupPCF(shadowMapSampler0, shadowMapCoordsOverW.xy, vec2(i, j)) + bias;
-                                float distInShadowMap1 = textureLookupPCF(shadowMapSampler1, shadowMapCoordsOverW.xy, vec2(i, j)) + bias;
-                                float distInShadowMap = l == 0 ? distInShadowMap0 : distInShadowMap1;
-                                if (shadowMapCoords[l].w > 0) {
-                                    shadow += distInShadowMap < shadowMapCoordsOverW.z ? 0.5 : 1.0;
-                                }
-                            }
-			}
-			shadow /= 9.0;
-		}
-
-		// Compute the final color
-		color += vec4(shadow * diffuse, 0.0);
-	}
+    color = vec4(result, globalVertexColor.a);
 }

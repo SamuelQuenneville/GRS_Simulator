@@ -481,7 +481,7 @@ void FixedWing::setInitialStates(initialStates& states) {
     m_states.psi   = states.orientation[2];
 
     m_launcherPitch = m_states.theta;
-    m_launcherYaw = -1.492653;
+    m_launcherYaw = m_states.psi;
 
     setAttitude({m_states.phi, m_states.theta, m_states.psi});
     updateRotationMatrixCBodyEarth();
@@ -585,8 +585,7 @@ bodyRenderData FixedWing::packRenderData() const {
     std::vector<frameRenderData> framesData;
 
     for (const auto& f : frames()) {
-        frameRenderData frame{.transform = f->transform(), .forceAtOrigin = f->originNode().force(), .forceColor = f->getForceColor()};
-        framesData.push_back(frame);
+        framesData.push_back(f->packRenderData());
     }
 
     return bodyRenderData{.type = RenderObjectType::AIRCRAFT, .id = m_id, .transform = transform(), .frames = framesData};

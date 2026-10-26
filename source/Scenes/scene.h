@@ -14,7 +14,6 @@
 #include "RigidBodyAndLink/SceneObjects/cube.h"
 #include "RigidBodyAndLink/SceneObjects/aircraft.h"
 #include "RigidBodyAndLink/SceneObjects/launcher.h"
-#include "RigidBodyAndLink/SceneObjects/grid.h"
 #include "RigidBodyAndLink/SceneObjects/ground.h"
 #include "RigidBodyAndLink/SceneObjects/skybox.h"
 #include "RigidBodyAndLink/SceneObjects/tetherLine.h"
@@ -37,7 +36,6 @@ public:
 
     void update(const systemRenderData& systemData);
     void render();
-    void renderSinglePass(Shader& shader, const grs::Matrix4d& worldToCameraMatrix);
     void drawReferenceFrame(bool shouldDraw);
     void drawForcesVector(bool shouldDraw);
     void drawSky(bool shouldDraw);
@@ -56,13 +54,17 @@ public:
     [[nodiscard]] bool shouldDrawForcesVector() const {return m_shouldDrawForcesVector;};
     [[nodiscard]] bool shouldDrawSky() const {return m_shouldDrawSky;};
 
+    // Keep the camera orbit center on the system centroid
+    void setFollowSystem(bool follow) {m_followSystem = follow;};
+    [[nodiscard]] bool followSystem() const {return m_followSystem;};
+
     void changeView(const grs::Matrix4d& viewMatrix);
 
     void setInterpolationFactor(double interpolationFactor);
 
 protected:
-    const GLsizei SHADOWMAP_WIDTH  = 2048;
-    const GLsizei SHADOWMAP_HEIGHT = 2048;
+    const GLsizei SHADOWMAP_WIDTH  = 1024;
+    const GLsizei SHADOWMAP_HEIGHT = 1024;
 
     static constexpr int NB_SHADOW_MAPS = 1;
 
@@ -78,7 +80,6 @@ protected:
     std::string m_skyCross;
     std::shared_ptr<Skybox> m_sky;
     std::shared_ptr<Ground> m_ground;
-    std::shared_ptr<Grid> m_grid;
 
     std::shared_ptr<Cube> m_targetObject;
     std::vector<std::shared_ptr<Launcher>> m_launchers;
@@ -88,11 +89,14 @@ protected:
     Shader m_colorShader;
     Shader m_quadShader;
     Shader m_skyboxShader;
+    Shader m_groundShader;
+    Shader m_skyShader;
+    GLuint m_skyVertexArray = 0;
+    Texture2D m_noiseTexture;
 
     Light m_light0;
     Light m_light1;
 
-    Camera m_shadowMapLightCameras[NB_SHADOW_MAPS];
     FrameBufferObject m_frameBufferObjectShadowMap[NB_SHADOW_MAPS];
     Texture2D m_shadowMapTexture[NB_SHADOW_MAPS];
 
@@ -105,6 +109,11 @@ protected:
     bool m_shouldDrawReferenceFrame = false;
     bool m_shouldDrawForcesVector = false;
     bool m_shouldDrawSky = false;
+    bool m_followSystem = true;
+
+    // Centroid and radius of the moving bodies, used by the follow camera and the shadow frustum
+    grs::Vec3d m_systemCenter{};
+    double m_shadowRadius = 30.0;
 
     // Last mouse coordinates on the windows
     double m_lastMouseX;
@@ -128,6 +137,11 @@ protected:
     double m_initialZoom;
 
     void m_createShadowMapFrameBufferObjectAndTexture();
+    void m_computeShadowMatrices(const grs::Vec3d& sunDirWorld, grs::Matrix4d& worldToLight, grs::Matrix4d& lightProjection) const;
+    void m_renderShadowCasters(const grs::Matrix4d& worldToLight);
+    void m_renderSky(const grs::Matrix4d& worldToCameraMatrix, const grs::Vec3d& sunDirWorld);
+    void m_setDefaultView();
+    void m_createNoiseTexture();
     void m_setScenePosition(const grs::Vec3d& position, float sceneRadius);
     void m_resetCameraToViewAll();
 

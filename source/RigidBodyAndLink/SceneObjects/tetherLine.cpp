@@ -9,7 +9,7 @@
 #include "tetherLine.h"
 
 TetherLine::TetherLine(const tetherRenderData& tetherRenderData)
-    : m_cylinder(0.02f, 1.0f, 16)
+    : m_cylinder(0.05f, 1.0f, 12) // drawn thicker than the real line so it stays visible at distance
 {
     m_tetherRenderData = tetherRenderData;
 }

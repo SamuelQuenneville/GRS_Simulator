@@ -22,6 +22,10 @@ struct programArguments {
     bool sitlMode;
     bool inFlightLaunch;
     bool loggingEnabled;
+    double renderFps = 60.0; // Viewer frame cap and snapshot publication rate (Hz)
+    int msaaSamples = 4;     // Viewer anti-aliasing samples (0 disables)
+    bool headless = false;   // Run without window or render snapshots
+    std::string configFile;  // Loaded at startup (--config) or run headless (--headless)
 };
 
 struct simulationParameters {

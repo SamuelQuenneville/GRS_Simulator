@@ -15,7 +15,7 @@ AircraftProperties:
   CG_POSITION            : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
   AERO_REF_POSITION      : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
   PROPULSION_POSITION    : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-  TETHER_ATTACH_POSITION : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  TETHER_ATTACH_POSITION : [0.0, 0.0, 0.06, 0.0, 0.0, 0.0]
   #
   INERTIA_X : 0.187100 # kg*m^2
   INERTIA_Y : 0.333500 # kg*m^2

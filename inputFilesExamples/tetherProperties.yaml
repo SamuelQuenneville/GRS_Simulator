@@ -28,7 +28,7 @@ TethersProperties:
   SEGMENTS:
     - NAME: 'Leg1'
       LINEAR_MASS: 0.05   # kg/m
-      LENGTH: 30.0        # m
+      LENGTH: 28.5        # m
       DIAMETER: 0.002     # m
       RIGIDITY: 1500.0    # spring model k value
       DAMPING: 30.0      # spring model b value
@@ -36,7 +36,7 @@ TethersProperties:
 
     - NAME: 'Leg2'
       LINEAR_MASS: 0.05   # kg/m
-      LENGTH: 30.0        # m
+      LENGTH: 28.5        # m
       DIAMETER: 0.002     # m
       RIGIDITY: 1500.0    # spring model k value
       DAMPING: 30.0      # spring model b value

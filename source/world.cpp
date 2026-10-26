@@ -8,9 +8,10 @@
 
 #include "world.h"
 
+#include <algorithm>
+
 World::World(programArguments& args)
     : m_programArgs(args)
-    , m_elapsedTime(0.0)
 {
     systemTypeStringToEnum = {
         {"FREE", FREE},
@@ -27,7 +28,7 @@ void World::update() {
         m_system->update(simulationConfiguration.dt.count());
     }
 
-    m_elapsedTime += simulationConfiguration.dt.count();
+    m_elapsedTime.store(m_elapsedTime.load() + simulationConfiguration.dt.count());
 }
 
 std::string World::getDateString() {
@@ -94,6 +95,21 @@ void World::createSystem() {
     m_system = std::make_unique<System>(m_programArgs, physics, *m_windEnv, m_systemConfiguration, m_systemProperties, m_ctrlGains);
     m_system->setTarget(m_systemTarget);
 
+    // Called from the physics thread: only set flags, the viewer reacts on its own thread
+    m_system->setPauseTimerCallback([this]() {
+        m_isRunning.store(false);
+        m_endOfRun.store(true);
+    });
+
+    // Drop commands aimed at a previous system
+    {
+        std::lock_guard lock(m_commandMutex);
+        m_pendingTarget.reset();
+    }
+    m_pendingLaunch.store(false);
+    m_endOfRun.store(false);
+    m_elapsedTime.store(0.0);
+
     switch(getSystemType()) {
         case FREE:
             switch (m_systemConfiguration.numberOfUav) {
@@ -145,43 +161,56 @@ void World::createSystem() {
 }
 
 void World::resetSystem() {
+    // The physics thread must not touch the system while it is replaced
+    const bool threadWasRunning = m_running.load();
+    stopPhysicsThread();
+    stop();
+
     Logger::instance().stop();
     m_system.reset();
 
     Logger::instance().start(m_programArgs.loggingEnabled, m_logDirectory + getDateString());
     createSystem();
+
+    if (threadWasRunning) {
+        startPhysicsThread();
+    }
 }
 
 void World::deleteSystem() {
+    stopPhysicsThread();
+    stop();
+
     Logger::instance().stop();
     m_system.reset();
 
     m_initialAircraftStatesVector.clear();
 }
 
-std::vector<Frame*> World::collectFrames() const {
-    std::vector<Frame*> frames;
-
-    for (auto&& aircraft : m_system->aircraft()) {
-        auto f = aircraft->frames();
-        frames.insert(frames.end(), f.begin(), f.end());
-    }
-
-    if (m_system->tetherNode()) {
-        auto f = m_system->tetherNode()->frames();
-        frames.insert(frames.end(), f.begin(), f.end());
-    }
-
-    if (m_system->payload()) {
-        auto f = m_system->payload()->frames();
-        frames.insert(frames.end(), f.begin(), f.end());
-    }
-
-    return frames;
+void World::requestTarget(const target& newTarget) {
+    std::lock_guard lock(m_commandMutex);
+    m_pendingTarget = newTarget;
 }
 
-void World::setPauseTimerCallback(std::function<void()> callback) const {
-    m_system->setPauseTimerCallback(std::move(callback));
+void World::requestLaunch() {
+    m_pendingLaunch.store(true);
+}
+
+void World::m_applyPendingCommands() {
+    if (!m_system) return;
+
+    std::optional<target> newTarget;
+    {
+        std::lock_guard lock(m_commandMutex);
+        newTarget.swap(m_pendingTarget);
+    }
+    if (newTarget) {
+        m_system->setTarget(*newTarget);
+    }
+
+    if (m_pendingLaunch.exchange(false)) {
+        m_system->setLaunchTriggered(true);
+    }
 }
 
 systemType World::getSystemType() const {
@@ -199,6 +228,70 @@ sceneConfiguration World::getSceneConfiguration() const {
     config.haveTarget    = m_systemConfiguration.haveTarget;
 
     return config;
+}
+
+void World::startPhysicsThread() {
+    if (m_running.load()) return;
+
+    m_running.store(true);
+    m_physicsThread = std::thread(&World::m_physicsLoop, this);
+}
+
+void World::stopPhysicsThread() {
+    m_running.store(false);
+
+    if (m_physicsThread.joinable()) {
+        m_physicsThread.join();
+    }
+}
+
+std::shared_ptr<systemRenderData> World::getLatestSnapshot() const {
+    return std::atomic_load_explicit(&m_snapshot, std::memory_order_acquire);
+}
+
+void World::publishSnapshot(const std::shared_ptr<systemRenderData>& snapshot) {
+    snapshot->elapsedTime = m_elapsedTime.load();
+    std::atomic_store_explicit(&m_snapshot, snapshot, std::memory_order_release);
+}
+
+void World::m_physicsLoop() {
+
+    const auto dt = std::chrono::duration_cast<std::chrono::steady_clock::duration>(simulationConfiguration.dt);
+    auto next = std::chrono::steady_clock::now();
+
+    // Snapshots are only consumed at the viewer frame rate, so building one
+    // every physics step only costs allocations and shared_ptr lock contention.
+    const auto publishPeriod = std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+        std::chrono::duration<double>(1.0 / std::max(1.0, m_programArgs.renderFps)));
+    auto nextPublish = next;
+
+    while (m_running.load()) {
+        next += dt;
+
+        // ---- GUI COMMANDS ----
+        m_applyPendingCommands();
+
+        // ---- PHYSICS STEP ----
+        if (isRunning()) {
+            update();
+        }
+
+        // ---- SNAPSHOT (rate limited, none in headless mode) ----
+        if (const auto tPublish = std::chrono::steady_clock::now(); !m_programArgs.headless && tPublish >= nextPublish) {
+            if (const auto sys = system()) {
+                publishSnapshot(sys->getRenderData());
+            }
+            nextPublish = tPublish + publishPeriod;
+        }
+
+        auto now = std::chrono::steady_clock::now();
+        if (now < next) {
+            std::this_thread::sleep_until(next);
+        } else {
+            // overrun → resync
+            next = now;
+        }
+    }
 }
 
 #if defined(_WIN32) || defined(_WIN64) // Windows-specific implementation
@@ -233,58 +326,6 @@ std::string World::getExecutablePath() {
     std::string executablePath = fullPath.substr(0, fullPath.find_last_of('/'));
 
     return executablePath;
-}
-
-void World::startPhysicsThread() {
-    if (m_running.load()) return;
-
-    m_running.store(true);
-    m_physicsThread = std::thread(&World::m_physicsLoop, this);
-}
-
-void World::stopPhysicsThread() {
-    m_running.store(false);
-
-    if (m_physicsThread.joinable()) {
-        m_physicsThread.join();
-    }
-}
-
-std::shared_ptr<systemRenderData> World::getLatestSnapshot() const {
-    return std::atomic_load_explicit(&m_snapshot, std::memory_order_acquire);
-}
-
-void World::publishSnapshot(const std::shared_ptr<systemRenderData>& snapshot) {
-    snapshot->elapsedTime = m_elapsedTime;
-    std::atomic_store_explicit(&m_snapshot, snapshot, std::memory_order_release);
-}
-
-void World::m_physicsLoop() {
-
-    const auto dt = std::chrono::duration_cast<std::chrono::steady_clock::duration>(simulationConfiguration.dt);
-    auto next = std::chrono::steady_clock::now();
-
-    while (m_running.load()) {
-        next += dt;
-
-        // ---- PHYSICS STEP ----
-        if (isRunning()) {
-            update();
-        }
-
-        // ---- SNAPSHOT ----
-        if (const auto sys = system()) {
-            publishSnapshot(sys->getRenderData());
-        }
-
-        auto now = std::chrono::steady_clock::now();
-        if (now < next) {
-            std::this_thread::sleep_until(next);
-        } else {
-            // overrun → resync
-            next = now;
-        }
-    }
 }
 
 #else

@@ -8,6 +8,10 @@
 
 #include "simulationViewer.h"
 
+#include <algorithm>
+#include <chrono>
+#include <thread>
+
 SimulationViewer::SimulationViewer(programArguments& args)
     : m_programArgs(args)
     , m_isInitialized(false)
@@ -63,7 +67,7 @@ void SimulationViewer::start() {
     int height;
     glfwGetFramebufferSize(m_window.get(), &width, &height);
     glViewport(0, 0, width, height);
-    glfwSwapInterval(0);
+    glfwSwapInterval(1); // vsync: no tearing, and swap blocks instead of spinning
     glfwSwapBuffers(m_window.get());
 
     m_gui.drawAll();
@@ -73,11 +77,37 @@ void SimulationViewer::start() {
     m_setCallback();
     m_isInitialized = true;
 
+    if (!m_programArgs.configFile.empty()) {
+        m_gui.setConfigFile(m_programArgs.configFile);
+    }
+
+    // Frame pacing: the viewer never needs to run faster than renderFps.
+    // When 3D rendering is paused, only the GUI is refreshed at a low rate.
+    using clock = std::chrono::steady_clock;
+    const auto framePeriod = std::chrono::duration_cast<clock::duration>(
+        std::chrono::duration<double>(1.0 / std::max(1.0, m_programArgs.renderFps)));
+    const auto idlePeriod = std::chrono::duration_cast<clock::duration>(std::chrono::duration<double>(0.1));
+    auto nextFrame = clock::now();
+
+    // If the requested rate is at or above the monitor refresh, vsync already
+    // paces the loop; sleeping as well would beat against vblank and stutter.
+    // Falls back to sleep pacing if vsync turns out to be disabled (driver
+    // setting, remote desktop, VM), detected by swaps that return too fast.
+    bool vsyncPaced = mode->refreshRate > 0 && m_programArgs.renderFps >= mode->refreshRate - 1;
+    int fastSwapCount = 0;
+
     // Simulation loop
     while (!glfwWindowShouldClose(m_window.get())) {
 
         // Check if any events have been activated (key pressed, mouse moved etc.) and call corresponding response functions
         glfwPollEvents();
+
+        // Minimized window: draw nothing, just wait for events
+        if (glfwGetWindowAttrib(m_window.get(), GLFW_ICONIFIED)) {
+            glfwWaitEventsTimeout(0.25);
+            nextFrame = clock::now();
+            continue;
+        }
 
         if(m_gui.getHasConfigFile() && !m_sceneCreated) {
             m_world->readConfigurationFile(m_gui.configFilePath());
@@ -86,32 +116,58 @@ void SimulationViewer::start() {
 
             m_world->startPhysicsThread();
 
-            // callback binding, enable to stop timer from system
-            m_world->setPauseTimerCallback([this]() {
-                m_pauseSimulation();
-                LOG_INFO("Reach end of trajectory!");
-            });
-
-            m_gui.setTargetFromConfig(m_world->system()->getTarget().groundspeed, m_world->system()->getTarget().positionPayload);
-            m_gui.setFrames(m_world->collectFrames());
-
             m_scene->reshape(m_windowWidth, m_windowHeight);
             m_scene->setWindowDimension(m_windowWidth, m_windowHeight);
             m_scene->reset();
+            m_syncGuiWithSystem();
         }
 
-        if (m_sceneCreated) {
-            m_update();
+        // End of run reported by the physics thread (handled here, on the UI thread)
+        if (m_sceneCreated && m_world->consumeEndOfRun()) {
+            m_pauseSimulation();
+            LOG_INFO("Reach end of trajectory!");
         }
 
-        m_gui.update();
+        const auto snapshot = m_sceneCreated ? m_world->getLatestSnapshot() : nullptr;
+        if (snapshot) {
+            m_elapsedTime = snapshot->elapsedTime;
+        }
+
+        const bool renderScene = m_sceneCreated && m_renderEnabled;
+
+        if (renderScene) {
+            m_update(snapshot.get());
+        } else {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
+
+        m_gui.update(snapshot.get());
         m_gui.draw();
 
-        if (m_sceneCreated) {
+        if (renderScene) {
             m_render();
         }
 
         m_gui.drawTearDown();
+
+        // Sleep until the next frame instead of spinning
+        if (renderScene && vsyncPaced) {
+            const auto now = clock::now();
+            fastSwapCount = (now - nextFrame < framePeriod / 2) ? fastSwapCount + 1 : 0;
+            if (fastSwapCount > 30) {
+                vsyncPaced = false;
+                LOG_INFO("Vsync not effective, using sleep frame pacing");
+            }
+            nextFrame = now;
+            continue;
+        }
+        nextFrame += renderScene ? framePeriod : idlePeriod;
+        const auto now = clock::now();
+        if (now < nextFrame) {
+            std::this_thread::sleep_until(nextFrame);
+        } else {
+            nextFrame = now;
+        }
     }
 
     // Terminate GLFW, clearing any resources allocated by GLFW.
@@ -150,6 +206,19 @@ void SimulationViewer::keyboardEvent(const int key, const int scancode, const in
         m_gui.setIsDisplayed(!m_gui.getIsDisplayed());
         return;
     }
+
+    // Toggle the follow camera with "f" key
+    if (key == GLFW_KEY_F && action == GLFW_PRESS) {
+        m_toggleFollowSystem();
+        return;
+    }
+
+    // Pause/resume the 3D rendering with "v" key (simulation keeps running)
+    if (key == GLFW_KEY_V && action == GLFW_PRESS) {
+        m_renderEnabled = !m_renderEnabled;
+        LOG_INFO(m_renderEnabled ? "3D rendering resumed" : "3D rendering paused");
+        return;
+    }
 }
 
 void SimulationViewer::mouseButtonEvent(const int button, const int action, const int modifiers, const double mousePosX, const double mousePosY) const {
@@ -177,7 +246,9 @@ void SimulationViewer::scrollEvent(const double x, const double y) const {
 }
 
 void SimulationViewer::m_createScene() {
+    m_destroyScenes(); // a previous scene may remain after Stop
     m_scene = new Scene(World::getExecutablePath(), m_world->getSceneConfiguration(), *m_world->getLatestSnapshot());
+    m_scene->setFollowSystem(m_followSystem);
     m_sceneCreated = true;
 }
 
@@ -201,37 +272,56 @@ void SimulationViewer::m_pauseSimulation() {
 }
 
 void SimulationViewer::m_restartSimulation() {
+    if (!m_sceneCreated) return;
+
     if (m_timer.isRunning()) {
         m_timer.stop();
         m_world->stop();
-        m_timer.reset();
     }
+    m_timer.reset();
     m_elapsedTime = 0.0;
 
+    // resetSystem() stops the physics thread before replacing the system
     m_world->resetSystem();
     m_scene->reset();
+    m_syncGuiWithSystem();
 }
 
 void SimulationViewer::m_stopSimulation() {
+    if (!m_sceneCreated) return;
+
     if (m_timer.isRunning()) {
         m_timer.stop();
-        m_world->stop();
-        m_world->stopPhysicsThread();
     }
+    m_timer.reset();
     m_elapsedTime = 0.0;
 
+    // GUI must forget the frames before the system they describe is deleted
+    m_gui.clearFrames();
+
+    // deleteSystem() always stops the physics thread first, even when paused
     m_world->deleteSystem();
     m_scene->destroy();
     m_sceneCreated = false;
 }
 
-void SimulationViewer::m_setGlfwHints() {
+void SimulationViewer::m_syncGuiWithSystem() {
+    const target t = m_world->initialTarget();
+    m_gui.setTargetFromConfig(t.groundspeed, t.positionPayload);
+    m_scene->updateTarget(t.positionPayload);
+
+    if (const auto snapshot = m_world->getLatestSnapshot()) {
+        m_gui.setFrames(*snapshot);
+    }
+}
+
+void SimulationViewer::m_setGlfwHints() const {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_SAMPLES, 0);
+    glfwWindowHint(GLFW_SAMPLES, m_programArgs.msaaSamples); // MSAA: smooth edges on wings, tethers and frame axes
     glfwWindowHint(GLFW_RED_BITS, 8);
     glfwWindowHint(GLFW_GREEN_BITS, 8);
     glfwWindowHint(GLFW_BLUE_BITS, 8);
@@ -307,7 +397,7 @@ void GLAPIENTRY SimulationViewer::onOpenGLError(const GLenum source, const GLenu
 #endif
 }
 
-void SimulationViewer::m_update() {
+void SimulationViewer::m_update(const systemRenderData* snapshot) {
 
     // Compute the interpolation factor , 1 because physic is assume to be quicker than rendering
     constexpr double factor = 1.0;
@@ -317,19 +407,21 @@ void SimulationViewer::m_update() {
     m_scene->setInterpolationFactor(factor);
 
     // Update the scene
-    if (const auto snapshot = m_world->getLatestSnapshot()) {
+    if (snapshot) {
         m_scene->update(*snapshot);
-        m_elapsedTime = snapshot->elapsedTime;
     }
 }
 
 void SimulationViewer::m_updateTarget(const float groundspeed, const std::vector<double>& payloadPosition) const {
+    if (!m_sceneCreated) return;
+
     m_scene->updateTarget(payloadPosition);
 
-    target t = m_world->system()->getTarget();
+    // Applied by the physics thread before its next step
+    target t = m_world->initialTarget();
     t.groundspeed = groundspeed;
     t.positionPayload = payloadPosition;
-    m_world->system()->setTarget(t);
+    m_world->requestTarget(t);
 }
 
 void SimulationViewer::m_changeView(const grs::Matrix4d& viewMatrix) const {
@@ -337,7 +429,8 @@ void SimulationViewer::m_changeView(const grs::Matrix4d& viewMatrix) const {
 }
 
 void SimulationViewer::m_launchTriggered() const {
-    m_world->system()->setLaunchTriggered(true);
+    if (!m_sceneCreated) return;
+    m_world->requestLaunch();
 }
 
 void SimulationViewer::m_drawReferenceFrame(const bool shouldDraw) const {
@@ -346,6 +439,14 @@ void SimulationViewer::m_drawReferenceFrame(const bool shouldDraw) const {
 
 void SimulationViewer::m_drawForcesVector(const bool shouldDraw) const {
     m_scene->drawForcesVector(shouldDraw);
+}
+
+void SimulationViewer::m_toggleFollowSystem() {
+    m_followSystem = !m_followSystem;
+    if (m_scene) {
+        m_scene->setFollowSystem(m_followSystem);
+    }
+    m_gui.setFollowCaption(m_followSystem);
 }
 
 void SimulationViewer::m_drawSky(const bool shouldDraw) const {

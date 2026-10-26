@@ -161,8 +161,7 @@ bodyRenderData Payload::packRenderData() const {
     std::vector<frameRenderData> framesData;
 
     for (const auto& f : frames()) {
-        frameRenderData frame{.transform = f->transform(), .forceAtOrigin = f->originNode().force(), .forceColor = f->getForceColor()};
-        framesData.push_back(frame);
+        framesData.push_back(f->packRenderData());
     }
 
     bodyRenderData data{.type = RenderObjectType::PAYLOAD, .id = m_id, .transform = transform(), .frames = framesData};

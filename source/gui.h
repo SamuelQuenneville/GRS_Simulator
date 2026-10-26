@@ -15,8 +15,11 @@
 #include <nanogui/opengl.h>
 #include <nanogui/nanogui.h>
 
+#include <utility>
+#include <vector>
+
 #include "Log/programLogger.h"
-#include "RigidBodyAndLink/frame.h"
+#include "Definitions/renderObjectDefinitions.h"
 
 class SimulationViewer;
 
@@ -29,7 +32,7 @@ public:
     // Initialize the GUI
     void init(GLFWwindow* window);
 
-    void update() const;
+    void update(const systemRenderData* snapshot) const;
     void drawAll();
     void draw();
     void drawTearDown();
@@ -47,9 +50,12 @@ public:
 
     [[nodiscard]] bool getHasConfigFile() const {return m_hasConfigFile;};
     [[nodiscard]] std::string configFilePath() const {return m_configFilePath;};
+    void setConfigFile(const std::string& filePath);
 
     void setTargetFromConfig(float groundspeed, const std::vector<double>& positionTarget);
-    void setFrames(const std::vector<Frame*>& frames);
+    void setFrames(const systemRenderData& snapshot);
+    void setFollowCaption(bool follow);
+    void clearFrames();
 
 protected:
     SimulationViewer* m_viewer;
@@ -66,6 +72,7 @@ protected:
     bool m_shouldDrawReferenceFrame = false;
     bool m_shouldDrawForcesVector = false;
     bool m_shouldDrawSky = false;
+    nanogui::Button* m_followButton = nullptr;
 
     nanogui::TextBox* m_groundspeedTargetText;
     float m_groundspeedTarget = 0.0;
@@ -83,8 +90,9 @@ protected:
 
     nanogui::ComboBox* m_comboBoxFrames = nullptr;
 
-    std::vector<Frame*> m_frames{};
-    Frame* m_currentFrameDisplayed{};
+    // (body index, frame index) in systemRenderData for each combo box entry
+    std::vector<std::pair<size_t, size_t>> m_frameIndices{};
+    int m_currentFrameDisplayed = -1;
 
     //
     char m_configFilePath[256] = {};
