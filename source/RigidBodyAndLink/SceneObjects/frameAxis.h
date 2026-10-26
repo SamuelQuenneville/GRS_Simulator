@@ -15,6 +15,8 @@
 #include "OpenglFramework/vertexArrayObject.h"
 #include "Definitions/renderObjectDefinitions.h"
 
+#include <vector>
+
 
 class FrameAxis final : public Object3D {
 
@@ -55,6 +57,14 @@ private:
     VertexArrayObject m_vertexArrayObjectForce;
 
     float m_length;
+
+    // Arrow = thin prism shaft + cone head, all triangles
+    static constexpr int kShaftSegments = 6;
+    static constexpr int kConeSegments = 12;
+    static constexpr int kArrowVertexCount = kShaftSegments * 6 + kConeSegments * 6;
+    mutable bool m_hasForce = false;
+
+    static void m_appendArrow(std::vector<Vertex>& vertices, const grs::Vec3f& tip, uint32_t color, float headLength, float headRadius, float shaftRadius);
 
     void m_createVertexBufferAndArrayObject();
     void m_createForceBufferAndArrayObject();
