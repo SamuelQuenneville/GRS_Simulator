@@ -55,6 +55,10 @@ public:
     void setTargetFromConfig(float groundspeed, const std::vector<double>& positionTarget);
     void setFrames(const systemRenderData& snapshot);
     void setFollowCaption(bool follow);
+    void setCloseUpCaptions(bool enabled, bool xray);
+
+    // (body index, frame index) of the frame selected in the Numeric Infos list, or (-1, -1)
+    [[nodiscard]] std::pair<int, int> selectedFrame() const;
     void clearFrames();
 
 protected:
@@ -73,6 +77,8 @@ protected:
     bool m_shouldDrawForcesVector = false;
     bool m_shouldDrawSky = false;
     nanogui::Button* m_followButton = nullptr;
+    nanogui::Button* m_closeUpButton = nullptr;
+    nanogui::Button* m_closeUpModeButton = nullptr;
 
     nanogui::TextBox* m_groundspeedTargetText;
     float m_groundspeedTarget = 0.0;

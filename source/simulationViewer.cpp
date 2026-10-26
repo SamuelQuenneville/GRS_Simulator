@@ -207,6 +207,12 @@ void SimulationViewer::keyboardEvent(const int key, const int scancode, const in
         return;
     }
 
+    // Toggle the close-up view with "g" key
+    if (key == GLFW_KEY_G && action == GLFW_PRESS) {
+        m_toggleCloseUp();
+        return;
+    }
+
     // Toggle the follow camera with "f" key
     if (key == GLFW_KEY_F && action == GLFW_PRESS) {
         m_toggleFollowSystem();
@@ -222,12 +228,18 @@ void SimulationViewer::keyboardEvent(const int key, const int scancode, const in
 }
 
 void SimulationViewer::mouseButtonEvent(const int button, const int action, const int modifiers, const double mousePosX, const double mousePosY) const {
+    if (m_scene && button == GLFW_MOUSE_BUTTON_LEFT && m_scene->closeUpMouseButton(action == GLFW_PRESS, mousePosX, mousePosY)) {
+        return;
+    }
     if (m_scene) {
         m_scene->mouseButtonEvent(button, action == GLFW_PRESS, modifiers, mousePosX, mousePosY);
     }
 }
 
 void SimulationViewer::mouseMotionEvent(const double x, const double y) const {
+    if (m_scene && m_scene->closeUpMouseMotion(x, y)) {
+        return;
+    }
 
     const int leftButtonState   = glfwGetMouseButton(m_window.get(), GLFW_MOUSE_BUTTON_LEFT);
     const int rightButtonState  = glfwGetMouseButton(m_window.get(), GLFW_MOUSE_BUTTON_RIGHT);
@@ -240,6 +252,12 @@ void SimulationViewer::mouseMotionEvent(const double x, const double y) const {
 }
 
 void SimulationViewer::scrollEvent(const double x, const double y) const {
+    double cursorX;
+    double cursorY;
+    glfwGetCursorPos(m_window.get(), &cursorX, &cursorY);
+    if (m_scene && m_scene->closeUpScroll(y, cursorX, cursorY)) {
+        return;
+    }
     if (m_scene) {
         m_scene->scrollingEvent(x, y, 0.05f);
     }
@@ -249,6 +267,9 @@ void SimulationViewer::m_createScene() {
     m_destroyScenes(); // a previous scene may remain after Stop
     m_scene = new Scene(World::getExecutablePath(), m_world->getSceneConfiguration(), *m_world->getLatestSnapshot());
     m_scene->setFollowSystem(m_followSystem);
+    m_scene->setAircraftDisplayScale(m_aircraftScale);
+    m_scene->setCloseUpEnabled(m_closeUpEnabled);
+    m_scene->setCloseUpMode(m_closeUpMode);
     m_sceneCreated = true;
 }
 
@@ -441,6 +462,29 @@ void SimulationViewer::m_drawForcesVector(const bool shouldDraw) const {
     m_scene->drawForcesVector(shouldDraw);
 }
 
+void SimulationViewer::m_toggleCloseUp() {
+    m_closeUpEnabled = !m_closeUpEnabled;
+    if (m_scene) {
+        m_scene->setCloseUpEnabled(m_closeUpEnabled);
+    }
+    m_gui.setCloseUpCaptions(m_closeUpEnabled, m_closeUpMode == CloseUpView::Mode::XRay);
+}
+
+void SimulationViewer::m_toggleCloseUpMode() {
+    m_closeUpMode = m_closeUpMode == CloseUpView::Mode::Wireframe ? CloseUpView::Mode::XRay : CloseUpView::Mode::Wireframe;
+    if (m_scene) {
+        m_scene->setCloseUpMode(m_closeUpMode);
+    }
+    m_gui.setCloseUpCaptions(m_closeUpEnabled, m_closeUpMode == CloseUpView::Mode::XRay);
+}
+
+void SimulationViewer::m_setAircraftScale(const double scale) {
+    m_aircraftScale = scale;
+    if (m_scene) {
+        m_scene->setAircraftDisplayScale(scale);
+    }
+}
+
 void SimulationViewer::m_toggleFollowSystem() {
     m_followSystem = !m_followSystem;
     if (m_scene) {
@@ -461,6 +505,23 @@ void SimulationViewer::m_render() const {
 
     m_scene->setViewport(0, 0, bufferWidth, bufferHeight);
     m_scene->render();
+
+    if (m_closeUpEnabled) {
+        int windowWidth;
+        int windowHeight;
+        glfwGetWindowSize(m_window.get(), &windowWidth, &windowHeight);
+        const float pixelRatio = windowWidth > 0 ? static_cast<float>(bufferWidth) / static_cast<float>(windowWidth) : 1.0f;
+
+        const auto [body, frame] = m_gui.selectedFrame();
+        m_scene->setCloseUpSelection(body, frame);
+        m_scene->renderCloseUp(bufferWidth, bufferHeight, pixelRatio);
+
+        // Markers and labels (NanoVG, window coordinates); the GUI widgets are drawn after
+        NVGcontext* vg = m_gui.screen()->nvg_context();
+        nvgBeginFrame(vg, static_cast<float>(windowWidth), static_cast<float>(windowHeight), pixelRatio);
+        m_scene->drawCloseUpOverlay(vg);
+        nvgEndFrame(vg);
+    }
 }
 
 void SimulationViewer::m_enableGlfwDebugOutput() {

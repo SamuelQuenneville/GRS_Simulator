@@ -14,6 +14,7 @@ uniform vec3 zenithColor;
 uniform vec3 horizonColor;
 uniform vec3 sunDirWorld;
 uniform vec3 sunColor;
+uniform float brightness;               // 1 in the main view, dimmed in the close-up
 
 in vec3 vDirection;
 
@@ -28,5 +29,5 @@ void main() {
     float sunAmount = max(dot(d, sunDirWorld), 0.0);
     sky += sunColor * (pow(sunAmount, 800.0) * 1.2 + pow(sunAmount, 8.0) * 0.12);
 
-    color = vec4(sky, 1.0);
+    color = vec4(sky * brightness, 1.0);
 }

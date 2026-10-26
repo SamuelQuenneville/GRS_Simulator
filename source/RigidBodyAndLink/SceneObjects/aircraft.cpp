@@ -27,6 +27,11 @@ Aircraft::Aircraft(const bodyRenderData& aircraftRenderData, const grs::Vec3d& s
     setTransformMatrix(getTransformMatrix() * m_scalingMatrix);
 }
 
+void Aircraft::setDisplayScale(const double scale) {
+    m_scalingMatrix = grs::Matrix4d::diagonal({scale, scale, scale, 1.0});
+    updateTransform(1.0);
+}
+
 // Update the transform matrix of the object
 void Aircraft::updateTransform(const double interpolationFactor) {
     setTransformMatrix(m_calculateTransform(interpolationFactor, m_scalingMatrix));

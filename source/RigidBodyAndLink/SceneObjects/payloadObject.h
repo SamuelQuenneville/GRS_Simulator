@@ -21,6 +21,8 @@ public:
     ~PayloadObject() override;
 
     void render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) override;
+    void renderWithModel(Shader& shader, const grs::Matrix4d& localToWorldMatrix, const grs::Matrix4d& worldToCameraMatrix) override;
+    [[nodiscard]] grs::Matrix4d trueScaleMatrix() const override {return m_scalingMatrix;};
     void updateTransform(double interpolationFactor) override;
 
 private:

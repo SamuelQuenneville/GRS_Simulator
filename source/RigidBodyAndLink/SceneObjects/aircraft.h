@@ -20,6 +20,9 @@ public :
 
     void updateTransform(double interpolationFactor) override;
 
+    // Scale used in the main view only; the mesh itself is at true size
+    void setDisplayScale(double scale);
+
 private :
     grs::Matrix4d m_scalingMatrix{};
 };

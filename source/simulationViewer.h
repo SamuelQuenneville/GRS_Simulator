@@ -65,12 +65,18 @@ private:
     void m_drawForcesVector(bool shouldDraw) const;
     void m_drawSky(bool shouldDraw) const;
     void m_toggleFollowSystem();
+    void m_toggleCloseUp();
+    void m_toggleCloseUpMode();
+    void m_setAircraftScale(double scale);
 
     void m_render() const;
 
     bool m_sceneCreated;
     bool m_renderEnabled = true;
     bool m_followSystem = true;
+    bool m_closeUpEnabled = false;
+    CloseUpView::Mode m_closeUpMode = CloseUpView::Mode::Wireframe;
+    double m_aircraftScale = 2.0;
     void m_createScene();
     void m_destroyScenes();
 

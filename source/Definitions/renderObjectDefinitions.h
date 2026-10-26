@@ -44,6 +44,7 @@ struct frameRenderData {
     grs::Vec3d      position = grs::Vec3d::zeros();
     grs::Vec3d      velocity = grs::Vec3d::zeros();
     grs::Vec3d      wind     = grs::Vec3d::zeros();
+    grs::Vec3d      localPosition = grs::Vec3d::zeros(); // Body axes (NED), relative to the body origin
 };
 
 /*

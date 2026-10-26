@@ -380,29 +380,63 @@ void Gui::m_createDebugPanel() {
     new nanogui::Label(m_debugPanel, std::string("Visual Objects :"),"sans-bold",20);
     auto* group1 = new nanogui::Widget(m_debugPanel);
     group1->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical,nanogui::Alignment::Fill, 5, 5));
-    auto* buttonFrames = new nanogui::Button(group1, "Show Reference Frames");
+
+    // Two buttons per row
+    auto makeRow = [&]() {
+        auto* row = new nanogui::Widget(group1);
+        row->set_layout(new nanogui::GridLayout(nanogui::Orientation::Horizontal, 2, nanogui::Alignment::Fill, 0, 5));
+        return row;
+    };
+    constexpr int halfWidth = 172;
+
+    auto* row1 = makeRow();
+    auto* buttonFrames = new nanogui::Button(row1, "Show Frames");
+    buttonFrames->set_fixed_width(halfWidth);
     buttonFrames->set_callback([&] {
         m_shouldDrawReferenceFrame = !m_shouldDrawReferenceFrame;
         m_viewer->m_drawReferenceFrame(m_shouldDrawReferenceFrame);
     });
 
-    auto* buttonForces = new nanogui::Button(group1, "Show Forces");
+    auto* buttonForces = new nanogui::Button(row1, "Show Forces");
+    buttonForces->set_fixed_width(halfWidth);
     buttonForces->set_callback([&] {
         m_shouldDrawForcesVector = !m_shouldDrawForcesVector;
         m_viewer->m_drawForcesVector(m_shouldDrawForcesVector);
     });
 
-    auto* buttonSky = new nanogui::Button(group1, "Show Sky");
+    auto* row2 = makeRow();
+    auto* buttonSky = new nanogui::Button(row2, "Show Sky");
+    buttonSky->set_fixed_width(halfWidth);
     buttonSky->set_callback([&] {
         m_shouldDrawSky = !m_shouldDrawSky;
         m_viewer->m_drawSky(m_shouldDrawSky);
     });
 
-    m_followButton = new nanogui::Button(group1, "Camera : Follow System (F)");
+    m_followButton = new nanogui::Button(row2, "Follow (F) : On");
+    m_followButton->set_fixed_width(halfWidth);
     m_followButton->set_callback([&] {
         m_viewer->m_toggleFollowSystem();
     });
 
+    // Close-up view of the body owning the frame selected below
+    auto* row3 = makeRow();
+    m_closeUpButton = new nanogui::Button(row3, "Close-up (G) : Off");
+    m_closeUpButton->set_fixed_width(halfWidth);
+    m_closeUpButton->set_callback([&] {
+        m_viewer->m_toggleCloseUp();
+    });
+
+    m_closeUpModeButton = new nanogui::Button(row3, "Mode : Wireframe");
+    m_closeUpModeButton->set_fixed_width(halfWidth);
+    m_closeUpModeButton->set_callback([&] {
+        m_viewer->m_toggleCloseUpMode();
+    });
+
+    auto* comboScale = new nanogui::ComboBox(group1, {"Aircraft scale : 1:1 (true size)", "Aircraft scale : 2:1", "Aircraft scale : 3:1"});
+    comboScale->set_selected_index(1);
+    comboScale->set_callback([&](const int index) {
+        m_viewer->m_setAircraftScale(static_cast<double>(index + 1));
+    });
 
     // Group 2 Numeric Infos
     new nanogui::Label(m_debugPanel, std::string("Numeric Infos :"),"sans-bold",20);
@@ -467,7 +501,20 @@ void Gui::setFrames(const systemRenderData& snapshot) {
 }
 
 void Gui::setFollowCaption(const bool follow) {
-    m_followButton->set_caption(follow ? "Camera : Follow System (F)" : "Camera : Fixed (F)");
+    m_followButton->set_caption(follow ? "Follow (F) : On" : "Follow (F) : Off");
+}
+
+void Gui::setCloseUpCaptions(const bool enabled, const bool xray) {
+    m_closeUpButton->set_caption(enabled ? "Close-up (G) : On" : "Close-up (G) : Off");
+    m_closeUpModeButton->set_caption(xray ? "Mode : X-ray" : "Mode : Wireframe");
+}
+
+std::pair<int, int> Gui::selectedFrame() const {
+    if (m_currentFrameDisplayed < 0 || static_cast<size_t>(m_currentFrameDisplayed) >= m_frameIndices.size()) {
+        return {-1, -1};
+    }
+    const auto [body, frame] = m_frameIndices[m_currentFrameDisplayed];
+    return {static_cast<int>(body), static_cast<int>(frame)};
 }
 
 void Gui::clearFrames() {

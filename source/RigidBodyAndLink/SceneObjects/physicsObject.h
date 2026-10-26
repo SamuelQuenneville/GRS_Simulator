@@ -25,6 +25,14 @@ public:
     virtual void updatePosition() {};
 
     virtual void render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix);
+
+    // Draw the mesh with an explicit local-to-world matrix (used by the close-up view)
+    virtual void renderWithModel(Shader& shader, const grs::Matrix4d& localToWorldMatrix, const grs::Matrix4d& worldToCameraMatrix);
+
+    // Mesh-to-body scaling at true size (the scene may draw some objects larger)
+    [[nodiscard]] virtual grs::Matrix4d trueScaleMatrix() const {return grs::Matrix4d::identity();};
+
+    [[nodiscard]] const bodyRenderData& getBodyRenderData() const {return m_bodyRenderData;};
     virtual void renderVisualObject(Shader& shader, const grs::Matrix4d& worldToCameraMatrix, bool drawFrames, bool drawForces);
 
     void createVertexBufferAndArrayObject();

@@ -21,6 +21,7 @@
 #include "OpenglFramework/light.h"
 #include "OpenglFramework/camera.h"
 #include "OpenglFramework/frameBufferObject.h"
+#include "Scenes/closeUpView.h"
 
 class Scene {
 
@@ -53,6 +54,19 @@ public:
     [[nodiscard]] bool shouldDrawReferenceFrame() const {return m_shouldDrawReferenceFrame;};
     [[nodiscard]] bool shouldDrawForcesVector() const {return m_shouldDrawForcesVector;};
     [[nodiscard]] bool shouldDrawSky() const {return m_shouldDrawSky;};
+
+    // Close-up inset on one body (index in the render data), with the selected frame highlighted
+    void setCloseUpEnabled(bool enabled);
+    void setCloseUpMode(CloseUpView::Mode mode) {m_closeUp->setMode(mode);};
+    void setCloseUpSelection(int bodyIndex, int frameIndex) {m_closeUpBody = bodyIndex; m_closeUpFrame = frameIndex;};
+    void renderCloseUp(int framebufferWidth, int framebufferHeight, float pixelRatio);
+    void drawCloseUpOverlay(NVGcontext* vg) const;
+    bool closeUpMouseButton(bool pressed, double x, double y) {return m_closeUpEnabled && m_closeUp->mouseButton(pressed, x, y);};
+    bool closeUpMouseMotion(double x, double y) {return m_closeUpEnabled && m_closeUp->mouseMotion(x, y);};
+    bool closeUpScroll(double dy, double x, double y) {return m_closeUpEnabled && m_closeUp->scroll(dy, x, y);};
+
+    // Aircraft size in the main view (the mesh is modelled at true size)
+    void setAircraftDisplayScale(double scale);
 
     // Keep the camera orbit center on the system centroid
     void setFollowSystem(bool follow) {m_followSystem = follow;};
@@ -111,6 +125,12 @@ protected:
     bool m_shouldDrawSky = false;
     bool m_followSystem = true;
 
+    std::unique_ptr<CloseUpView> m_closeUp;
+    bool m_closeUpEnabled = false;
+    int m_closeUpBody = -1;
+    int m_closeUpFrame = -1;
+    double m_aircraftScale = 2.0;
+
     // Centroid and radius of the moving bodies, used by the follow camera and the shadow frustum
     grs::Vec3d m_systemCenter{};
     double m_shadowRadius = 30.0;
@@ -139,7 +159,7 @@ protected:
     void m_createShadowMapFrameBufferObjectAndTexture();
     void m_computeShadowMatrices(const grs::Vec3d& sunDirWorld, grs::Matrix4d& worldToLight, grs::Matrix4d& lightProjection) const;
     void m_renderShadowCasters(const grs::Matrix4d& worldToLight);
-    void m_renderSky(const grs::Matrix4d& worldToCameraMatrix, const grs::Vec3d& sunDirWorld);
+    void m_renderSky(const grs::Matrix4d& worldToCameraMatrix, const grs::Matrix4d& projectionMatrix, const grs::Vec3d& sunDirWorld, float brightness);
     void m_setDefaultView();
     void m_createNoiseTexture();
     void m_setScenePosition(const grs::Vec3d& position, float sceneRadius);

@@ -85,6 +85,8 @@ Scene::Scene(const std::string& executablePath, const sceneConfiguration& config
 
     m_createNoiseTexture();
 
+    m_closeUp = std::make_unique<CloseUpView>(executablePath);
+
     // Set the center of the scene
     m_setScenePosition({0.0, 0.0, 0.0}, 100.0f);
     setInitialZoom(0.8f);
@@ -117,7 +119,7 @@ void Scene::createPhysicsWorld() {
 
         // ---------- AIRCRAFT ---------- //
         if (body.type == RenderObjectType::AIRCRAFT) {
-            auto aircraftObject = std::make_unique<Aircraft>(body, grs::Vec3d(2.0, 2.0, 2.0), m_executablePath);
+            auto aircraftObject = std::make_unique<Aircraft>(body, grs::Vec3d(m_aircraftScale, m_aircraftScale, m_aircraftScale), m_executablePath);
             aircraftObject->setColor(uavColor(body.id));
 
             m_physicsObjects.push_back(std::move(aircraftObject));
@@ -341,7 +343,7 @@ void Scene::render() {
     }
 
     if (!shouldDrawSky()) {
-        m_renderSky(worldToCameraMatrix, sunDirWorld);
+        m_renderSky(worldToCameraMatrix, projectionMatrix, sunDirWorld, 1.0f);
     }
 
     if (m_targetObject) {
@@ -409,12 +411,12 @@ void Scene::m_computeShadowMatrices(const grs::Vec3d& sunDirWorld, grs::Matrix4d
                        0.0, 0.0, 0.0, 1.0};
 }
 
-void Scene::m_renderSky(const grs::Matrix4d& worldToCameraMatrix, const grs::Vec3d& sunDirWorld) {
+void Scene::m_renderSky(const grs::Matrix4d& worldToCameraMatrix, const grs::Matrix4d& projectionMatrix, const grs::Vec3d& sunDirWorld, const float brightness) {
     grs::Matrix4d viewRotation = worldToCameraMatrix;
     viewRotation(0, 3) = 0.0;
     viewRotation(1, 3) = 0.0;
     viewRotation(2, 3) = 0.0;
-    const grs::Matrix4d inverseViewProjection = (m_camera.getProjectionMatrix() * viewRotation).inverse();
+    const grs::Matrix4d inverseViewProjection = (projectionMatrix * viewRotation).inverse();
 
     // Depth is 1.0 in the shader: only pixels still at the cleared depth pass
     glDepthFunc(GL_LEQUAL);
@@ -426,6 +428,7 @@ void Scene::m_renderSky(const grs::Matrix4d& worldToCameraMatrix, const grs::Vec
     m_skyShader.setVector3Uniform("horizonColor", kHorizonColor);
     m_skyShader.setVector3Uniform("sunDirWorld", toVec3f(sunDirWorld));
     m_skyShader.setVector3Uniform("sunColor", kSunColor);
+    m_skyShader.setFloatUniform("brightness", brightness);
 
     glBindVertexArray(m_skyVertexArray);
     glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -517,7 +520,50 @@ void Scene::reset() {
     createPhysicsWorld();
 }
 
+void Scene::setCloseUpEnabled(const bool enabled) {
+    m_closeUpEnabled = enabled;
+    if (!enabled) {
+        m_closeUp->hide();
+    }
+}
+
+void Scene::renderCloseUp(const int framebufferWidth, const int framebufferHeight, const float pixelRatio) {
+    if (!m_closeUpEnabled || m_physicsObjects.empty()) {
+        m_closeUp->hide();
+        return;
+    }
+
+    const bool validBody = m_closeUpBody >= 0 && m_closeUpBody < static_cast<int>(m_physicsObjects.size());
+    const int body = validBody ? m_closeUpBody : 0;
+    const int frame = validBody ? m_closeUpFrame : -1;
+
+    const grs::Vec3d sunDirWorld = grs::normalize(m_light0.getOrigin());
+    m_closeUp->render(*m_physicsObjects[body], frame, framebufferWidth, framebufferHeight, pixelRatio, m_colorShader, m_depthShader,
+                      [this, sunDirWorld](const grs::Matrix4d& view, const grs::Matrix4d& projection, const float brightness) {
+                          m_renderSky(view, projection, sunDirWorld, brightness);
+                      });
+}
+
+void Scene::drawCloseUpOverlay(NVGcontext* vg) const {
+    if (m_closeUpEnabled) {
+        m_closeUp->drawOverlay(vg);
+    }
+}
+
+void Scene::setAircraftDisplayScale(const double scale) {
+    m_aircraftScale = scale;
+    for (const auto& object : m_physicsObjects) {
+        if (auto* aircraft = dynamic_cast<Aircraft*>(object.get())) {
+            aircraft->setDisplayScale(scale);
+        }
+    }
+}
+
 void Scene::destroy() {
+    // Cached close-up edges refer to the objects about to be destroyed
+    m_closeUp->forgetObjects();
+    m_closeUp->hide();
+
     // Destroy all the physics objects of the scene
     m_physicsObjects.clear();
     m_tethersObjects.clear();

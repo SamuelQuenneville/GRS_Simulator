@@ -154,6 +154,8 @@ set(GRS_RIGID_BODIES_AND_LINK
 )
 
 set(GRS_SCENES
+        source/Scenes/closeUpView.cpp
+        source/Scenes/closeUpView.h
         source/Scenes/scene.cpp
         source/Scenes/scene.h
 )

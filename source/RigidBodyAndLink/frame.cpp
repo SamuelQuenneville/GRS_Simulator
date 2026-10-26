@@ -80,6 +80,7 @@ frameRenderData Frame::packRenderData() const {
     data.position       = originNode().position();
     data.velocity       = originNode().velocity();
     data.wind           = originNode().wind();
+    data.localPosition  = m_localPosition;
     return data;
 }
 

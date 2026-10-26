@@ -42,6 +42,26 @@ PayloadObject::~PayloadObject() {
     m_vertexArrayObject.destroy();
 }
 
+void PayloadObject::renderWithModel(Shader& shader, const grs::Matrix4d& localToWorldMatrix, const grs::Matrix4d& worldToCameraMatrix) {
+    shader.bind();
+
+    shader.setMatrix4x4Uniform("localToWorldMatrix", localToWorldMatrix);
+    shader.setMatrix4x4Uniform("worldToCameraMatrix", worldToCameraMatrix);
+
+    const grs::Matrix4d localToCameraMatrix = worldToCameraMatrix * localToWorldMatrix;
+    const grs::Matrix3d normalMatrix = localToCameraMatrix.upperLeft3x3().inverse().transpose();
+    shader.setMatrix3x3Uniform("normalMatrix", normalMatrix, false);
+    shader.setVector4Uniform("globalVertexColor", m_color.toVec4f(), false);
+
+    m_vertexArrayObject.bind();
+    for (int i=0; i<getNumbersParts(); i++) {
+        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(getNumbersFaces(i) * 3), GL_UNSIGNED_INT, nullptr);
+    }
+    m_vertexArrayObject.unbind();
+
+    shader.unbind();
+}
+
 void PayloadObject::render(Shader& shader, const grs::Matrix4d& worldToCameraMatrix) {
 
     shader.bind();
