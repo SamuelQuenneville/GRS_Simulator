@@ -4,12 +4,11 @@
 #     X (downstream) / Y (right) / Z (up)         #
 #--------------------------------------------------
 AircraftProperties:
-  MASS        : 4.475000 # kg
+  MASS        : 4.613000 # kg
   WING_SURFACE: 0.536250 # m^2
   WING_CHORD  : 0.330000 # m
   WING_SPAN   : 1.625000 # m
   ASPECT_RATIO: 4.924242
-  OSWALD_EFF  : 0.920800
   #
   # Frame [ POSITION (m) , ORIENTATION (rad) ]
   CG_POSITION            : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
@@ -31,42 +30,54 @@ AircraftProperties:
   DELTA_RUD_MIN_DEG: -20.000000 # degrees
   DELTA_RUD_MAX_DEG: 20.000000 # degrees
   #
-  # Model Baseline
-  TRIM_ALPHA: 0.912140 # deg
-  TRIM_ELE  : -1.381480 # deg
-  # Lift and Drag
-  CL_0    : 0.213850 # rad
-  CL_ALPHA: 4.328933 # rad
-  CD_0    : 0.050000 # rad
-  # Force x direction
-  Cx_q        : -0.020758 # rad
-  Cx_DELTA_ELE: 0.000037 # deg
-  # Force y direction
-  Cy_0        : 0.000000 # rad
-  Cy_BETA     : -0.183746 # rad
-  Cy_p        : 0.057221 # rad
-  Cy_r        : 0.187631 # rad
-  Cy_DELTA_AIL: -0.000734 # deg
-  Cy_DELTA_RUD: -0.002336 # deg
-  # Force z direction
-  Cz_q        : -7.433721 # rad
-  Cz_DELTA_ELE: -0.007384 # deg
-  # Moment l
-  Cl_0        : -0.000000 # rad
-  Cl_BETA     : -0.031543 # rad
-  Cl_p        : -0.390092 # rad
-  Cl_r        : 0.061276 # rad
-  Cl_DELTA_AIL: 0.006081 # deg
-  Cl_DELTA_RUD: -0.000155 # deg
-  # Moment m
-  Cm_0         : 0.000000 # rad
-  Cm_ALPHA     : -0.742082 # rad
-  Cm_q         : -8.258848 # rad
-  Cm_DELTA_ELE : -0.017966 # deg
-  # Moment n
-  Cn_0        : -0.000000 # rad
-  Cn_BETA     : 0.082855 # rad
-  Cn_p        : -0.023115 # rad
-  Cn_r        : -0.095821 # rad
-  Cn_DELTA_AIL: 0.000253 # deg
-  Cn_DELTA_RUD: 0.001265 # deg
+  # Calibrated aerodynamic model (AVL coefficients calibrated on flight data)
+  # Angles and rates in rad, control deflections in deg.
+  # Each coefficient applies to the deviation from the calibration trim below,
+  # except the drag terms in alpha, beta and |control|, which use absolute values.
+  #
+  # Calibration trim
+  TRIM_ALPHA   : 4.535  # deg
+  TRIM_BETA    : 0.000  # deg
+  TRIM_ELEVATOR: -2.543 # deg
+  TRIM_AILERON : 0.000  # deg
+  TRIM_RUDDER  : 0.000  # deg
+  #
+  # Lift (stability axes)
+  CL_TRIM        : 0.33939
+  CL_ALPHA       : 4.39381   # 1/rad
+  CL_q           : 7.17626   # 1/rad (q c / 2V)
+  CL_DEL_ELEVATOR: 0.00549   # 1/deg
+  # Drag (stability axes): CD_0 + CD_ALPHA a + CL^2/(pi AR e) + CD_BETA b + CD_BETA2 b^2 + CD_DEL_ELEVATOR |ele| + CD_DEL_RUDDER |rud|
+  CD_0           : 0.05076
+  CD_ALPHA       : 0.00000   # 1/rad
+  CD_BETA        : 0.00000   # 1/rad
+  CD_BETA2       : 0.32006   # 1/rad^2
+  CD_DEL_ELEVATOR: 0.00193   # 1/deg
+  CD_DEL_RUDDER  : 0.00061   # 1/deg
+  e              : 0.59263   # Oswald efficiency
+  # Side force
+  Cy_TRIM        : 0.00000
+  Cy_BETA        : -0.44194  # 1/rad
+  Cy_p           : 0.11834   # 1/rad (p b / 2V)
+  Cy_r           : 0.18589   # 1/rad (r b / 2V)
+  Cy_DEL_AILERON : 0.00000   # 1/deg
+  Cy_DEL_RUDDER  : -0.00232  # 1/deg
+  # Rolling moment
+  Cl_TRIM        : 0.00000
+  Cl_BETA        : -0.01651  # 1/rad
+  Cl_p           : -0.40572  # 1/rad
+  Cl_r           : 0.08613   # 1/rad
+  Cl_DEL_AILERON : 0.00430   # 1/deg
+  Cl_DEL_RUDDER  : 0.00000   # 1/deg
+  # Pitching moment
+  Cm_TRIM        : 0.00000
+  Cm_ALPHA       : -0.19980  # 1/rad
+  Cm_q           : -13.55363 # 1/rad (q c / 2V)
+  Cm_DEL_ELEVATOR: -0.01552  # 1/deg
+  # Yawing moment
+  Cn_TRIM        : 0.00000
+  Cn_BETA        : 0.04779   # 1/rad
+  Cn_p           : -0.03489  # 1/rad
+  Cn_r           : -0.09147  # 1/rad
+  Cn_DEL_AILERON : 0.00000   # 1/deg
+  Cn_DEL_RUDDER  : 0.00100   # 1/deg

@@ -308,7 +308,6 @@ namespace YAML {
             rhs.wingChord           = node["WING_CHORD"].as<double>();
             rhs.wingSpan            = node["WING_SPAN"].as<double>();
             rhs.aspectRatio         = node["ASPECT_RATIO"].as<double>();
-            rhs.oswaldEfficiency    = node["OSWALD_EFF"].as<double>();
 
             auto temp = node["CG_POSITION"].as<std::vector<double>>();
             rhs.geom.cgPosition    = {temp[0], temp[1], temp[2]};
@@ -342,46 +341,53 @@ namespace YAML {
             rhs.rudMinDeg = node["DELTA_RUD_MIN_DEG"].as<double>();
             rhs.rudMaxDeg = node["DELTA_RUD_MAX_DEG"].as<double>();
 
-            // AERO COEFFICIENTS
-            // Lift and Drag
-            rhs.CL_0     = node["CL_0"].as<double>();
-            rhs.CL_ALPHA = node["CL_ALPHA"].as<double>();
-            rhs.CD_0     = node["CD_0"].as<double>();
-            // Force x direction
-            rhs.Cx_q         = node["Cx_q"].as<double>();
-            rhs.Cx_DELTA_ELE = node["Cx_DELTA_ELE"].as<double>();
-            // Force y direction
-            rhs.Cy_0         = node["Cy_0"].as<double>();
-            rhs.Cy_BETA      = node["Cy_BETA"].as<double>();
-            rhs.Cy_p         = node["Cy_p"].as<double>();
-            rhs.Cy_r         = node["Cy_r"].as<double>();
-            rhs.Cy_DELTA_AIL = node["Cy_DELTA_AIL"].as<double>();
-            rhs.Cy_DELTA_RUD = node["Cy_DELTA_RUD"].as<double>();
-            // Force z direction
-            rhs.Cz_q         = node["Cz_q"].as<double>();
-            rhs.Cz_DELTA_ELE = node["Cz_DELTA_ELE"].as<double>();
-            // Moment l
-            rhs.Cl_0         = node["Cl_0"].as<double>();
-            rhs.Cl_BETA      = node["Cl_BETA"].as<double>();
-            rhs.Cl_p         = node["Cl_p"].as<double>();
-            rhs.Cl_r         = node["Cl_r"].as<double>();
-            rhs.Cl_DELTA_AIL = node["Cl_DELTA_AIL"].as<double>();
-            rhs.Cl_DELTA_RUD = node["Cl_DELTA_RUD"].as<double>();
-            //Moment m
-            rhs.Cm_0         = node["Cm_0"].as<double>();
-            rhs.Cm_ALPHA     = node["Cm_ALPHA"].as<double>();
-            rhs.Cm_q         = node["Cm_q"].as<double>();
-            rhs.Cm_DELTA_ELE = node["Cm_DELTA_ELE"].as<double>();
-            // Moment n
-            rhs.Cn_0         = node["Cn_0"].as<double>();
-            rhs.Cn_BETA      = node["Cn_BETA"].as<double>();
-            rhs.Cn_p         = node["Cn_p"].as<double>();
-            rhs.Cn_r         = node["Cn_r"].as<double>();
-            rhs.Cn_DELTA_AIL = node["Cn_DELTA_AIL"].as<double>();
-            rhs.Cn_DELTA_RUD = node["Cn_DELTA_RUD"].as<double>();
-
-            rhs.trimElevator = node["TRIM_ELE"].as<double>();
+            // CALIBRATION TRIM (deg)
             rhs.trimAlpha    = node["TRIM_ALPHA"].as<double>();
+            rhs.trimBeta     = node["TRIM_BETA"].as<double>();
+            rhs.trimElevator = node["TRIM_ELEVATOR"].as<double>();
+            rhs.trimAileron  = node["TRIM_AILERON"].as<double>();
+            rhs.trimRudder   = node["TRIM_RUDDER"].as<double>();
+
+            // AERO COEFFICIENTS
+            // Lift
+            rhs.CL_TRIM         = node["CL_TRIM"].as<double>();
+            rhs.CL_ALPHA        = node["CL_ALPHA"].as<double>();
+            rhs.CL_q            = node["CL_q"].as<double>();
+            rhs.CL_DEL_ELEVATOR = node["CL_DEL_ELEVATOR"].as<double>();
+            // Drag
+            rhs.CD_0            = node["CD_0"].as<double>();
+            rhs.CD_ALPHA        = node["CD_ALPHA"].as<double>();
+            rhs.CD_BETA         = node["CD_BETA"].as<double>();
+            rhs.CD_BETA2        = node["CD_BETA2"].as<double>();
+            rhs.CD_DEL_ELEVATOR = node["CD_DEL_ELEVATOR"].as<double>();
+            rhs.CD_DEL_RUDDER   = node["CD_DEL_RUDDER"].as<double>();
+            rhs.e               = node["e"].as<double>();
+            // Side force
+            rhs.Cy_TRIM         = node["Cy_TRIM"].as<double>();
+            rhs.Cy_BETA         = node["Cy_BETA"].as<double>();
+            rhs.Cy_p            = node["Cy_p"].as<double>();
+            rhs.Cy_r            = node["Cy_r"].as<double>();
+            rhs.Cy_DEL_AILERON  = node["Cy_DEL_AILERON"].as<double>();
+            rhs.Cy_DEL_RUDDER   = node["Cy_DEL_RUDDER"].as<double>();
+            // Rolling moment
+            rhs.Cl_TRIM         = node["Cl_TRIM"].as<double>();
+            rhs.Cl_BETA         = node["Cl_BETA"].as<double>();
+            rhs.Cl_p            = node["Cl_p"].as<double>();
+            rhs.Cl_r            = node["Cl_r"].as<double>();
+            rhs.Cl_DEL_AILERON  = node["Cl_DEL_AILERON"].as<double>();
+            rhs.Cl_DEL_RUDDER   = node["Cl_DEL_RUDDER"].as<double>();
+            // Pitching moment
+            rhs.Cm_TRIM         = node["Cm_TRIM"].as<double>();
+            rhs.Cm_ALPHA        = node["Cm_ALPHA"].as<double>();
+            rhs.Cm_q            = node["Cm_q"].as<double>();
+            rhs.Cm_DEL_ELEVATOR = node["Cm_DEL_ELEVATOR"].as<double>();
+            // Yawing moment
+            rhs.Cn_TRIM         = node["Cn_TRIM"].as<double>();
+            rhs.Cn_BETA         = node["Cn_BETA"].as<double>();
+            rhs.Cn_p            = node["Cn_p"].as<double>();
+            rhs.Cn_r            = node["Cn_r"].as<double>();
+            rhs.Cn_DEL_AILERON  = node["Cn_DEL_AILERON"].as<double>();
+            rhs.Cn_DEL_RUDDER   = node["Cn_DEL_RUDDER"].as<double>();
             return true;
         }
     };

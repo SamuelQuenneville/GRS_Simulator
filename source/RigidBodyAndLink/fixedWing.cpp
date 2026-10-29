@@ -180,35 +180,64 @@ std::tuple<double, double, double> FixedWing::m_angleOfAttackSideSlip() const {
     return {Va, alphaRadian, betaRadian};
 }
 
+FixedWing::aeroCoefficients FixedWing::m_calcAeroCoefficients(const double airspeed, const double alphaRadian, const double betaRadian) const {
+    const auto& k = m_properties;
+
+    // Deviations from the calibration trim (angles in rad, control deflections in deg)
+    const double delAlpha    = alphaRadian - grs::degToRad(k.trimAlpha);
+    const double delBeta     = betaRadian  - grs::degToRad(k.trimBeta);
+    const double delAileron  = m_inputs.deltaAileron  - k.trimAileron;
+    const double delElevator = m_inputs.deltaElevator - k.trimElevator;
+    const double delRudder   = m_inputs.deltaRudder   - k.trimRudder;
+
+    // Non-dimensional rates (p b / 2V, q c / 2V, r b / 2V)
+    double pHat = 0.0;
+    double qHat = 0.0;
+    double rHat = 0.0;
+    if (airspeed > 0.1) {
+        const double oneOverTwoVa = 0.5 / airspeed;
+        pHat = k.wingSpan  * oneOverTwoVa * m_states.p;
+        qHat = k.wingChord * oneOverTwoVa * m_states.q;
+        rHat = k.wingSpan  * oneOverTwoVa * m_states.r;
+    }
+
+    aeroCoefficients c{};
+    c.CL = k.CL_TRIM + k.CL_ALPHA * delAlpha + k.CL_q * qHat + k.CL_DEL_ELEVATOR * delElevator;
+
+    c.CD = k.CD_0 + k.CD_ALPHA * alphaRadian + (c.CL * c.CL) / (M_PI * k.aspectRatio * k.e)
+         + k.CD_BETA * betaRadian + k.CD_BETA2 * betaRadian * betaRadian
+         + k.CD_DEL_ELEVATOR * std::abs(m_inputs.deltaElevator) + k.CD_DEL_RUDDER * std::abs(m_inputs.deltaRudder);
+
+    c.CY = k.Cy_TRIM + k.Cy_BETA * delBeta + k.Cy_p * pHat + k.Cy_r * rHat + k.Cy_DEL_AILERON * delAileron + k.Cy_DEL_RUDDER * delRudder;
+
+    c.Cl = k.Cl_TRIM + k.Cl_BETA * delBeta + k.Cl_p * pHat + k.Cl_r * rHat + k.Cl_DEL_AILERON * delAileron + k.Cl_DEL_RUDDER * delRudder;
+    c.Cm = k.Cm_TRIM + k.Cm_ALPHA * delAlpha + k.Cm_q * qHat + k.Cm_DEL_ELEVATOR * delElevator;
+    c.Cn = k.Cn_TRIM + k.Cn_BETA * delBeta + k.Cn_p * pHat + k.Cn_r * rHat + k.Cn_DEL_AILERON * delAileron + k.Cn_DEL_RUDDER * delRudder;
+
+    return c;
+}
+
 grs::Vec3d FixedWing::m_calcForceAeroBodyFrame(const double airspeed, const double alphaRadian, const double betaRadian) const {
-
-    const double delAlpha = alphaRadian;
-    // CL and CD
-    const double CL = m_properties.CL_0 + m_properties.CL_ALPHA * delAlpha;
-    const double CD = m_properties.CD_0 + (CL*CL) / (M_PI * m_properties.oswaldEfficiency * m_properties.aspectRatio);
-
-    // stability vs body frame
-    const double cosAlpha = std::cos(alphaRadian);
-    const double sinAlpha = std::sin(alphaRadian);
-    const double CX = -CD * cosAlpha + CL * sinAlpha;
-    const double CZ = -CD * sinAlpha - CL * cosAlpha;
 
     // q_bar
     const double qBarSurface = 0.5 * m_physics.airDensity * airspeed * airspeed * m_properties.wingSurface;
-
-    // del_commands
-    const double delElevator = m_inputs.deltaElevator;
 
     // Forces in body frame
     double Fx = 0.0;
     double Fy = 0.0;
     double Fz = 0.0;
     if (qBarSurface > 0.0) {
-        const double oneOverTwoVa = 0.5 / airspeed;
+        const aeroCoefficients c = m_calcAeroCoefficients(airspeed, alphaRadian, betaRadian);
 
-        Fx += qBarSurface * (CX + m_properties.Cx_q * m_properties.wingChord * oneOverTwoVa * m_states.q + m_properties.Cx_DELTA_ELE * delElevator);
-        Fy += qBarSurface * (m_properties.Cy_0 + m_properties.Cy_BETA * betaRadian + m_properties.Cy_p * m_properties.wingSpan * oneOverTwoVa * m_states.p + m_properties.Cy_r * m_properties.wingSpan * oneOverTwoVa * m_states.r + m_properties.Cy_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cy_DELTA_RUD * m_inputs.deltaRudder);
-        Fz += qBarSurface * (CZ + m_properties.Cz_q * m_properties.wingChord * oneOverTwoVa * m_states.q + m_properties.Cz_DELTA_ELE * delElevator);
+        // Lift and drag from stability to body axes
+        const double cosAlpha = std::cos(alphaRadian);
+        const double sinAlpha = std::sin(alphaRadian);
+        const double CX = -c.CD * cosAlpha + c.CL * sinAlpha;
+        const double CZ = -c.CD * sinAlpha - c.CL * cosAlpha;
+
+        Fx = qBarSurface * CX;
+        Fy = qBarSurface * c.CY;
+        Fz = qBarSurface * CZ;
     }
 
     if (m_launchTriggered || !m_sitl || m_inFlightLaunch) {
@@ -220,24 +249,19 @@ grs::Vec3d FixedWing::m_calcForceAeroBodyFrame(const double airspeed, const doub
 
 grs::Vec3d FixedWing::m_calcMomentAeroBodyFrame(const double airspeed, const double alphaRadian, const double betaRadian) const {
 
-    const double delAlpha = alphaRadian;
-
     // q_bar
     const double qBarSurface = 0.5 * m_physics.airDensity * airspeed * airspeed * m_properties.wingSurface;
-
-    // del_commands
-    const double delElevator = m_inputs.deltaElevator;
 
     // Moments in body frame
     double Mx = 0.0;
     double My = 0.0;
     double Mz = 0.0;
     if (qBarSurface > 0.0) {
-        const double oneOverTwoVa = 0.5 / airspeed;
+        const aeroCoefficients c = m_calcAeroCoefficients(airspeed, alphaRadian, betaRadian);
 
-        Mx += qBarSurface * m_properties.wingSpan * (m_properties.Cl_0 + m_properties.Cl_BETA * betaRadian + m_properties.Cl_p * m_properties.wingSpan * oneOverTwoVa * m_states.p + m_properties.Cl_r * m_properties.wingSpan * oneOverTwoVa * m_states.r + m_properties.Cl_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cl_DELTA_RUD * m_inputs.deltaRudder);
-        My += qBarSurface * m_properties.wingChord * (m_properties.Cm_0 + m_properties.Cm_ALPHA * delAlpha + m_properties.Cm_q * m_properties.wingChord * oneOverTwoVa * m_states.q + m_properties.Cm_DELTA_ELE * delElevator);
-        Mz += qBarSurface * m_properties.wingSpan * (m_properties.Cn_0 + m_properties.Cn_BETA * betaRadian + m_properties.Cn_p * m_properties.wingSpan * oneOverTwoVa * m_states.p + m_properties.Cn_r * m_properties.wingSpan * oneOverTwoVa * m_states.r + m_properties.Cn_DELTA_AIL * m_inputs.deltaAileron + m_properties.Cn_DELTA_RUD * m_inputs.deltaRudder);
+        Mx = qBarSurface * m_properties.wingSpan  * c.Cl;
+        My = qBarSurface * m_properties.wingChord * c.Cm;
+        Mz = qBarSurface * m_properties.wingSpan  * c.Cn;
     }
 
     if (m_launchTriggered || !m_sitl || m_inFlightLaunch) {

@@ -56,7 +56,6 @@ struct fixedWingProperties {
     double wingChord;      // m
     double wingSpan;       // m
     double aspectRatio;
-    double oswaldEfficiency;
 
     struct geometry {
         grs::Vec3d cgPosition{};
@@ -85,47 +84,54 @@ struct fixedWingProperties {
     double rudMinDeg;  // deg
     double rudMaxDeg;  // deg
 
-    // Model Baseline (0)
-    double trimElevator;   // deg
-    double trimAlpha;      // deg
+    // CALIBRATION TRIM (reference point of the aero model)
+    double trimAlpha;       // deg
+    double trimBeta;        // deg
+    double trimElevator;    // deg
+    double trimAileron;     // deg
+    double trimRudder;      // deg
 
-    // AERO COEFFICIENTS
-    // Lift and Drag
-    double CL_0;            // rad
-    double CL_ALPHA;        // rad
-    double CD_0;            // rad (CD_vis in avl)
-    // Force x direction
-    double Cx_q;            // rad
-    double Cx_DELTA_ELE;    // deg
-    // Force y direction
-    double Cy_0;            // rad
-    double Cy_BETA;         // rad
-    double Cy_p;            // rad
-    double Cy_r;            // rad
-    double Cy_DELTA_AIL;    // deg
-    double Cy_DELTA_RUD;    // deg
-    // Force z direction
-    double Cz_q;            // rad
-    double Cz_DELTA_ELE;    // deg
-    // Moment l
-    double Cl_0;            // rad
-    double Cl_BETA;         // rad
-    double Cl_p;            // rad
-    double Cl_r;            // rad
-    double Cl_DELTA_AIL;    // deg
-    double Cl_DELTA_RUD;    // deg
-    //Moment m
-    double Cm_0;            // rad
-    double Cm_ALPHA;        // rad
-    double Cm_q;            // rad
-    double Cm_DELTA_ELE;    // deg
-    // Moment n
-    double Cn_0;            // rad
-    double Cn_BETA;         // rad
-    double Cn_p;            // rad
-    double Cn_r;            // rad
-    double Cn_DELTA_AIL;    // deg
-    double Cn_DELTA_RUD;    // deg
+    // AERO COEFFICIENTS (calibrated model, same names as the MATLAB COEFF structure)
+    // Angles and rates are in rad / rad/s, control deflections in deg.
+    // Lift (stability axes)
+    double CL_TRIM;
+    double CL_ALPHA;            // 1/rad
+    double CL_q;                // 1/rad (q * c / 2V)
+    double CL_DEL_ELEVATOR;     // 1/deg
+    // Drag (stability axes)
+    double CD_0;
+    double CD_ALPHA;            // 1/rad, on the absolute angle of attack
+    double CD_BETA;             // 1/rad
+    double CD_BETA2;            // 1/rad^2
+    double CD_DEL_ELEVATOR;     // 1/deg, on |elevator|
+    double CD_DEL_RUDDER;       // 1/deg, on |rudder|
+    double e;                   // Oswald efficiency of the induced drag CL^2 / (pi * AR * e)
+    // Side force
+    double Cy_TRIM;
+    double Cy_BETA;             // 1/rad
+    double Cy_p;                // 1/rad (p * b / 2V)
+    double Cy_r;                // 1/rad (r * b / 2V)
+    double Cy_DEL_AILERON;      // 1/deg
+    double Cy_DEL_RUDDER;       // 1/deg
+    // Rolling moment
+    double Cl_TRIM;
+    double Cl_BETA;             // 1/rad
+    double Cl_p;                // 1/rad
+    double Cl_r;                // 1/rad
+    double Cl_DEL_AILERON;      // 1/deg
+    double Cl_DEL_RUDDER;       // 1/deg
+    // Pitching moment
+    double Cm_TRIM;
+    double Cm_ALPHA;            // 1/rad
+    double Cm_q;                // 1/rad (q * c / 2V)
+    double Cm_DEL_ELEVATOR;     // 1/deg
+    // Yawing moment
+    double Cn_TRIM;
+    double Cn_BETA;             // 1/rad
+    double Cn_p;                // 1/rad
+    double Cn_r;                // 1/rad
+    double Cn_DEL_AILERON;      // 1/deg
+    double Cn_DEL_RUDDER;       // 1/deg
 };
 
 #endif //GRS_SIMULATOR_FIXEDWINGDEFINITIONS_H

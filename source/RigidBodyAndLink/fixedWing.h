@@ -96,6 +96,9 @@ private:
     std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> m_controller = nullptr;
 
     [[nodiscard]] std::tuple<double, double, double> m_angleOfAttackSideSlip() const;
+    // Aero coefficients of the calibrated model (stability axes for CL and CD)
+    struct aeroCoefficients { double CL, CD, CY, Cl, Cm, Cn; };
+    [[nodiscard]] aeroCoefficients m_calcAeroCoefficients(double airspeed, double alphaRadian, double betaRadian) const;
     [[nodiscard]] grs::Vec3d m_calcForceAeroBodyFrame(double airspeed, double alphaRadian, double betaRadian) const;
     [[nodiscard]] grs::Vec3d m_calcMomentAeroBodyFrame(double airspeed, double alphaRadian, double betaRadian) const;
 
