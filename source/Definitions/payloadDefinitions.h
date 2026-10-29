@@ -36,6 +36,8 @@ struct payloadProperties {
     float mass{};
     std::vector<float> dimension{};
     float cda{};
+    float frictionStatic{};  // Ground friction coefficients, 0 = frictionless
+    float frictionKinetic{};
 
 //    double inertiaX{};  // kg*m^2
 //    double inertiaY{};  // kg*m^2

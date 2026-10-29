@@ -48,6 +48,11 @@ private:
     [[nodiscard]] payloadStates m_calcStatesDerivatives() const;
     // Returns true when the ground plane constrained the body this step
     bool m_eulerIntegration(const payloadStates& derivatives, double dt);
+    // Coulomb friction while resting on the ground: holds the body while the
+    // horizontal force stays below frictionStatic * normal force, else slides
+    // against frictionKinetic * normal force. Modifies the horizontal
+    // accelerations (and velocity when it sticks).
+    void m_applyGroundFriction(payloadStates& derivatives, double dt);
 
     // Payload has no attitude (identity), so body frame == NED: f_b = a_NED - [0 0 g]
     [[nodiscard]] grs::Vec3d m_calcSpecificForceBody(const grs::Vec3d& accelNed) const;

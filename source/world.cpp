@@ -265,6 +265,15 @@ void World::m_physicsLoop() {
         std::chrono::duration<double>(1.0 / std::max(1.0, m_programArgs.renderFps)));
     auto nextPublish = next;
 
+    // A late step is caught up by running the following ones back to back, so
+    // the simulated time keeps up with the wall clock that stamps the SITL
+    // frames. Only a backlog above kMaxBacklog (pause, debugger) is dropped.
+    constexpr auto kMaxBacklog = std::chrono::milliseconds(200);
+    constexpr auto kReportPeriod = std::chrono::seconds(10);
+    auto reportStart = next;
+    double reportSimTime = m_elapsedTime.load();
+    std::chrono::steady_clock::duration dropped{};
+
     while (m_running.load()) {
         next += dt;
 
@@ -284,12 +293,30 @@ void World::m_physicsLoop() {
             nextPublish = tPublish + publishPeriod;
         }
 
-        auto now = std::chrono::steady_clock::now();
+        const auto now = std::chrono::steady_clock::now();
         if (now < next) {
             std::this_thread::sleep_until(next);
-        } else {
-            // overrun → resync
+        } else if (now - next > kMaxBacklog) {
+            dropped += now - next;
             next = now;
+        }
+
+        // Real-time factor while running: simulated time / wall time.
+        if (!isRunning()) {
+            reportStart = now;
+            reportSimTime = m_elapsedTime.load();
+            dropped = {};
+        } else if (now - reportStart >= kReportPeriod) {
+            const double wall = std::chrono::duration<double>(now - reportStart).count();
+            const double factor = (m_elapsedTime.load() - reportSimTime) / wall;
+            if (factor < 0.99) {
+                LOG_WARNING("Simulation slower than real time: factor " + std::to_string(factor) + " over the last "
+                            + std::to_string(wall) + " s, " + std::to_string(std::chrono::duration<double>(dropped).count())
+                            + " s dropped");
+            }
+            reportStart = now;
+            reportSimTime = m_elapsedTime.load();
+            dropped = {};
         }
     }
 }

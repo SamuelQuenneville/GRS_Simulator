@@ -254,6 +254,8 @@ namespace YAML {
             rhs.mass      = node["MASS"].as<float>();
             rhs.dimension = node["DIMENSION"].as<std::vector<float>>();
             rhs.cda       = node["CDA"].as<float>();
+            if (node["FRICTION_STATIC"])  rhs.frictionStatic  = node["FRICTION_STATIC"].as<float>();
+            if (node["FRICTION_KINETIC"]) rhs.frictionKinetic = node["FRICTION_KINETIC"].as<float>();
             return true;
         }
     };

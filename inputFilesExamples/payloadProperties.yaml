@@ -8,6 +8,8 @@ PayloadProperties:
   MASS      : 20.0  # kg
   DIMENSION : [0.4, 0.4, 0.4] # [x y z]
   CDA       : 0.5
+  FRICTION_STATIC  : 0.6 # ground friction coefficients (optional, 0 = frictionless)
+  FRICTION_KINETIC : 0.5
 
 NodeProperties:
   NAME: 'tetherNode'

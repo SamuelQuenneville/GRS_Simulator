@@ -48,7 +48,8 @@ void Payload::update(const double dt, const WindEnvironment& windEnv) {
     if (!m_isGrounded) {
         updateForcesOnBody();
 
-        const payloadStates derivatives   = m_calcStatesDerivatives();
+        payloadStates derivatives = m_calcStatesDerivatives();
+        m_applyGroundFriction(derivatives, dt);
         const bool groundContact = m_eulerIntegration(derivatives, dt);
 
         // Inertial acceleration in NED; the ground can only push up while in contact
@@ -141,6 +142,39 @@ bool Payload::m_eulerIntegration(const payloadStates& derivatives, const double 
     }
 
     return false;
+}
+
+void Payload::m_applyGroundFriction(payloadStates& derivatives, const double dt) {
+    // On the ground and pressed into it: the ground supplies the normal force.
+    if (m_states.z < 0.0 || derivatives.vz <= 0.0) return;
+    const double normal = m_properties.mass * derivatives.vz;
+
+    const double v = std::hypot(m_states.vx, m_states.vy);
+    const double a = std::hypot(derivatives.vx, derivatives.vy);
+    constexpr double vStick = 1e-3; // [m/s]
+
+    if (v < vStick && m_properties.mass * a <= m_properties.frictionStatic * normal) {
+        m_states.vx = 0.0;
+        m_states.vy = 0.0;
+        derivatives.x = 0.0;
+        derivatives.y = 0.0;
+        derivatives.vx = 0.0;
+        derivatives.vy = 0.0;
+        return;
+    }
+
+    // Sliding: against the velocity, or against the applied force when starting.
+    const double ux = v >= vStick ? m_states.vx / v : derivatives.vx / a;
+    const double uy = v >= vStick ? m_states.vy / v : derivatives.vy / a;
+    const double aFriction = m_properties.frictionKinetic * normal / m_properties.mass;
+    derivatives.vx -= aFriction * ux;
+    derivatives.vy -= aFriction * uy;
+
+    // Friction stops the body, it never reverses it within a step.
+    if (v >= vStick && (m_states.vx + derivatives.vx * dt) * ux + (m_states.vy + derivatives.vy * dt) * uy < 0.0) {
+        derivatives.vx = -m_states.vx / dt;
+        derivatives.vy = -m_states.vy / dt;
+    }
 }
 
 grs::Vec3d Payload::m_calcSpecificForceBody(const grs::Vec3d& accelNed) const {
