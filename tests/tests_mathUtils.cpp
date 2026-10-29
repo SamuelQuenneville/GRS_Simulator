@@ -57,20 +57,20 @@ TEST(MathUtilsTest, WrapToPiLargeValues) {
 TEST(MathUtilsTest, UnwrapContinuousIncreasing) {
     constexpr double prev = 0.9 * M_PI;
     constexpr double wrapped = -0.9 * M_PI;  // wrapped value just after π
-    constexpr double unwrapped = unwrap(prev, wrapped);
+    double unwrapped = unwrap(prev, wrapped);
     EXPECT_NEAR(unwrapped, 1.1 * M_PI, EPS); // should "continue"
 }
 
 TEST(MathUtilsTest, UnwrapContinuousDecreasing) {
     constexpr double prev = -0.9 * M_PI;
     constexpr double wrapped = 0.9 * M_PI;  // wrapped value just before -π
-    constexpr double unwrapped = unwrap(prev, wrapped);
+    double unwrapped = unwrap(prev, wrapped);
     EXPECT_NEAR(unwrapped, -1.1 * M_PI, EPS);
 }
 
 TEST(MathUtilsTest, UnwrapNoCrossing) {
     constexpr double prev = 1.0;
     constexpr double wrapped = 1.1;
-    constexpr double unwrapped = unwrap(prev, wrapped);
+    double unwrapped = unwrap(prev, wrapped);
     EXPECT_NEAR(unwrapped, 1.1, EPS);
 }
