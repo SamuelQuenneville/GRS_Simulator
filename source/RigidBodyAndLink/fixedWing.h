@@ -91,7 +91,6 @@ private:
     bool m_inFlightLaunch = false;
 
     double m_rpm = 0.0;
-    double m_rpmTau = 0.12;
 
     std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> m_controller = nullptr;
 
@@ -115,6 +114,7 @@ private:
 
     [[nodiscard]] double m_pwmToControl(controlAxis control, uint16_t pwm) const;
     void m_updateRpmSensor(double dt, double throttleInput);
+    [[nodiscard]] fixedWingControlInputs m_servoDynamics(fixedWingControlInputs target, double dt) const;
 
     void m_writeLog();
 };

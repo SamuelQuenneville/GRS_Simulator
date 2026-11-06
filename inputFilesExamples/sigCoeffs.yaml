@@ -30,6 +30,13 @@ AircraftProperties:
   DELTA_RUD_MIN_DEG: -20.000000 # degrees
   DELTA_RUD_MAX_DEG: 20.000000 # degrees
   #
+  # Actuator dynamics (optional, 0 = none): surfaces 1st order lag + rate limit,
+  # motor RPM 1st order lag (thrust and RPM sensor). Bench 2022-01-25: RPM
+  # starts about 0.1 s after the PWM step, then 63 % in about 0.15 s.
+  SERVO_TAU       : 0.025  # s, to measure
+  SERVO_RATE_DEG_S: 160.0 # deg/s, to measure
+  MOTOR_TAU       : 0.15  # s
+  #
   # Calibrated aerodynamic model (AVL coefficients calibrated on flight data)
   # Angles and rates in rad, control deflections in deg.
   # Each coefficient applies to the deviation from the calibration trim below,

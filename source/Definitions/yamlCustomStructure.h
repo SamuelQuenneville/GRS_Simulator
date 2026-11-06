@@ -351,6 +351,11 @@ namespace YAML {
             rhs.rudMinDeg = node["DELTA_RUD_MIN_DEG"].as<double>();
             rhs.rudMaxDeg = node["DELTA_RUD_MAX_DEG"].as<double>();
 
+            // ACTUATOR DYNAMICS (optional)
+            if (node["SERVO_TAU"])        rhs.servoTau      = node["SERVO_TAU"].as<double>();
+            if (node["SERVO_RATE_DEG_S"]) rhs.servoRateDegS = node["SERVO_RATE_DEG_S"].as<double>();
+            if (node["MOTOR_TAU"])        rhs.motorTau      = node["MOTOR_TAU"].as<double>();
+
             // CALIBRATION TRIM (deg)
             rhs.trimAlpha    = node["TRIM_ALPHA"].as<double>();
             rhs.trimBeta     = node["TRIM_BETA"].as<double>();

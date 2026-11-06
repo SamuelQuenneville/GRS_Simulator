@@ -8,6 +8,9 @@
 
 #include "fixedWing.h"
 
+#include <cmath>
+#include <limits>
+
 int FixedWing::m_idCounter = 0;
 
 FixedWing::FixedWing(const worldPhysics& physics, const fixedWingProperties& properties)
@@ -85,7 +88,7 @@ void FixedWing::update(const double dt, const WindEnvironment& windEnv) {
     centerOfMass().setWind(m_windBody);
 
     const fixedWingControlInputs inputs = m_controller->calculateAircraftControlInputs(getId(), getStates(), getCommands());
-    setInputs(inputs);
+    setInputs(m_servoDynamics(inputs, dt));
 
     // Go through all Frames
     updateForcesOnBody();
@@ -147,7 +150,9 @@ void FixedWing::updateSitl(const double dt, const WindEnvironment& windEnv, cons
 
     m_updateRpmSensor(dt, pwm[2]);
 
-    setInputs(inputs);
+    // Motor lag: thrust from the lagged RPM
+    inputs.deltaThrust = (pwm[0] == 0 || m_rpm < 10.0) ? 0.0 : std::max(rpm2thrust(static_cast<float>(airspeed()), static_cast<float>(m_rpm)), 0.0);
+    setInputs(m_servoDynamics(inputs, dt));
 
     // Go through all Frames
     updateForcesOnBody();
@@ -586,11 +591,23 @@ void FixedWing::m_updateRpmSensor(const double dt, const double throttleInput) {
         rpm = 0.0;
     }
 
-    // 1st order lag: dRPM/dt = (desired - current) / tau
-    const double rpm_dot = (rpm - m_rpm) / m_rpmTau;
+    // 1st order lag, exact over the step
+    const double tau = m_properties.motorTau;
+    m_rpm += tau > 0.0 ? (rpm - m_rpm) * (1.0 - std::exp(-dt / tau)) : rpm - m_rpm;
+}
 
-    // Integrate
-    m_rpm += rpm_dot * dt;
+fixedWingControlInputs FixedWing::m_servoDynamics(fixedWingControlInputs target, const double dt) const {
+    // 1st order lag (exact over the step), then rate limit, on each surface [deg]
+    const double tau = m_properties.servoTau;
+    const double maxStep = m_properties.servoRateDegS > 0.0 ? m_properties.servoRateDegS * dt : std::numeric_limits<double>::infinity();
+    const auto servo = [&](const double current, const double command) {
+        const double step = tau > 0.0 ? (command - current) * (1.0 - std::exp(-dt / tau)) : command - current;
+        return current + std::clamp(step, -maxStep, maxStep);
+    };
+    target.deltaElevator = servo(m_inputs.deltaElevator, target.deltaElevator);
+    target.deltaAileron  = servo(m_inputs.deltaAileron,  target.deltaAileron);
+    target.deltaRudder   = servo(m_inputs.deltaRudder,   target.deltaRudder);
+    return target;
 }
 
 void FixedWing::m_writeLog() {

@@ -84,6 +84,11 @@ struct fixedWingProperties {
     double rudMinDeg;  // deg
     double rudMaxDeg;  // deg
 
+    // ACTUATOR DYNAMICS (0 = none)
+    double servoTau      = 0.0;  // s, surface 1st order lag
+    double servoRateDegS = 0.0;  // deg/s, surface rate limit
+    double motorTau      = 0.12; // s, RPM 1st order lag (thrust and RPM sensor)
+
     // CALIBRATION TRIM (reference point of the aero model)
     double trimAlpha;       // deg
     double trimBeta;        // deg
