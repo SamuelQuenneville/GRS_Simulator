@@ -38,10 +38,13 @@ FixedWing::FixedWing(const worldPhysics& physics, const fixedWingProperties& pro
     });
 
     propulsionReference.setLoadCallback([this](const Frame& f) {
-        // TODO Moment?
+        // Shaft along x: motor reaction torque and gyroscopic moment H x Omega of the propeller
+        const grs::Vec3d& e = f.getLocalOrientation();
+        const grs::Vec3d omega = grs::eulerToMat(e[0], e[1], e[2]).transpose() * grs::Vec3d(m_states.p, m_states.q, m_states.r);
+        const double h = propAngularMomentum(static_cast<float>(m_rpm));
 
         f.setForce(grs::Vec3d(m_inputs.deltaThrust,0.0,0.0));
-        f.setMoment(grs::Vec3d::zeros());
+        f.setMoment(grs::Vec3d(propReactionTorque(static_cast<float>(airspeed()), static_cast<float>(m_rpm)), -h * omega[2], h * omega[1]));
     });
 
     tetherAttach.setLoadCallback([this](const Frame& f) {
@@ -320,6 +323,12 @@ fixedWingStates FixedWing::m_calcStatesDerivatives() {
             derivatives.u = 0.0;
             derivatives.v = 0.0;
             derivatives.w = 0.0;
+            derivatives.phi = 0.0;
+            derivatives.theta = 0.0;
+            derivatives.psi = 0.0;
+            derivatives.p = 0.0;
+            derivatives.q = 0.0;
+            derivatives.r = 0.0;
         } else {
             // In-flight launch, waiting for shouldMove
             derivatives.psi = 0.0;

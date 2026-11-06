@@ -22,6 +22,15 @@ namespace {
     constexpr double kThrustCoeffZ = 0.0757;
     constexpr double kPsi = kAirDensity * kPropDiameter * kPropDiameter * kPropDiameter * kPropDiameter / 3600.0;
     constexpr double kMaxRpm = 9000.0;
+
+    // Power coefficient CP(J) = c0 + c1 J + c2 J^2, J = airspeed / (rps*D), P = CP rho n^3 D^5.
+    // Fitted on the wind tunnel data of the APC 16x8E, as the thrust coefficients above.
+    constexpr double kPowerCoeff0 = 0.0285;
+    constexpr double kPowerCoeff1 = 0.0606;
+    constexpr double kPowerCoeff2 = -0.1450;
+    constexpr double kTwoPi = 6.283185307179586;
+    constexpr double kPropInertia = 3.4e-4;    // Propeller + motor rotating part about the shaft [kg*m^2], measured
+    constexpr double kPropSpinDirection = 1.0; // +1: clockwise seen from behind, -1: counter-clockwise
 }
 
 double thrust2rpm(const float airspeed, const float thrustTarget) {
@@ -47,4 +56,19 @@ double rpm2thrust(const float airspeed, const float rpmTarget) {
 
 float maxThrust(const float airspeed) {
     return static_cast<float>(rpm2thrust(airspeed, kMaxRpm));
+}
+
+double propReactionTorque(const float airspeed, const float rpm) {
+    if (!(rpm > 0.0f)) {
+        return 0.0;
+    }
+    const double n = rpm / 60.0;
+    const double J = std::max(static_cast<double>(airspeed), 0.0) / (n * kPropDiameter);
+    const double cp = std::max(kPowerCoeff0 + kPowerCoeff1 * J + kPowerCoeff2 * J * J, 0.0);
+    const double torque = cp / kTwoPi * kAirDensity * n * n * std::pow(kPropDiameter, 5);
+    return -kPropSpinDirection * torque;
+}
+
+double propAngularMomentum(const float rpm) {
+    return kPropSpinDirection * kPropInertia * rpm * kTwoPi / 60.0;
 }

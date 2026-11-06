@@ -23,4 +23,9 @@ double thrust2rpm(float airspeed, float thrustTarget);
 double rpm2thrust(float airspeed, float rpmTarget);
 float maxThrust(float airspeed);
 
+// Moment of the motor on the airframe about the shaft (+x of the propulsion frame) [N*m]
+double propReactionTorque(float airspeed, float rpm);
+// Signed angular momentum of the propeller about the shaft [kg*m^2/s]
+double propAngularMomentum(float rpm);
+
 #endif //POWERTRAIN_H
