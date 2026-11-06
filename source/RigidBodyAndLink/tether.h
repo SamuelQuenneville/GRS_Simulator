@@ -37,6 +37,8 @@ private:
 
     tetherLogInfos m_tetherLogInfos{};
 
+    double m_paidOut = 0.0; // Length paid out by the slip clutch [m]
+
     // endPoint - startPoint
     grs::Vec3d m_relativePosition{};
     grs::Vec3d m_relativeSpeed{};

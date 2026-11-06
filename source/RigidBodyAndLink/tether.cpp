@@ -8,6 +8,8 @@
 
 #include "tether.h"
 
+#include <algorithm>
+
 Tether::Tether(const worldPhysics& physics, const segmentProperties& properties)
     : m_type(Link::RIGID)
     , m_physics(physics)
@@ -48,6 +50,12 @@ void Tether::update(const double dt) {
     startPoint->setForce(tensionForce);
     endPoint->setForce(-tensionForce);
 
+    // Slip clutch, never reels back in
+    const double tension = tensionForce.norm();
+    if (m_paidOut < m_properties.payoutLength && tension > m_properties.slipTension) {
+        m_paidOut = std::min<double>(m_properties.payoutLength, m_paidOut + (tension - m_properties.slipTension) / m_properties.slipDamping * dt);
+    }
+
     // Log
     m_writeLog();
 }
@@ -66,7 +74,7 @@ grs::Vec3d Tether::m_calcTensionForce() {
     const grs::Vec3d tetherNormalize = grs::normalize(m_relativePosition);
 
     // Calculate tether elongation
-    const double tetherDeformation = tetherMagnitude - m_properties.length;
+    const double tetherDeformation = tetherMagnitude - (m_properties.length + m_paidOut);
 
     grs::Vec3d forceSpring = (m_properties.rigidity * tetherDeformation * tetherNormalize) + (m_properties.damping * grs::dot(m_relativeSpeed, tetherNormalize) * tetherNormalize);
 
@@ -152,7 +160,8 @@ void Tether::m_writeLog() const {
         << endPoint->position()[0]   << "," << endPoint->position()[1]   << "," << endPoint->position()[2]   << ","
         << endPoint->velocity()[0]   << "," << endPoint->velocity()[1]   << "," << endPoint->velocity()[2]   << ","
         << m_tetherLogInfos.forceSpring[0] << "," << m_tetherLogInfos.forceSpring[1] << "," << m_tetherLogInfos.forceSpring[2] << ","
-        << m_tetherLogInfos.forceAero[0]   << "," << m_tetherLogInfos.forceAero[1]   << "," << m_tetherLogInfos.forceAero[2];
+        << m_tetherLogInfos.forceAero[0]   << "," << m_tetherLogInfos.forceAero[1]   << "," << m_tetherLogInfos.forceAero[2] << ","
+        << m_properties.length + m_paidOut;
 
     Logger::instance().log(LogType::Tether, msg.str());
 }

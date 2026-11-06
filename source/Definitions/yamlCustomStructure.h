@@ -224,6 +224,14 @@ namespace YAML {
             rhs.rigidity     = node["RIGIDITY"].as<float>();
             rhs.damping      = node["DAMPING"].as<float>();
             rhs.numSegments  = node["NUM_SEGMENTS"].as<int>();
+            if (node["PAYOUT_LENGTH"]) {
+                rhs.payoutLength = node["PAYOUT_LENGTH"].as<float>();
+                rhs.slipTension  = node["SLIP_TENSION"].as<float>();
+                rhs.slipDamping  = node["SLIP_DAMPING"].as<float>();
+                if (rhs.payoutLength > 0.0f && !(rhs.slipDamping > 0.0f)) {
+                    throw std::runtime_error("Tether " + rhs.name + ": SLIP_DAMPING must be > 0 with PAYOUT_LENGTH > 0");
+                }
+            }
             return true;
         }
     };

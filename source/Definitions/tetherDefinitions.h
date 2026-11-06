@@ -25,6 +25,11 @@ struct segmentProperties {
     float rigidity;    // spring model k value
     float damping;     // spring model b value
     int   numSegments; // number of segments use to compute aerodynamic forces
+    // Slip clutch: pays out up to payoutLength beyond length when the tension exceeds
+    // slipTension, at (tension - slipTension) / slipDamping. 0 = no clutch.
+    float payoutLength = 0.0f; // m
+    float slipTension  = 0.0f; // N
+    float slipDamping  = 0.0f; // N.s/m
 };
 
 struct tethersProperties {
