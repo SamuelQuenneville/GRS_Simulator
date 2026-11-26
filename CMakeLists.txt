@@ -245,6 +245,18 @@ include_directories(${NANOGUI_EXTRA_INCS})
 # Project
 target_include_directories(GRS_Simulator PUBLIC source)
 
+# Git commit of this tree, recorded in every log manifest. Regenerated on
+# every build; the header only changes (and recompiles its users) when the
+# commit or the dirty state changes.
+set(GRS_GIT_VERSION_HEADER ${CMAKE_BINARY_DIR}/generated/gitVersion.h)
+add_custom_target(git_version
+        COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR} -DOUT=${GRS_GIT_VERSION_HEADER} -P ${CMAKE_SOURCE_DIR}/cmake/gitVersion.cmake
+        BYPRODUCTS ${GRS_GIT_VERSION_HEADER}
+        COMMENT "Recording the git commit"
+        VERBATIM)
+add_dependencies(GRS_Simulator git_version)
+target_include_directories(GRS_Simulator PRIVATE ${CMAKE_BINARY_DIR}/generated)
+
 foreach(p ${NANOGUI_EXTRA_INCS})
     target_include_directories(GRS_Simulator PRIVATE $<1:${p}>)
 endforeach()
