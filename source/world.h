@@ -20,7 +20,9 @@
 #include <functional>
 #include <mutex>
 #include <optional>
+#include <string>
 #include <thread>
+#include <vector>
 
 #include "Definitions/renderObjectDefinitions.h"
 #include "Configuration/configurationParser.h"
@@ -79,6 +81,13 @@ private:
 
     std::atomic<bool> m_isRunning{false};
     std::string m_logDirectory;
+    std::string m_configFile;
+    std::vector<std::string> m_propertyFiles;
+    int m_logRunCount = 0;
+
+    // Log folder of the next Logger::start(): <runDirectory>/sim with --run-dir, else LOG_FILE_DIRECTORY/<date>.
+    std::string m_nextLogDirectory();
+    [[nodiscard]] LogRunInfo m_logRunInfo() const;
 
     void m_physicsLoop();
     void m_applyPendingCommands();

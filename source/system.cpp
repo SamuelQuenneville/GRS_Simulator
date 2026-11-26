@@ -97,10 +97,19 @@ void System::updateSitl(const double dt) {
     }
 
     if (shouldEndSimulation) {
+        if (!m_endLogged) {
+            Logger::instance().logEvent(m_simTime, 0, "END_FLAG", "endSimulation received from every autopilot");
+            m_endLogged = true;
+        }
         if (m_pauseTimer) m_pauseTimer();
     }
 
     if (m_communicationManager->fcuOnline()) {
+        if (!m_fcuOnlineLogged) {
+            Logger::instance().logEvent(m_simTime, 0, "FCU_ONLINE", "every autopilot answered, physics starts");
+            m_fcuOnlineLogged = true;
+        }
+
         // Call tether update()
         if (m_systemConfiguration.configuration != "FREE") {
             for(const auto& tether : m_links) {
@@ -109,6 +118,7 @@ void System::updateSitl(const double dt) {
         }
 
         // Call fixedWing update()
+        bool released = false;
         for(const auto& aircraft : m_aircraft) {
 
             // Are we on a launcher?
@@ -125,6 +135,10 @@ void System::updateSitl(const double dt) {
                     // The aircraft exited the launcher (timeSinceLaunch sec to msec)
                     if (m_timeSinceLaunch * 1000 > m_systemProperties.launcher.launchDuration) {
                         aircraft->setInLaunch(false);
+                        if (!m_releaseLogged) {
+                            Logger::instance().logEvent(m_simTime, aircraft->getId(), "RAIL_RELEASE", "leaves the launcher");
+                            released = true;
+                        }
                     }
                 }
             }
@@ -143,7 +157,15 @@ void System::updateSitl(const double dt) {
             m_communicationManager->sendData(aircraft->getId(), sensorData);
         }
 
+        if (released) {
+            m_releaseLogged = true;
+        }
+
         if (m_launchTriggered) {
+            if (m_timeSinceLaunch == 0) {
+                Logger::instance().logEvent(m_simTime, 0, "LAUNCH",
+                    m_systemConfiguration.haveLauncher ? "launcher stroke starts" : "launch triggered, no launcher");
+            }
             m_timeSinceLaunch += dt;
         }
 
@@ -164,6 +186,9 @@ void System::updateSitl(const double dt) {
         }
 
         m_communicationManager->resetSyncFlags();
+
+        // Same clock as the simTimeSec column of every body (one dt per physics step).
+        m_simTime += dt;
     }
 }
 

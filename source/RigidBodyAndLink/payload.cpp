@@ -8,6 +8,8 @@
 
 #include "payload.h"
 
+#include <iomanip>
+
 Payload::Payload(const worldPhysics& physics, const payloadProperties& properties, const bool isGrounded)
     : m_physics(physics)
     , m_properties(properties)
@@ -96,7 +98,8 @@ void Payload::setInitialStates(initialStates& states) {
 void Payload::m_writeLog() const {
 
     std::ostringstream msg;
-    msg << m_simTime << "," << Logger::nowWallTimeMs() << "," << m_properties.name << ","
+    msg << std::fixed << std::setprecision(4)
+        << m_simTime << "," << Logger::nowWallTimeMs() << "," << m_properties.name << ","
         << m_states.x  << "," << m_states.y  << "," << m_states.z  << ","
         << m_states.vx << "," << m_states.vy << "," << m_states.vz << ","
         << m_wind[0]   << "," << m_wind[1]   << "," << m_wind[2]   << ","

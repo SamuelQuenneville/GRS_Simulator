@@ -72,6 +72,12 @@ private:
     double m_timeSinceHlcCall;
     double m_timeSinceLaunch;
 
+    // SITL physics time and the events logged once per run (events.csv).
+    double m_simTime = 0.0;
+    bool m_fcuOnlineLogged = false;
+    bool m_releaseLogged = false;
+    bool m_endLogged = false;
+
     bool m_shouldCallHlc();
     void m_initHlcCommands();
 

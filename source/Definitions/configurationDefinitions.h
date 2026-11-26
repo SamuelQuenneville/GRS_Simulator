@@ -26,6 +26,8 @@ struct programArguments {
     int msaaSamples = 4;     // Viewer anti-aliasing samples (0 disables)
     bool headless = false;   // Run without window or render snapshots
     std::string configFile;  // Loaded at startup (--config) or run headless (--headless)
+    std::string runDirectory; // --run-dir: logs go to <runDirectory>/sim instead of LOG_FILE_DIRECTORY/<date>
+    std::string commandLine;  // Arguments as typed, recorded in the log manifest
 };
 
 struct simulationParameters {

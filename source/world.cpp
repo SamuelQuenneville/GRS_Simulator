@@ -43,14 +43,33 @@ std::string World::getDateString() {
     return date;
 }
 
+std::string World::m_nextLogDirectory() {
+    const int run = m_logRunCount++;
+    if (m_programArgs.runDirectory.empty()) {
+        return m_logDirectory + getDateString();
+    }
+    // A reset logs into a new folder next to the first one.
+    return m_programArgs.runDirectory + (run == 0 ? std::string("/sim") : "/sim_reset" + std::to_string(run));
+}
+
+LogRunInfo World::m_logRunInfo() const {
+    return {.commandLine = m_programArgs.commandLine,
+            .runDirectory = m_programArgs.runDirectory,
+            .configFile = m_configFile,
+            .propertyFiles = m_propertyFiles};
+}
+
 void World::readConfigurationFile(const std::string& fileName) {
     YAML::Node nodeConfiguration = YAML::LoadFile(fileName);
     const simulationParameters simParams = ConfigurationParser::parseSimulationParameters(nodeConfiguration);
     m_systemConfiguration = ConfigurationParser::parseSystemConfiguration(nodeConfiguration);
 
     m_logDirectory = simParams.logFilesDirectory;
-    Logger::instance().start(m_programArgs.loggingEnabled, m_logDirectory + getDateString());
-    Logger::instance().copyConfigFile(fileName, m_logDirectory + getDateString());
+    m_configFile = fileName;
+    m_propertyFiles = {simParams.aircraftPropertiesFileDirectory, simParams.tetherPropertiesFileDirectory,
+                       simParams.payloadPropertiesFileDirectory, simParams.launcherPropertiesFileDirectory,
+                       simParams.controllerGainsFileDirectory};
+    Logger::instance().start(m_programArgs.loggingEnabled, m_nextLogDirectory(), m_logRunInfo());
 
     const std::chrono::duration<double> timeStep(1.0 / m_systemConfiguration.llcRate);
     simulationConfiguration = {timeStep};
@@ -169,7 +188,7 @@ void World::resetSystem() {
     Logger::instance().stop();
     m_system.reset();
 
-    Logger::instance().start(m_programArgs.loggingEnabled, m_logDirectory + getDateString());
+    Logger::instance().start(m_programArgs.loggingEnabled, m_nextLogDirectory(), m_logRunInfo());
     createSystem();
 
     if (threadWasRunning) {

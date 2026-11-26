@@ -62,6 +62,10 @@ int main(const int argc, const char * argv[]) {
     programArguments arguments{.sitlMode = false,.inFlightLaunch = false};
     PROGRAM_LOGGER.setLogFileName("log.txt");
 
+    for (int i = 0; i < argc; ++i) {
+        arguments.commandLine += (i ? " " : "") + std::string(argv[i]);
+    }
+
     // Loop through command-line arguments
     for (int i = 1; i < argc; ++i) {
         
@@ -73,6 +77,8 @@ int main(const int argc, const char * argv[]) {
             arguments.inFlightLaunch = true;
         }else if (arg == "--log") {
             arguments.loggingEnabled = true;
+        } else if (arg == "--run-dir" && i + 1 < argc) {
+            arguments.runDirectory = argv[++i];
         } else if (arg == "--headless" && i + 1 < argc) {
             arguments.headless = true;
             arguments.configFile = argv[++i];
@@ -90,6 +96,7 @@ int main(const int argc, const char * argv[]) {
                       << "  --sitl      Enable SITL mode\n"
                       << "  --csv       Use with sitl to enable commands from .csv\n"
                       << "  --log       Enable logging\n"
+                      << "  --run-dir DIR    Log into DIR/sim (shared with the GCS's DIR/gcs)\n"
                       << "  --fps N     Viewer frame rate cap in Hz (default 60)\n"
                       << "  --msaa N    Viewer anti-aliasing samples, 0 to disable (default 4)\n"
                       << "  --config FILE    Load FILE (.yaml) in the viewer at startup\n"
