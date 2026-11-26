@@ -31,6 +31,21 @@ namespace {
     constexpr double kTwoPi = 6.283185307179586;
     constexpr double kPropInertia = 3.4e-4;    // Propeller + motor rotating part about the shaft [kg*m^2], measured
     constexpr double kPropSpinDirection = 1.0; // +1: clockwise seen from behind, -1: counter-clockwise
+
+    // Aerodynamic torque of the propeller about the shaft, CP clamped at 0 (no windmilling) [N*m]
+    double propTorque(const double airspeed, const double rpm) {
+        if (!(rpm > 0.0)) {
+            return 0.0;
+        }
+        const double n = rpm / 60.0;
+        const double J = airspeed / (n * kPropDiameter);
+        const double cp = std::max(kPowerCoeff0 + kPowerCoeff1 * J + kPowerCoeff2 * J * J, 0.0);
+        return cp / kTwoPi * kAirDensity * n * n * std::pow(kPropDiameter, 5);
+    }
+
+    double firstOrderLag(const double y, const double target, const double dt, const double tau) {
+        return tau > 0.0 ? y + (target - y) * (1.0 - std::exp(-dt / tau)) : target;
+    }
 }
 
 double thrust2rpm(const float airspeed, const float thrustTarget) {
@@ -58,17 +73,48 @@ float maxThrust(const float airspeed) {
     return static_cast<float>(rpm2thrust(airspeed, kMaxRpm));
 }
 
-double propReactionTorque(const float airspeed, const float rpm) {
-    if (!(rpm > 0.0f)) {
-        return 0.0;
-    }
-    const double n = rpm / 60.0;
-    const double J = std::max(static_cast<double>(airspeed), 0.0) / (n * kPropDiameter);
-    const double cp = std::max(kPowerCoeff0 + kPowerCoeff1 * J + kPowerCoeff2 * J * J, 0.0);
-    const double torque = cp / kTwoPi * kAirDensity * n * n * std::pow(kPropDiameter, 5);
-    return -kPropSpinDirection * torque;
+double Powertrain::rotorRpm() const {
+    return m_omega * 60.0 / kTwoPi;
 }
 
-double propAngularMomentum(const float rpm) {
-    return kPropSpinDirection * kPropInertia * rpm * kTwoPi / 60.0;
+double Powertrain::reactionTorque() const {
+    return -kPropSpinDirection * m_motorTorque;
+}
+
+double Powertrain::angularMomentum() const {
+    return kPropSpinDirection * kPropInertia * m_omega;
+}
+
+void Powertrain::update(const double dt, const double pwm, const double airspeed) {
+    const auto& p = m_properties;
+
+    const double dutyTarget = std::clamp((pwm - p.escPwmMin) / (p.escPwmMax - p.escPwmMin), 0.0, 1.0);
+    m_duty = firstOrderLag(m_duty, dutyTarget, dt, p.escTau);
+
+    // Back-EMF constant [V*s/rad], equal to the torque constant [N*m/A].
+    // Current is quasi-static (L/R << dt); the ESC does not brake regeneratively.
+    const double ke = 60.0 / (kTwoPi * p.motorKv);
+    m_current = std::max((m_duty * p.batteryVoltage - ke * m_omega) / p.motorResistance, 0.0);
+    m_motorTorque = ke * (m_current - p.motorNoLoadCurrent);
+    if (m_omega <= 0.0) {
+        m_motorTorque = std::max(m_motorTorque, 0.0);
+    }
+
+    const double v = std::max(airspeed, 0.0);
+    m_omega = std::max(m_omega + dt * (m_motorTorque - propTorque(v, rotorRpm())) / kPropInertia, 0.0);
+
+    const double rpm = rotorRpm();
+    m_thrust = rpm < 10.0 ? 0.0 : std::max(rpm2thrust(static_cast<float>(v), static_cast<float>(rpm)), 0.0);
+
+    m_filteredRpm = firstOrderLag(m_filteredRpm, rpm, dt, p.rpmSensorTau);
+    if (p.rpmSensorRateHz <= 0.0) {
+        m_sensedRpm = m_filteredRpm;
+        return;
+    }
+    const double period = 1.0 / p.rpmSensorRateHz;
+    m_sensorTimer += dt;
+    if (m_sensorTimer >= period) {
+        m_sensorTimer = std::fmod(m_sensorTimer, period);
+        m_sensedRpm = m_filteredRpm;
+    }
 }

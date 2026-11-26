@@ -17,6 +17,7 @@ FixedWing::FixedWing(const worldPhysics& physics, const fixedWingProperties& pro
     : m_id(++m_idCounter)
     , m_physics(physics)
     , m_properties(properties)
+    , m_powertrain(properties.powertrain)
 {
     const std::string idString = "uav" + std::to_string(m_id);
 
@@ -44,10 +45,10 @@ FixedWing::FixedWing(const worldPhysics& physics, const fixedWingProperties& pro
         // Shaft along x: motor reaction torque and gyroscopic moment H x Omega of the propeller
         const grs::Vec3d& e = f.getLocalOrientation();
         const grs::Vec3d omega = grs::eulerToMat(e[0], e[1], e[2]).transpose() * grs::Vec3d(m_states.p, m_states.q, m_states.r);
-        const double h = propAngularMomentum(static_cast<float>(m_rpm));
+        const double h = m_powertrain.angularMomentum();
 
         f.setForce(grs::Vec3d(m_inputs.deltaThrust,0.0,0.0));
-        f.setMoment(grs::Vec3d(propReactionTorque(static_cast<float>(airspeed()), static_cast<float>(m_rpm)), -h * omega[2], h * omega[1]));
+        f.setMoment(grs::Vec3d(m_powertrain.reactionTorque(), -h * omega[2], h * omega[1]));
     });
 
     tetherAttach.setLoadCallback([this](const Frame& f) {
@@ -126,17 +127,16 @@ void FixedWing::updateSitl(const double dt, const WindEnvironment& windEnv, cons
     // Read from .csv(GCS pass through pixhawk) if we should move (launch triggered)
     m_flightLaunchTriggered = shouldMove;
 
-    // Convert PWM to normalized control inputs
-    fixedWingControlInputs inputs{
-         .deltaElevator = m_pwmToControl(ELEVATOR, pwm[1]),
-         .deltaAileron  = m_pwmToControl(AILERON,  pwm[0]),
-         .deltaRudder   = m_pwmToControl(RUDDER,   pwm[3]),
-         .deltaThrust   = m_pwmToControl(THROTTLE, pwm[2])
-    };
+    // All-zero input guard (fail-safe or inactive): surfaces centred, ESC at zero duty
+    const bool inactive = pwm[0] == 0;
+    m_powertrain.update(dt, inactive ? 0.0 : pwm[2], airspeed());
 
-    // All-zero input guard (fail-safe or inactive)
-    if (pwm[0] == 0) {
-        inputs = {.deltaElevator = 0.0, .deltaAileron = 0.0, .deltaRudder = 0.0, .deltaThrust = 0.0};
+    fixedWingControlInputs inputs{};
+    inputs.deltaThrust = m_powertrain.thrust();
+    if (!inactive) {
+        inputs.deltaElevator = m_pwmToControl(ELEVATOR, pwm[1]);
+        inputs.deltaAileron  = m_pwmToControl(AILERON,  pwm[0]);
+        inputs.deltaRudder   = m_pwmToControl(RUDDER,   pwm[3]);
     }
 
     // Log
@@ -144,14 +144,11 @@ void FixedWing::updateSitl(const double dt, const WindEnvironment& windEnv, cons
     msg << std::fixed << std::setprecision(4)
         << m_simTime << "," << Logger::nowWallTimeMs() << "," << m_id << ","
         << pwm[0] << "," << pwm[1] << "," << pwm[2] << "," << pwm[3] << ","
-        << inputs.deltaAileron << "," << inputs.deltaElevator << "," << inputs.deltaThrust << "," << inputs.deltaRudder;
+        << inputs.deltaAileron << "," << inputs.deltaElevator << "," << inputs.deltaThrust << "," << inputs.deltaRudder << ","
+        << m_powertrain.duty() << "," << m_powertrain.rotorRpm() << "," << m_powertrain.sensedRpm() << ","
+        << m_powertrain.current() << "," << m_powertrain.motorTorque();
     Logger::instance().log(LogType::SitlIn, msg.str());
 
-
-    m_updateRpmSensor(dt, pwm[2]);
-
-    // Motor lag: thrust from the lagged RPM
-    inputs.deltaThrust = (pwm[0] == 0 || m_rpm < 10.0) ? 0.0 : std::max(rpm2thrust(static_cast<float>(airspeed()), static_cast<float>(m_rpm)), 0.0);
     setInputs(m_servoDynamics(inputs, dt));
 
     // Go through all Frames
@@ -564,36 +561,9 @@ double FixedWing::m_pwmToControl(const controlAxis control, const uint16_t pwm) 
             return m_properties.rudMaxDeg / (PWM_MAX - PWM_MEAN) * (pwm - PWM_MEAN);
         }
 
-        case THROTTLE: {
-            constexpr double RPM_MAX = 9000.0;
-
-            const double rpm = (pwm - PWM_MIN) * RPM_MAX / (PWM_MAX - PWM_MIN);
-            if (rpm < 10.0) {
-                return 0.0;
-            }
-
-            const double thrust = rpm2thrust(static_cast<float>(airspeed()), static_cast<float>(rpm));
-            if (thrust < 0.0) {
-                return 0.0;
-            }
-            return thrust;
-        }
-
         default:
             return 0.0;
     }
-}
-
-void FixedWing::m_updateRpmSensor(const double dt, const double throttleInput) {
-
-    double rpm = (throttleInput - 1100.0) * 9000.0/800.0;
-    if (rpm < 10.0) {
-        rpm = 0.0;
-    }
-
-    // 1st order lag, exact over the step
-    const double tau = m_properties.motorTau;
-    m_rpm += tau > 0.0 ? (rpm - m_rpm) * (1.0 - std::exp(-dt / tau)) : rpm - m_rpm;
 }
 
 fixedWingControlInputs FixedWing::m_servoDynamics(fixedWingControlInputs target, const double dt) const {

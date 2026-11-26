@@ -30,12 +30,23 @@ AircraftProperties:
   DELTA_RUD_MIN_DEG: -20.000000 # degrees
   DELTA_RUD_MAX_DEG: 20.000000 # degrees
   #
-  # Actuator dynamics (optional, 0 = none): surfaces 1st order lag + rate limit,
-  # motor RPM 1st order lag (thrust and RPM sensor). Bench 2022-01-25: RPM
-  # starts about 0.1 s after the PWM step, then 63 % in about 0.15 s.
+  # Actuator dynamics (optional, 0 = none): surfaces 1st order lag + rate limit
   SERVO_TAU       : 0.025  # s, to measure
   SERVO_RATE_DEG_S: 160.0 # deg/s, to measure
-  MOTOR_TAU       : 0.15  # s
+  #
+  # Powertrain: ESC duty -> DC motor at fixed battery voltage -> rotor -> RPM sensor.
+  # Cobra 4130/12: Kv 540 rpm/V, Io 1.85 A @ 20 V, Rm 0.019 ohm phase to phase.
+  # MOTOR_RESISTANCE includes ESC and wiring (fitted on the 2026-11-12 RPM).
+  # ESC_PWM_MIN/MAX are the ESC calibration, not SERVO3_MIN/MAX.
+  ESC_PWM_MIN          : 1000   # us
+  ESC_PWM_MAX          : 2000   # us
+  ESC_TAU              : 0.04   # s
+  BATT_VOLTAGE         : 22.2   # V, under load
+  MOTOR_KV             : 540.0  # rpm/V
+  MOTOR_NO_LOAD_CURRENT: 1.85   # A
+  MOTOR_RESISTANCE     : 0.044  # ohm
+  RPM_SENSOR_TAU       : 0.44   # s
+  RPM_SENSOR_RATE_HZ   : 10.0   # Hz
   #
   # Calibrated aerodynamic model (AVL coefficients calibrated on flight data)
   # Angles and rates in rad, control deflections in deg.

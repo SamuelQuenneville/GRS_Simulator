@@ -47,7 +47,7 @@ public:
 
     void setInFlightLaunch() {m_inFlightLaunch = true;};
 
-    [[nodiscard]] double getRpm() const {return m_rpm;};
+    [[nodiscard]] double getRpm() const {return m_powertrain.sensedRpm();};
 
     [[nodiscard]] double airspeed() const;
     [[nodiscard]] double groundspeed() const;
@@ -60,7 +60,6 @@ public:
         AILERON,
         ELEVATOR,
         RUDDER,
-        THROTTLE,
     };
 
 private:
@@ -75,6 +74,7 @@ private:
 
     fixedWingStates m_states{};
     fixedWingProperties m_properties;
+    Powertrain m_powertrain;
     fixedWingControlInputs m_inputs{};
     fixedWingCommands m_commands{};
 
@@ -89,8 +89,6 @@ private:
 
     bool m_flightLaunchTriggered = false;
     bool m_inFlightLaunch = false;
-
-    double m_rpm = 0.0;
 
     std::unique_ptr<LowLevelController<fixedWingControlInputs,fixedWingStates,fixedWingCommands>> m_controller = nullptr;
 
@@ -113,7 +111,6 @@ private:
     void m_eulerIntegration(const fixedWingStates& derivatives, double dt);
 
     [[nodiscard]] double m_pwmToControl(controlAxis control, uint16_t pwm) const;
-    void m_updateRpmSensor(double dt, double throttleInput);
     [[nodiscard]] fixedWingControlInputs m_servoDynamics(fixedWingControlInputs target, double dt) const;
 
     void m_writeLog();

@@ -354,7 +354,18 @@ namespace YAML {
             // ACTUATOR DYNAMICS (optional)
             if (node["SERVO_TAU"])        rhs.servoTau      = node["SERVO_TAU"].as<double>();
             if (node["SERVO_RATE_DEG_S"]) rhs.servoRateDegS = node["SERVO_RATE_DEG_S"].as<double>();
-            if (node["MOTOR_TAU"])        rhs.motorTau      = node["MOTOR_TAU"].as<double>();
+
+            // POWERTRAIN (optional)
+            auto& pt = rhs.powertrain;
+            if (node["ESC_PWM_MIN"])           pt.escPwmMin          = node["ESC_PWM_MIN"].as<double>();
+            if (node["ESC_PWM_MAX"])           pt.escPwmMax          = node["ESC_PWM_MAX"].as<double>();
+            if (node["ESC_TAU"])               pt.escTau             = node["ESC_TAU"].as<double>();
+            if (node["BATT_VOLTAGE"])          pt.batteryVoltage     = node["BATT_VOLTAGE"].as<double>();
+            if (node["MOTOR_KV"])              pt.motorKv            = node["MOTOR_KV"].as<double>();
+            if (node["MOTOR_NO_LOAD_CURRENT"]) pt.motorNoLoadCurrent = node["MOTOR_NO_LOAD_CURRENT"].as<double>();
+            if (node["MOTOR_RESISTANCE"])      pt.motorResistance    = node["MOTOR_RESISTANCE"].as<double>();
+            if (node["RPM_SENSOR_TAU"])        pt.rpmSensorTau       = node["RPM_SENSOR_TAU"].as<double>();
+            if (node["RPM_SENSOR_RATE_HZ"])    pt.rpmSensorRateHz    = node["RPM_SENSOR_RATE_HZ"].as<double>();
 
             // CALIBRATION TRIM (deg)
             rhs.trimAlpha    = node["TRIM_ALPHA"].as<double>();

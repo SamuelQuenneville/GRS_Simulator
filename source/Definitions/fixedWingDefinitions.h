@@ -49,6 +49,18 @@ struct fixedWingStates {
     double r;     // yaw rate               (rad/s)
 };
 
+struct powertrainProperties {
+    double escPwmMin          = 1000.0; // us, ESC calibration end points
+    double escPwmMax          = 2000.0; // us
+    double escTau             = 0.04;   // s, duty 1st order lag
+    double batteryVoltage     = 22.2;   // V
+    double motorKv            = 540.0;  // rpm/V
+    double motorNoLoadCurrent = 1.85;   // A
+    double motorResistance    = 0.044;  // ohm, winding phase to phase plus ESC and wiring
+    double rpmSensorTau       = 0.44;   // s, 1st order lag of the RPM measurement
+    double rpmSensorRateHz    = 10.0;   // Hz, RPM sample and hold (0 = continuous)
+};
+
 struct fixedWingProperties {
     // GEOMETRY
     double mass;           // kg
@@ -87,7 +99,8 @@ struct fixedWingProperties {
     // ACTUATOR DYNAMICS (0 = none)
     double servoTau      = 0.0;  // s, surface 1st order lag
     double servoRateDegS = 0.0;  // deg/s, surface rate limit
-    double motorTau      = 0.12; // s, RPM 1st order lag (thrust and RPM sensor)
+
+    powertrainProperties powertrain;
 
     // CALIBRATION TRIM (reference point of the aero model)
     double trimAlpha;       // deg

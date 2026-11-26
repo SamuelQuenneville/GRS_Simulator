@@ -162,7 +162,8 @@ void Logger::m_writeHeaders() {
     writeHeader(m_files[LogType::SitlIn], {
         {"simTimeSec", "s"}, {"wallTimeMs", "ms"}, {"id", "-"},
         {"pwm_0", "us"}, {"pwm_1", "us"}, {"pwm_2", "us"}, {"pwm_3", "us"},
-        {"aileron_deg", "deg"}, {"elevator_deg", "deg"}, {"throttle", "rpm"}, {"rudder_deg", "deg"}});
+        {"aileron_deg", "deg"}, {"elevator_deg", "deg"}, {"throttle", "rpm"}, {"rudder_deg", "deg"},
+        {"esc_duty", ""}, {"rotor_rpm", "rpm"}, {"sensed_rpm", "rpm"}, {"motor_current", "amp"}, {"motor_torque", "Nm"}});
 
     writeHeader(m_files[LogType::Frame], {
         {"simTimeSec", "s"}, {"wallTimeMs", "ms"}, {"name", "-"}, {"node_id", "-"},
