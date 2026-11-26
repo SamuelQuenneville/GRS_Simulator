@@ -150,6 +150,7 @@ void Logger::m_writeHeaders() {
 
     // First column: the timestamp sent to ArduPilot in the JSON frame (Unix
     // time), which drives the autopilot clock. Not the physics time.
+    // rpm: the sensed rpm sent to ArduPilot (sensed_rpm in sitlIn.csv).
     writeHeader(m_files[LogType::SitlOut], {
         {"jsonTimestampSec", "s"}, {"wallTimeMs", "ms"}, {"id", "-"},
         {"gyro_x", "rad/s"}, {"gyro_y", "rad/s"}, {"gyro_z", "rad/s"},
@@ -162,8 +163,8 @@ void Logger::m_writeHeaders() {
     writeHeader(m_files[LogType::SitlIn], {
         {"simTimeSec", "s"}, {"wallTimeMs", "ms"}, {"id", "-"},
         {"pwm_0", "us"}, {"pwm_1", "us"}, {"pwm_2", "us"}, {"pwm_3", "us"},
-        {"aileron_deg", "deg"}, {"elevator_deg", "deg"}, {"throttle", "rpm"}, {"rudder_deg", "deg"},
-        {"esc_duty", ""}, {"rotor_rpm", "rpm"}, {"sensed_rpm", "rpm"}, {"motor_current", "amp"}, {"motor_torque", "Nm"}});
+        {"aileron_deg", "deg"}, {"elevator_deg", "deg"}, {"thrust", "N"}, {"rudder_deg", "deg"},
+        {"esc_duty", "-"}, {"rotor_rpm", "rpm"}, {"sensed_rpm", "rpm"}, {"motor_current", "A"}, {"motor_torque", "N*m"}});
 
     writeHeader(m_files[LogType::Frame], {
         {"simTimeSec", "s"}, {"wallTimeMs", "ms"}, {"name", "-"}, {"node_id", "-"},
