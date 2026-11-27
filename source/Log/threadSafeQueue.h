@@ -12,6 +12,7 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <chrono>
 #include <optional>
 
 template<typename T>
@@ -38,6 +39,34 @@ public:
         auto val = std::move(m_queue.front());
         m_queue.pop();
         return val;
+    }
+
+    // Waits at most `timeout`; nullopt on timeout or once stopped and empty
+    // (stopped() tells the two apart).
+    std::optional<T> popFor(const std::chrono::milliseconds timeout) {
+        std::unique_lock lock(m_mutex);
+        m_cv.wait_for(lock, timeout, [this] {
+            return !m_queue.empty() || m_stopped;
+        });
+
+        if (m_queue.empty()) {
+            return std::nullopt;
+        }
+
+        auto val = std::move(m_queue.front());
+        m_queue.pop();
+        return val;
+    }
+
+    // Accepts items again after stop() (the Logger restarts on a reset).
+    void restart() {
+        std::scoped_lock lock(m_mutex);
+        m_stopped = false;
+    }
+
+    [[nodiscard]] bool stopped() {
+        std::scoped_lock lock(m_mutex);
+        return m_stopped;
     }
 
     void stop() {

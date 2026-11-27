@@ -116,7 +116,13 @@ int main(const int argc, const char * argv[]) {
         return runHeadless(arguments);
     }
 
+    // Ctrl+C or the IDE's stop button: close the viewer cleanly so the
+    // logger flushes (the default handler would kill the process).
+    std::signal(SIGINT, onSignal);
+    std::signal(SIGTERM, onSignal);
+
     SimulationViewer applicationViewer(arguments);
+    applicationViewer.setStopRequest([] { return g_stopRequested.load(); });
     applicationViewer.start();
 
     return 0;

@@ -97,7 +97,7 @@ void SimulationViewer::start() {
     int fastSwapCount = 0;
 
     // Simulation loop
-    while (!glfwWindowShouldClose(m_window.get())) {
+    while (!glfwWindowShouldClose(m_window.get()) && !(m_stopRequested && m_stopRequested())) {
 
         // Check if any events have been activated (key pressed, mouse moved etc.) and call corresponding response functions
         glfwPollEvents();
@@ -172,6 +172,7 @@ void SimulationViewer::start() {
 
     // Terminate GLFW, clearing any resources allocated by GLFW.
     m_world->stopPhysicsThread();
+    Logger::instance().stop(); // flush and close the logs now, not at static destruction
     glfwTerminate();
 }
 

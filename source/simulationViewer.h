@@ -9,6 +9,8 @@
 #ifndef GRS_SIMULATOR_SIMULATIONVIEWER_H
 #define GRS_SIMULATOR_SIMULATIONVIEWER_H
 
+#include <functional>
+
 #include "gui.h"
 #include "timer.h"
 #include "world.h"
@@ -21,6 +23,9 @@ public:
     ~SimulationViewer();
 
     void start();
+    // Polled every frame; true closes the viewer as if the window were closed
+    // (main.cpp sets it on SIGINT / SIGTERM so the logs are flushed).
+    void setStopRequest(std::function<bool()> stopRequested) { m_stopRequested = std::move(stopRequested); }
 
     bool onWindowResized(int width, int height);
     [[nodiscard]] double getElapsedTime() const {return m_elapsedTime;};
@@ -37,6 +42,8 @@ public:
     friend class Gui;
 
 private:
+    std::function<bool()> m_stopRequested;
+
     programArguments& m_programArgs;
 
     bool m_isInitialized;

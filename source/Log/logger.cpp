@@ -80,6 +80,7 @@ void Logger::start(const bool enabled, const std::string& logDirectory, const Lo
     m_copyConfigFiles(info);
 
     m_running = true;
+    m_queue.restart();
     m_writerThread = std::thread(&Logger::m_writerLoop, this);
 }
 
@@ -221,16 +222,31 @@ void Logger::m_copyConfigFiles(const LogRunInfo& info) const {
     }
 }
 
+// Files are flushed at least once a second and events.csv on every event,
+// so a run killed without stop() (SIGKILL, crash) loses at most the last
+// second of samples and no event.
 void Logger::m_writerLoop() {
-    while (m_running || !m_queue.empty()) {
-        auto item = m_queue.pop();
-        if (!item.has_value()) {
-            break;
+    using clock = std::chrono::steady_clock;
+    constexpr auto kFlushPeriod = std::chrono::seconds(1);
+    auto lastFlush = clock::now();
+
+    while (true) {
+        auto item = m_queue.popFor(std::chrono::milliseconds(250));
+        if (item.has_value()) {
+            auto it = m_files.find(item->type);
+            if (it != m_files.end() && it->second.is_open()) {
+                it->second << item->line << '\n';
+                if (item->type == LogType::Event) it->second.flush();
+            }
+        } else if (m_queue.stopped()) {
+            break; // stopped and drained
         }
 
-        auto it = m_files.find(item->type);
-        if (it != m_files.end() && it->second.is_open()) {
-            it->second << item->line << '\n';
+        if (clock::now() - lastFlush >= kFlushPeriod) {
+            for (auto& [_, file] : m_files) {
+                if (file.is_open()) file.flush();
+            }
+            lastFlush = clock::now();
         }
     }
 }
